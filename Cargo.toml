@@ -1,0 +1,13 @@
+[package]
+
+name = "statrs"
+version = "0.0.1"
+author = "Michael Ma"
+
+[lib]
+
+name = "statrs"
+path = "src/lib.rs"
+
+[dependencies]
+rand = "0.3"
