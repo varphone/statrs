@@ -3,6 +3,7 @@ use std::option::Option;
 use rand::Rng;
 use consts;
 use distribution::{Distribution, Univariate, Continuous};
+use error::StatsError;
 use functions::erf;
 use result;
 
@@ -14,7 +15,7 @@ pub struct Normal {
 impl Normal {
     pub fn new(mean: f64, std_dev: f64) -> result::Result<Normal> {
         if mean.is_nan() || std_dev < 0.0 {
-            return Err(consts::BAD_DISTR_PARAMS.to_string());
+            return Err(StatsError::BadParams);
         }
         Ok(Normal {
             mu: mean,
@@ -91,7 +92,7 @@ pub struct LogNormal {
 impl LogNormal {
     pub fn new(mean: f64, std_dev: f64) -> result::Result<Normal> {
         if mean.is_nan() || std_dev < 0.0 {
-            return Err(consts::BAD_DISTR_PARAMS.to_string());
+            return Err(StatsError::BadParams);
         }
         Ok(Normal {
             mu: mean,

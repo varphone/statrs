@@ -1,6 +1,15 @@
-pub const DEFAULT_PREC: f64 = 0.0000000000000011102230246251565;
+/// Standard epsilon, maximum relative precision of IEEE 754 double-precision
+/// floating point numbers (64 bit). 2^-53
+pub const F64_PREC: f64 = 0.00000000000000011102230246251565;
 
-pub fn almost_eq(a: f64, b: f64, prec: f64) -> bool {
+/// Default accuracy for f64, equivalent to 10.0 * F64_PREC
+pub const DEFAULT_F64_ACC: f64 = 0.0000000000000011102230246251565;
+
+/// Returns true if a and b are within acc of each other.
+/// If a or b are infinite, returns true only if both are
+/// infinite and similarly signed. Always returns false if
+/// either number is a NAN.
+pub fn almost_eq(a: f64, b: f64, acc: f64) -> bool {
     // only true if a and b are infinite with same
     // sign
     if a.is_infinite() || b.is_infinite() {
@@ -12,5 +21,5 @@ pub fn almost_eq(a: f64, b: f64, prec: f64) -> bool {
         return false;
     }
 
-    (a - b).abs() < prec
+    (a - b).abs() < acc
 }

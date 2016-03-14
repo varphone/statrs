@@ -2,6 +2,7 @@ use std::f64;
 use consts;
 use prec;
 use result;
+use error::StatsError;
 
 /// The order of approximation for the gamma_ln function
 const GAMMA_N: usize = 11;
@@ -27,7 +28,7 @@ const GAMMA_DK: &'static [f64] = &[2.48574089138753565546e-5,
 /// The implementation is derived from 
 /// "An Analysis of the Lanczos Gamma Approximation",
 /// Glendon Ralph Pugh, 2004 p. 116
-pub fn gamma_ln(x: f64) -> f64 {
+pub fn ln_gamma(x: f64) -> f64 {
     if x < 0.5 {
         let mut s = GAMMA_DK[0];
         for i in 1..GAMMA_N {
@@ -71,6 +72,28 @@ pub fn gamma(x: f64) -> f64 {
     }
 }
 
+/// Computes the upper incomplete gamma function
+/// Gamma(a,x) = int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0
+/// where a is the argument for the gamma function and
+/// x is the lower intergral limit
+pub fn gamma_ui(a: f64, x: f64) -> result::Result<f64> {
+    match gamma_ur(a, x) {
+        Ok(v) => Ok(v * gamma(a)),
+        Err(e) => Err(e),
+    }
+}
+
+/// Computes the lower incomplete gamma function
+/// gamma(a,x) = int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0
+/// where a is the argument for the gamma function and x
+/// is the upper integral limit
+pub fn gamma_li(a: f64, x: f64) -> result::Result<f64> {
+    match gamma_lr(a, x) {
+        Ok(v) => Ok(v * gamma(a)),
+        Err(e) => Err(e),
+    }
+}
+
 /// Computes the upper incomplete regularized gamma function
 /// Q(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0
 /// where a is the argument for the gamma function and
@@ -82,12 +105,12 @@ pub fn gamma_ur(a: f64, x: f64) -> result::Result<f64> {
 
     if x < 1.0 || x <= a {
         return match gamma_lr(a, x) {
-            Ok(val) => Ok(1.0 - val),
-            Err(err) => Err(err),
+            Ok(v) => Ok(1.0 - v),
+            Err(e) => Err(e),
         };
     }
 
-    let mut ax = a * x.ln() - x - gamma_ln(a);
+    let mut ax = a * x.ln() - x - ln_gamma(a);
     if ax < -709.78271289338399 {
         return if a < x {
             Ok(0.0)
@@ -147,19 +170,19 @@ pub fn gamma_lr(a: f64, x: f64) -> result::Result<f64> {
     let big_inv = 2.22044604925031308085e-16;
 
     if a < 0.0 {
-        return Err("Parameter a must be greater than 0".to_string());
+        return Err(StatsError::ArgMustBePositive("a"));
     }
     if x < 0.0 {
-        return Err("Parameter x must be greater than 0".to_string());
+        return Err(StatsError::ArgMustBePositive("a"));
     }
-    if prec::almost_eq(a, 0.0, prec::DEFAULT_PREC) {
+    if prec::almost_eq(a, 0.0, prec::DEFAULT_F64_ACC) {
         return Ok(1.0);
     }
-    if prec::almost_eq(a, 0.0, prec::DEFAULT_PREC) {
+    if prec::almost_eq(a, 0.0, prec::DEFAULT_F64_ACC) {
         return Ok(0.0);
     }
 
-    let ax = a * x.ln() - x - gamma_ln(a);
+    let ax = a * x.ln() - x - ln_gamma(a);
     if ax < -709.78271289338399 {
         if a < x {
             return Ok(1.0);

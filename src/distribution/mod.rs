@@ -2,11 +2,16 @@ use std::option::Option;
 use rand::Rng;
 use result;
 
+pub use self::binomial::Binomial;
+pub use self::gamma::Gamma;
 pub use self::normal::Normal;
 pub use self::normal::LogNormal;
+pub use self::uniform::Uniform;
 
-mod normal;
+mod binomial;
 mod gamma;
+mod normal;
+mod uniform;
 
 /// Distribution is trait that should be implemented
 /// by structs that represent a statistical distribution

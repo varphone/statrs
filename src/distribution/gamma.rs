@@ -1,9 +1,9 @@
 use std::f64;
 use std::option::Option;
 use rand::Rng;
-use consts;
 use distribution::{Distribution, Univariate, Continuous};
 use distribution::normal;
+use error::StatsError;
 use functions::gamma;
 use result;
 
@@ -15,7 +15,7 @@ pub struct Gamma {
 impl Gamma {
     pub fn new(shape: f64, rate: f64) -> result::Result<Gamma> {
         if shape < 0.0 || rate < 0.0 {
-            return Err(consts::BAD_DISTR_PARAMS.to_string());
+            return Err(StatsError::BadParams);
         }
         Ok(Gamma {
             a: shape,
@@ -56,7 +56,7 @@ impl Univariate for Gamma {
             (0.0, 0.0) => f64::NAN,
             (_, f64::INFINITY) => 0.0,
             (_, _) => {
-                self.a - self.b.ln() + gamma::gamma_ln(self.a) +
+                self.a - self.b.ln() + gamma::ln_gamma(self.a) +
                 (1.0 - self.a) * gamma::digamma(self.a)
             }
         }
@@ -138,7 +138,7 @@ impl Continuous for Gamma {
             (1.0, _) => self.b.ln() - self.b * x,
             (_, _) => {
                 self.a * self.b.ln() + (self.a - 1.0) * x.ln() - self.b * x -
-                gamma::gamma_ln(self.a)
+                gamma::ln_gamma(self.a)
             }
         }
     }
