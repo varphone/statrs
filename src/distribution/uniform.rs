@@ -106,12 +106,12 @@ impl Continuous for Uniform {
 mod test {
     use std::f64;
     use distribution::{Univariate, Continuous};
+    use prec;
     use super::Uniform;
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let r = Uniform::new(min, max);
         assert!(r.is_ok());
-
         r.unwrap()
     }
 
@@ -126,70 +126,47 @@ mod test {
         assert!(n.is_err());
     }
 
-    fn entropy_case(min: f64, max: f64) {
+    fn entropy_case(min: f64, max: f64, expected: f64) {
         let n = try_create(min, max);
-        assert_eq!(n.entropy(), (max - min).ln());
+        assert!(prec::almost_eq(expected, n.entropy(), 1e-15));
     }
 
     fn skewness_case(min: f64, max: f64) {
         let n = try_create(min, max);
-        assert_eq!(n.skewness(), 0.0);
+        assert_eq!(0.0, n.skewness());
     }
 
-    fn mode_case(min: f64, max: f64) {
+    fn mode_case(min: f64, max: f64, expected: f64) {
         let n = try_create(min, max);
-        assert_eq!(n.mode(), (min + max) / 2.0);
+        assert_eq!(expected, n.mode());
     }
 
-    fn median_case(min: f64, max: f64) {
+    fn median_case(min: f64, max: f64, expected: f64) {
         let n = try_create(min, max);
         let r = n.median();
         assert!(r.is_some());
 
         let m = r.unwrap();
-        assert_eq!(m, (min + max) / 2.0);
+        assert_eq!(expected, m);
     }
 
-    fn pdf_case(min: f64, max: f64) {
+    fn pdf_case(min: f64, max: f64, input: f64, expected: f64) {
         let n = try_create(min, max);
-        for i in 0..11 {
-            let x = i as f64 - 5.0;
-            if x >= min && x <= max {
-                assert_eq!(n.pdf(x), 1.0 / (max - min));
-            } else {
-                assert_eq!(n.pdf(x), 0.0);
-            }
-        }
+        assert_eq!(expected, n.pdf(input));
     }
 
-    fn ln_pdf_case(min: f64, max: f64) {
+    fn ln_pdf_case(min: f64, max: f64, input: f64, expected: f64) {
         let n = try_create(min, max);
-        for i in 0..11 {
-            let x = i as f64 - 5.0;
-            if x >= min && x <= max {
-                assert_eq!(n.ln_pdf(x), -(max - min).ln());
-            } else {
-                assert_eq!(n.ln_pdf(x), f64::NEG_INFINITY);
-            }
-        }
+        assert!(prec::almost_eq(expected, n.ln_pdf(input), 1e-15));
     }
 
-    fn cdf_case(min: f64, max: f64) {
+    fn cdf_case(min: f64, max: f64, input: f64, expected: f64) {
         let n = try_create(min, max);
-        for i in 0..11 {
-            let x = i as f64 - 5.0;
-            let r = n.cdf(x);
-            assert!(r.is_ok());
+        let r = n.cdf(input);
+        assert!(r.is_ok());
 
-            let v = r.unwrap();
-            if x <= min {
-                assert_eq!(v, 0.0);
-            } else if x >= max {
-                assert_eq!(v, 1.0);
-            } else {
-                assert_eq!(v, (x - min) / (max - min));
-            }
-        }
+        let m = r.unwrap();
+        assert_eq!(expected, m);
     }
 
     #[test]
@@ -212,12 +189,12 @@ mod test {
 
     #[test]
     fn test_entropy() {
-        entropy_case(-0.0, 2.0);
-        entropy_case(0.0, 2.0);
-        entropy_case(0.1, 4.0);
-        entropy_case(1.0, 10.0);
-        entropy_case(10.0, 11.0);
-        entropy_case(0.0, f64::INFINITY);
+        entropy_case(-0.0, 2.0, 0.6931471805599453094172);
+        entropy_case(0.0, 2.0, 0.6931471805599453094172);
+        entropy_case(0.1, 4.0, 1.360976553135600743431);
+        entropy_case(1.0, 10.0, 2.19722457733621938279);
+        entropy_case(10.0, 11.0, 0.0);
+        entropy_case(0.0, f64::INFINITY, f64::INFINITY);
     }
 
     #[test]
@@ -232,51 +209,93 @@ mod test {
 
     #[test]
     fn test_mode() {
-        mode_case(-0.0, 2.0);
-        mode_case(0.0, 2.0);
-        mode_case(0.1, 4.0);
-        mode_case(1.0, 10.0);
-        mode_case(10.0, 11.0);
-        mode_case(0.0, f64::INFINITY);
+        mode_case(-0.0, 2.0, 1.0);
+        mode_case(0.0, 2.0, 1.0);
+        mode_case(0.1, 4.0, 2.05);
+        mode_case(1.0, 10.0, 5.5);
+        mode_case(10.0, 11.0, 10.5);
+        mode_case(0.0, f64::INFINITY, f64::INFINITY);
     }
 
     #[test]
     fn test_median() {
-        median_case(-0.0, 2.0);
-        median_case(0.0, 2.0);
-        median_case(0.1, 4.0);
-        median_case(1.0, 10.0);
-        median_case(10.0, 11.0);
-        median_case(0.0, f64::INFINITY);
+        median_case(-0.0, 2.0, 1.0);
+        median_case(0.0, 2.0, 1.0);
+        median_case(0.1, 4.0, 2.05);
+        median_case(1.0, 10.0, 5.5);
+        median_case(10.0, 11.0, 10.5);
+        median_case(0.0, f64::INFINITY, f64::INFINITY);
     }
 
     #[test]
     fn test_pdf() {
-        pdf_case(0.0, 0.0);
-        pdf_case(0.0, 0.1);
-        pdf_case(0.0, 1.0);
-        pdf_case(0.0, 10.0);
-        pdf_case(-5.0, 100.0);
-        pdf_case(0.0, f64::INFINITY);
+        pdf_case(0.0, 0.0, -5.0, 0.0);
+        pdf_case(0.0, 0.0, 0.0, f64::INFINITY);
+        pdf_case(0.0, 0.0, 5.0, 0.0);
+        pdf_case(0.0, 0.1, -5.0, 0.0);
+        pdf_case(0.0, 0.1, 0.05, 10.0);
+        pdf_case(0.0, 0.1, 5.0, 0.0);
+        pdf_case(0.0, 1.0, -5.0, 0.0);
+        pdf_case(0.0, 1.0, 0.5, 1.0);
+        pdf_case(0.0, 0.1, 5.0, 0.0);
+        pdf_case(0.0, 10.0, -5.0, 0.0);
+        pdf_case(0.0, 10.0, 1.0, 0.1);
+        pdf_case(0.0, 10.0, 5.0, 0.1);
+        pdf_case(0.0, 10.0, 11.0, 0.0);
+        pdf_case(-5.0, 100.0, -10.0, 0.0);
+        pdf_case(-5.0, 100.0, -5.0, 0.009523809523809523809524);
+        pdf_case(-5.0, 100.0, 0.0, 0.009523809523809523809524);
+        pdf_case(-5.0, 100.0, 101.0, 0.0);
+        pdf_case(0.0, f64::INFINITY, -5.0, 0.0);
+        pdf_case(0.0, f64::INFINITY, 10.0, 0.0);
+        pdf_case(0.0, f64::INFINITY, f64::INFINITY, 0.0);
     }
 
     #[test]
     fn test_ln_pdf() {
-        ln_pdf_case(0.0, 0.0);
-        ln_pdf_case(0.0, 0.1);
-        ln_pdf_case(0.0, 1.0);
-        ln_pdf_case(0.0, 10.0);
-        ln_pdf_case(-5.0, 100.0);
-        ln_pdf_case(0.0, f64::INFINITY);
+        ln_pdf_case(0.0, 0.0, -5.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, 0.0, 0.0, f64::INFINITY);
+        ln_pdf_case(0.0, 0.0, 5.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, 0.1, -5.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, 0.1, 0.05, 2.302585092994045684018);
+        ln_pdf_case(0.0, 0.1, 5.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, 1.0, -5.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, 1.0, 0.5, 0.0);
+        ln_pdf_case(0.0, 0.1, 5.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, 10.0, -5.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, 10.0, 1.0, -2.302585092994045684018);
+        ln_pdf_case(0.0, 10.0, 5.0, -2.302585092994045684018);
+        ln_pdf_case(0.0, 10.0, 11.0, f64::NEG_INFINITY);
+        ln_pdf_case(-5.0, 100.0, -10.0, f64::NEG_INFINITY);
+        ln_pdf_case(-5.0, 100.0, -5.0, -4.653960350157523371101);
+        ln_pdf_case(-5.0, 100.0, 0.0, -4.653960350157523371101);
+        ln_pdf_case(-5.0, 100.0, 101.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, f64::INFINITY, -5.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, f64::INFINITY, 10.0, f64::NEG_INFINITY);
+        ln_pdf_case(0.0, f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY);
     }
 
     #[test]
     fn test_cdf() {
-        cdf_case(0.0, 0.0);
-        cdf_case(0.0, 0.1);
-        cdf_case(0.0, 1.0);
-        cdf_case(0.0, 10.0);
-        cdf_case(-5.0, 100.0);
-        cdf_case(0.0, f64::INFINITY);
+        cdf_case(0.0, 0.0, -5.0, 0.0);
+        cdf_case(0.0, 0.0, 0.0, 0.0);
+        cdf_case(0.0, 0.0, 5.0, 1.0);
+        cdf_case(0.0, 0.1, -5.0, 0.0);
+        cdf_case(0.0, 0.1, 0.05, 0.5);
+        cdf_case(0.0, 0.1, 5.0, 1.0);
+        cdf_case(0.0, 1.0, -5.0, 0.0);
+        cdf_case(0.0, 1.0, 0.5, 0.5);
+        cdf_case(0.0, 0.1, 5.0, 1.0);
+        cdf_case(0.0, 10.0, -5.0, 0.0);
+        cdf_case(0.0, 10.0, 1.0, 0.1);
+        cdf_case(0.0, 10.0, 5.0, 0.5);
+        cdf_case(0.0, 10.0, 11.0, 1.0);
+        cdf_case(-5.0, 100.0, -10.0, 0.0);
+        cdf_case(-5.0, 100.0, -5.0, 0.0);
+        cdf_case(-5.0, 100.0, 0.0, 0.04761904761904761904762);
+        cdf_case(-5.0, 100.0, 101.0, 1.0);
+        cdf_case(0.0, f64::INFINITY, -5.0, 0.0);
+        cdf_case(0.0, f64::INFINITY, 10.0, 0.0);
+        cdf_case(0.0, f64::INFINITY, f64::INFINITY, 1.0);
     }
 }
