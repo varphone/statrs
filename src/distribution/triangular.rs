@@ -22,6 +22,9 @@ impl Triangular {
         if max < mode || mode < min {
             return Err(StatsError::BadParams);
         }
+        if max == min {
+            return Err(StatsError::BadParams);
+        }
         Ok(Triangular {
             min: min,
             max: max,
@@ -148,6 +151,8 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
+    use distribution::{Univariate, Continuous};
+    use prec;
     use super::Triangular;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
@@ -168,9 +173,32 @@ mod test {
         assert!(n.is_err());
     }
 
+    fn entropy_case(min: f64, max: f64, mode: f64, expected: f64) {
+        let n = try_create(min, max, mode);
+        assert!(prec::almost_eq(expected, n.entropy(), 1e-16));
+    }
+
+    fn skewness_case(min: f64, max: f64, mode: f64, expected: f64) {
+        let n = try_create(min, max, mode);
+        assert_eq!(expected, n.skewness());
+    }
+
+    fn mode_case(min: f64, max: f64, mode: f64, expected: f64) {
+        let n = try_create(min, max, mode);
+        assert_eq!(expected, n.mode());
+    }
+
+    fn median_case(min: f64, max: f64, mode: f64, expected: f64) {
+        let n = try_create(min, max, mode);
+        let r = n.median();
+        assert!(r.is_some());
+
+        let m = r.unwrap();
+        assert!(prec::almost_eq(expected, m, 1e-14));
+    }
+
     #[test]
     fn test_create() {
-        create_case(0.0, 0.0, 0.0);
         create_case(-1.0, 1.0, 0.0);
         create_case(1.0, 2.0, 1.0);
         create_case(5.0, 25.0, 25.0);
@@ -182,6 +210,7 @@ mod test {
 
     #[test]
     fn test_bad_create() {
+        bad_create_case(0.0, 0.0, 0.0);
         bad_create_case(0.0, 1.0, -0.1);
         bad_create_case(0.0, 1.0, 1.1);
         bad_create_case(0.0, -1.0, 0.5);
@@ -192,5 +221,45 @@ mod test {
         bad_create_case(f64::NAN, f64::NAN, f64::NAN);
         bad_create_case(f64::NEG_INFINITY, 1.0, 0.5);
         bad_create_case(0.0, f64::INFINITY, 0.5);
+    }
+
+    #[test]
+    fn test_entropy() {
+        entropy_case(0.0, 1.0, 0.5, -0.1931471805599453094172);
+        entropy_case(0.0, 1.0, 0.75, -0.1931471805599453094172);
+        entropy_case(-5.0, 8.0, -3.5, 2.371802176901591426636);
+        entropy_case(-5.0, 8.0, 5.0, 2.371802176901591426636);
+        entropy_case(-5.0, -3.0, -4.0, 0.5);
+        entropy_case(15.0, 134.0, 21.0, 4.585976312551584075938);
+    }
+
+    #[test]
+    fn test_skewness() {
+        skewness_case(0.0, 1.0, 0.5, 0.0);
+        skewness_case(0.0, 1.0, 0.75, -0.4224039833745502226059);
+        skewness_case(-5.0, 8.0, -3.5, 0.5375093589712976359809);
+        skewness_case(-5.0, 8.0, 5.0, -0.4445991743012595633537);
+        skewness_case(-5.0, -3.0, -4.0, 0.0);
+        skewness_case(15.0, 134.0, 21.0, 0.5605920922751860613217);
+    }
+
+    #[test]
+    fn test_mode() {
+        mode_case(0.0, 1.0, 0.5, 0.5);
+        mode_case(0.0, 1.0, 0.75, 0.75);
+        mode_case(-5.0, 8.0, -3.5, -3.5);
+        mode_case(-5.0, 8.0, 5.0, 5.0);
+        mode_case(-5.0, -3.0, -4.0, -4.0);
+        mode_case(15.0, 134.0, 21.0, 21.0);
+    }
+
+    #[test]
+    fn test_median() {
+        median_case(0.0, 1.0, 0.5, 0.5);
+        median_case(0.0, 1.0, 0.75, 0.6123724356957945245493);
+        median_case(-5.0, 8.0, -3.5, -0.6458082328952913226724);
+        median_case(-5.0, 8.0, 5.0, 3.062257748298549652367);
+        median_case(-5.0, -3.0, -4.0, -4.0);
+        median_case(15.0, 134.0, 21.0, 52.00304883716712238797);
     }
 }
