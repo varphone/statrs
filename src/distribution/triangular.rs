@@ -172,29 +172,32 @@ mod test {
         let n = Triangular::new(min, max, mode);
         assert!(n.is_err());
     }
-
-    fn entropy_case(min: f64, max: f64, mode: f64, expected: f64) {
+    
+    fn test_case<F>(min: f64, max: f64, mode: f64, expected: f64, eval: F)
+        where F : Fn(Triangular) -> f64 {  
+                
         let n = try_create(min, max, mode);
-        assert!(prec::almost_eq(expected, n.entropy(), 1e-16));
+        let x = eval(n);
+        assert_eq!(expected, x);
     }
-
-    fn skewness_case(min: f64, max: f64, mode: f64, expected: f64) {
+    
+    fn test_almost<F>(min: f64, max: f64, mode: f64, expected: f64, prec: f64, eval: F)
+        where F : Fn(Triangular) -> f64 {
+            
         let n = try_create(min, max, mode);
-        assert_eq!(expected, n.skewness());
+        let x = eval(n);
+        assert!(prec::almost_eq(expected, x, prec));
     }
-
-    fn mode_case(min: f64, max: f64, mode: f64, expected: f64) {
+    
+    fn test_optional_almost<F>(min: f64, max: f64, mode: f64, expected: f64, prec: f64, eval: F)
+        where F : Fn(Triangular) -> Option<f64> {
+        
         let n = try_create(min, max, mode);
-        assert_eq!(expected, n.mode());
-    }
-
-    fn median_case(min: f64, max: f64, mode: f64, expected: f64) {
-        let n = try_create(min, max, mode);
-        let r = n.median();
-        assert!(r.is_some());
-
-        let m = r.unwrap();
-        assert!(prec::almost_eq(expected, m, 1e-14));
+        let x = eval(n);
+        assert!(x.is_some());
+        
+        let v = x.unwrap();
+        assert!(prec::almost_eq(expected, v, prec));
     }
 
     #[test]
@@ -225,41 +228,41 @@ mod test {
 
     #[test]
     fn test_entropy() {
-        entropy_case(0.0, 1.0, 0.5, -0.1931471805599453094172);
-        entropy_case(0.0, 1.0, 0.75, -0.1931471805599453094172);
-        entropy_case(-5.0, 8.0, -3.5, 2.371802176901591426636);
-        entropy_case(-5.0, 8.0, 5.0, 2.371802176901591426636);
-        entropy_case(-5.0, -3.0, -4.0, 0.5);
-        entropy_case(15.0, 134.0, 21.0, 4.585976312551584075938);
+        test_almost(0.0, 1.0, 0.5, -0.1931471805599453094172, 1e-16, |x| x.entropy());
+        test_almost(0.0, 1.0, 0.75, -0.1931471805599453094172, 1e-16, |x| x.entropy());
+        test_almost(-5.0, 8.0, -3.5, 2.371802176901591426636, 1e-16, |x| x.entropy());
+        test_almost(-5.0, 8.0, 5.0, 2.371802176901591426636, 1e-16, |x| x.entropy());
+        test_almost(-5.0, -3.0, -4.0, 0.5, 1e-16, |x| x.entropy());
+        test_almost(15.0, 134.0, 21.0, 4.585976312551584075938, 1e-16, |x| x.entropy());
     }
 
     #[test]
     fn test_skewness() {
-        skewness_case(0.0, 1.0, 0.5, 0.0);
-        skewness_case(0.0, 1.0, 0.75, -0.4224039833745502226059);
-        skewness_case(-5.0, 8.0, -3.5, 0.5375093589712976359809);
-        skewness_case(-5.0, 8.0, 5.0, -0.4445991743012595633537);
-        skewness_case(-5.0, -3.0, -4.0, 0.0);
-        skewness_case(15.0, 134.0, 21.0, 0.5605920922751860613217);
+        test_case(0.0, 1.0, 0.5, 0.0, |x| x.skewness());
+        test_case(0.0, 1.0, 0.75, -0.4224039833745502226059, |x| x.skewness());
+        test_case(-5.0, 8.0, -3.5, 0.5375093589712976359809, |x| x.skewness());
+        test_case(-5.0, 8.0, 5.0, -0.4445991743012595633537, |x| x.skewness());
+        test_case(-5.0, -3.0, -4.0, 0.0, |x| x.skewness());
+        test_case(15.0, 134.0, 21.0, 0.5605920922751860613217, |x| x.skewness());
     }
 
     #[test]
     fn test_mode() {
-        mode_case(0.0, 1.0, 0.5, 0.5);
-        mode_case(0.0, 1.0, 0.75, 0.75);
-        mode_case(-5.0, 8.0, -3.5, -3.5);
-        mode_case(-5.0, 8.0, 5.0, 5.0);
-        mode_case(-5.0, -3.0, -4.0, -4.0);
-        mode_case(15.0, 134.0, 21.0, 21.0);
+        test_case(0.0, 1.0, 0.5, 0.5, |x| x.mode());
+        test_case(0.0, 1.0, 0.75, 0.75, |x| x.mode());
+        test_case(-5.0, 8.0, -3.5, -3.5, |x| x.mode());
+        test_case(-5.0, 8.0, 5.0, 5.0, |x| x.mode());
+        test_case(-5.0, -3.0, -4.0, -4.0, |x| x.mode());
+        test_case(15.0, 134.0, 21.0, 21.0, |x| x.mode());
     }
 
     #[test]
     fn test_median() {
-        median_case(0.0, 1.0, 0.5, 0.5);
-        median_case(0.0, 1.0, 0.75, 0.6123724356957945245493);
-        median_case(-5.0, 8.0, -3.5, -0.6458082328952913226724);
-        median_case(-5.0, 8.0, 5.0, 3.062257748298549652367);
-        median_case(-5.0, -3.0, -4.0, -4.0);
-        median_case(15.0, 134.0, 21.0, 52.00304883716712238797);
+        test_optional_almost(0.0, 1.0, 0.5, 0.5, 1e-14, |x| x.median());
+        test_optional_almost(0.0, 1.0, 0.75, 0.6123724356957945245493, 1e-14, |x| x.median());
+        test_optional_almost(-5.0, 8.0, -3.5, -0.6458082328952913226724, 1e-14, |x| x.median());
+        test_optional_almost(-5.0, 8.0, 5.0, 3.062257748298549652367, 1e-14, |x| x.median());
+        test_optional_almost(-5.0, -3.0, -4.0, -4.0, 1e-14, |x| x.median());
+        test_optional_almost(15.0, 134.0, 21.0, 52.00304883716712238797, 1e-14, |x| x.median());
     }
 }
