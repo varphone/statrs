@@ -225,6 +225,26 @@ mod test {
         bad_create_case(f64::NEG_INFINITY, 1.0, 0.5);
         bad_create_case(0.0, f64::INFINITY, 0.5);
     }
+    
+    #[test]
+    fn test_variance() {
+        test_case(0.0, 1.0, 0.5, 0.75/18.0, |x| x.variance());
+        test_case(0.0, 1.0, 0.75, 0.8125/18.0, |x| x.variance());
+        test_case(-5.0, 8.0, -3.5, 151.75/18.0, |x| x.variance());
+        test_case(-5.0, 8.0, 5.0, 139.0/18.0, |x| x.variance());
+        test_case(-5.0, -3.0, -4.0, 3.0/18.0, |x| x.variance());
+        test_case(15.0, 134.0, 21.0, 13483.0/18.0, |x| x.variance());
+    }
+    
+    #[test]
+    fn test_std_dev() {
+        test_case(0.0, 1.0, 0.5, (0.75f64/18.0).sqrt(), |x| x.std_dev());
+        test_case(0.0, 1.0, 0.75, (0.8125f64/18.0).sqrt(), |x| x.std_dev());
+        test_case(-5.0, 8.0, -3.5, (151.75f64/18.0).sqrt(), |x| x.std_dev());
+        test_case(-5.0, 8.0, 5.0, (139.0f64/18.0).sqrt(), |x| x.std_dev());
+        test_case(-5.0, -3.0, -4.0, (3.0f64/18.0).sqrt(), |x| x.std_dev());
+        test_case(15.0, 134.0, 21.0, (13483.0f64/18.0).sqrt(), |x| x.std_dev());
+    }
 
     #[test]
     fn test_entropy() {
