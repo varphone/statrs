@@ -304,4 +304,28 @@ mod test {
         test_case(-5.0, -3.0, -4.0, 1.0, |x| x.pdf(-4.0));
         test_case(-5.0, -3.0, -4.0, 0.5, |x| x.pdf(-3.5));
     }
+    
+    #[test]
+    fn test_ln_pdf() {
+        test_case(0.0, 1.0, 0.5, f64::NEG_INFINITY, |x| x.ln_pdf(-1.0));
+        test_case(0.0, 1.0, 0.5, f64::NEG_INFINITY, |x| x.ln_pdf(1.1));
+        test_case(0.0, 1.0, 0.5, 0.0, |x| x.ln_pdf(0.25));
+        test_case(0.0, 1.0, 0.5, 2f64.ln(), |x| x.ln_pdf(0.5));
+        test_case(0.0, 1.0, 0.5, 0.0, |x| x.ln_pdf(0.75));
+        test_case(-5.0, 8.0, -3.5, f64::NEG_INFINITY, |x| x.ln_pdf(-5.1));
+        test_case(-5.0, 8.0, -3.5, f64::NEG_INFINITY, |x| x.ln_pdf(8.1));
+        test_case(-5.0, 8.0, -3.5, 0.1025641025641025641026f64.ln(), |x| x.ln_pdf(-4.0));
+        test_case(-5.0, 8.0, -3.5, 0.1538461538461538461538f64.ln(), |x| x.ln_pdf(-3.5));
+        test_case(-5.0, 8.0, -3.5, 0.05351170568561872909699f64.ln(), |x| x.ln_pdf(4.0));
+        test_case(-5.0, -3.0, -4.0, f64::NEG_INFINITY, |x| x.ln_pdf(-5.1));
+        test_case(-5.0, -3.0, -4.0, f64::NEG_INFINITY, |x| x.ln_pdf(-2.9));
+        test_case(-5.0, -3.0, -4.0, 0.5f64.ln(), |x| x.ln_pdf(-4.5));
+        test_case(-5.0, -3.0, -4.0, 0.0, |x| x.ln_pdf(-4.0));
+        test_case(-5.0, -3.0, -4.0, 0.5f64.ln(), |x| x.ln_pdf(-3.5));
+    }
+    
+    #[test]
+    fn test_cdf() {
+        // todo: triangular CDF tests
+    }
 }
