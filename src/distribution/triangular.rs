@@ -153,6 +153,7 @@ mod test {
     use std::f64;
     use distribution::{Univariate, Continuous};
     use prec;
+    use result;
     use super::Triangular;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
@@ -198,6 +199,17 @@ mod test {
         
         let v = x.unwrap();
         assert!(prec::almost_eq(expected, v, prec));
+    }
+    
+    fn test_result<F>(min: f64, max: f64, mode: f64, expected: f64, eval: F)
+        where F : Fn(Triangular) -> result::Result<f64> {
+    
+        let n = try_create(min, max, mode);
+        let x = eval(n);
+        assert!(x.is_ok());
+        
+        let v = x.unwrap();
+        assert_eq!(expected, v);        
     }
 
     #[test]
@@ -326,6 +338,20 @@ mod test {
     
     #[test]
     fn test_cdf() {
-        // todo: triangular CDF tests
+        test_result(0.0, 1.0, 0.5, 0.0, |x| x.cdf(-1.0));
+        test_result(0.0, 1.0, 0.5, 1.0, |x| x.cdf(1.1));
+        test_result(0.0, 1.0, 0.5, 0.125, |x| x.cdf(0.25));
+        test_result(0.0, 1.0, 0.5, 0.5, |x| x.cdf(0.5));
+        test_result(0.0, 1.0, 0.5, 0.875, |x| x.cdf(0.75));
+        test_result(-5.0, 8.0, -3.5, 0.0, |x| x.cdf(-5.1));
+        test_result(-5.0, 8.0, -3.5, 1.0, |x| x.cdf(8.1));
+        test_result(-5.0, 8.0, -3.5, 0.05128205128205128205128, |x| x.cdf(-4.0));
+        test_result(-5.0, 8.0, -3.5, 0.1153846153846153846154, |x| x.cdf(-3.5));
+        test_result(-5.0, 8.0, -3.5, 0.892976588628762541806, |x| x.cdf(4.0));
+        test_result(-5.0, -3.0, -4.0, 0.0, |x| x.cdf(-5.1));
+        test_result(-5.0, -3.0, -4.0, 1.0, |x| x.cdf(-2.9));
+        test_result(-5.0, -3.0, -4.0, 0.125, |x| x.cdf(-4.5));
+        test_result(-5.0, -3.0, -4.0, 0.5, |x| x.cdf(-4.0));
+        test_result(-5.0, -3.0, -4.0, 0.875, |x| x.cdf(-3.5));
     }
 }
