@@ -90,11 +90,11 @@ pub struct LogNormal {
 }
 
 impl LogNormal {
-    pub fn new(mean: f64, std_dev: f64) -> result::Result<Normal> {
+    pub fn new(mean: f64, std_dev: f64) -> result::Result<LogNormal> {
         if mean.is_nan() || std_dev < 0.0 {
             return Err(StatsError::BadParams);
         }
-        Ok(Normal {
+        Ok(LogNormal {
             mu: mean,
             sigma: std_dev,
         })
@@ -197,4 +197,48 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 
     let fac = (-2.0 * r.ln() / r).sqrt();
     (v1 * fac, v2 * fac, true)
+}
+
+#[cfg(test)]
+mod test {
+    use std::f64;
+    use distribution::{Univariate, Continuous};
+    use prec;
+    use result;
+    use super::{Normal, LogNormal};
+    
+    fn try_create(mean: f64, std_dev: f64) -> Normal {
+        let n = Normal::new(mean, std_dev);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+    
+    fn create_case(mean: f64, std_dev: f64) {
+        let n = try_create(mean, std_dev);
+        assert_eq!(mean, n.mean());
+        assert_eq!(std_dev, n.std_dev());
+    }
+    
+    fn bad_create_case(mean: f64, std_dev: f64) {
+        let n = Normal::new(mean, std_dev);
+        assert!(n.is_err());
+    }
+    
+    #[test]
+    fn test_create() {
+        create_case(0.0, 0.0);
+        create_case(10.0, 0.1);
+        create_case(-5.0, 1.0);
+        create_case(0.0, 10.0);
+        create_case(10.0, 100.0);
+        create_case(-5.0, f64::INFINITY);
+    }
+    
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(f64::NAN, 1.0);
+        bad_create_case(1.0, f64::NAN);
+        bad_create_case(f64::NAN, f64::NAN);
+        bad_create_case(1.0, -1.0);
+    }
 }

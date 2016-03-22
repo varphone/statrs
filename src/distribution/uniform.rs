@@ -111,9 +111,9 @@ mod test {
     use super::Uniform;
 
     fn try_create(min: f64, max: f64) -> Uniform {
-        let r = Uniform::new(min, max);
-        assert!(r.is_ok());
-        r.unwrap()
+        let n = Uniform::new(min, max);
+        assert!(n.is_ok());
+        n.unwrap()
     }
 
     fn create_case(min: f64, max: f64) {

@@ -157,9 +157,9 @@ mod test {
     use super::Triangular;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
-        let r = Triangular::new(min, max, mode);
-        assert!(r.is_ok());
-        r.unwrap()
+        let n = Triangular::new(min, max, mode);
+        assert!(n.is_ok());
+        n.unwrap()
     }
 
     fn create_case(min: f64, max: f64, mode: f64) {
