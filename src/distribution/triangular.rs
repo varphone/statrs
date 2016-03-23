@@ -182,15 +182,15 @@ mod test {
         assert_eq!(expected, x);
     }
     
-    fn test_almost<F>(min: f64, max: f64, mode: f64, expected: f64, prec: f64, eval: F)
+    fn test_almost<F>(min: f64, max: f64, mode: f64, expected: f64, acc: f64, eval: F)
         where F : Fn(Triangular) -> f64 {
             
         let n = try_create(min, max, mode);
         let x = eval(n);
-        assert!(prec::almost_eq(expected, x, prec));
+        assert!(prec::almost_eq(expected, x, acc));
     }
     
-    fn test_optional_almost<F>(min: f64, max: f64, mode: f64, expected: f64, prec: f64, eval: F)
+    fn test_optional_almost<F>(min: f64, max: f64, mode: f64, expected: f64, acc: f64, eval: F)
         where F : Fn(Triangular) -> Option<f64> {
         
         let n = try_create(min, max, mode);
@@ -198,7 +198,7 @@ mod test {
         assert!(x.is_some());
         
         let v = x.unwrap();
-        assert!(prec::almost_eq(expected, v, prec));
+        assert!(prec::almost_eq(expected, v, acc));
     }
     
     fn test_result<F>(min: f64, max: f64, mode: f64, expected: f64, eval: F)

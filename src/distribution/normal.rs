@@ -14,7 +14,7 @@ pub struct Normal {
 
 impl Normal {
     pub fn new(mean: f64, std_dev: f64) -> result::Result<Normal> {
-        if mean.is_nan() || std_dev < 0.0 {
+        if mean.is_nan() || std_dev.is_nan() || std_dev < 0.0 {
             return Err(StatsError::BadParams);
         }
         Ok(Normal {
@@ -91,7 +91,7 @@ pub struct LogNormal {
 
 impl LogNormal {
     pub fn new(mean: f64, std_dev: f64) -> result::Result<LogNormal> {
-        if mean.is_nan() || std_dev < 0.0 {
+        if mean.is_nan() || std_dev.is_nan() || std_dev < 0.0 {
             return Err(StatsError::BadParams);
         }
         Ok(LogNormal {
@@ -202,6 +202,7 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 #[cfg(test)]
 mod test {
     use std::f64;
+    use std::option::Option;
     use distribution::{Univariate, Continuous};
     use prec;
     use result;
@@ -224,6 +225,33 @@ mod test {
         assert!(n.is_err());
     }
     
+    fn test_case<F>(mean: f64, std_dev: f64, expected: f64, eval: F) 
+        where F : Fn(Normal) -> f64 {
+    
+        let n = try_create(mean, std_dev);
+        let x = eval(n);
+        assert_eq!(expected, x);        
+    }
+    
+    fn test_almost<F>(mean: f64, std_dev: f64, expected: f64, acc: f64, eval: F) 
+        where F : Fn(Normal) -> f64 {
+        
+        let n = try_create(mean, std_dev);
+        let x = eval(n);
+        assert!(prec::almost_eq(expected, x, acc));    
+    }
+    
+    fn test_optional<F>(mean: f64, std_dev: f64, expected: f64, eval: F)
+        where F : Fn(Normal) -> Option<f64> {
+    
+        let n = try_create(mean, std_dev);
+        let x = eval(n);
+        assert!(x.is_some());
+        
+        let v = x.unwrap();
+        assert_eq!(expected, v);   
+    }
+    
     #[test]
     fn test_create() {
         create_case(0.0, 0.0);
@@ -240,5 +268,62 @@ mod test {
         bad_create_case(1.0, f64::NAN);
         bad_create_case(f64::NAN, f64::NAN);
         bad_create_case(1.0, -1.0);
+    }
+    
+    #[test]
+    fn test_entropy() {
+        // note: mean is irrelevant to the entropy calculation,
+        // ergo, all the test cases are instantiated with the
+        // same mean
+        test_almost(0.0, -0.0, f64::NEG_INFINITY, 1e-15, |x| x.entropy());
+        test_almost(0.0, 0.0, f64::NEG_INFINITY, 1e-15, |x| x.entropy());
+        test_almost(0.0, 0.1, -0.8836465597893729422377, 1e-15, |x| x.entropy());
+        test_almost(0.0, 1.0, 1.41893853320467274178, 1e-15, |x| x.entropy());
+        test_almost(0.0, 10.0, 3.721523626198718425798, 1e-15, |x| x.entropy());
+        test_almost(0.0, f64::INFINITY, f64::INFINITY, 1e-15, |x| x.entropy());
+    }
+    
+    #[test]
+    fn test_skewness() {
+        test_case(0.0, -0.0, 0.0, |x| x.skewness());
+        test_case(0.0, 0.0, 0.0, |x| x.skewness());
+        test_case(0.0, 0.1, 0.0, |x| x.skewness());
+        test_case(4.0, 1.0, 0.0, |x| x.skewness());
+        test_case(0.3, 10.0, 0.0, |x| x.skewness());
+        test_case(0.0, f64::INFINITY, 0.0, |x| x.skewness());
+    }
+    
+    #[test]
+    fn test_mode() {
+        // note: std_dev is irrelevant to the mode of a
+        // normal distribution
+        test_case(-0.0, 0.0, 0.0, |x| x.mode());
+        test_case(0.0, 0.0, 0.0, |x| x.mode());
+        test_case(0.1, 0.0, 0.1, |x| x.mode());
+        test_case(1.0, 0.0, 1.0, |x| x.mode());
+        test_case(-10.0, 0.0, -10.0, |x| x.mode());
+        test_case(f64::INFINITY, 0.0, f64::INFINITY, |x| x.mode());
+    }
+    
+    #[test]
+    fn test_median() {
+        // note: std_dev is irrelevant to the median of a
+        // normal distribution
+        test_optional(-0.0, 0.0, 0.0, |x| x.median());
+        test_optional(0.0, 0.0, 0.0, |x| x.median());
+        test_optional(0.1, 0.0, 0.1, |x| x.median());
+        test_optional(1.0, 0.0, 1.0, |x| x.median());
+        test_optional(-0.0, 0.0, -10.0, |x| x.median());
+        test_optional(f64::INFINITY, 0.0, f64::INFINITY, |x| x.median());
+    }
+    
+    #[test]
+    fn test_min_max() {
+        test_case(0.0, 0.0, f64::NEG_INFINITY, |x| x.min());
+        test_case(0.0, 0.1, f64::NEG_INFINITY, |x| x.min());
+        test_case(-3.0, 10.0, f64::NEG_INFINITY, |x| x.min());
+        test_case(0.0, 0.0, f64::INFINITY, |x| x.max());
+        test_case(0.0, 0.1, f64::INFINITY, |x| x.max());
+        test_case(-3.0, 10.0, f64::INFINITY, |x| x.max());
     }
 }
