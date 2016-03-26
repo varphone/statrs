@@ -190,6 +190,17 @@ mod test {
         assert!(prec::almost_eq(expected, x, acc));
     }
     
+    fn test_optional<F>(min: f64, max: f64, mode: f64, expected: f64, eval: F)
+        where F :Fn(Triangular) -> Option<f64> {
+        
+        let n = try_create(min, max, mode);
+        let x = eval(n);
+        assert!(x.is_some());
+        
+        let v = x.unwrap();
+        assert_eq!(expected, v);
+    }
+    
     fn test_optional_almost<F>(min: f64, max: f64, mode: f64, expected: f64, acc: f64, eval: F)
         where F : Fn(Triangular) -> Option<f64> {
         
@@ -262,10 +273,10 @@ mod test {
     fn test_entropy() {
         test_almost(0.0, 1.0, 0.5, -0.1931471805599453094172, 1e-16, |x| x.entropy());
         test_almost(0.0, 1.0, 0.75, -0.1931471805599453094172, 1e-16, |x| x.entropy());
-        test_almost(-5.0, 8.0, -3.5, 2.371802176901591426636, 1e-16, |x| x.entropy());
-        test_almost(-5.0, 8.0, 5.0, 2.371802176901591426636, 1e-16, |x| x.entropy());
-        test_almost(-5.0, -3.0, -4.0, 0.5, 1e-16, |x| x.entropy());
-        test_almost(15.0, 134.0, 21.0, 4.585976312551584075938, 1e-16, |x| x.entropy());
+        test_case(-5.0, 8.0, -3.5, 2.371802176901591426636, |x| x.entropy());
+        test_case(-5.0, 8.0, 5.0, 2.371802176901591426636, |x| x.entropy());
+        test_case(-5.0, -3.0, -4.0, 0.5, |x| x.entropy());
+        test_case(15.0, 134.0, 21.0, 4.585976312551584075938, |x| x.entropy());
     }
 
     #[test]
@@ -290,11 +301,11 @@ mod test {
 
     #[test]
     fn test_median() {
-        test_optional_almost(0.0, 1.0, 0.5, 0.5, 1e-14, |x| x.median());
-        test_optional_almost(0.0, 1.0, 0.75, 0.6123724356957945245493, 1e-14, |x| x.median());
-        test_optional_almost(-5.0, 8.0, -3.5, -0.6458082328952913226724, 1e-14, |x| x.median());
-        test_optional_almost(-5.0, 8.0, 5.0, 3.062257748298549652367, 1e-14, |x| x.median());
-        test_optional_almost(-5.0, -3.0, -4.0, -4.0, 1e-14, |x| x.median());
+        test_optional(0.0, 1.0, 0.5, 0.5, |x| x.median());
+        test_optional(0.0, 1.0, 0.75, 0.6123724356957945245493, |x| x.median());
+        test_optional_almost(-5.0, 8.0, -3.5, -0.6458082328952913226724, 1e-15, |x| x.median());
+        test_optional_almost(-5.0, 8.0, 5.0, 3.062257748298549652367, 1e-15, |x| x.median());
+        test_optional(-5.0, -3.0, -4.0, -4.0, |x| x.median());
         test_optional_almost(15.0, 134.0, 21.0, 52.00304883716712238797, 1e-14, |x| x.median());
     }
     

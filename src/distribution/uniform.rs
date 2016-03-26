@@ -185,30 +185,30 @@ mod test {
     
     #[test]
     fn test_variance() {
-        test_almost(-0.0, 2.0, 1.0/3.0, 1e-15, |x| x.variance());
-        test_almost(0.0, 2.0, 1.0/3.0, 1e-15, |x| x.variance());
+        test_case(-0.0, 2.0, 1.0/3.0, |x| x.variance());
+        test_case(0.0, 2.0, 1.0/3.0, |x| x.variance());
         test_almost(0.1, 4.0, 1.2675, 1e-15, |x| x.variance());
-        test_almost(10.0, 11.0, 1.0/12.0, 1e-15, |x| x.variance());
-        test_almost(0.0, f64::INFINITY, f64::INFINITY, 1e-15, |x| x.variance());
+        test_case(10.0, 11.0, 1.0/12.0, |x| x.variance());
+        test_case(0.0, f64::INFINITY, f64::INFINITY, |x| x.variance());
     }
     
     #[test]
     fn test_std_dev() {
-        test_almost(-0.0, 2.0, (1f64/3.0).sqrt(), 1e-15, |x| x.std_dev());
-        test_almost(0.0, 2.0, (1f64/3.0).sqrt(), 1e-15, |x| x.std_dev());
+        test_case(-0.0, 2.0, (1f64/3.0).sqrt(), |x| x.std_dev());
+        test_case(0.0, 2.0, (1f64/3.0).sqrt(), |x| x.std_dev());
         test_almost(0.1, 4.0, (1.2675f64).sqrt(), 1e-15, |x| x.std_dev());
-        test_almost(10.0, 11.0, (1f64/12.0).sqrt(), 1e-15, |x| x.std_dev());
-        test_almost(0.0, f64::INFINITY, f64::INFINITY, 1e-15, |x| x.std_dev());
+        test_case(10.0, 11.0, (1f64/12.0).sqrt(), |x| x.std_dev());
+        test_case(0.0, f64::INFINITY, f64::INFINITY, |x| x.std_dev());
     }
 
     #[test]
     fn test_entropy() {
-        test_almost(-0.0, 2.0, 0.6931471805599453094172, 1e-15, |x| x.entropy());
-        test_almost(0.0, 2.0, 0.6931471805599453094172, 1e-15, |x| x.entropy());
+        test_case(-0.0, 2.0, 0.6931471805599453094172, |x| x.entropy());
+        test_case(0.0, 2.0, 0.6931471805599453094172, |x| x.entropy());
         test_almost(0.1, 4.0, 1.360976553135600743431, 1e-15, |x| x.entropy());
-        test_almost(1.0, 10.0, 2.19722457733621938279, 1e-15, |x| x.entropy());
-        test_almost(10.0, 11.0, 0.0, 1e-15, |x| x.entropy());
-        test_almost(0.0, f64::INFINITY, f64::INFINITY, 1e-15, |x| x.entropy());
+        test_case(1.0, 10.0, 2.19722457733621938279, |x| x.entropy());
+        test_case(10.0, 11.0, 0.0, |x| x.entropy());
+        test_case(0.0, f64::INFINITY, f64::INFINITY, |x| x.entropy());
     }
 
     #[test]
@@ -267,26 +267,26 @@ mod test {
 
     #[test]
     fn test_ln_pdf() {
-        test_almost(0.0, 0.0, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(-5.0));
-        test_almost(0.0, 0.0, f64::INFINITY, 1e-15, |x| x.ln_pdf(0.0));
-        test_almost(0.0, 0.0, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(5.0));
-        test_almost(0.0, 0.1, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(-5.0));
+        test_case(0.0, 0.0, f64::NEG_INFINITY, |x| x.ln_pdf(-5.0));
+        test_case(0.0, 0.0, f64::INFINITY, |x| x.ln_pdf(0.0));
+        test_case(0.0, 0.0, f64::NEG_INFINITY, |x| x.ln_pdf(5.0));
+        test_case(0.0, 0.1, f64::NEG_INFINITY, |x| x.ln_pdf(-5.0));
         test_almost(0.0, 0.1, 2.302585092994045684018, 1e-15, |x| x.ln_pdf(0.05));
-        test_almost(0.0, 0.1, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(5.0));
-        test_almost(0.0, 1.0, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(-5.0));
-        test_almost(0.0, 1.0, 0.0, 1e-15, |x| x.ln_pdf(0.5));
-        test_almost(0.0, 0.1, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(5.0));
-        test_almost(0.0, 10.0, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(-5.0));
-        test_almost(0.0, 10.0, -2.302585092994045684018, 1e-15, |x| x.ln_pdf(1.0));
-        test_almost(0.0, 10.0, -2.302585092994045684018, 1e-15, |x| x.ln_pdf(5.0));
-        test_almost(0.0, 10.0, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(11.0));
-        test_almost(-5.0, 100.0, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(-10.0));
-        test_almost(-5.0, 100.0, -4.653960350157523371101, 1e-15, |x| x.ln_pdf(-5.0));
-        test_almost(-5.0, 100.0, -4.653960350157523371101, 1e-15, |x| x.ln_pdf(0.0));
-        test_almost(-5.0, 100.0, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(101.0));
-        test_almost(0.0, f64::INFINITY, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(-5.0));
-        test_almost(0.0, f64::INFINITY, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(10.0));
-        test_almost(0.0, f64::INFINITY, f64::NEG_INFINITY, 1e-15, |x| x.ln_pdf(f64::INFINITY));
+        test_case(0.0, 0.1, f64::NEG_INFINITY, |x| x.ln_pdf(5.0));
+        test_case(0.0, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(-5.0));
+        test_case(0.0, 1.0, 0.0, |x| x.ln_pdf(0.5));
+        test_case(0.0, 0.1, f64::NEG_INFINITY, |x| x.ln_pdf(5.0));
+        test_case(0.0, 10.0, f64::NEG_INFINITY, |x| x.ln_pdf(-5.0));
+        test_case(0.0, 10.0, -2.302585092994045684018, |x| x.ln_pdf(1.0));
+        test_case(0.0, 10.0, -2.302585092994045684018, |x| x.ln_pdf(5.0));
+        test_case(0.0, 10.0, f64::NEG_INFINITY, |x| x.ln_pdf(11.0));
+        test_case(-5.0, 100.0, f64::NEG_INFINITY, |x| x.ln_pdf(-10.0));
+        test_case(-5.0, 100.0, -4.653960350157523371101, |x| x.ln_pdf(-5.0));
+        test_case(-5.0, 100.0, -4.653960350157523371101, |x| x.ln_pdf(0.0));
+        test_case(-5.0, 100.0, f64::NEG_INFINITY, |x| x.ln_pdf(101.0));
+        test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(-5.0));
+        test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(10.0));
+        test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
     }
 
     #[test]
