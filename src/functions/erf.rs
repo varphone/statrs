@@ -514,7 +514,7 @@ fn erf_impl(z: f64, inv: bool) -> f64 {
         } else if z < 1.25 {
             (evaluate::polynomial(z - 0.75, ERF_IMPL_CN) /
              evaluate::polynomial(z - 0.75, ERF_IMPL_CD),
-             0.3440242112)
+             0.419990927)
         } else if z < 2.25 {
             (evaluate::polynomial(z - 1.25, ERF_IMPL_DN) /
              evaluate::polynomial(z - 1.25, ERF_IMPL_DD),
@@ -560,16 +560,16 @@ fn erf_impl(z: f64, inv: bool) -> f64 {
              evaluate::polynomial(z - 85.0, ERF_IMPL_ND),
              0.5641584396)
         };
-        let g = (-z * z / z).exp();
+        let g = (-z * z).exp() / z;
         g * b + g * r
     } else {
         0.0
     };
-    match (z, inv) {
-        (_, true) if z >= 0.5 => result,
-        (_, false) if z >= 0.5 => 1.0 - result,
-        (_, true) => 1.0 - result, 
-        (_, false) => result,
+    match inv {
+        true if z >= 0.5 => result,
+        false if z >= 0.5 => 1.0 - result,
+        true => 1.0 - result, 
+        false => result,
     }
 }
 
@@ -624,4 +624,14 @@ fn erf_inv_impl(p: f64, q: f64, s: f64) -> f64 {
         }
     };
     s * result
+}
+
+#[cfg(test)]
+mod test {
+    use prec;
+    
+    #[test]
+    fn test_erfc() {
+        assert!(prec::almost_eq(super::erfc(-1.0), 1.842700792949715, 1e-11));
+    }
 }

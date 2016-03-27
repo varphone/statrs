@@ -252,6 +252,17 @@ mod test {
         assert_eq!(expected, v);   
     }
     
+    fn test_result<F>(mean: f64, std_dev: f64, expected: f64, eval: F)
+        where F : Fn(Normal) -> result::Result<f64> {
+     
+        let n = try_create(mean, std_dev);
+        let x = eval(n);
+        assert!(x.is_ok());
+        
+        let v = x.unwrap();
+        assert_eq!(expected, v);       
+    }
+    
     #[test]
     fn test_create() {
         create_case(10.0, 0.1);
@@ -373,5 +384,10 @@ mod test {
         test_case(-5.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(-5.0));
         test_case(-5.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
         test_case(-5.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(100.0));
+    }
+    
+    #[test]
+    fn test_cdf() {
+        test_result(5.0, 2.0, 0.0, |x| x.cdf(f64::NEG_INFINITY));
     }
 }
