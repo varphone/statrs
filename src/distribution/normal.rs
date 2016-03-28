@@ -263,6 +263,17 @@ mod test {
         assert_eq!(expected, v);       
     }
     
+    fn test_result_almost<F>(mean: f64, std_dev: f64, expected: f64, acc: f64, eval: F)
+        where F : Fn(Normal) -> result::Result<f64> {
+            
+        let n = try_create(mean, std_dev);
+        let x = eval(n);
+        assert!(x.is_ok());
+        
+        let v = x.unwrap();
+        assert!(prec::almost_eq(expected, v, acc));  
+    }
+    
     #[test]
     fn test_create() {
         create_case(10.0, 0.1);
@@ -389,5 +400,12 @@ mod test {
     #[test]
     fn test_cdf() {
         test_result(5.0, 2.0, 0.0, |x| x.cdf(f64::NEG_INFINITY));
+        test_result_almost(5.0, 2.0, 0.0000002866515718, 1e-16, |x| x.cdf(-5.0));
+        test_result_almost(5.0, 2.0, 0.0002326290790, 1e-13, |x| x.cdf(-2.0));
+        test_result_almost(5.0, 2.0, 0.006209665325, 1e-12, |x| x.cdf(0.0));
+        test_result(5.0, 2.0, 0.30853753872598689636229538939166226011639782444542207, |x| x.cdf(4.0));
+        test_result(5.0, 2.0, 0.5, |x| x.cdf(5.0));
+        test_result(5.0, 2.0, 0.69146246127401310363770461060833773988360217555457859, |x| x.cdf(6.0));
+        test_result_almost(5.0, 2.0, 0.993790334674, 1e-12, |x| x.cdf(10.0));
     }
 }
