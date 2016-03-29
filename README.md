@@ -37,3 +37,6 @@ when not.
 - [ ] Weibull
 - [ ] Wishart
 - [ ] Zipf
+  
+## Unplanned
+- MatrixNormal
