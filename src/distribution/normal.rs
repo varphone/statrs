@@ -214,6 +214,12 @@ mod test {
         n.unwrap()
     }
     
+    fn try_create_log(mean: f64, std_dev: f64) -> LogNormal {
+        let n = LogNormal::new(mean, std_dev);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+    
     fn create_case(mean: f64, std_dev: f64) {
         let n = try_create(mean, std_dev);
         assert_eq!(mean, n.mean());
@@ -225,6 +231,11 @@ mod test {
         assert!(n.is_err());
     }
     
+    fn bad_create_log_case(mean: f64, std_dev: f64) {
+        let n = LogNormal::new(mean, std_dev);
+        assert!(n.is_err());
+    }
+    
     fn test_case<F>(mean: f64, std_dev: f64, expected: f64, eval: F) 
         where F : Fn(Normal) -> f64 {
     
@@ -233,12 +244,28 @@ mod test {
         assert_eq!(expected, x);        
     }
     
+    fn test_log_case<F>(mean: f64, std_dev: f64, expected: f64, eval: F)
+        where F : Fn(LogNormal) -> f64 {
+    
+        let n = try_create_log(mean, std_dev);
+        let x = eval(n);
+        assert_eq!(expected, x);         
+    }
+    
     fn test_almost<F>(mean: f64, std_dev: f64, expected: f64, acc: f64, eval: F) 
         where F : Fn(Normal) -> f64 {
         
         let n = try_create(mean, std_dev);
         let x = eval(n);
         assert!(prec::almost_eq(expected, x, acc));    
+    }
+    
+    fn test_log_almost<F>(mean: f64, std_dev: f64, expected: f64, acc: f64, eval: F)
+        where F : Fn(LogNormal) -> f64 {
+        
+        let n = try_create_log(mean, std_dev);
+        let x = eval(n);
+        assert!(prec::almost_eq(expected, x, acc)); 
     }
     
     fn test_optional<F>(mean: f64, std_dev: f64, expected: f64, eval: F)
@@ -293,10 +320,19 @@ mod test {
     }
     
     #[test]
+    fn test_variance() {
+        // note: mean is irrelevant to the variance
+        // calculation, ergo all the test cases are
+        // instantiated with the same mean
+        test_case(0.0, 0.1, 0.1 * 0.1, |x| x.variance());
+        test_case(0.0, 1.0, 1.0, |x| x.variance());
+        test_case(0.0, 10.0, 100.0, |x| x.variance());
+        test_case(0.0, f64::INFINITY, f64::INFINITY, |x| x.variance());
+    }
+    
+    #[test]
     fn test_entropy() {
-        // note: mean is irrelevant to the entropy calculation,
-        // ergo, all the test cases are instantiated with the
-        // same mean
+        // note: mean is irrelevant to the entropy calculation
         test_almost(0.0, 0.1, -0.8836465597893729422377, 1e-15, |x| x.entropy());
         test_case(0.0, 1.0, 1.41893853320467274178, |x| x.entropy());
         test_case(0.0, 10.0, 3.721523626198718425798, |x| x.entropy());
@@ -407,5 +443,82 @@ mod test {
         test_result(5.0, 2.0, 0.5, |x| x.cdf(5.0));
         test_result(5.0, 2.0, 0.69146246127401310363770461060833773988360217555457859, |x| x.cdf(6.0));
         test_result_almost(5.0, 2.0, 0.993790334674, 1e-12, |x| x.cdf(10.0));
+    }
+    
+    #[test]
+    fn test_create_log() {
+        try_create_log(10.0, 0.1);
+        try_create_log(-5.0, 1.0);
+        try_create_log(0.0, 10.0);
+        try_create_log(10.0, 100.0);
+        try_create_log(-5.0, f64::INFINITY);
+    }
+    
+    #[test]
+    fn test_bad_create_log() {
+        bad_create_log_case(0.0, 0.0);
+        bad_create_log_case(f64::NAN, 1.0);
+        bad_create_log_case(1.0, f64::NAN);
+        bad_create_log_case(f64::NAN, f64::NAN);
+        bad_create_log_case(1.0, -1.0);
+    }
+    
+    #[test]
+    fn test_log_mean() {
+        test_log_case(-1.0, 0.1, 0.369723444544058982601, |x| x.mean());
+        test_log_case(-1.0, 1.5, 1.133148453066826316829, |x| x.mean());
+        test_log_case(-1.0, 2.5, 8.372897488127264663205, |x| x.mean());
+        test_log_case(-1.0, 5.5, 1362729.18425285481771, |x| x.mean());
+        test_log_case(-0.1, 0.1, 0.9093729344682314204933, |x| x.mean());
+        test_log_case(-0.1, 1.5, 2.787095460565850768514, |x| x.mean());
+        test_log_case(-0.1, 2.5, 20.59400471119602917533, |x| x.mean());
+        test_log_almost(-0.1, 5.5, 3351772.941252693807591, 1e-9, |x| x.mean());
+        test_log_case(0.1, 0.1, 1.110710610355705232259, |x| x.mean());
+        test_log_case(0.1, 1.5, 3.40416608279081898632, |x| x.mean());
+        test_log_almost(0.1, 2.5, 25.15357415581836182776, 1e-14, |x| x.mean());
+        test_log_almost(0.1, 5.5, 4093864.715172665106863, 1e-8, |x| x.mean());
+        test_log_almost(1.5, 0.1, 4.50415363028848413209, 1e-15, |x| x.mean());
+        test_log_case(1.5, 1.5, 13.80457418606709491926, |x| x.mean());
+        test_log_case(1.5, 2.5, 102.0027730826996844534, |x| x.mean());
+        test_log_case(1.5, 5.5, 16601440.05723477471392, |x| x.mean());
+        test_log_almost(2.5, 0.1, 12.24355896580102707724, 1e-14, |x| x.mean());
+        test_log_case(2.5, 1.5, 37.52472315960099891407, |x| x.mean());
+        test_log_case(2.5, 2.5, 277.2722845231339804081, |x| x.mean());
+        test_log_case(2.5, 5.5, 45127392.83383337999291, |x| x.mean());
+        test_log_almost(5.5, 0.1, 245.9184556788219446833, 1e-13, |x| x.mean());
+        test_log_case(5.5, 1.5, 753.7042125545612656606, |x| x.mean());
+        test_log_case(5.5, 2.5, 5569.162708566004074422, |x| x.mean());
+        test_log_case(5.5, 5.5, 906407915.0111549133446, |x| x.mean());
+    }
+    
+    #[test]
+    fn test_log_variance() {
+        // note: variance seems to be only accurate to around 15 orders
+        // of magnitude. Hopefully in the future we can extend the precision
+        // of this function
+        test_log_almost(-1.0, 0.1, 0.001373811865368952608715, 1e-16, |x| x.variance());
+        test_log_case(-1.0, 1.5, 10.898468544015731954, |x| x.variance());
+        test_log_case(-1.0, 2.5, 36245.39726189994988081, |x| x.variance());
+        test_log_almost(-1.0, 5.5, 2.5481629178024539E+25, 1e10, |x| x.variance());
+        test_log_almost(-0.1, 0.1, 0.008311077467909703803238, 1e-16, |x| x.variance());
+        test_log_case(-0.1, 1.5, 65.93189259328902509552, |x| x.variance());
+        test_log_almost(-0.1, 2.5, 219271.8756420929704707, 1e-10, |x| x.variance());
+        test_log_almost(-0.1, 5.5, 1.541548733459471E+26, 1e12, |x| x.variance());
+        test_log_almost(0.1, 0.1, 0.01239867063063756838894, 1e-15, |x| x.variance());
+        test_log_almost(0.1, 1.5, 98.35882573290010981464, 1e-13, |x| x.variance());
+        test_log_almost(0.1, 2.5, 327115.1995809995715014, 1e-10, |x| x.variance());
+        test_log_almost(0.1, 5.5, 2.299720473192458E+26, 1e12, |x| x.variance());
+        test_log_almost(1.5, 0.1, 0.2038917589520099120699, 1e-14, |x| x.variance());
+        test_log_almost(1.5, 1.5, 1617.476145997433210727, 1e-12, |x| x.variance());
+        test_log_almost(1.5, 2.5, 5379293.910566451644527, 1e-9, |x| x.variance());
+        test_log_almost(1.5, 5.5, 3.7818090853910142E+27, 1e12, |x| x.variance());
+        test_log_almost(2.5, 0.1, 1.506567645006046841936, 1e-13, |x| x.variance());
+        test_log_almost(2.5, 1.5, 11951.62198145717670088, 1e-11, |x| x.variance());
+        test_log_case(2.5, 2.5, 39747904.47781154725843, |x| x.variance());
+        test_log_almost(2.5, 5.5, 2.7943999487399818E+28, 1e13, |x| x.variance());
+        test_log_almost(5.5, 0.1, 607.7927673399807484235, 1e-11, |x| x.variance());
+        test_log_case(5.5, 1.5, 4821628.436260521100027, |x| x.variance());
+        test_log_case(5.5, 2.5, 16035449147.34799637823, |x| x.variance());
+        test_log_case(5.5, 5.5, 1.127341399856331737823E+31, |x| x.variance());
     }
 }
