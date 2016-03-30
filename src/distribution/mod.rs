@@ -4,13 +4,14 @@ use result;
 
 pub use self::binomial::Binomial;
 pub use self::gamma::Gamma;
+pub use self::lognormal::LogNormal;
 pub use self::normal::Normal;
-pub use self::normal::LogNormal;
 pub use self::triangular::Triangular;
 pub use self::uniform::Uniform;
 
 mod binomial;
 mod gamma;
+mod lognormal;
 mod normal;
 mod triangular;
 mod uniform;
