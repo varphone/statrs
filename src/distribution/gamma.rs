@@ -14,13 +14,25 @@ pub struct Gamma {
 
 impl Gamma {
     pub fn new(shape: f64, rate: f64) -> result::Result<Gamma> {
-        if shape < 0.0 || rate < 0.0 {
-            return Err(StatsError::BadParams);
+        let is_nan = shape.is_nan() || rate.is_nan();
+        match (shape, rate, is_nan) {
+            (_, _, true) => Err(StatsError::BadParams),
+            (_, _, false) if shape < 0.0 || rate < 0.0 => Err(StatsError::BadParams),
+            (_, _, false) => {
+                Ok(Gamma {
+                    a: shape,
+                    b: rate,
+                })
+            }
         }
-        Ok(Gamma {
-            a: shape,
-            b: rate,
-        })
+    }
+    
+    pub fn shape(&self) -> f64 {
+        self.a
+    }
+    
+    pub fn rate(&self) -> f64 {
+        self.b
     }
 }
 
@@ -176,5 +188,152 @@ fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
         if u.ln() < 0.5 * x + d * (1.0 - v - v.ln()) {
             return afix * d * v / rate;
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::f64;
+    use std::option::Option;
+    use distribution::{Univariate, Continuous};
+    use prec;
+    use result;
+    use super::Gamma;
+    
+    fn try_create(shape: f64, rate: f64) -> Gamma {
+        let n = Gamma::new(shape, rate);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+    
+    fn create_case(shape: f64, rate: f64) {
+        let n = try_create(shape, rate);
+        assert_eq!(shape, n.shape());
+        assert_eq!(rate, n.rate());
+    }
+    
+    fn bad_create_case(shape: f64, rate: f64) {
+        let n = Gamma::new(shape, rate);
+        assert!(n.is_err());
+    }
+    
+    fn test_case<F>(shape: f64, rate: f64, expected: f64, eval: F)
+        where F : Fn(Gamma) -> f64 {
+    
+        let n = try_create(shape, rate);
+        let x = eval(n);
+        assert_eq!(expected, x);  
+    }
+    
+    fn test_almost<F>(shape: f64, rate: f64, expected: f64, acc: f64, eval: F)
+        where F : Fn(Gamma) -> f64 {
+        
+        let n = try_create(shape, rate);
+        let x = eval(n);
+        assert!(prec::almost_eq(expected, x, acc)); 
+    }
+    
+    fn test_unsupported<F>(shape: f64, rate: f64, eval: F)
+        where F : Fn(Gamma) -> Option<f64> {
+    
+        let n = try_create(shape, rate);
+        let x = eval(n);
+        assert!(x.is_none());        
+    }
+    
+    #[test]
+    fn test_create() {
+        create_case(0.0, 0.0);
+        create_case(1.0, 0.1);
+        create_case(1.0, 1.0);
+        create_case(10.0, 10.0);
+        create_case(10.0, 1.0);
+        create_case(10.0, f64::INFINITY);
+    }
+    
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(1.0, f64::NAN);
+        bad_create_case(1.0, -1.0);
+        bad_create_case(-1.0, 1.0);
+        bad_create_case(-1.0, -1.0);
+        bad_create_case(-1.0, f64::NAN);
+    }
+    
+    #[test]
+    fn test_mean() {
+        test_case(1.0, 0.1, 10.0, |x| x.mean());
+        test_case(1.0, 1.0, 1.0, |x| x.mean());
+        test_case(10.0, 10.0, 1.0, |x| x.mean());
+        test_case(10.0, 1.0, 10.0, |x| x.mean());
+        test_case(10.0, f64::INFINITY, 10.0, |x| x.mean());
+    }
+    
+    #[test]
+    fn test_variance() {
+        test_almost(1.0, 0.1, 100.0, 1e-13, |x| x.variance());
+        test_case(1.0, 1.0, 1.0, |x| x.variance());
+        test_case(10.0, 10.0, 0.1, |x| x.variance());
+        test_case(10.0, 1.0, 10.0, |x| x.variance());
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.variance());
+    }
+    
+    #[test]
+    fn test_std_dev() {
+        test_case(1.0, 0.1, 10.0, |x| x.std_dev());
+        test_case(1.0, 1.0, 1.0, |x| x.std_dev());
+        test_case(10.0, 10.0, 0.31622776601683794197697302588502426416723164097476643, |x| x.std_dev());
+        test_case(10.0, 1.0, 3.1622776601683793319988935444327185337195551393252168, |x| x.std_dev());
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.std_dev());
+    }
+    
+    #[test]
+    fn test_entropy() {
+        test_almost(1.0, 0.1, 3.3025850929940456285068402234265387271634735938763824, 1e-15, |x| x.entropy());
+        test_almost(1.0, 1.0, 1.0, 1e-15, |x| x.entropy());
+        test_almost(10.0, 10.0, 0.23346908548693395836262094490967812177376750477943892, 1e-13, |x| x.entropy());
+        test_almost(10.0, 1.0, 2.5360541784809796423806123995940423293748689934081866, 1e-13, |x| x.entropy());
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.entropy());
+    }
+    
+    #[test]
+    fn test_skewness() {
+        test_case(1.0, 0.1, 2.0, |x| x.skewness());
+        test_case(1.0, 1.0, 2.0, |x| x.skewness());
+        test_case(10.0, 10.0, 0.63245553203367586639977870888654370674391102786504337, |x| x.skewness());
+        test_case(10.0, 1.0, 0.63245553203367586639977870888654370674391102786504337, |x| x.skewness());
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.skewness());
+    }
+    
+    #[test]
+    fn test_mode() {
+        test_case(1.0, 0.1, 0.0, |x| x.mode());
+        test_case(1.0, 1.0, 0.0, |x| x.mode());
+        test_case(10.0, 10.0, 0.9, |x| x.mode());
+        test_case(10.0, 1.0, 9.0, |x| x.mode());
+        test_case(10.0, f64::INFINITY, 10.0, |x| x.mode());
+    }
+    
+    #[test]
+    fn test_median() {
+        test_unsupported(1.0, 0.1, |x| x.median());
+        test_unsupported(1.0, 1.0, |x| x.median());
+        test_unsupported(10.0, 10.0, |x| x.median());
+        test_unsupported(10.0, 1.0, |x| x.median());
+        test_unsupported(10.0, f64::INFINITY, |x| x.median());
+    }
+    
+    #[test]
+    fn test_min_max() {
+        test_case(1.0, 0.1, 0.0, |x| x.min());
+        test_case(1.0, 1.0, 0.0, |x| x.min());
+        test_case(10.0, 10.0, 0.0, |x| x.min());
+        test_case(10.0, 1.0, 0.0, |x| x.min());
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.min());
+        test_case(1.0, 0.1, f64::INFINITY, |x| x.max());
+        test_case(1.0, 1.0, f64::INFINITY, |x| x.max());
+        test_case(10.0, 10.0, f64::INFINITY, |x| x.max());
+        test_case(10.0, 1.0, f64::INFINITY, |x| x.max());
+        test_case(10.0, f64::INFINITY, f64::INFINITY, |x| x.max());
     }
 }

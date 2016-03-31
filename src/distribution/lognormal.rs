@@ -171,7 +171,7 @@ mod test {
     }
     
     #[test]
-    fn test_create_log() {
+    fn test_create() {
         try_create(10.0, 0.1);
         try_create(-5.0, 1.0);
         try_create(0.0, 10.0);
@@ -180,7 +180,7 @@ mod test {
     }
     
     #[test]
-    fn test_bad_create_log() {
+    fn test_bad_create() {
         bad_create_case(0.0, 0.0);
         bad_create_case(f64::NAN, 1.0);
         bad_create_case(1.0, f64::NAN);
