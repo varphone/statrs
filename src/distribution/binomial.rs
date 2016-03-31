@@ -2,8 +2,8 @@ use std::f64;
 use rand::Rng;
 use distribution::{Distribution, Univariate, Discrete};
 use error::StatsError;
-use functions::beta;
-use functions::factorial;
+use function::beta;
+use function::factorial;
 use result;
 
 pub struct Binomial {

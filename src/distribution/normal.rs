@@ -4,7 +4,7 @@ use rand::Rng;
 use consts;
 use distribution::{Distribution, Univariate, Continuous};
 use error::StatsError;
-use functions::erf;
+use function::erf;
 use result;
 
 pub struct Normal {

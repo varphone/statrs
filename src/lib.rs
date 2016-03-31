@@ -4,7 +4,7 @@
 extern crate rand;
 
 pub mod distribution;
-pub mod functions;
+pub mod function;
 pub mod consts;
 pub mod prec;
 

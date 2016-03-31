@@ -4,7 +4,7 @@ use rand::Rng;
 use distribution::{Distribution, Univariate, Continuous};
 use distribution::normal;
 use error::StatsError;
-use functions::gamma;
+use function::gamma;
 use result;
 
 pub struct Gamma {

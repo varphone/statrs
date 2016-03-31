@@ -1,5 +1,5 @@
 use std::f64;
-use functions::evaluate;
+use function::evaluate;
 
 /// erf calculates the error function at x.
 /// erf returns 1 if x is positive infinity

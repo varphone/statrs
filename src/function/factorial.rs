@@ -1,6 +1,6 @@
 use std::f64;
 use std::sync::{Once, ONCE_INIT};
-use functions::gamma;
+use function::gamma;
 
 /// The maximum factorial representable
 /// by a 64-bit floating point without

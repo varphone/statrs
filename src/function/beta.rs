@@ -1,6 +1,6 @@
 use std::f64;
 use error::StatsError;
-use functions::gamma;
+use function::gamma;
 use prec;
 use result;
 
