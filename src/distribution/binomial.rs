@@ -13,7 +13,7 @@ pub struct Binomial {
 
 impl Binomial {
     pub fn new(p: f64, n: i64) -> result::Result<Binomial> {
-        if p < 0.0 || p > 1.0 || n < 0 {
+        if p.is_nan() || p < 0.0 || p > 1.0 || n < 0 {
             return Err(StatsError::BadParams);
         }
         Ok(Binomial { p: p, n: n })
@@ -58,7 +58,7 @@ impl Univariate for Binomial {
         match self.p {
             0.0 | 1.0 => 0.0,
             _ => {
-                (0..self.n).fold(0.0, |acc, x| {
+                (0..self.n+1).fold(0.0, |acc, x| {
                     let p = self.pmf(x);
                     acc - p * p.ln()
                 })
@@ -149,11 +149,13 @@ impl Discrete for Binomial {
     }
 }
 
-#[cfg(tests)]
+#[cfg(test)]
 mod test {
+    use std::cmp::PartialEq;
+    use std::fmt::Debug;
     use std::f64;
     use std::option::Option;
-    use distribution::{Univariate, Continuous};
+    use distribution::{Univariate, Discrete};
     use prec;
     use result;
     use super::Binomial;
@@ -174,6 +176,34 @@ mod test {
         assert!(n.is_err());
     }
     
+    fn test_case<T, F>(p: f64, n: i64, expected: T, eval: F) where 
+        T : PartialEq + Debug,
+        F : Fn(Binomial) -> T {
+            
+        let n = try_create(p, n);
+        let x = eval(n);
+        assert_eq!(expected, x);
+    }
+    
+    fn test_almost<F>(p: f64, n: i64, expected: f64, acc: f64, eval: F)
+        where F : Fn(Binomial) -> f64 {
+            
+        let n = try_create(p, n);
+        let x = eval(n);
+        assert!(prec::almost_eq(expected, x, acc));
+    }
+    
+    fn test_option<F>(p: f64, n: i64, expected: f64, eval: F)
+        where F : Fn(Binomial) -> Option<f64> {
+            
+        let n = try_create(p, n);
+        let x = eval(n);
+        assert!(x.is_some());
+        
+        let v = x.unwrap();
+        assert_eq!(expected, v);
+    }
+    
     #[test]
     fn test_create() {
         create_case(0.0, 4);
@@ -187,5 +217,54 @@ mod test {
         bad_create_case(-1.0, 1);
         bad_create_case(2.0, 1);
         bad_create_case(0.3, -2);
+    }
+    
+    #[test]
+    fn test_mean() {
+        test_case(0.0, 4, 0.0, |x| x.mean());
+        test_almost(0.3, 3, 0.9, 1e-15, |x| x.mean());
+        test_case(1.0, 2, 2.0, |x| x.mean());
+    }
+    
+    #[test]
+    fn test_variance() {
+        test_case(0.0, 4, 0.0, |x| x.variance());
+        test_case(0.3, 3, 0.63, |x| x.variance());
+        test_case(1.0, 2, 0.0, |x| x.variance());
+    }
+    
+    #[test]
+    fn test_std_dev() {
+        test_case(0.0, 4, 0.0, |x| x.std_dev());
+        test_case(0.3, 3, 0.7937253933193771771505, |x| x.std_dev());
+        test_case(1.0, 2, 0.0, |x| x.std_dev());
+    }
+    
+    #[test]
+    fn test_entropy() {
+        test_case(0.0, 4, 0.0, |x| x.entropy());
+        test_almost(0.3, 3, 1.1404671643037712668976423399228972051669206536461, 1e-15, |x| x.entropy());
+        test_case(1.0, 2, 0.0, |x| x.entropy());
+    }
+    
+    #[test]
+    fn test_skewness() {
+        test_case(0.0, 4, f64::INFINITY, |x| x.skewness());
+        test_case(0.3, 3, 0.503952630678969636286, |x| x.skewness());
+        test_case(1.0, 2, f64::NEG_INFINITY, |x| x.skewness());
+    }
+    
+    #[test]
+    fn test_median() {
+        test_option(0.0, 4, 0.0, |x| x.median());
+        test_option(0.3, 3, 0.0, |x| x.median());
+        test_option(1.0, 2, 2.0, |x| x.median());
+    }
+    
+    #[test]
+    fn test_mode() {
+        test_case(0.0, 4, 0, |x| x.mode());
+        test_case(0.3, 3, 1, |x| x.mode());
+        test_case(1.0, 2, 2, |x| x.mode());
     }
 }

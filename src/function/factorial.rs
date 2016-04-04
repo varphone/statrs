@@ -26,7 +26,7 @@ pub fn ln_factorial(x: u64) -> f64 {
     } else if x > MAX_ARG {
         gamma::ln_gamma(x as f64 + 1.0)
     } else {
-        get_fcache()[x as usize]
+        get_fcache()[x as usize].ln()
     };
 }
 
