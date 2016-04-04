@@ -18,6 +18,14 @@ impl Binomial {
         }
         Ok(Binomial { p: p, n: n })
     }
+    
+    pub fn p(&self) -> f64 {
+        self.p
+    }
+    
+    pub fn n(&self) -> i64 {
+        self.n
+    }
 }
 
 impl Distribution for Binomial {
@@ -138,5 +146,46 @@ impl Discrete for Binomial {
         }
         factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
         (self.n - x) as f64 * (1.0 - self.p).ln()
+    }
+}
+
+#[cfg(tests)]
+mod test {
+    use std::f64;
+    use std::option::Option;
+    use distribution::{Univariate, Continuous};
+    use prec;
+    use result;
+    use super::Binomial;
+    
+    fn try_create(p: f64, n: i64) -> Binomial {
+        let n = Binomial::new(p, n);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+    
+    fn create_case(p: f64, n: i64) {
+        let n = try_create(p, n);
+        assert_eq!(p, n.p());
+    }
+    
+    fn bad_create_case(p: f64, n: i64) {
+        let n = Binomial::new(p, n);
+        assert!(n.is_err());
+    }
+    
+    #[test]
+    fn test_create() {
+        create_case(0.0, 4);
+        create_case(0.3, 3);
+        create_case(1.0, 2);
+    }
+    
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(f64::NAN, 1);
+        bad_create_case(-1.0, 1);
+        bad_create_case(2.0, 1);
+        bad_create_case(0.3, -2);
     }
 }
