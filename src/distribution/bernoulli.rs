@@ -1,7 +1,5 @@
-use std::f64;
 use rand::Rng;
 use distribution::{Binomial, Distribution, Univariate, Discrete};
-use error::StatsError;
 use result;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -22,17 +20,17 @@ impl Bernoulli {
     }
     
     pub fn n(&self) -> f64 {
-        1
+        1.0
     }
 }
 
-impl Distribution for Binomial {
+impl Distribution for Bernoulli {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         self.b.sample(r)
     }
 }
 
-impl Univariate for Binomial {
+impl Univariate for Bernoulli {
     fn mean(&self) -> f64 {
         self.b.mean()
     }
@@ -58,11 +56,11 @@ impl Univariate for Binomial {
     }
 
     fn cdf(&self, x: f64) -> result::Result<f64> {
-        self.b.cdf()
+        self.b.cdf(x)
     }
 }
 
-impl Discrete for Binomial {
+impl Discrete for Bernoulli {
     fn mode(&self) -> i64 {
         self.b.mode()
     }

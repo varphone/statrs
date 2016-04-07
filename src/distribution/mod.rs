@@ -2,14 +2,18 @@ use std::option::Option;
 use rand::Rng;
 use result;
 
+pub use self::bernoulli::Bernoulli;
 pub use self::binomial::Binomial;
+pub use self::chisquared::ChiSquared;
 pub use self::gamma::Gamma;
 pub use self::lognormal::LogNormal;
 pub use self::normal::Normal;
 pub use self::triangular::Triangular;
 pub use self::uniform::Uniform;
 
+mod bernoulli;
 mod binomial;
+mod chisquared;
 mod gamma;
 mod lognormal;
 mod normal;
