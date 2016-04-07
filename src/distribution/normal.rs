@@ -7,6 +7,7 @@ use error::StatsError;
 use function::erf;
 use result;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Normal {
     mu: f64,
     sigma: f64,

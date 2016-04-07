@@ -7,6 +7,7 @@ use error::StatsError;
 use function::gamma;
 use result;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Gamma {
     a: f64,
     b: f64,

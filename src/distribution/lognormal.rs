@@ -8,6 +8,7 @@ use function::erf;
 use super::normal;
 use result;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct LogNormal {
     mu: f64,
     sigma: f64,

@@ -5,6 +5,7 @@ use distribution::{Distribution, Univariate, Continuous};
 use error::StatsError;
 use result;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Triangular {
     min: f64,
     max: f64,
