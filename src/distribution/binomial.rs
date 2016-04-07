@@ -6,6 +6,7 @@ use function::beta;
 use function::factorial;
 use result;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Binomial {
     p: f64,
     n: i64,
