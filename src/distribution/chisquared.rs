@@ -4,12 +4,12 @@ use rand::Rng;
 use distribution::{Gamma, Distribution, Univariate, Continuous};
 use result;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct ChiSquared {
     k: f64,
     g: Gamma
 }
 
-#[derive(Debug, Clone, PartialEq)]
 impl ChiSquared {
     pub fn new(k: f64) -> result::Result<ChiSquared> {
         match Gamma::new(k / 2.0, 0.5) {
