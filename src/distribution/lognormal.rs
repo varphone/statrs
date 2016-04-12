@@ -17,12 +17,13 @@ pub struct LogNormal {
 impl LogNormal {
     pub fn new(mean: f64, std_dev: f64) -> result::Result<LogNormal> {
         if mean.is_nan() || std_dev.is_nan() || std_dev <= 0.0 {
-            return Err(StatsError::BadParams);
+            Err(StatsError::BadParams);
+        } else {
+            Ok(LogNormal {
+                mu: mean,
+                sigma: std_dev,
+            })
         }
-        Ok(LogNormal {
-            mu: mean,
-            sigma: std_dev,
-        })
     }
 }
 
@@ -82,22 +83,20 @@ impl Continuous for LogNormal {
     }
 
     fn pdf(&self, x: f64) -> f64 {
-        match x {
-            _ if x < 0.0 => 0.0,
-            _ => {
-                let d = (x.ln() - self.mu) / self.sigma;
-                (-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.sigma)
-            }
+        if x < 0.0 {
+            0.0
+        } else {
+            let d = (x.ln() - self.mu) / self.sigma;
+            (-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.sigma)
         }
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
-        match x {
-            _ if x < 0.0 => f64::NEG_INFINITY,
-            _ => {
-                let d = (x.ln() - self.mu) / self.sigma;
-                (-0.5 * d * d) - consts::LN_SQRT_2PI - (x * self.sigma).ln()
-            }
+        if x < 0.0 {
+            f64::NEG_INFINITY
+        } else {
+            let d = (x.ln() - self.mu) / self.sigma;
+            (-0.5 * d * d) - consts::LN_SQRT_2PI - (x * self.sigma).ln()
         }
     }
 }

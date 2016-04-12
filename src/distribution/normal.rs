@@ -16,12 +16,13 @@ pub struct Normal {
 impl Normal {
     pub fn new(mean: f64, std_dev: f64) -> result::Result<Normal> {
         if mean.is_nan() || std_dev.is_nan() || std_dev <= 0.0 {
-            return Err(StatsError::BadParams);
+            Err(StatsError::BadParams);
+        } else {
+            Ok(Normal {
+                mu: mean,
+                sigma: std_dev,
+            })
         }
-        Ok(Normal {
-            mu: mean,
-            sigma: std_dev,
-        })
     }
 }
 
@@ -100,11 +101,11 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
     let v2 = 2.0 * b - 1.0;
     let r = v1 * v2 + v2 * v2;
     if r >= 1.0 || r == 0.0 {
-        return (0.0, 0.0, false);
+        (0.0, 0.0, false);
+    } else {
+        let fac = (-2.0 * r.ln() / r).sqrt();
+        (v1 * fac, v2 * fac, true)
     }
-
-    let fac = (-2.0 * r.ln() / r).sqrt();
-    (v1 * fac, v2 * fac, true)
 }
 
 #[cfg(test)]

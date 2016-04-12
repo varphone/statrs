@@ -14,9 +14,10 @@ pub struct Exponential {
 impl Exponential {
     pub fn new(rate: f64) -> result::Result<Exponential> {
         if rate < 0.0 {
-            return Err(StatsError::BadParams);
+            Err(StatsError::BadParams);
+        } else {
+            Ok(Exponential{rate: rate})
         }
-        Ok(Exponential{rate: rate})
     }
     
     pub fn rate(&self) -> f64 {

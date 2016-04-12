@@ -14,12 +14,13 @@ pub struct Uniform {
 impl Uniform {
     pub fn new(min: f64, max: f64) -> result::Result<Uniform> {
         if min > max || min.is_nan() || max.is_nan() {
-            return Err(StatsError::BadParams);
+            Err(StatsError::BadParams);
+        } else {
+            Ok(Uniform {
+                min: min,
+                max: max,
+            })
         }
-        Ok(Uniform {
-            min: min,
-            max: max,
-        })
     }
 }
 
@@ -55,13 +56,13 @@ impl Univariate for Uniform {
     }
 
     fn cdf(&self, x: f64) -> result::Result<f64> {
-        return if x <= self.min {
-            Ok(0.0)
-        } else if x >= self.max {
-            Ok(1.0)
-        } else {
-            Ok((x - self.min) / (self.max - self.min))
-        };
+        if x <= self.min {
+            return Ok(0.0);
+        } 
+        if x >= self.max {
+            return Ok(1.0);
+        }
+        Ok((x - self.min) / (self.max - self.min))
     }
 }
 
@@ -79,19 +80,19 @@ impl Continuous for Uniform {
     }
 
     fn pdf(&self, x: f64) -> f64 {
-        return if x < self.min || x > self.max {
+        if x < self.min || x > self.max {
             0.0
         } else {
             1.0 / (self.max - self.min)
-        };
+        }
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
-        return if x < self.min || x > self.max {
+        if x < self.min || x > self.max {
             f64::NEG_INFINITY
         } else {
             -(self.max - self.min).ln()
-        };
+        }
     }
 }
 

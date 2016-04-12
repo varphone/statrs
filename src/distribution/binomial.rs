@@ -15,9 +15,10 @@ pub struct Binomial {
 impl Binomial {
     pub fn new(p: f64, n: i64) -> result::Result<Binomial> {
         if p.is_nan() || p < 0.0 || p > 1.0 || n < 0 {
-            return Err(StatsError::BadParams);
+            Err(StatsError::BadParams)
+        } else {
+            Ok(Binomial { p: p, n: n })
         }
-        Ok(Binomial { p: p, n: n })
     }
     
     pub fn p(&self) -> f64 {
@@ -33,11 +34,11 @@ impl Distribution for Binomial {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         (0..self.n).fold(0.0, |acc, _| {
             let n = r.next_f64();
-            return if n < self.p {
+            if n < self.p {
                 acc + 1.0
             } else {
                 acc
-            };
+            }
         })
     }
 }

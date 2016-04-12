@@ -14,12 +14,13 @@ pub struct DiscreteUniform {
 impl DiscreteUniform {
     pub fn new(min: i64, max: i64) -> result::Result<DiscreteUniform> {
         if max < min {
-            return Err(StatsError::BadParams);
+            Err(StatsError::BadParams);
+        } else {
+            Ok(DiscreteUniform{
+                min: min,
+                max: max
+            })
         }
-        Ok(DiscreteUniform{
-            min: min,
-            max: max
-        })
     }
 }
 
@@ -63,13 +64,15 @@ impl Univariate for DiscreteUniform {
         if x >= self.max as f64 {
             return Ok(1.0);
         }
+        
         let lower = self.min as f64;
         let upper = self.max as f64;
         let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
         if x > 1.0 {
-            return Ok(1.0);
+            Ok(1.0)
+        } else {
+            Ok(ans)
         }
-        Ok(ans)
     }
 }
 
@@ -88,16 +91,18 @@ impl Discrete for DiscreteUniform {
 
     fn pmf(&self, x: i64) -> f64 {
         if x >= self.min && x <= self.max {
-            return 1.0 / (self.max - self.min + 1) as f64
+            1.0 / (self.max - self.min + 1) as f64
+        } else {
+            0.0
         }
-        0.0
     }
 
     fn ln_pmf(&self, x: i64) -> f64 {
         if x >= self.min && x <= self.max {
-            return -((self.max - self.min + 1) as f64).ln()
+            -((self.max - self.min + 1) as f64).ln()
+        } else {
+            f64::NEG_INFINITY
         }
-        f64::NEG_INFINITY
     }
 }
 
