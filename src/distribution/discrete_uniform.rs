@@ -13,7 +13,7 @@ pub struct DiscreteUniform {
 
 impl DiscreteUniform {
     pub fn new(min: i64, max: i64) -> result::Result<DiscreteUniform> {
-        if max > min {
+        if max < min {
             return Err(StatsError::BadParams);
         }
         Ok(DiscreteUniform{
@@ -98,5 +98,162 @@ impl Discrete for DiscreteUniform {
             return -((self.max - self.min + 1) as f64).ln()
         }
         f64::NEG_INFINITY
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::cmp::PartialEq;
+    use std::fmt::Debug;
+    use std::f64;
+    use std::option::Option;
+    use distribution::{Univariate, Discrete};
+    use result;
+    use super::DiscreteUniform;
+    
+    fn try_create(min: i64, max: i64) -> DiscreteUniform {
+        let n = DiscreteUniform::new(min, max);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+    
+    fn create_case(min: i64, max: i64) {
+        let n = try_create(min, max);
+        assert_eq!(min, n.min());
+        assert_eq!(max, n.max());
+    }
+    
+    fn bad_create_case(min: i64, max: i64) {
+        let n = DiscreteUniform::new(min, max);
+        assert!(n.is_err());
+    }
+    
+    fn test_case<T, F>(min: i64, max: i64, expected: T, eval: F) where 
+        T : PartialEq + Debug,
+        F : Fn(DiscreteUniform) -> T {
+            
+        let n = try_create(min, max);
+        let x = eval(n);
+        assert_eq!(expected, x);
+    }
+    
+    fn test_option<F>(min: i64, max: i64, expected: f64, eval: F)
+        where F : Fn(DiscreteUniform) -> Option<f64> {
+            
+        let n = try_create(min, max);
+        let x = eval(n);
+        assert!(x.is_some());
+        
+        let v = x.unwrap();
+        assert_eq!(expected, v);
+    }
+    
+    fn test_result<F>(min: i64, max: i64, expected: f64, eval: F)
+        where F : Fn(DiscreteUniform) -> result::Result<f64> {
+        
+        let n = try_create(min, max);
+        let x = eval(n);
+        assert!(x.is_ok());
+        
+        let v = x.unwrap();
+        assert_eq!(expected, v);
+    }
+    
+    #[test]
+    fn test_create() {
+        create_case(-10, 10);
+        create_case(0, 4);
+        create_case(10, 20);
+        create_case(20, 20);
+    }
+    
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(-1, -2);
+        bad_create_case(6, 5);
+    }
+    
+    #[test]
+    fn test_mean() {
+        test_case(-10, 10, 0.0, |x| x.mean());
+        test_case(0, 4, 2.0, |x| x.mean());
+        test_case(10, 20, 15.0, |x| x.mean());
+        test_case(20, 20, 20.0, |x| x.mean());
+    }
+    
+    #[test]
+    fn test_variance() {
+        test_case(-10, 10, 36.66666666666666666667, |x| x.variance());
+        test_case(0, 4, 2.0, |x| x.variance());
+        test_case(10, 20, 10.0, |x| x.variance());
+        test_case(20, 20, 0.0, |x| x.variance());
+    }
+    
+    #[test]
+    fn test_std_dev() {
+        test_case(-10, 10, (36.66666666666666666667f64).sqrt(), |x| x.std_dev());
+        test_case(0, 4, (2.0f64).sqrt(), |x| x.std_dev());
+        test_case(10, 20, (10.0f64).sqrt(), |x| x.std_dev());
+        test_case(20, 20, 0.0, |x| x.std_dev());
+    }
+    
+    #[test]
+    fn test_entropy() {
+        test_case(-10, 10, 3.0445224377234229965005979803657054342845752874046093, |x| x.entropy());
+        test_case(0, 4, 1.6094379124341003746007593332261876395256013542685181, |x| x.entropy());
+        test_case(10, 20, 2.3978952727983705440619435779651292998217068539374197, |x| x.entropy());
+        test_case(20, 20, 0.0, |x| x.entropy());
+    }
+    
+    #[test]
+    fn test_skewness() {
+        test_case(-10, 10, 0.0, |x| x.skewness());
+        test_case(0, 4, 0.0, |x| x.skewness());
+        test_case(10, 20, 0.0, |x| x.skewness());
+        test_case(20, 20, 0.0, |x| x.skewness());
+    }
+    
+    #[test]
+    fn test_median() {
+        test_option(-10, 10, 0.0, |x| x.median());
+        test_option(0, 4, 2.0, |x| x.median());
+        test_option(10, 20, 15.0, |x| x.median());
+        test_option(20, 20, 20.0, |x| x.median());
+    }
+    
+    #[test]
+    fn test_mode() {
+        test_case(-10, 10, 0, |x| x.mode());
+        test_case(0, 4, 2, |x| x.mode());
+        test_case(10, 20, 15, |x| x.mode());
+        test_case(20, 20, 20, |x| x.mode());
+    }
+    
+    #[test]
+    fn test_pmf() {
+        test_case(-10, 10, 0.04761904761904761904762, |x| x.pmf(-5));
+        test_case(-10, 10, 0.04761904761904761904762, |x| x.pmf(1));
+        test_case(-10, 10, 0.04761904761904761904762, |x| x.pmf(10));
+        test_case(-10, -10, 0.0, |x| x.pmf(0));
+        test_case(-10, -10, 1.0, |x| x.pmf(-10));
+    }
+    
+    #[test]
+    fn test_ln_pmf() {
+        test_case(-10, 10, -3.0445224377234229965005979803657054342845752874046093, |x| x.ln_pmf(-5));
+        test_case(-10, 10, -3.0445224377234229965005979803657054342845752874046093, |x| x.ln_pmf(1));
+        test_case(-10, 10, -3.0445224377234229965005979803657054342845752874046093, |x| x.ln_pmf(10));
+        test_case(-10, -10, f64::NEG_INFINITY, |x| x.ln_pmf(0));
+        test_case(-10, -10, 0.0, |x| x.ln_pmf(-10));
+    }
+    
+    #[test]
+    fn test_cdf() {
+        test_result(-10, 10, 0.2857142857142857142857, |x| x.cdf(-5.0));
+        test_result(-10, 10, 0.5714285714285714285714, |x| x.cdf(1.0));
+        test_result(-10, 10, 1.0, |x| x.cdf(10.0));
+        test_result(-10, -10, 1.0, |x| x.cdf(0.0));
+        test_result(-10, -10, 1.0, |x| x.cdf(-10.0));
+        test_result(-10, -10, 0.0, |x| x.cdf(-11.0));
     }
 }
