@@ -21,19 +21,11 @@ impl Uniform {
             max: max,
         })
     }
-
-    pub fn min(&self) -> f64 {
-        self.min
-    }
-
-    pub fn max(&self) -> f64 {
-        self.max
-    }
 }
 
 impl Distribution for Uniform {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        self.min + r.next_f64() * (self.max - self.min)
+        r.gen_range(self.min, self.max + 1.0)
     }
 }
 
