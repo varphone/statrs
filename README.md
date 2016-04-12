@@ -11,7 +11,7 @@ when not.
 - [ ] Chi
 - [x] ChiSquared
 - [x] ContinuousUniform
-- [ ] DiscreteUniform
+- [x] DiscreteUniform
 - [ ] Exponential
 - [x] Gamma
 - [x] LogNormal
