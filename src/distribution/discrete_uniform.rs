@@ -14,7 +14,7 @@ pub struct DiscreteUniform {
 impl DiscreteUniform {
     pub fn new(min: i64, max: i64) -> result::Result<DiscreteUniform> {
         if max < min {
-            Err(StatsError::BadParams);
+            Err(StatsError::BadParams)
         } else {
             Ok(DiscreteUniform{
                 min: min,

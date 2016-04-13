@@ -17,7 +17,7 @@ pub struct LogNormal {
 impl LogNormal {
     pub fn new(mean: f64, std_dev: f64) -> result::Result<LogNormal> {
         if mean.is_nan() || std_dev.is_nan() || std_dev <= 0.0 {
-            Err(StatsError::BadParams);
+            Err(StatsError::BadParams)
         } else {
             Ok(LogNormal {
                 mu: mean,

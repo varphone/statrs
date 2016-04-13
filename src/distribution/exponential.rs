@@ -53,7 +53,7 @@ impl Univariate for Exponential {
     }
 
     fn median(&self) -> Option<f64> {
-        Some(consts::LN_TWO / self.rate)
+        Some(consts::LN_2 / self.rate)
     }
 
     fn cdf(&self, x: f64) -> result::Result<f64> {

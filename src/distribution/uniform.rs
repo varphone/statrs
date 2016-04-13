@@ -14,7 +14,7 @@ pub struct Uniform {
 impl Uniform {
     pub fn new(min: f64, max: f64) -> result::Result<Uniform> {
         if min > max || min.is_nan() || max.is_nan() {
-            Err(StatsError::BadParams);
+            Err(StatsError::BadParams)
         } else {
             Ok(Uniform {
                 min: min,

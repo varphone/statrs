@@ -11,9 +11,9 @@ pub struct ChiSquared {
 }
 
 impl ChiSquared {
-    pub fn new(k: f64) -> result::Result<ChiSquared> {
-        match Gamma::new(k / 2.0, 0.5) {
-            Ok(g) => Ok(ChiSquared{k: k, g: g}),
+    pub fn new(freedom: f64) -> result::Result<ChiSquared> {
+        match Gamma::new(freedom / 2.0, 0.5) {
+            Ok(g) => Ok(ChiSquared{k: freedom, g: g}),
             Err(e) => Err(e)
         }
     }
