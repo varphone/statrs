@@ -53,7 +53,7 @@ impl Univariate for Chi {
     }
 
     fn median(&self) -> f64 {
-        panic!("Unsupported")
+        unimplemented!()
     }
 
     fn cdf(&self, x: f64) -> f64 {

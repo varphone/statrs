@@ -84,7 +84,7 @@ impl Univariate for Binomial {
             return 1.0;
         }
         let k = x.floor();
-        beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p)
+        beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p).unwrap()
     }
 }
 

@@ -79,19 +79,14 @@ impl Univariate for Gamma {
     }
 
     fn median(&self) -> f64 {
-        panic!("Unsupported")
+        unimplemented!()
     }
 
     fn cdf(&self, x: f64) -> f64 {
         match (self.a, self.b) {
-            (_, f64::INFINITY) => {
-                if x == self.a {
-                    1.0
-                } else {
-                    0.0
-                }
-            }
-            (_, _) => gamma::gamma_lr(self.a, x * self.b),
+            (_, f64::INFINITY) if x == self.a => 1.0,
+            (_, f64::INFINITY) => 0.0,
+            (_, _) => gamma::gamma_lr(self.a, x * self.b).unwrap(),
         }
     }
 }
@@ -114,13 +109,8 @@ impl Continuous for Gamma {
 
     fn pdf(&self, x: f64) -> f64 {
         match (self.a, self.b) {
-            (_, f64::INFINITY) => {
-                if x == self.a {
-                    f64::INFINITY
-                } else {
-                    0.0
-                }
-            }
+            (_, f64::INFINITY) if x == self.a => f64::INFINITY,
+            (_, f64::INFINITY) => 0.0,
             (1.0, _) => self.b * (-self.b * x).exp(),
             (_, _) if self.a > 160.0 => self.ln_pdf(x).exp(),
             (_, _) => {
@@ -132,13 +122,8 @@ impl Continuous for Gamma {
 
     fn ln_pdf(&self, x: f64) -> f64 {
         match (self.a, self.b) {
-            (_, f64::INFINITY) => {
-                if x == self.a {
-                    f64::INFINITY
-                } else {
-                    f64::NEG_INFINITY
-                }
-            }
+            (_, f64::INFINITY) if x == self.a => f64::INFINITY,
+            (_, f64::INFINITY) => f64::NEG_INFINITY,
             (1.0, _) => self.b.ln() - self.b * x,
             (_, _) => {
                 self.a * self.b.ln() + (self.a - 1.0) * x.ln() - self.b * x -

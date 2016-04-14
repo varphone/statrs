@@ -3,4 +3,7 @@
 #[derive(Debug)]
 pub enum StatsError {
     BadParams,
+    ArgMustBePositive(&'static str),
+    ArgNotNegative(&'static str),
+    ArgIntervalIncl(&'static str, f64, f64),
 }

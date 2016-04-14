@@ -1,27 +1,32 @@
 use std::f64;
+use error::StatsError;
 use function::gamma;
 use prec;
+use result::Result;
 
 /// Computes the natural logarithm
 /// of the Euler Beta function
 /// where a is the first Beta parameter
 /// and b is the second Beta parameter
 /// and a > 0, b > 0
-pub fn ln_beta(a: f64, b: f64) -> f64 {
+pub fn ln_beta(a: f64, b: f64) -> Result<f64> {
     if a <= 0.0 {
-        panic!("Argument a must be positive");
+        return Err(StatsError::ArgMustBePositive("a"));
     }
     if b <= 0.0 {
-        panic!("Argument b must be positive");
+        return Err(StatsError::ArgMustBePositive("b"));
     }
-    gamma::ln_gamma(a) + gamma::ln_gamma(b) - gamma::ln_gamma(a + b)
+    Ok(gamma::ln_gamma(a) + gamma::ln_gamma(b) - gamma::ln_gamma(a + b))
 }
 
 /// Computes the Euler Beta function
 /// where a is the first Beta parameter
 /// and b is the second Beta parameter
-pub fn beta(a: f64, b: f64) -> f64 {
-    ln_beta(a, b).exp()
+pub fn beta(a: f64, b: f64) -> Result<f64> {
+    match ln_beta(a, b) {
+        Ok(v) => Ok(v.exp()),
+        Err(e) => Err(e)
+    }
 }
 
 /// Computes the regularized lower incomplete beta function
@@ -29,15 +34,15 @@ pub fn beta(a: f64, b: f64) -> f64 {
 /// a > 0, b > 0, 1 >= x > 0 where a is the first Beta parameter,
 /// b is the second Beta parameter, and x is the upper limit of the
 /// integral
-pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
+pub fn beta_reg(a: f64, b: f64, x: f64) -> Result<f64> {
     if a < 0.0 {
-        panic!("Argument a must be non-negative");
+        return Err(StatsError::ArgNotNegative("a"));
     }
     if b < 0.0 {
-        panic!("Argument b must be non-negative");
+        return Err(StatsError::ArgNotNegative("b"));
     }
     if x < 0.0 || x > 1.0 {
-        panic!("Argument x must be in [0, 1]");
+        return Err(StatsError::ArgIntervalIncl("x", 0.0, 1.0));
     }
 
     let bt = match x {
@@ -110,16 +115,16 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
 
         if (del - 1.0).abs() <= eps {
             return if symm_transform {
-                1.0 - bt * h / a
+                Ok(1.0 - bt * h / a)
             } else {
-                bt * h / a
+                Ok(bt * h / a)
             };
         }
     }
 
     if symm_transform {
-        1.0 - bt * h / a
+        Ok(1.0 - bt * h / a)
     } else {
-        bt * h / a
+        Ok(bt * h / a)
     }
 }
