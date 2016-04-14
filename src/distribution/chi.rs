@@ -13,7 +13,7 @@ pub struct Chi {
 
 impl Chi {
     pub fn new(freedom: f64) -> result::Result<Chi> {
-        if freedom <= 0.0 {
+        if freedom.is_nan() || freedom <= 0.0 {
             Err(StatsError::BadParams)
         } else {
             Ok(Chi{k: freedom})
