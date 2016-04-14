@@ -13,7 +13,7 @@ pub struct Exponential {
 
 impl Exponential {
     pub fn new(rate: f64) -> result::Result<Exponential> {
-        if rate < 0.0 {
+        if rate <= 0.0 {
             Err(StatsError::BadParams);
         } else {
             Ok(Exponential{rate: rate})
