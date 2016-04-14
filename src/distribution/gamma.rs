@@ -18,7 +18,7 @@ impl Gamma {
         let is_nan = shape.is_nan() || rate.is_nan();
         match (shape, rate, is_nan) {
             (_, _, true) => Err(StatsError::BadParams),
-            (_, _, false) if shape < 0.0 || rate < 0.0 => Err(StatsError::BadParams),
+            (_, _, false) if shape <= 0.0 || rate <= 0.0 => Err(StatsError::BadParams),
             (_, _, false) => {
                 Ok(Gamma {
                     a: shape,
@@ -46,7 +46,6 @@ impl Distribution for Gamma {
 impl Univariate for Gamma {
     fn mean(&self) -> f64 {
         match (self.a, self.b) {
-            (0.0, 0.0) => f64::NAN,
             (_, f64::INFINITY) => self.a,
             (_, _) => self.a / self.b,
         }
@@ -54,7 +53,6 @@ impl Univariate for Gamma {
 
     fn variance(&self) -> f64 {
         match (self.a, self.b) {
-            (0.0, 0.0) => f64::NAN,
             (_, f64::INFINITY) => 0.0,
             (_, _) => self.a / (self.b * self.b),
         }
@@ -66,7 +64,6 @@ impl Univariate for Gamma {
 
     fn entropy(&self) -> f64 {
         match (self.a, self.b) {
-            (0.0, 0.0) => f64::NAN,
             (_, f64::INFINITY) => 0.0,
             (_, _) => {
                 self.a - self.b.ln() + gamma::ln_gamma(self.a) +
@@ -77,7 +74,6 @@ impl Univariate for Gamma {
 
     fn skewness(&self) -> f64 {
         match (self.a, self.b) {
-            (0.0, 0.0) => f64::NAN,
             (_, f64::INFINITY) => 0.0,
             (_, _) => 2.0 / self.a.sqrt(),
         }
@@ -89,7 +85,6 @@ impl Univariate for Gamma {
 
     fn cdf(&self, x: f64) -> result::Result<f64> {
         match (self.a, self.b) {
-            (0.0, 0.0) => Ok(0.0),
             (_, f64::INFINITY) => {
                 if x == self.a {
                     Ok(1.0)
@@ -105,7 +100,6 @@ impl Univariate for Gamma {
 impl Continuous for Gamma {
     fn mode(&self) -> f64 {
         match (self.a, self.b) {
-            (0.0, 0.0) => f64::NAN,
             (_, f64::INFINITY) => self.a,
             (_, _) => (self.a - 1.0) / self.b,
         }
@@ -121,7 +115,6 @@ impl Continuous for Gamma {
 
     fn pdf(&self, x: f64) -> f64 {
         match (self.a, self.b) {
-            (0.0, 0.0) => 0.0,
             (_, f64::INFINITY) => {
                 if x == self.a {
                     f64::INFINITY
@@ -140,7 +133,6 @@ impl Continuous for Gamma {
 
     fn ln_pdf(&self, x: f64) -> f64 {
         match (self.a, self.b) {
-            (0.0, 0.0) => f64::NEG_INFINITY,
             (_, f64::INFINITY) => {
                 if x == self.a {
                     f64::INFINITY
@@ -266,7 +258,6 @@ mod test {
     
     #[test]
     fn test_create() {
-        create_case(0.0, 0.0);
         create_case(1.0, 0.1);
         create_case(1.0, 1.0);
         create_case(10.0, 10.0);
@@ -276,6 +267,7 @@ mod test {
     
     #[test]
     fn test_bad_create() {
+        bad_create_case(0.0, 0.0);
         bad_create_case(1.0, f64::NAN);
         bad_create_case(1.0, -1.0);
         bad_create_case(-1.0, 1.0);
