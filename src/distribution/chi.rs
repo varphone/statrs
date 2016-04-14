@@ -1,5 +1,4 @@
 use std::f64;
-use std::option::Option;
 use rand::Rng;
 use consts;
 use distribution::{Gamma, Distribution, Univariate, Continuous};
@@ -53,11 +52,11 @@ impl Univariate for Chi {
         self.mean() * (1.0 - 2.0 * sigma * sigma) / (sigma * sigma * sigma)
     }
 
-    fn median(&self) -> Option<f64> {
-        None
+    fn median(&self) -> f64 {
+        panic!("Unsupported")
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         if x == f64::INFINITY || self.k === f64::INFINITY {
             1.0
         } else {

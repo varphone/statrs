@@ -1,5 +1,4 @@
 use std::f64;
-use std::option::Option;
 use rand::Rng;
 use distribution::{Distribution, Univariate, Continuous};
 use distribution::normal;
@@ -79,17 +78,17 @@ impl Univariate for Gamma {
         }
     }
 
-    fn median(&self) -> Option<f64> {
-        None
+    fn median(&self) -> f64 {
+        panic!("Unsupported")
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         match (self.a, self.b) {
             (_, f64::INFINITY) => {
                 if x == self.a {
-                    Ok(1.0)
+                    1.0
                 } else {
-                    Ok(0.0)
+                    0.0
                 }
             }
             (_, _) => gamma::gamma_lr(self.a, x * self.b),
@@ -187,10 +186,8 @@ fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use std::option::Option;
     use distribution::{Univariate, Continuous};
     use prec;
-    use result;
     use super::Gamma;
     
     fn try_create(shape: f64, rate: f64) -> Gamma {
@@ -227,33 +224,10 @@ mod test {
     }
     
     fn test_unsupported<F>(shape: f64, rate: f64, eval: F)
-        where F : Fn(Gamma) -> Option<f64> {
+        where F : Fn(Gamma) -> f64 {
     
         let n = try_create(shape, rate);
-        let x = eval(n);
-        assert!(x.is_none());        
-    }
-    
-    fn test_result<F>(shape: f64, rate: f64, expected: f64, eval: F)
-        where F : Fn(Gamma) -> result::Result<f64> {
-        
-        let n = try_create(shape, rate);
-        let x = eval(n);
-        assert!(x.is_ok());     
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);
-    }
-    
-    fn test_result_almost<F>(shape: f64, rate: f64, expected: f64, acc: f64, eval: F)
-        where F : Fn(Gamma) -> result::Result<f64> {
-        
-        let n = try_create(shape, rate);
-        let x = eval(n);
-        assert!(x.is_ok());     
-        
-        let v = x.unwrap();
-        assert!(prec::almost_eq(expected, v, acc));    
+        eval(n);    
     }
     
     #[test]
@@ -330,6 +304,7 @@ mod test {
     }
     
     #[test]
+    #[should_panic]
     fn test_median() {
         test_unsupported(1.0, 0.1, |x| x.median());
         test_unsupported(1.0, 1.0, |x| x.median());
@@ -392,20 +367,20 @@ mod test {
     
     #[test]
     fn test_cdf() {
-        test_result(1.0, 0.1, 0.0, |x| x.cdf(0.0));
-        test_result_almost(1.0, 0.1, 0.095162581964040431858607615783064404690935346242622848, 1e-16, |x| x.cdf(1.0));
-        test_result_almost(1.0, 0.1, 0.63212055882855767840447622983853913255418886896823196, 1e-15, |x| x.cdf(10.0));
-        test_result(1.0, 1.0, 0.0, |x| x.cdf(0.0));
-        test_result_almost(1.0, 1.0, 0.63212055882855767840447622983853913255418886896823196, 1e-15, |x| x.cdf(1.0));
-        test_result(1.0, 1.0, 0.99995460007023751514846440848443944938976208191113396, |x| x.cdf(10.0));
-        test_result(10.0, 10.0, 0.0, |x| x.cdf(0.0));
-        test_result_almost(10.0, 10.0, 0.54207028552814779168583514294066541824736464003242184, 1e-15, |x| x.cdf(1.0));
-        test_result(10.0, 10.0, 0.99999999999999999999999999999988746526039157266114706, |x| x.cdf(10.0));
-        test_result(10.0, 1.0, 0.0, |x| x.cdf(0.0));
-        test_result_almost(10.0, 1.0, 0.00000011142547833872067735305068724025236288094949815466035, 1e-21, |x| x.cdf(1.0));
-        test_result_almost(10.0, 1.0, 0.54207028552814779168583514294066541824736464003242184, 1e-15, |x| x.cdf(10.0));
-        test_result(10.0, f64::INFINITY, 0.0, |x| x.cdf(0.0));
-        test_result(10.0, f64::INFINITY, 0.0, |x| x.cdf(1.0));
-        test_result(10.0, f64::INFINITY, 1.0, |x| x.cdf(10.0));
+        test_case(1.0, 0.1, 0.0, |x| x.cdf(0.0));
+        test_almost(1.0, 0.1, 0.095162581964040431858607615783064404690935346242622848, 1e-16, |x| x.cdf(1.0));
+        test_almost(1.0, 0.1, 0.63212055882855767840447622983853913255418886896823196, 1e-15, |x| x.cdf(10.0));
+        test_case(1.0, 1.0, 0.0, |x| x.cdf(0.0));
+        test_almost(1.0, 1.0, 0.63212055882855767840447622983853913255418886896823196, 1e-15, |x| x.cdf(1.0));
+        test_case(1.0, 1.0, 0.99995460007023751514846440848443944938976208191113396, |x| x.cdf(10.0));
+        test_case(10.0, 10.0, 0.0, |x| x.cdf(0.0));
+        test_almost(10.0, 10.0, 0.54207028552814779168583514294066541824736464003242184, 1e-15, |x| x.cdf(1.0));
+        test_case(10.0, 10.0, 0.99999999999999999999999999999988746526039157266114706, |x| x.cdf(10.0));
+        test_case(10.0, 1.0, 0.0, |x| x.cdf(0.0));
+        test_almost(10.0, 1.0, 0.00000011142547833872067735305068724025236288094949815466035, 1e-21, |x| x.cdf(1.0));
+        test_almost(10.0, 1.0, 0.54207028552814779168583514294066541824736464003242184, 1e-15, |x| x.cdf(10.0));
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.cdf(0.0));
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.cdf(1.0));
+        test_case(10.0, f64::INFINITY, 1.0, |x| x.cdf(10.0));
     }
 }

@@ -1,5 +1,4 @@
 use std::f64;
-use std::option::Option;
 use rand::Rng;
 use consts;
 use distribution::{Distribution, Univariate, Continuous};
@@ -53,12 +52,12 @@ impl Univariate for Normal {
         0.0
     }
 
-    fn median(&self) -> Option<f64> {
-        Some(self.mu)
+    fn median(&self) -> f64 {
+        self.mu
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
-        Ok(0.5 * erf::erfc((self.mu - x) / (self.sigma * f64::consts::SQRT_2)))
+    fn cdf(&self, x: f64) -> f64 {
+        0.5 * erf::erfc((self.mu - x) / (self.sigma * f64::consts::SQRT_2))
     }
 }
 
@@ -111,10 +110,8 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use std::option::Option;
     use distribution::{Univariate, Continuous};
     use prec;
-    use result;
     use super::Normal;
     
     fn try_create(mean: f64, std_dev: f64) -> Normal {
@@ -148,39 +145,6 @@ mod test {
         let n = try_create(mean, std_dev);
         let x = eval(n);
         assert!(prec::almost_eq(expected, x, acc));    
-    }
-    
-    fn test_optional<F>(mean: f64, std_dev: f64, expected: f64, eval: F)
-        where F : Fn(Normal) -> Option<f64> {
-    
-        let n = try_create(mean, std_dev);
-        let x = eval(n);
-        assert!(x.is_some());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);   
-    }
-    
-    fn test_result<F>(mean: f64, std_dev: f64, expected: f64, eval: F)
-        where F : Fn(Normal) -> result::Result<f64> {
-     
-        let n = try_create(mean, std_dev);
-        let x = eval(n);
-        assert!(x.is_ok());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);       
-    }
-    
-    fn test_result_almost<F>(mean: f64, std_dev: f64, expected: f64, acc: f64, eval: F)
-        where F : Fn(Normal) -> result::Result<f64> {
-            
-        let n = try_create(mean, std_dev);
-        let x = eval(n);
-        assert!(x.is_ok());
-        
-        let v = x.unwrap();
-        assert!(prec::almost_eq(expected, v, acc));  
     }
     
     #[test]
@@ -245,12 +209,12 @@ mod test {
     fn test_median() {
         // note: std_dev is irrelevant to the median of a
         // normal distribution
-        test_optional(-0.0, 1.0, 0.0, |x| x.median());
-        test_optional(0.0, 1.0, 0.0, |x| x.median());
-        test_optional(0.1, 1.0, 0.1, |x| x.median());
-        test_optional(1.0, 1.0, 1.0, |x| x.median());
-        test_optional(-0.0, 1.0, -0.0, |x| x.median());
-        test_optional(f64::INFINITY, 1.0, f64::INFINITY, |x| x.median());
+        test_case(-0.0, 1.0, 0.0, |x| x.median());
+        test_case(0.0, 1.0, 0.0, |x| x.median());
+        test_case(0.1, 1.0, 0.1, |x| x.median());
+        test_case(1.0, 1.0, 1.0, |x| x.median());
+        test_case(-0.0, 1.0, -0.0, |x| x.median());
+        test_case(f64::INFINITY, 1.0, f64::INFINITY, |x| x.median());
     }
     
     #[test]
@@ -317,13 +281,13 @@ mod test {
     
     #[test]
     fn test_cdf() {
-        test_result(5.0, 2.0, 0.0, |x| x.cdf(f64::NEG_INFINITY));
-        test_result_almost(5.0, 2.0, 0.0000002866515718, 1e-16, |x| x.cdf(-5.0));
-        test_result_almost(5.0, 2.0, 0.0002326290790, 1e-13, |x| x.cdf(-2.0));
-        test_result_almost(5.0, 2.0, 0.006209665325, 1e-12, |x| x.cdf(0.0));
-        test_result(5.0, 2.0, 0.30853753872598689636229538939166226011639782444542207, |x| x.cdf(4.0));
-        test_result(5.0, 2.0, 0.5, |x| x.cdf(5.0));
-        test_result(5.0, 2.0, 0.69146246127401310363770461060833773988360217555457859, |x| x.cdf(6.0));
-        test_result_almost(5.0, 2.0, 0.993790334674, 1e-12, |x| x.cdf(10.0));
+        test_case(5.0, 2.0, 0.0, |x| x.cdf(f64::NEG_INFINITY));
+        test_almost(5.0, 2.0, 0.0000002866515718, 1e-16, |x| x.cdf(-5.0));
+        test_almost(5.0, 2.0, 0.0002326290790, 1e-13, |x| x.cdf(-2.0));
+        test_almost(5.0, 2.0, 0.006209665325, 1e-12, |x| x.cdf(0.0));
+        test_case(5.0, 2.0, 0.30853753872598689636229538939166226011639782444542207, |x| x.cdf(4.0));
+        test_case(5.0, 2.0, 0.5, |x| x.cdf(5.0));
+        test_case(5.0, 2.0, 0.69146246127401310363770461060833773988360217555457859, |x| x.cdf(6.0));
+        test_almost(5.0, 2.0, 0.993790334674, 1e-12, |x| x.cdf(10.0));
     }
 }

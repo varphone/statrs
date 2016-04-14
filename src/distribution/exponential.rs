@@ -1,5 +1,4 @@
 use std::f64;
-use std::option::Option;
 use rand::Rng;
 use consts;
 use distribution::{Distribution, Univariate, Continuous};
@@ -52,15 +51,15 @@ impl Univariate for Exponential {
         2.0
     }
 
-    fn median(&self) -> Option<f64> {
-        Some(consts::LN_2 / self.rate)
+    fn median(&self) -> f64 {
+        consts::LN_2 / self.rate
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         if x < 0.0 {
-            Ok(0.0)
+            0.0
         } else {
-            Ok(1.0 - (-self.rate * x).exp())
+            1.0 - (-self.rate * x).exp()
         }
     }
 }

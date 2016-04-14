@@ -1,6 +1,4 @@
-use std::option::Option;
 use rand::Rng;
-use result;
 
 pub use self::bernoulli::Bernoulli;
 pub use self::binomial::Binomial;
@@ -38,16 +36,8 @@ pub trait Univariate : Distribution {
     fn std_dev(&self) -> f64;
     fn entropy(&self) -> f64;
     fn skewness(&self) -> f64;
-
-    /// median returns the median of the distribution
-    /// or none if a median calculation is not supported
-    /// by the distribution
-    fn median(&self) -> Option<f64>;
-
-    /// cdf computes the cumulative density at x
-    /// or returns an error if x is an invalid parameter
-    /// for the distribution
-    fn cdf(&self, x: f64) -> result::Result<f64>;
+    fn median(&self) -> f64;
+    fn cdf(&self, x: f64) -> f64;
 }
 
 /// Continuous should be implemented by structs

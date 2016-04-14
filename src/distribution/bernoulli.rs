@@ -51,11 +51,11 @@ impl Univariate for Bernoulli {
         self.b.skewness()
     }
 
-    fn median(&self) -> Option<f64> {
+    fn median(&self) -> f64 {
         self.b.median()
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         self.b.cdf(x)
     }
 }

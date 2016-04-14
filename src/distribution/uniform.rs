@@ -1,5 +1,4 @@
 use std::f64;
-use std::option::Option;
 use rand::Rng;
 use distribution::{Distribution, Univariate, Continuous};
 use error::StatsError;
@@ -51,18 +50,18 @@ impl Univariate for Uniform {
         0.0
     }
 
-    fn median(&self) -> Option<f64> {
-        Some((self.min + self.max) / 2.0)
+    fn median(&self) -> f64 {
+        (self.min + self.max) / 2.0
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         if x <= self.min {
-            return Ok(0.0);
+            return 0.0;
         } 
         if x >= self.max {
-            return Ok(1.0);
+            return 1.0;
         }
-        Ok((x - self.min) / (self.max - self.min))
+        (x - self.min) / (self.max - self.min)
     }
 }
 
@@ -101,7 +100,6 @@ mod test {
     use std::f64;
     use distribution::{Univariate, Continuous};
     use prec;
-    use result;
     use super::Uniform;
 
     fn try_create(min: f64, max: f64) -> Uniform {
@@ -135,28 +133,6 @@ mod test {
         let n = try_create(min, max);
         let x = eval(n);
         assert!(prec::almost_eq(expected, x, acc));
-    }
-    
-    fn test_optional<F>(min: f64, max: f64, expected: f64, eval: F)
-        where F : Fn(Uniform) -> Option<f64> {
-        
-        let n = try_create(min, max);
-        let x = eval(n);
-        assert!(x.is_some());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);
-    }
-    
-    fn test_result<F>(min: f64, max: f64, expected: f64, eval: F)
-        where F : Fn(Uniform) -> result::Result<f64> {
-    
-        let n = try_create(min, max);
-        let x = eval(n);
-        assert!(x.is_ok());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);        
     }
 
     #[test]
@@ -227,12 +203,12 @@ mod test {
 
     #[test]
     fn test_median() {
-        test_optional(-0.0, 2.0, 1.0, |x| x.median());
-        test_optional(0.0, 2.0, 1.0, |x| x.median());
-        test_optional(0.1, 4.0, 2.05, |x| x.median());
-        test_optional(1.0, 10.0, 5.5, |x| x.median());
-        test_optional(10.0, 11.0, 10.5, |x| x.median());
-        test_optional(0.0, f64::INFINITY, f64::INFINITY, |x| x.median());
+        test_case(-0.0, 2.0, 1.0, |x| x.median());
+        test_case(0.0, 2.0, 1.0, |x| x.median());
+        test_case(0.1, 4.0, 2.05, |x| x.median());
+        test_case(1.0, 10.0, 5.5, |x| x.median());
+        test_case(10.0, 11.0, 10.5, |x| x.median());
+        test_case(0.0, f64::INFINITY, f64::INFINITY, |x| x.median());
     }
 
     #[test]
@@ -285,25 +261,25 @@ mod test {
 
     #[test]
     fn test_cdf() {
-        test_result(0.0, 0.0, 0.0, |x| x.cdf(-5.0));
-        test_result(0.0, 0.0, 0.0, |x| x.cdf(0.0));
-        test_result(0.0, 0.0, 1.0, |x| x.cdf(5.0));
-        test_result(0.0, 0.1, 0.0, |x| x.cdf(-5.0));
-        test_result(0.0, 0.1, 0.5, |x| x.cdf(0.05));
-        test_result(0.0, 0.1, 1.0, |x| x.cdf(5.0));
-        test_result(0.0, 1.0, 0.0, |x| x.cdf(-5.0));
-        test_result(0.0, 1.0, 0.5, |x| x.cdf(0.5));
-        test_result(0.0, 0.1, 1.0, |x| x.cdf(5.0));
-        test_result(0.0, 10.0, 0.0, |x| x.cdf(-5.0));
-        test_result(0.0, 10.0, 0.1, |x| x.cdf(1.0));
-        test_result(0.0, 10.0, 0.5, |x| x.cdf(5.0));
-        test_result(0.0, 10.0, 1.0, |x| x.cdf(11.0));
-        test_result(-5.0, 100.0, 0.0, |x| x.cdf(-10.0));
-        test_result(-5.0, 100.0, 0.0, |x| x.cdf(-5.0));
-        test_result(-5.0, 100.0, 0.04761904761904761904762, |x| x.cdf(0.0));
-        test_result(-5.0, 100.0, 1.0, |x| x.cdf(101.0));
-        test_result(0.0, f64::INFINITY, 0.0, |x| x.cdf(-5.0));
-        test_result(0.0, f64::INFINITY, 0.0, |x| x.cdf(10.0));
-        test_result(0.0, f64::INFINITY, 1.0, |x| x.cdf(f64::INFINITY));
+        test_case(0.0, 0.0, 0.0, |x| x.cdf(-5.0));
+        test_case(0.0, 0.0, 0.0, |x| x.cdf(0.0));
+        test_case(0.0, 0.0, 1.0, |x| x.cdf(5.0));
+        test_case(0.0, 0.1, 0.0, |x| x.cdf(-5.0));
+        test_case(0.0, 0.1, 0.5, |x| x.cdf(0.05));
+        test_case(0.0, 0.1, 1.0, |x| x.cdf(5.0));
+        test_case(0.0, 1.0, 0.0, |x| x.cdf(-5.0));
+        test_case(0.0, 1.0, 0.5, |x| x.cdf(0.5));
+        test_case(0.0, 0.1, 1.0, |x| x.cdf(5.0));
+        test_case(0.0, 10.0, 0.0, |x| x.cdf(-5.0));
+        test_case(0.0, 10.0, 0.1, |x| x.cdf(1.0));
+        test_case(0.0, 10.0, 0.5, |x| x.cdf(5.0));
+        test_case(0.0, 10.0, 1.0, |x| x.cdf(11.0));
+        test_case(-5.0, 100.0, 0.0, |x| x.cdf(-10.0));
+        test_case(-5.0, 100.0, 0.0, |x| x.cdf(-5.0));
+        test_case(-5.0, 100.0, 0.04761904761904761904762, |x| x.cdf(0.0));
+        test_case(-5.0, 100.0, 1.0, |x| x.cdf(101.0));
+        test_case(0.0, f64::INFINITY, 0.0, |x| x.cdf(-5.0));
+        test_case(0.0, f64::INFINITY, 0.0, |x| x.cdf(10.0));
+        test_case(0.0, f64::INFINITY, 1.0, |x| x.cdf(f64::INFINITY));
     }
 }

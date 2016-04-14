@@ -1,5 +1,4 @@
 use std::f64::consts;
-use std::option::Option;
 use rand::Rng;
 use distribution::{Distribution, Univariate, Continuous};
 use error::StatsError;
@@ -81,31 +80,31 @@ impl Univariate for Triangular {
         q / d
     }
 
-    fn median(&self) -> Option<f64> {
+    fn median(&self) -> f64 {
         let a = self.min;
         let b = self.max;
         let c = self.mode;
         if c >= (a + b) / 2.0 {
-            Some(a + ((b - a) * (c - a) / 2.0).sqrt())
+            a + ((b - a) * (c - a) / 2.0).sqrt()
         } else {
-            Some(b - ((b - a) * (b - c) / 2.0).sqrt())
+            b - ((b - a) * (b - c) / 2.0).sqrt()
         }
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         let a = self.min;
         let b = self.max;
         let c = self.mode;
         if x < a {
-            return Ok(0.0);
+            return 0.0;
         }
         if a <= x && x <= c {
-            return Ok((x - a) * (x - a) / ((b - a) * (c - a)));
+            return (x - a) * (x - a) / ((b - a) * (c - a));
         }
         if c < x && x <= b {
-            return Ok(1.0 - (b - x) * (b - x) / ((b - a) * (b - c)));
+            return 1.0 - (b - x) * (b - x) / ((b - a) * (b - c));
         }
-        Ok(1.0)
+        1.0
     }
 }
 
@@ -154,7 +153,6 @@ mod test {
     use std::f64;
     use distribution::{Univariate, Continuous};
     use prec;
-    use result;
     use super::Triangular;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
@@ -189,39 +187,6 @@ mod test {
         let n = try_create(min, max, mode);
         let x = eval(n);
         assert!(prec::almost_eq(expected, x, acc));
-    }
-    
-    fn test_optional<F>(min: f64, max: f64, mode: f64, expected: f64, eval: F)
-        where F :Fn(Triangular) -> Option<f64> {
-        
-        let n = try_create(min, max, mode);
-        let x = eval(n);
-        assert!(x.is_some());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);
-    }
-    
-    fn test_optional_almost<F>(min: f64, max: f64, mode: f64, expected: f64, acc: f64, eval: F)
-        where F : Fn(Triangular) -> Option<f64> {
-        
-        let n = try_create(min, max, mode);
-        let x = eval(n);
-        assert!(x.is_some());
-        
-        let v = x.unwrap();
-        assert!(prec::almost_eq(expected, v, acc));
-    }
-    
-    fn test_result<F>(min: f64, max: f64, mode: f64, expected: f64, eval: F)
-        where F : Fn(Triangular) -> result::Result<f64> {
-    
-        let n = try_create(min, max, mode);
-        let x = eval(n);
-        assert!(x.is_ok());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);        
     }
 
     #[test]
@@ -302,12 +267,12 @@ mod test {
 
     #[test]
     fn test_median() {
-        test_optional(0.0, 1.0, 0.5, 0.5, |x| x.median());
-        test_optional(0.0, 1.0, 0.75, 0.6123724356957945245493, |x| x.median());
-        test_optional_almost(-5.0, 8.0, -3.5, -0.6458082328952913226724, 1e-15, |x| x.median());
-        test_optional_almost(-5.0, 8.0, 5.0, 3.062257748298549652367, 1e-15, |x| x.median());
-        test_optional(-5.0, -3.0, -4.0, -4.0, |x| x.median());
-        test_optional_almost(15.0, 134.0, 21.0, 52.00304883716712238797, 1e-14, |x| x.median());
+        test_case(0.0, 1.0, 0.5, 0.5, |x| x.median());
+        test_case(0.0, 1.0, 0.75, 0.6123724356957945245493, |x| x.median());
+        test_almost(-5.0, 8.0, -3.5, -0.6458082328952913226724, 1e-15, |x| x.median());
+        test_almost(-5.0, 8.0, 5.0, 3.062257748298549652367, 1e-15, |x| x.median());
+        test_case(-5.0, -3.0, -4.0, -4.0, |x| x.median());
+        test_almost(15.0, 134.0, 21.0, 52.00304883716712238797, 1e-14, |x| x.median());
     }
     
     #[test]
@@ -350,20 +315,20 @@ mod test {
     
     #[test]
     fn test_cdf() {
-        test_result(0.0, 1.0, 0.5, 0.0, |x| x.cdf(-1.0));
-        test_result(0.0, 1.0, 0.5, 1.0, |x| x.cdf(1.1));
-        test_result(0.0, 1.0, 0.5, 0.125, |x| x.cdf(0.25));
-        test_result(0.0, 1.0, 0.5, 0.5, |x| x.cdf(0.5));
-        test_result(0.0, 1.0, 0.5, 0.875, |x| x.cdf(0.75));
-        test_result(-5.0, 8.0, -3.5, 0.0, |x| x.cdf(-5.1));
-        test_result(-5.0, 8.0, -3.5, 1.0, |x| x.cdf(8.1));
-        test_result(-5.0, 8.0, -3.5, 0.05128205128205128205128, |x| x.cdf(-4.0));
-        test_result(-5.0, 8.0, -3.5, 0.1153846153846153846154, |x| x.cdf(-3.5));
-        test_result(-5.0, 8.0, -3.5, 0.892976588628762541806, |x| x.cdf(4.0));
-        test_result(-5.0, -3.0, -4.0, 0.0, |x| x.cdf(-5.1));
-        test_result(-5.0, -3.0, -4.0, 1.0, |x| x.cdf(-2.9));
-        test_result(-5.0, -3.0, -4.0, 0.125, |x| x.cdf(-4.5));
-        test_result(-5.0, -3.0, -4.0, 0.5, |x| x.cdf(-4.0));
-        test_result(-5.0, -3.0, -4.0, 0.875, |x| x.cdf(-3.5));
+        test_case(0.0, 1.0, 0.5, 0.0, |x| x.cdf(-1.0));
+        test_case(0.0, 1.0, 0.5, 1.0, |x| x.cdf(1.1));
+        test_case(0.0, 1.0, 0.5, 0.125, |x| x.cdf(0.25));
+        test_case(0.0, 1.0, 0.5, 0.5, |x| x.cdf(0.5));
+        test_case(0.0, 1.0, 0.5, 0.875, |x| x.cdf(0.75));
+        test_case(-5.0, 8.0, -3.5, 0.0, |x| x.cdf(-5.1));
+        test_case(-5.0, 8.0, -3.5, 1.0, |x| x.cdf(8.1));
+        test_case(-5.0, 8.0, -3.5, 0.05128205128205128205128, |x| x.cdf(-4.0));
+        test_case(-5.0, 8.0, -3.5, 0.1153846153846153846154, |x| x.cdf(-3.5));
+        test_case(-5.0, 8.0, -3.5, 0.892976588628762541806, |x| x.cdf(4.0));
+        test_case(-5.0, -3.0, -4.0, 0.0, |x| x.cdf(-5.1));
+        test_case(-5.0, -3.0, -4.0, 1.0, |x| x.cdf(-2.9));
+        test_case(-5.0, -3.0, -4.0, 0.125, |x| x.cdf(-4.5));
+        test_case(-5.0, -3.0, -4.0, 0.5, |x| x.cdf(-4.0));
+        test_case(-5.0, -3.0, -4.0, 0.875, |x| x.cdf(-3.5));
     }
 }

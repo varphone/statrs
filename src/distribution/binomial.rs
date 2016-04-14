@@ -72,16 +72,16 @@ impl Univariate for Binomial {
         (1.0 - 2.0 * self.p) / (self.n as f64 * self.p * (1.0 - self.p)).sqrt()
     }
 
-    fn median(&self) -> Option<f64> {
-        Some((self.p * self.n as f64).floor())
+    fn median(&self) -> f64 {
+        (self.p * self.n as f64).floor()
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         if x < 0.0 {
-            return Ok(0.0);
+            return 0.0;
         }
         if x >= self.n as f64 {
-            return Ok(1.0);
+            return 1.0;
         }
         let k = x.floor();
         beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p)
@@ -156,10 +156,8 @@ mod test {
     use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
-    use std::option::Option;
     use distribution::{Univariate, Discrete};
     use prec;
-    use result;
     use super::Binomial;
     
     fn try_create(p: f64, n: i64) -> Binomial {
@@ -193,40 +191,7 @@ mod test {
         let n = try_create(p, n);
         let x = eval(n);
         assert!(prec::almost_eq(expected, x, acc));
-    }
-    
-    fn test_option<F>(p: f64, n: i64, expected: f64, eval: F)
-        where F : Fn(Binomial) -> Option<f64> {
-            
-        let n = try_create(p, n);
-        let x = eval(n);
-        assert!(x.is_some());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);
-    }
-    
-    fn test_result<F>(p: f64, n: i64, expected: f64, eval: F)
-        where F : Fn(Binomial) -> result::Result<f64> {
-        
-        let n = try_create(p, n);
-        let x = eval(n);
-        assert!(x.is_ok());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);
-    }
-    
-    fn test_result_almost<F>(p: f64, n: i64, expected: f64, acc: f64, eval: F)
-        where F : Fn(Binomial) -> result::Result<f64> {
-        
-        let n = try_create(p, n);
-        let x = eval(n);
-        assert!(x.is_ok());
-        
-        let v = x.unwrap();
-        assert!(prec::almost_eq(expected, v, acc));
-    }
+    } 
     
     #[test]
     fn test_create() {
@@ -280,9 +245,9 @@ mod test {
     
     #[test]
     fn test_median() {
-        test_option(0.0, 4, 0.0, |x| x.median());
-        test_option(0.3, 3, 0.0, |x| x.median());
-        test_option(1.0, 2, 2.0, |x| x.median());
+        test_case(0.0, 4, 0.0, |x| x.median());
+        test_case(0.3, 3, 0.0, |x| x.median());
+        test_case(1.0, 2, 2.0, |x| x.median());
     }
     
     #[test]
@@ -356,29 +321,29 @@ mod test {
     
     #[test]
     fn test_cdf() {
-        test_result(0.0, 1, 1.0, |x| x.cdf(0.0));
-        test_result(0.0, 1, 1.0, |x| x.cdf(1.0));
-        test_result(0.0, 3, 1.0, |x| x.cdf(0.0));
-        test_result(0.0, 3, 1.0, |x| x.cdf(1.0));
-        test_result(0.0, 3, 1.0, |x| x.cdf(3.0));
-        test_result(0.0, 10, 1.0, |x| x.cdf(0.0));
-        test_result(0.0, 10, 1.0, |x| x.cdf(1.0));
-        test_result(0.0, 10, 1.0, |x| x.cdf(10.0));
-        test_result_almost(0.3, 1, 0.7, 1e-15, |x| x.cdf(0.0));
-        test_result(0.3, 1, 1.0, |x| x.cdf(1.0));
-        test_result_almost(0.3, 3, 0.343, 1e-14, |x| x.cdf(0.0));
-        test_result_almost(0.3, 3, 0.784, 1e-15, |x| x.cdf(1.0));
-        test_result(0.3, 3, 1.0, |x| x.cdf(3.0));
-        test_result_almost(0.3, 10, 0.0282475249, 1e-16, |x| x.cdf(0.0));
-        test_result_almost(0.3, 10, 0.1493083459, 1e-14, |x| x.cdf(1.0));
-        test_result(0.3, 10, 1.0, |x| x.cdf(10.0));
-        test_result(1.0, 1, 0.0, |x| x.cdf(0.0));
-        test_result(1.0, 1, 1.0, |x| x.cdf(1.0));
-        test_result(1.0, 3, 0.0, |x| x.cdf(0.0));
-        test_result(1.0, 3, 0.0, |x| x.cdf(1.0));
-        test_result(1.0, 3, 1.0, |x| x.cdf(3.0));
-        test_result(1.0, 10, 0.0, |x| x.cdf(0.0));
-        test_result(1.0, 10, 0.0, |x| x.cdf(1.0));
-        test_result(1.0, 10, 1.0, |x| x.cdf(10.0));
+        test_case(0.0, 1, 1.0, |x| x.cdf(0.0));
+        test_case(0.0, 1, 1.0, |x| x.cdf(1.0));
+        test_case(0.0, 3, 1.0, |x| x.cdf(0.0));
+        test_case(0.0, 3, 1.0, |x| x.cdf(1.0));
+        test_case(0.0, 3, 1.0, |x| x.cdf(3.0));
+        test_case(0.0, 10, 1.0, |x| x.cdf(0.0));
+        test_case(0.0, 10, 1.0, |x| x.cdf(1.0));
+        test_case(0.0, 10, 1.0, |x| x.cdf(10.0));
+        test_almost(0.3, 1, 0.7, 1e-15, |x| x.cdf(0.0));
+        test_case(0.3, 1, 1.0, |x| x.cdf(1.0));
+        test_almost(0.3, 3, 0.343, 1e-14, |x| x.cdf(0.0));
+        test_almost(0.3, 3, 0.784, 1e-15, |x| x.cdf(1.0));
+        test_case(0.3, 3, 1.0, |x| x.cdf(3.0));
+        test_almost(0.3, 10, 0.0282475249, 1e-16, |x| x.cdf(0.0));
+        test_almost(0.3, 10, 0.1493083459, 1e-14, |x| x.cdf(1.0));
+        test_case(0.3, 10, 1.0, |x| x.cdf(10.0));
+        test_case(1.0, 1, 0.0, |x| x.cdf(0.0));
+        test_case(1.0, 1, 1.0, |x| x.cdf(1.0));
+        test_case(1.0, 3, 0.0, |x| x.cdf(0.0));
+        test_case(1.0, 3, 0.0, |x| x.cdf(1.0));
+        test_case(1.0, 3, 1.0, |x| x.cdf(3.0));
+        test_case(1.0, 10, 0.0, |x| x.cdf(0.0));
+        test_case(1.0, 10, 0.0, |x| x.cdf(1.0));
+        test_case(1.0, 10, 1.0, |x| x.cdf(10.0));
     }
 }

@@ -1,5 +1,4 @@
 use std::f64;
-use std::option::Option;
 use rand::Rng;
 use distribution::{Gamma, Distribution, Univariate, Continuous};
 use result;
@@ -58,11 +57,11 @@ impl Univariate for ChiSquared {
         self.g.skewness()
     }
 
-    fn median(&self) -> Option<f64> {
-        None
+    fn median(&self) -> f64 {
+        panic!("Unsupported")
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         self.g.cdf(x)
     }
 }

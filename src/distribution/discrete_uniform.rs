@@ -1,5 +1,4 @@
 use std::f64;
-use std::option::Option;
 use rand::Rng;
 use distribution::{Distribution, Univariate, Discrete};
 use error::StatsError;
@@ -53,25 +52,25 @@ impl Univariate for DiscreteUniform {
         0.0
     }
 
-    fn median(&self) -> Option<f64> {
-        Some((self.min + self.max) as f64 / 2.0)
+    fn median(&self) -> f64 {
+        (self.min + self.max) as f64 / 2.0
     }
 
-    fn cdf(&self, x: f64) -> result::Result<f64> {
+    fn cdf(&self, x: f64) -> f64 {
         if x < self.min as f64 {
-            return Ok(0.0);
+            return 0.0;
         }
         if x >= self.max as f64 {
-            return Ok(1.0);
+            return 1.0;
         }
         
         let lower = self.min as f64;
         let upper = self.max as f64;
         let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
         if x > 1.0 {
-            Ok(1.0)
+            1.0
         } else {
-            Ok(ans)
+            ans
         }
     }
 }
@@ -111,9 +110,7 @@ mod test {
     use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
-    use std::option::Option;
     use distribution::{Univariate, Discrete};
-    use result;
     use super::DiscreteUniform;
     
     fn try_create(min: i64, max: i64) -> DiscreteUniform {
@@ -140,28 +137,6 @@ mod test {
         let n = try_create(min, max);
         let x = eval(n);
         assert_eq!(expected, x);
-    }
-    
-    fn test_option<F>(min: i64, max: i64, expected: f64, eval: F)
-        where F : Fn(DiscreteUniform) -> Option<f64> {
-            
-        let n = try_create(min, max);
-        let x = eval(n);
-        assert!(x.is_some());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);
-    }
-    
-    fn test_result<F>(min: i64, max: i64, expected: f64, eval: F)
-        where F : Fn(DiscreteUniform) -> result::Result<f64> {
-        
-        let n = try_create(min, max);
-        let x = eval(n);
-        assert!(x.is_ok());
-        
-        let v = x.unwrap();
-        assert_eq!(expected, v);
     }
     
     #[test]
@@ -220,10 +195,10 @@ mod test {
     
     #[test]
     fn test_median() {
-        test_option(-10, 10, 0.0, |x| x.median());
-        test_option(0, 4, 2.0, |x| x.median());
-        test_option(10, 20, 15.0, |x| x.median());
-        test_option(20, 20, 20.0, |x| x.median());
+        test_case(-10, 10, 0.0, |x| x.median());
+        test_case(0, 4, 2.0, |x| x.median());
+        test_case(10, 20, 15.0, |x| x.median());
+        test_case(20, 20, 20.0, |x| x.median());
     }
     
     #[test]
@@ -254,11 +229,11 @@ mod test {
     
     #[test]
     fn test_cdf() {
-        test_result(-10, 10, 0.2857142857142857142857, |x| x.cdf(-5.0));
-        test_result(-10, 10, 0.5714285714285714285714, |x| x.cdf(1.0));
-        test_result(-10, 10, 1.0, |x| x.cdf(10.0));
-        test_result(-10, -10, 1.0, |x| x.cdf(0.0));
-        test_result(-10, -10, 1.0, |x| x.cdf(-10.0));
-        test_result(-10, -10, 0.0, |x| x.cdf(-11.0));
+        test_case(-10, 10, 0.2857142857142857142857, |x| x.cdf(-5.0));
+        test_case(-10, 10, 0.5714285714285714285714, |x| x.cdf(1.0));
+        test_case(-10, 10, 1.0, |x| x.cdf(10.0));
+        test_case(-10, -10, 1.0, |x| x.cdf(0.0));
+        test_case(-10, -10, 1.0, |x| x.cdf(-10.0));
+        test_case(-10, -10, 0.0, |x| x.cdf(-11.0));
     }
 }

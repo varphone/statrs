@@ -1,32 +1,27 @@
 use std::f64;
-use error::StatsError;
 use function::gamma;
 use prec;
-use result;
 
 /// Computes the natural logarithm
 /// of the Euler Beta function
 /// where a is the first Beta parameter
 /// and b is the second Beta parameter
 /// and a > 0, b > 0
-pub fn ln_beta(a: f64, b: f64) -> result::Result<f64> {
+pub fn ln_beta(a: f64, b: f64) -> f64 {
     if a <= 0.0 {
-        return Err(StatsError::ArgMustBePositive("a"));
+        panic!("Argument a must be positive");
     }
     if b <= 0.0 {
-        return Err(StatsError::ArgMustBePositive("b"));
+        panic!("Argument b must be positive");
     }
-    Ok(gamma::ln_gamma(a) + gamma::ln_gamma(b) - gamma::ln_gamma(a + b))
+    gamma::ln_gamma(a) + gamma::ln_gamma(b) - gamma::ln_gamma(a + b)
 }
 
 /// Computes the Euler Beta function
 /// where a is the first Beta parameter
 /// and b is the second Beta parameter
-pub fn beta(a: f64, b: f64) -> result::Result<f64> {
-    match ln_beta(a, b) {
-        Ok(v) => Ok(v.exp()),
-        Err(e) => Err(e),
-    }
+pub fn beta(a: f64, b: f64) -> f64 {
+    ln_beta(a, b).exp()
 }
 
 /// Computes the regularized lower incomplete beta function
@@ -34,15 +29,15 @@ pub fn beta(a: f64, b: f64) -> result::Result<f64> {
 /// a > 0, b > 0, 1 >= x > 0 where a is the first Beta parameter,
 /// b is the second Beta parameter, and x is the upper limit of the
 /// integral
-pub fn beta_reg(a: f64, b: f64, x: f64) -> result::Result<f64> {
+pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
     if a < 0.0 {
-        return Err(StatsError::ArgNotNegative("a"));
+        panic!("Argument a must be non-negative");
     }
     if b < 0.0 {
-        return Err(StatsError::ArgNotNegative("b"));
+        panic!("Argument b must be non-negative");
     }
     if x < 0.0 || x > 1.0 {
-        return Err(StatsError::ArgIntervalIncl("x"));
+        panic!("Argument x must be in [0, 1]");
     }
 
     let bt = match x {
@@ -115,16 +110,16 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> result::Result<f64> {
 
         if (del - 1.0).abs() <= eps {
             return if symm_transform {
-                Ok(1.0 - bt * h / a)
+                1.0 - bt * h / a
             } else {
-                Ok(bt * h / a)
+                bt * h / a
             };
         }
     }
 
     if symm_transform {
-        Ok(1.0 - bt * h / a)
+        1.0 - bt * h / a
     } else {
-        Ok(bt * h / a)
+        bt * h / a
     }
 }
