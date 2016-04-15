@@ -1,8 +1,8 @@
 use std::f64;
 use consts;
+use error::StatsError;
 use prec;
 use result::Result;
-use error::StatsError;
 
 /// The order of approximation for the gamma_ln function
 const GAMMA_N: usize = 11;
@@ -254,7 +254,7 @@ pub fn gamma_lr(a: f64, x: f64) -> Result<f64> {
 /// the gamma function. The implementation is based on
 /// "Algorithm AS 103", Jose Bernardo, Applied Statistics, Volume 25, NUmber 3
 /// 1976, pages 315 - 317
-pub fn digamma(x: f64) -> f64 {
+pub fn digamma(x: f64) -> Result<f64> {
     let c = 12.0;
     let d1 = -0.57721566490153286;
     let d2 = 1.6449340668482264365;
@@ -265,17 +265,18 @@ pub fn digamma(x: f64) -> f64 {
     let s6 = 1.0 / 240.0;
     let s7 = 1.0 / 132.0;
 
-    if x == f64::NEG_INFINITY || x.is_nan() {
-        return f64::NAN;
+    if x == f64::NEG_INFINITY {
+        return Err(StatsError::ArgIntervalExclMin("x", f64::NEG_INFINITY, f64::INFINITY))
     }
     if x <= 0.0 && x.floor() == x {
-        return f64::NEG_INFINITY;
+        return Ok(f64::NEG_INFINITY);
     }
     if x < 0.0 {
-        return digamma(1.0 - x) + f64::consts::PI / (-f64::consts::PI * x).tan();
+        return digamma(1.0 - x)
+            .and_then(|v| Ok(v + f64::consts::PI / (-f64::consts::PI * x).tan()));
     }
     if x <= s {
-        return d1 - 1.0 / x + d2 * x;
+        return Ok(d1 - 1.0 / x + d2 * x);
     }
 
     let mut result = 0.0;
@@ -293,5 +294,5 @@ pub fn digamma(x: f64) -> f64 {
         result -= r * (s3 - (r * (s4 - (r * (s5 - (r * (s6 - (r * s7))))))));
     }
 
-    result
+    Ok(result)
 }

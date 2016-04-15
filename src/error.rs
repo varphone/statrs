@@ -8,6 +8,9 @@ pub enum StatsError {
     ArgMustBePositive(&'static str),
     ArgNotNegative(&'static str),
     ArgIntervalIncl(&'static str, f64, f64),
+    ArgIntervalExcl(&'static str, f64, f64),
+    ArgIntervalExclMin(&'static str, f64, f64),
+    ArgIntervalExclMax(&'static str, f64, f64),
 }
 
 impl Error for StatsError {
@@ -23,6 +26,9 @@ impl fmt::Display for StatsError{
             StatsError::ArgMustBePositive(s) => write!(f, "Argument {} must be positive", s),
             StatsError::ArgNotNegative(s) => write!(f, "Argument {} must be non-negative", s),
             StatsError::ArgIntervalIncl(s, min, max) => write!(f, "Argument {} not within interval [{}, {}]", s, min, max),
+            StatsError::ArgIntervalExcl(s, min, max) => write!(f, "Argument {} not within interval ({}, {})", s, min, max),
+            StatsError::ArgIntervalExclMin(s, min, max) => write!(f, "Argument {} not within interval ({}, {}]", s, min, max),
+            StatsError::ArgIntervalExclMax(s, min, max) => write!(f, "Argument {} not within interval [{}, {})", s, min, max),
         }
     }
 }
@@ -34,6 +40,9 @@ impl fmt::Debug for StatsError {
             StatsError::ArgMustBePositive(s) => write!(f, "Argument {} must be positive", s),
             StatsError::ArgNotNegative(s) => write!(f, "Argument {} must be non-negative", s),
             StatsError::ArgIntervalIncl(s, min, max) => write!(f, "Argument {} not within interval [{}, {}]", s, min, max),
+            StatsError::ArgIntervalExcl(s, min, max) => write!(f, "Argument {} not within interval ({}, {})", s, min, max),
+            StatsError::ArgIntervalExclMin(s, min, max) => write!(f, "Argument {} not within interval ({}, {}]", s, min, max),
+            StatsError::ArgIntervalExclMax(s, min, max) => write!(f, "Argument {} not within interval [{}, {})", s, min, max),
         }
     }
 }

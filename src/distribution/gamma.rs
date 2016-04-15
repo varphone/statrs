@@ -66,7 +66,7 @@ impl Univariate for Gamma {
             (_, f64::INFINITY) => 0.0,
             (_, _) => {
                 self.a - self.b.ln() + gamma::ln_gamma(self.a) +
-                (1.0 - self.a) * gamma::digamma(self.a)
+                (1.0 - self.a) * gamma::digamma(self.a).unwrap()
             }
         }
     }

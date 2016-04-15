@@ -5,12 +5,10 @@ use function::evaluate;
 /// erf returns 1 if x is positive infinity
 /// and -1 if x is negative infinity
 pub fn erf(x: f64) -> f64 {
-    let is_nan = x.is_nan();
     match x {
         0.0 => 0.0,
         f64::INFINITY => 1.0,
         f64::NEG_INFINITY => -1.0,
-        _ if is_nan => f64::NAN,
         _ => erf_impl(x, false),
     }
 }
@@ -38,12 +36,10 @@ pub fn erf_inv(x: f64) -> f64 {
 /// at x. erfc returns 0 if x is positive infinity and
 /// 2 if x is negative infinity
 pub fn erfc(x: f64) -> f64 {
-    let is_nan = x.is_nan();
     match x {
         0.0 => 1.0,
         f64::INFINITY => 0.0,
         f64::NEG_INFINITY => 2.0,
-        _ if is_nan => f64::NAN,
         _ => erf_impl(x, true),
     }
 }
