@@ -1,6 +1,6 @@
 use rand::Rng;
-use distribution::{Binomial, Distribution, Univariate, Discrete};
 use result;
+use super::{Binomial, Distribution, Univariate, Discrete};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Bernoulli {

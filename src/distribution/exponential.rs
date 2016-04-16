@@ -1,9 +1,9 @@
 use std::f64;
 use rand::Rng;
 use consts;
-use distribution::{Distribution, Univariate, Continuous};
 use error::StatsError;
 use result;
+use super::{Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Exponential {

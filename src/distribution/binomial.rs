@@ -1,10 +1,10 @@
 use std::f64;
 use rand::Rng;
-use distribution::{Distribution, Univariate, Discrete};
 use error::StatsError;
 use function::beta;
 use function::factorial;
 use result;
+use super::{Distribution, Univariate, Discrete};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Binomial {

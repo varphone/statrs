@@ -1,7 +1,7 @@
 use std::f64;
 use rand::Rng;
-use distribution::{Gamma, Distribution, Univariate, Continuous};
 use result;
+use super::{Gamma, Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ChiSquared {

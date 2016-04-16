@@ -1,10 +1,10 @@
 use std::f64;
 use rand::Rng;
-use distribution::{Distribution, Univariate, Continuous};
-use distribution::normal;
 use error::StatsError;
 use function::gamma;
 use result;
+use super::{Distribution, Univariate, Continuous};
+use super::normal;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Gamma {

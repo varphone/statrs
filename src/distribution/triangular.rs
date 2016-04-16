@@ -1,8 +1,8 @@
 use std::f64::consts;
 use rand::Rng;
-use distribution::{Distribution, Univariate, Continuous};
 use error::StatsError;
 use result;
+use super::{Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Triangular {

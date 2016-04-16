@@ -1,11 +1,11 @@
 use std::f64;
 use rand::Rng;
 use consts;
-use distribution::{Distribution, Univariate, Continuous};
 use error::StatsError;
 use function::erf;
-use super::normal;
 use result;
+use super::{Distribution, Univariate, Continuous};
+use super::normal;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LogNormal {

@@ -1,9 +1,10 @@
 use std::f64;
 use rand::Rng;
 use consts;
-use distribution::{Gamma, Distribution, Univariate, Continuous};
 use function;
 use result;
+use super::{Gamma, Distribution, Univariate, Continuous};
+use super::normal;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Chi {
@@ -26,7 +27,9 @@ impl Chi {
 
 impl Distribution for Chi {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        0.0
+        (0.0..self.k).fold(0.0, |acc, _| {
+            acc + normal::sample_unchecked(r, 0.0, 1.0).powf(2.0)
+        }).sqrt()
     }
 }
 
@@ -67,7 +70,10 @@ impl Univariate for Chi {
 
 impl Continuous for Chi {
     fn mode(&self) -> f64 {
-        0.0
+        if self.k < 1.0 {
+            panic!("Cannot calculate Chi distribution mode for freedom < 1");
+        }
+        (self.k - 1.0).sqrt()
     }
 
     fn min(&self) -> f64 {
@@ -75,14 +81,27 @@ impl Continuous for Chi {
     }
 
     fn max(&self) -> f64 {
-        0.0
+        f64::INFINITY
     }
 
     fn pdf(&self, x: f64) -> f64 {
-       0.0
+       match (self.k, x) {
+           (f64::INFINITY, _) | (_, f64::INFINITY) | (_, 0.0) => 0.0,
+           (_, _) if self.k > 160.0 => self.ln_pdf(x),
+           (_, _) => {
+               (2.0f64).powf(1.0 - self.k / 2.0) * x.powf(self.k - 1.0) 
+               * (-x * x / 2.0).exp() / function::gamma(self.k / 2.0)
+           }
+       }
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
-        0.0
+        match (self.k, x) {
+            (f64::INFINITY, _) | (_, f64::INFINITY) | (_, 0.0) => f64::NEG_INFINITY,
+            (_, _) => {
+                (1.0 - self.k / 2.0) * (2.0f64).ln() + ((self.k - 1.0) * x.ln()) 
+                - x * x / 2.0 - function::ln_gamma(self.k / 2.0)
+            }
+        }
     }
 }
