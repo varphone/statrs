@@ -82,7 +82,7 @@ impl Discrete for Poisson {
         if x < 0 {
             panic!("{}", StatsError::ArgNotNegative("x"));
         }
-        (-self.lambda + x as f64 * self.lambda.ln()).exp() - factorial::ln_factorial(x as u64)
+        (-self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)).exp()
     }
 
     fn ln_pmf(&self, x: i64) -> f64 {
