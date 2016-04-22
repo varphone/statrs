@@ -1,7 +1,7 @@
 use std::f64;
 use rand::Rng;
-use function;
-use result;
+use function::gamma;
+use result::Result;
 use super::{Gamma, Distribution, Univariate, Continuous};
 use super::normal;
 
@@ -11,7 +11,7 @@ pub struct Chi {
 }
 
 impl Chi {
-    pub fn new(freedom: f64) -> result::Result<Chi> {
+    pub fn new(freedom: f64) -> Result<Chi> {
         if freedom.is_nan() || freedom <= 0.0 {
             Err(StatsError::BadParams)
         } else {
@@ -34,7 +34,7 @@ impl Distribution for Chi {
 
 impl Univariate for Chi {
     fn mean(&self) -> f64 {
-        f64::consts::SQRT_2 * functions::gamma((self.k + 1.0) / 2.0) / functions::gamma(self.k / 2.0)
+        f64::consts::SQRT_2 * gamma::gamma((self.k + 1.0) / 2.0) / gamma::gamma(self.k / 2.0)
     }
 
     fn variance(&self) -> f64 {
@@ -46,7 +46,7 @@ impl Univariate for Chi {
     }
 
     fn entropy(&self) -> f64 {
-        functions::ln_gamma(self.k / 2.0) + (self.k - (2.0f64).ln() - (self.k - 1.0) * functions::digamma(self.k / 2.0)) / 2.0
+        gamma::ln_gamma(self.k / 2.0) + (self.k - (2.0f64).ln() - (self.k - 1.0) * gamma::digamma(self.k / 2.0)) / 2.0
     }
 
     fn skewness(&self) -> f64 {
@@ -62,7 +62,7 @@ impl Univariate for Chi {
         if x == f64::INFINITY || self.k === f64::INFINITY {
             1.0
         } else {
-            functions::gamma_lr(self.k / 2.0, x * x / 2.0)
+            gamma::gamma_lr(self.k / 2.0, x * x / 2.0)
         }
     }
 }
@@ -89,7 +89,7 @@ impl Continuous for Chi {
            (_, _) if self.k > 160.0 => self.ln_pdf(x),
            (_, _) => {
                (2.0f64).powf(1.0 - self.k / 2.0) * x.powf(self.k - 1.0) 
-               * (-x * x / 2.0).exp() / function::gamma(self.k / 2.0)
+               * (-x * x / 2.0).exp() / gamma::gamma(self.k / 2.0)
            }
        }
     }
@@ -99,7 +99,7 @@ impl Continuous for Chi {
             (f64::INFINITY, _) | (_, f64::INFINITY) | (_, 0.0) => f64::NEG_INFINITY,
             (_, _) => {
                 (1.0 - self.k / 2.0) * (2.0f64).ln() + ((self.k - 1.0) * x.ln()) 
-                - x * x / 2.0 - function::ln_gamma(self.k / 2.0)
+                - x * x / 2.0 - gamma::ln_gamma(self.k / 2.0)
             }
         }
     }

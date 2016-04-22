@@ -3,7 +3,7 @@ use rand::Rng;
 use consts;
 use error::StatsError;
 use function::erf;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -13,7 +13,7 @@ pub struct Normal {
 }
 
 impl Normal {
-    pub fn new(mean: f64, std_dev: f64) -> result::Result<Normal> {
+    pub fn new(mean: f64, std_dev: f64) -> Result<Normal> {
         if mean.is_nan() || std_dev.is_nan() || std_dev <= 0.0 {
             Err(StatsError::BadParams)
         } else {

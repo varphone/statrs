@@ -1,7 +1,7 @@
 use std::f64;
 use rand::Rng;
 use error::StatsError;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -11,7 +11,7 @@ pub struct Uniform {
 }
 
 impl Uniform {
-    pub fn new(min: f64, max: f64) -> result::Result<Uniform> {
+    pub fn new(min: f64, max: f64) -> Result<Uniform> {
         if min > max || min.is_nan() || max.is_nan() {
             Err(StatsError::BadParams)
         } else {

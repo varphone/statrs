@@ -3,7 +3,7 @@ use rand::Rng;
 use error::StatsError;
 use function::beta;
 use function::factorial;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Discrete};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -13,7 +13,7 @@ pub struct Binomial {
 }
 
 impl Binomial {
-    pub fn new(p: f64, n: i64) -> result::Result<Binomial> {
+    pub fn new(p: f64, n: i64) -> Result<Binomial> {
         if p.is_nan() || p < 0.0 || p > 1.0 || n < 0 {
             Err(StatsError::BadParams)
         } else {

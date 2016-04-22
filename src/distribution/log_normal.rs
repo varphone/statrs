@@ -3,7 +3,7 @@ use rand::Rng;
 use consts;
 use error::StatsError;
 use function::erf;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Continuous};
 use super::normal;
 
@@ -14,7 +14,7 @@ pub struct LogNormal {
 }
 
 impl LogNormal {
-    pub fn new(mean: f64, std_dev: f64) -> result::Result<LogNormal> {
+    pub fn new(mean: f64, std_dev: f64) -> Result<LogNormal> {
         if mean.is_nan() || std_dev.is_nan() || std_dev <= 0.0 {
             Err(StatsError::BadParams)
         } else {

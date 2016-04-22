@@ -1,7 +1,7 @@
 use std::f64;
 use rand::Rng;
 use error::StatsError;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -12,7 +12,7 @@ pub struct Triangular {
 }
 
 impl Triangular {
-    pub fn new(min: f64, max: f64, mode: f64) -> result::Result<Triangular> {
+    pub fn new(min: f64, max: f64, mode: f64) -> Result<Triangular> {
         if min.is_infinite() || max.is_infinite() || mode.is_infinite() {
             return Err(StatsError::BadParams);
         }

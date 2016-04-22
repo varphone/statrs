@@ -4,7 +4,7 @@ use rand::Rng;
 use error::StatsError;
 use function::factorial;
 use function::gamma;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Discrete};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -13,7 +13,7 @@ pub struct Poisson {
 }
 
 impl Poisson {
-    pub fn new(lambda: f64) -> result::Result<Poisson> {
+    pub fn new(lambda: f64) -> Result<Poisson> {
         if lambda.is_nan() || lambda < 0.0 {
             Err(StatsError::BadParams)
         } else {

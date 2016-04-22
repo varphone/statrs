@@ -1,8 +1,7 @@
 use std::f64;
 use rand::Rng;
-use consts;
 use error::StatsError;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -11,7 +10,7 @@ pub struct Exponential {
 }
 
 impl Exponential {
-    pub fn new(rate: f64) -> result::Result<Exponential> {
+    pub fn new(rate: f64) -> Result<Exponential> {
         if rate.is_nan() || rate <= 0.0 {
             Err(StatsError::BadParams);
         } else {

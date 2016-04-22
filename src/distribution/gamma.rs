@@ -2,7 +2,7 @@ use std::f64;
 use rand::Rng;
 use error::StatsError;
 use function::gamma;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Continuous};
 use super::normal;
 
@@ -13,7 +13,7 @@ pub struct Gamma {
 }
 
 impl Gamma {
-    pub fn new(shape: f64, rate: f64) -> result::Result<Gamma> {
+    pub fn new(shape: f64, rate: f64) -> Result<Gamma> {
         let is_nan = shape.is_nan() || rate.is_nan();
         match (shape, rate, is_nan) {
             (_, _, true) => Err(StatsError::BadParams),

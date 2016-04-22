@@ -1,5 +1,5 @@
 use rand::Rng;
-use result;
+use result::Result;
 use super::{Binomial, Distribution, Univariate, Discrete};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -8,7 +8,7 @@ pub struct Bernoulli {
 }
 
 impl Bernoulli {
-    pub fn new(p: f64) -> result::Result<Bernoulli> {
+    pub fn new(p: f64) -> Result<Bernoulli> {
         match Binomial::new(p, 1) {
             Ok(b) => Ok(Bernoulli{b: b}),
             Err(e) => Err(e)

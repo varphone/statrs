@@ -1,7 +1,7 @@
 use std::f64;
 use rand::Rng;
 use error::StatsError;
-use result;
+use result::Result;
 use super::{Distribution, Univariate, Discrete};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -11,7 +11,7 @@ pub struct DiscreteUniform {
 } 
 
 impl DiscreteUniform {
-    pub fn new(min: i64, max: i64) -> result::Result<DiscreteUniform> {
+    pub fn new(min: i64, max: i64) -> Result<DiscreteUniform> {
         if max < min {
             Err(StatsError::BadParams)
         } else {

@@ -1,6 +1,6 @@
 use std::f64;
 use rand::Rng;
-use result;
+use result::Result;
 use super::{Gamma, Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -10,7 +10,7 @@ pub struct ChiSquared {
 }
 
 impl ChiSquared {
-    pub fn new(freedom: f64) -> result::Result<ChiSquared> {
+    pub fn new(freedom: f64) -> Result<ChiSquared> {
         match Gamma::new(freedom / 2.0, 0.5) {
             Ok(g) => Ok(ChiSquared{k: freedom, g: g}),
             Err(e) => Err(e)
