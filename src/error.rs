@@ -3,6 +3,7 @@ use std::fmt;
 
 /// Enumeration of possible errors thrown
 /// within the statrs library
+#[derive(Debug)]
 pub enum StatsError {
     BadParams,
     ArgMustBePositive(&'static str),
@@ -20,20 +21,6 @@ impl Error for StatsError {
 }
 
 impl fmt::Display for StatsError{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            StatsError::BadParams => write!(f, "Bad distribution parameters"),
-            StatsError::ArgMustBePositive(s) => write!(f, "Argument {} must be positive", s),
-            StatsError::ArgNotNegative(s) => write!(f, "Argument {} must be non-negative", s),
-            StatsError::ArgIntervalIncl(s, min, max) => write!(f, "Argument {} not within interval [{}, {}]", s, min, max),
-            StatsError::ArgIntervalExcl(s, min, max) => write!(f, "Argument {} not within interval ({}, {})", s, min, max),
-            StatsError::ArgIntervalExclMin(s, min, max) => write!(f, "Argument {} not within interval ({}, {}]", s, min, max),
-            StatsError::ArgIntervalExclMax(s, min, max) => write!(f, "Argument {} not within interval [{}, {})", s, min, max),
-        }
-    }
-}
-
-impl fmt::Debug for StatsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             StatsError::BadParams => write!(f, "Bad distribution parameters"),
