@@ -28,7 +28,7 @@ impl Poisson {
 
 impl Distribution for Poisson {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        0.0
+        sample_unchecked(r, self.lambda)
     }
 }
 
@@ -90,5 +90,46 @@ impl Discrete for Poisson {
             panic!("{}", StatsError::ArgNotNegative("x"));
         }
         -self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)
+    }
+}
+
+/// Generates one sample from the Poisson distribution either by
+/// Knuth's method if lambda < 30.0 or Rejection method PA by
+/// A. C. Atkinson from the Journal of the Royal Statistical Society
+/// Series C (Applied Statistics) Vol. 28 No. 1. (1979) pp. 29 - 35
+/// otherwise
+fn sample_unchecked<R: Rng>(r: &mut R, lambda: f64) -> f64 {
+    if lambda < 30.0 {
+        let limit = (-lambda).exp();
+        let mut count = 0.0;
+        let mut product = r.next_f64();
+        while product >= limit {
+            count += 1.0;
+            product *= r.next_f64();
+        }
+        count
+    } else {
+        let c = 0.767 - 3.36 / lambda;
+        let beta = f64::consts::PI / (3.0 * lambda).sqrt();
+        let alpha = beta * lambda;
+        let k = c.ln() - lambda - beta.ln();
+        
+        loop {
+            let u = r.next_f64();
+            let x = (alpha - ((1.0 - u) / u).ln()) / beta;
+            let n = (x + 0.5).floor();
+            if n < 0.0 {
+                continue;
+            }
+            
+            let v = r.next_f64();
+            let y = alpha - beta * x;
+            let temp = 1.0 + y.exp();
+            let lhs = y + (v / (temp * temp)).ln();
+            let rhs = k + n * lambda.ln() - factorial::ln_factorial(n as u64);
+            if lhs <= rhs {
+                return n;
+            }
+        }
     }
 }
