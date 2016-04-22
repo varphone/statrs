@@ -7,6 +7,7 @@ pub use self::discrete_uniform::DiscreteUniform;
 pub use self::gamma::Gamma;
 pub use self::log_normal::LogNormal;
 pub use self::normal::Normal;
+pub use self::poisson::Poisson;
 pub use self::triangular::Triangular;
 pub use self::uniform::Uniform;
 
@@ -17,6 +18,7 @@ mod discrete_uniform;
 mod gamma;
 mod log_normal;
 mod normal;
+mod poisson;
 mod triangular;
 mod uniform;
 

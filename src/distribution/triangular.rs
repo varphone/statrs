@@ -1,4 +1,4 @@
-use std::f64::consts;
+use std::f64;
 use rand::Rng;
 use error::StatsError;
 use result;
@@ -75,7 +75,7 @@ impl Univariate for Triangular {
         let a = self.min;
         let b = self.max;
         let c = self.mode;
-        let q = consts::SQRT_2 * (a + b - 2.0 * c) * (2.0 * a - b - c) * (a - 2.0 * b + c);
+        let q = f64::consts::SQRT_2 * (a + b - 2.0 * c) * (2.0 * a - b - c) * (a - 2.0 * b + c);
         let d = 5.0 * (a * a + b * b + c * c - a * b - a * c - b * c).powf(3.0 / 2.0);
         q / d
     }

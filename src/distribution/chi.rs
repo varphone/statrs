@@ -1,6 +1,5 @@
 use std::f64;
 use rand::Rng;
-use consts;
 use function;
 use result;
 use super::{Gamma, Distribution, Univariate, Continuous};
@@ -35,7 +34,7 @@ impl Distribution for Chi {
 
 impl Univariate for Chi {
     fn mean(&self) -> f64 {
-        consts::SQRT_2 * functions::gamma((self.k + 1.0) / 2.0) / functions::gamma(self.k / 2.0)
+        f64::consts::SQRT_2 * functions::gamma((self.k + 1.0) / 2.0) / functions::gamma(self.k / 2.0)
     }
 
     fn variance(&self) -> f64 {

@@ -52,7 +52,7 @@ impl Univariate for Exponential {
     }
 
     fn median(&self) -> f64 {
-        consts::LN_2 / self.rate
+        f64::consts::LN_2 / self.rate
     }
 
     fn cdf(&self, x: f64) -> f64 {
