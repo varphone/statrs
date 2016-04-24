@@ -79,7 +79,7 @@ pub fn gamma(x: f64) -> f64 {
 pub fn gamma_ui(a: f64, x: f64) -> Result<f64> {
     match gamma_ur(a, x) {
         Ok(v) => Ok(v * gamma(a)),
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
 }
 
@@ -90,7 +90,7 @@ pub fn gamma_ui(a: f64, x: f64) -> Result<f64> {
 pub fn gamma_li(a: f64, x: f64) -> Result<f64> {
     match gamma_lr(a, x) {
         Ok(v) => Ok(v * gamma(a)),
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
 }
 
@@ -106,8 +106,8 @@ pub fn gamma_ur(a: f64, x: f64) -> Result<f64> {
     if x < 1.0 || x <= a {
         return match gamma_lr(a, x) {
             Ok(v) => Ok(1.0 - v),
-            Err(e) => Err(e)
-        }
+            Err(e) => Err(e),
+        };
     }
 
     let mut ax = a * x.ln() - x - ln_gamma(a);
@@ -266,14 +266,14 @@ pub fn digamma(x: f64) -> Result<f64> {
     let s7 = 1.0 / 132.0;
 
     if x == f64::NEG_INFINITY {
-        return Err(StatsError::ArgIntervalExclMin("x", f64::NEG_INFINITY, f64::INFINITY))
+        return Err(StatsError::ArgIntervalExclMin("x", f64::NEG_INFINITY, f64::INFINITY));
     }
     if x <= 0.0 && x.floor() == x {
         return Ok(f64::NEG_INFINITY);
     }
     if x < 0.0 {
         return digamma(1.0 - x)
-            .and_then(|v| Ok(v + f64::consts::PI / (-f64::consts::PI * x).tan()));
+                   .and_then(|v| Ok(v + f64::consts::PI / (-f64::consts::PI * x).tan()));
     }
     if x <= s {
         return Ok(d1 - 1.0 / x + d2 * x);

@@ -57,7 +57,7 @@ impl Univariate for Uniform {
     fn cdf(&self, x: f64) -> f64 {
         if x <= self.min {
             return 0.0;
-        } 
+        }
         if x >= self.max {
             return 1.0;
         }
@@ -118,18 +118,20 @@ mod test {
         let n = Uniform::new(min, max);
         assert!(n.is_err());
     }
-    
+
     fn test_case<F>(min: f64, max: f64, expected: f64, eval: F)
-        where F : Fn(Uniform) -> f64 {  
-                
+        where F: Fn(Uniform) -> f64
+    {
+
         let n = try_create(min, max);
         let x = eval(n);
         assert_eq!(expected, x);
     }
-    
+
     fn test_almost<F>(min: f64, max: f64, expected: f64, acc: f64, eval: F)
-        where F : Fn(Uniform) -> f64 {
-            
+        where F: Fn(Uniform) -> f64
+    {
+
         let n = try_create(min, max);
         let x = eval(n);
         assert!(prec::almost_eq(expected, x, acc));
@@ -152,22 +154,22 @@ mod test {
         bad_create_case(f64::NAN, f64::NAN);
         bad_create_case(1.0, 0.0);
     }
-    
+
     #[test]
     fn test_variance() {
-        test_case(-0.0, 2.0, 1.0/3.0, |x| x.variance());
-        test_case(0.0, 2.0, 1.0/3.0, |x| x.variance());
+        test_case(-0.0, 2.0, 1.0 / 3.0, |x| x.variance());
+        test_case(0.0, 2.0, 1.0 / 3.0, |x| x.variance());
         test_almost(0.1, 4.0, 1.2675, 1e-15, |x| x.variance());
-        test_case(10.0, 11.0, 1.0/12.0, |x| x.variance());
+        test_case(10.0, 11.0, 1.0 / 12.0, |x| x.variance());
         test_case(0.0, f64::INFINITY, f64::INFINITY, |x| x.variance());
     }
-    
+
     #[test]
     fn test_std_dev() {
-        test_case(-0.0, 2.0, (1f64/3.0).sqrt(), |x| x.std_dev());
-        test_case(0.0, 2.0, (1f64/3.0).sqrt(), |x| x.std_dev());
+        test_case(-0.0, 2.0, (1f64 / 3.0).sqrt(), |x| x.std_dev());
+        test_case(0.0, 2.0, (1f64 / 3.0).sqrt(), |x| x.std_dev());
         test_almost(0.1, 4.0, (1.2675f64).sqrt(), 1e-15, |x| x.std_dev());
-        test_case(10.0, 11.0, (1f64/12.0).sqrt(), |x| x.std_dev());
+        test_case(10.0, 11.0, (1f64 / 12.0).sqrt(), |x| x.std_dev());
         test_case(0.0, f64::INFINITY, f64::INFINITY, |x| x.std_dev());
     }
 
@@ -213,7 +215,7 @@ mod test {
 
     #[test]
     fn test_pdf() {
-        test_case(0.0, 0.0, 0.0, |x| x.pdf(-5.0,));
+        test_case(0.0, 0.0, 0.0, |x| x.pdf(-5.0));
         test_case(0.0, 0.0, f64::INFINITY, |x| x.pdf(0.0));
         test_case(0.0, 0.0, 0.0, |x| x.pdf(5.0));
         test_case(0.0, 0.1, 0.0, |x| x.pdf(-5.0));
@@ -256,7 +258,10 @@ mod test {
         test_case(-5.0, 100.0, f64::NEG_INFINITY, |x| x.ln_pdf(101.0));
         test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(-5.0));
         test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(10.0));
-        test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
+        test_case(0.0,
+                  f64::INFINITY,
+                  f64::NEG_INFINITY,
+                  |x| x.ln_pdf(f64::INFINITY));
     }
 
     #[test]

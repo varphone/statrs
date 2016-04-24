@@ -25,7 +25,7 @@ pub fn ln_beta(a: f64, b: f64) -> Result<f64> {
 pub fn beta(a: f64, b: f64) -> Result<f64> {
     match ln_beta(a, b) {
         Ok(v) => Ok(v.exp()),
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
 }
 

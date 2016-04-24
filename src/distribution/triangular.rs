@@ -172,18 +172,20 @@ mod test {
         let n = Triangular::new(min, max, mode);
         assert!(n.is_err());
     }
-    
+
     fn test_case<F>(min: f64, max: f64, mode: f64, expected: f64, eval: F)
-        where F : Fn(Triangular) -> f64 {  
-                
+        where F: Fn(Triangular) -> f64
+    {
+
         let n = try_create(min, max, mode);
         let x = eval(n);
         assert_eq!(expected, x);
     }
-    
+
     fn test_almost<F>(min: f64, max: f64, mode: f64, expected: f64, acc: f64, eval: F)
-        where F : Fn(Triangular) -> f64 {
-            
+        where F: Fn(Triangular) -> f64
+    {
+
         let n = try_create(min, max, mode);
         let x = eval(n);
         assert!(prec::almost_eq(expected, x, acc));
@@ -214,31 +216,45 @@ mod test {
         bad_create_case(f64::NEG_INFINITY, 1.0, 0.5);
         bad_create_case(0.0, f64::INFINITY, 0.5);
     }
-    
+
     #[test]
     fn test_variance() {
-        test_case(0.0, 1.0, 0.5, 0.75/18.0, |x| x.variance());
-        test_case(0.0, 1.0, 0.75, 0.8125/18.0, |x| x.variance());
-        test_case(-5.0, 8.0, -3.5, 151.75/18.0, |x| x.variance());
-        test_case(-5.0, 8.0, 5.0, 139.0/18.0, |x| x.variance());
-        test_case(-5.0, -3.0, -4.0, 3.0/18.0, |x| x.variance());
-        test_case(15.0, 134.0, 21.0, 13483.0/18.0, |x| x.variance());
+        test_case(0.0, 1.0, 0.5, 0.75 / 18.0, |x| x.variance());
+        test_case(0.0, 1.0, 0.75, 0.8125 / 18.0, |x| x.variance());
+        test_case(-5.0, 8.0, -3.5, 151.75 / 18.0, |x| x.variance());
+        test_case(-5.0, 8.0, 5.0, 139.0 / 18.0, |x| x.variance());
+        test_case(-5.0, -3.0, -4.0, 3.0 / 18.0, |x| x.variance());
+        test_case(15.0, 134.0, 21.0, 13483.0 / 18.0, |x| x.variance());
     }
-    
+
     #[test]
     fn test_std_dev() {
-        test_case(0.0, 1.0, 0.5, (0.75f64/18.0).sqrt(), |x| x.std_dev());
-        test_case(0.0, 1.0, 0.75, (0.8125f64/18.0).sqrt(), |x| x.std_dev());
-        test_case(-5.0, 8.0, -3.5, (151.75f64/18.0).sqrt(), |x| x.std_dev());
-        test_case(-5.0, 8.0, 5.0, (139.0f64/18.0).sqrt(), |x| x.std_dev());
-        test_case(-5.0, -3.0, -4.0, (3.0f64/18.0).sqrt(), |x| x.std_dev());
-        test_case(15.0, 134.0, 21.0, (13483.0f64/18.0).sqrt(), |x| x.std_dev());
+        test_case(0.0, 1.0, 0.5, (0.75f64 / 18.0).sqrt(), |x| x.std_dev());
+        test_case(0.0, 1.0, 0.75, (0.8125f64 / 18.0).sqrt(), |x| x.std_dev());
+        test_case(-5.0, 8.0, -3.5, (151.75f64 / 18.0).sqrt(), |x| x.std_dev());
+        test_case(-5.0, 8.0, 5.0, (139.0f64 / 18.0).sqrt(), |x| x.std_dev());
+        test_case(-5.0, -3.0, -4.0, (3.0f64 / 18.0).sqrt(), |x| x.std_dev());
+        test_case(15.0,
+                  134.0,
+                  21.0,
+                  (13483.0f64 / 18.0).sqrt(),
+                  |x| x.std_dev());
     }
 
     #[test]
     fn test_entropy() {
-        test_almost(0.0, 1.0, 0.5, -0.1931471805599453094172, 1e-16, |x| x.entropy());
-        test_almost(0.0, 1.0, 0.75, -0.1931471805599453094172, 1e-16, |x| x.entropy());
+        test_almost(0.0,
+                    1.0,
+                    0.5,
+                    -0.1931471805599453094172,
+                    1e-16,
+                    |x| x.entropy());
+        test_almost(0.0,
+                    1.0,
+                    0.75,
+                    -0.1931471805599453094172,
+                    1e-16,
+                    |x| x.entropy());
         test_case(-5.0, 8.0, -3.5, 2.371802176901591426636, |x| x.entropy());
         test_case(-5.0, 8.0, 5.0, 2.371802176901591426636, |x| x.entropy());
         test_case(-5.0, -3.0, -4.0, 0.5, |x| x.entropy());
@@ -252,7 +268,11 @@ mod test {
         test_case(-5.0, 8.0, -3.5, 0.5375093589712976359809, |x| x.skewness());
         test_case(-5.0, 8.0, 5.0, -0.4445991743012595633537, |x| x.skewness());
         test_case(-5.0, -3.0, -4.0, 0.0, |x| x.skewness());
-        test_case(15.0, 134.0, 21.0, 0.5605920922751860613217, |x| x.skewness());
+        test_case(15.0,
+                  134.0,
+                  21.0,
+                  0.5605920922751860613217,
+                  |x| x.skewness());
     }
 
     #[test]
@@ -269,12 +289,27 @@ mod test {
     fn test_median() {
         test_case(0.0, 1.0, 0.5, 0.5, |x| x.median());
         test_case(0.0, 1.0, 0.75, 0.6123724356957945245493, |x| x.median());
-        test_almost(-5.0, 8.0, -3.5, -0.6458082328952913226724, 1e-15, |x| x.median());
-        test_almost(-5.0, 8.0, 5.0, 3.062257748298549652367, 1e-15, |x| x.median());
+        test_almost(-5.0,
+                    8.0,
+                    -3.5,
+                    -0.6458082328952913226724,
+                    1e-15,
+                    |x| x.median());
+        test_almost(-5.0,
+                    8.0,
+                    5.0,
+                    3.062257748298549652367,
+                    1e-15,
+                    |x| x.median());
         test_case(-5.0, -3.0, -4.0, -4.0, |x| x.median());
-        test_almost(15.0, 134.0, 21.0, 52.00304883716712238797, 1e-14, |x| x.median());
+        test_almost(15.0,
+                    134.0,
+                    21.0,
+                    52.00304883716712238797,
+                    1e-14,
+                    |x| x.median());
     }
-    
+
     #[test]
     fn test_pdf() {
         test_case(0.0, 1.0, 0.5, 0.0, |x| x.pdf(-1.0));
@@ -293,7 +328,7 @@ mod test {
         test_case(-5.0, -3.0, -4.0, 1.0, |x| x.pdf(-4.0));
         test_case(-5.0, -3.0, -4.0, 0.5, |x| x.pdf(-3.5));
     }
-    
+
     #[test]
     fn test_ln_pdf() {
         test_case(0.0, 1.0, 0.5, f64::NEG_INFINITY, |x| x.ln_pdf(-1.0));
@@ -303,16 +338,28 @@ mod test {
         test_case(0.0, 1.0, 0.5, 0.0, |x| x.ln_pdf(0.75));
         test_case(-5.0, 8.0, -3.5, f64::NEG_INFINITY, |x| x.ln_pdf(-5.1));
         test_case(-5.0, 8.0, -3.5, f64::NEG_INFINITY, |x| x.ln_pdf(8.1));
-        test_case(-5.0, 8.0, -3.5, 0.1025641025641025641026f64.ln(), |x| x.ln_pdf(-4.0));
-        test_case(-5.0, 8.0, -3.5, 0.1538461538461538461538f64.ln(), |x| x.ln_pdf(-3.5));
-        test_case(-5.0, 8.0, -3.5, 0.05351170568561872909699f64.ln(), |x| x.ln_pdf(4.0));
+        test_case(-5.0,
+                  8.0,
+                  -3.5,
+                  0.1025641025641025641026f64.ln(),
+                  |x| x.ln_pdf(-4.0));
+        test_case(-5.0,
+                  8.0,
+                  -3.5,
+                  0.1538461538461538461538f64.ln(),
+                  |x| x.ln_pdf(-3.5));
+        test_case(-5.0,
+                  8.0,
+                  -3.5,
+                  0.05351170568561872909699f64.ln(),
+                  |x| x.ln_pdf(4.0));
         test_case(-5.0, -3.0, -4.0, f64::NEG_INFINITY, |x| x.ln_pdf(-5.1));
         test_case(-5.0, -3.0, -4.0, f64::NEG_INFINITY, |x| x.ln_pdf(-2.9));
         test_case(-5.0, -3.0, -4.0, 0.5f64.ln(), |x| x.ln_pdf(-4.5));
         test_case(-5.0, -3.0, -4.0, 0.0, |x| x.ln_pdf(-4.0));
         test_case(-5.0, -3.0, -4.0, 0.5f64.ln(), |x| x.ln_pdf(-3.5));
     }
-    
+
     #[test]
     fn test_cdf() {
         test_case(0.0, 1.0, 0.5, 0.0, |x| x.cdf(-1.0));

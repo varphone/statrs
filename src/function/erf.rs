@@ -19,13 +19,13 @@ pub fn erf(x: f64) -> f64 {
 pub fn erf_inv(x: f64) -> f64 {
     if x == 0.0 {
         return 0.0;
-    }  
+    }
     if x >= 1.0 {
         return f64::INFINITY;
-    }  
+    }
     if x <= -1.0 {
         return f64::NEG_INFINITY;
-    }  
+    }
     if x <= 0.0 {
         return erf_inv_impl(-x, 1.0 + x, -1.0);
     }
@@ -50,10 +50,10 @@ pub fn erfc(x: f64) -> f64 {
 pub fn erfc_inv(x: f64) -> f64 {
     if x <= 0.0 {
         return f64::INFINITY;
-    } 
+    }
     if x >= 2.0 {
         return f64::NEG_INFINITY;
-    } 
+    }
     if x > 1.0 {
         return erf_inv_impl(-1.0 + x, 2.0 - x, -1.0);
     }
@@ -628,7 +628,7 @@ fn erf_inv_impl(p: f64, q: f64, s: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use prec;
-    
+
     #[test]
     fn test_erfc() {
         assert!(prec::almost_eq(super::erfc(-1.0), 1.842700792949715, 1e-11));

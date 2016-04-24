@@ -4,21 +4,21 @@ use super::{Binomial, Distribution, Univariate, Discrete};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Bernoulli {
-    b: Binomial
+    b: Binomial,
 }
 
 impl Bernoulli {
     pub fn new(p: f64) -> Result<Bernoulli> {
         match Binomial::new(p, 1) {
-            Ok(b) => Ok(Bernoulli{b: b}),
-            Err(e) => Err(e)
+            Ok(b) => Ok(Bernoulli { b: b }),
+            Err(e) => Err(e),
         }
     }
-    
+
     pub fn p(&self) -> f64 {
         self.b.p()
     }
-    
+
     pub fn n(&self) -> f64 {
         1.0
     }

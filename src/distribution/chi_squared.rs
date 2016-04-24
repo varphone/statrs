@@ -6,25 +6,25 @@ use super::{Gamma, Distribution, Univariate, Continuous};
 #[derive(Debug, Clone, PartialEq)]
 pub struct ChiSquared {
     k: f64,
-    g: Gamma
+    g: Gamma,
 }
 
 impl ChiSquared {
     pub fn new(freedom: f64) -> Result<ChiSquared> {
         match Gamma::new(freedom / 2.0, 0.5) {
-            Ok(g) => Ok(ChiSquared{k: freedom, g: g}),
-            Err(e) => Err(e)
+            Ok(g) => Ok(ChiSquared { k: freedom, g: g }),
+            Err(e) => Err(e),
         }
     }
-    
+
     pub fn freedom(&self) -> f64 {
         self.k
     }
-    
+
     pub fn shape(&self) -> f64 {
         self.g.shape()
     }
-    
+
     pub fn rate(&self) -> f64 {
         self.g.rate()
     }

@@ -2,8 +2,10 @@ use rand::Rng;
 
 pub use self::bernoulli::Bernoulli;
 pub use self::binomial::Binomial;
+pub use self::chi::Chi;
 pub use self::chi_squared::ChiSquared;
 pub use self::discrete_uniform::DiscreteUniform;
+pub use self::exponential::Exponential;
 pub use self::gamma::Gamma;
 pub use self::log_normal::LogNormal;
 pub use self::normal::Normal;
@@ -13,8 +15,10 @@ pub use self::uniform::Uniform;
 
 mod bernoulli;
 mod binomial;
+mod chi;
 mod chi_squared;
 mod discrete_uniform;
+mod exponential;
 mod gamma;
 mod log_normal;
 mod normal;

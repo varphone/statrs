@@ -6,18 +6,18 @@ use super::{Distribution, Univariate, Continuous};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Exponential {
-    rate: f64
+    rate: f64,
 }
 
 impl Exponential {
     pub fn new(rate: f64) -> Result<Exponential> {
         if rate.is_nan() || rate <= 0.0 {
-            Err(StatsError::BadParams);
+            Err(StatsError::BadParams)
         } else {
-            Ok(Exponential{rate: rate})
+            Ok(Exponential { rate: rate })
         }
     }
-    
+
     pub fn rate(&self) -> f64 {
         self.rate
     }
@@ -25,7 +25,11 @@ impl Exponential {
 
 impl Distribution for Exponential {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        0.0
+        let mut x = r.next_f64();
+        while x == 0.0 {
+            x = r.next_f64();
+        }
+        -x.ln() / self.rate
     }
 }
 

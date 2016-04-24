@@ -9,7 +9,7 @@ use super::{Distribution, Univariate, Discrete};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Poisson {
-    lambda: f64
+    lambda: f64,
 }
 
 impl Poisson {
@@ -17,10 +17,10 @@ impl Poisson {
         if lambda.is_nan() || lambda < 0.0 {
             Err(StatsError::BadParams)
         } else {
-            Ok(Poisson{lambda: lambda})
+            Ok(Poisson { lambda: lambda })
         }
     }
-    
+
     pub fn lambda(&self) -> f64 {
         self.lambda
     }
@@ -46,14 +46,13 @@ impl Univariate for Poisson {
     }
 
     fn entropy(&self) -> f64 {
-        0.5 * (2.0 * f64::consts::PI * f64::consts::E * self.lambda).ln()
-        - 1.0 / (12.0 * self.lambda)
-        - 1.0 / (24.0 * self.lambda * self.lambda)
-        - 19.0 / (360.0 * self.lambda * self.lambda * self.lambda)
+        0.5 * (2.0 * f64::consts::PI * f64::consts::E * self.lambda).ln() -
+        1.0 / (12.0 * self.lambda) - 1.0 / (24.0 * self.lambda * self.lambda) -
+        19.0 / (360.0 * self.lambda * self.lambda * self.lambda)
     }
 
     fn skewness(&self) -> f64 {
-       1.0 / self.lambda.sqrt()
+        1.0 / self.lambda.sqrt()
     }
 
     fn median(&self) -> f64 {
@@ -113,7 +112,7 @@ fn sample_unchecked<R: Rng>(r: &mut R, lambda: f64) -> f64 {
         let beta = f64::consts::PI / (3.0 * lambda).sqrt();
         let alpha = beta * lambda;
         let k = c.ln() - lambda - beta.ln();
-        
+
         loop {
             let u = r.next_f64();
             let x = (alpha - ((1.0 - u) / u).ln()) / beta;
@@ -121,7 +120,7 @@ fn sample_unchecked<R: Rng>(r: &mut R, lambda: f64) -> f64 {
             if n < 0.0 {
                 continue;
             }
-            
+
             let v = r.next_f64();
             let y = alpha - beta * x;
             let temp = 1.0 + y.exp();
