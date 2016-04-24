@@ -27,7 +27,7 @@ impl Chi {
 
 impl Distribution for Chi {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        (0..self.k.floor() as i64)
+        (0..self.k as i64)
             .fold(0.0,
                   |acc, _| acc + normal::sample_unchecked(r, 0.0, 1.0).powf(2.0))
             .sqrt()
