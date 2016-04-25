@@ -3,7 +3,7 @@ use rand::Rng;
 use result::Result;
 use super::{Gamma, Distribution, Univariate, Continuous};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct ChiSquared {
     k: f64,
     g: Gamma,

@@ -6,7 +6,7 @@ use result::Result;
 use super::{Distribution, Univariate, Continuous};
 use super::normal;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Chi {
     k: f64,
 }

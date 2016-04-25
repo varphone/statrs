@@ -6,7 +6,7 @@ use function::erf;
 use result::Result;
 use super::{Distribution, Univariate, Continuous};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Normal {
     mu: f64,
     sigma: f64,

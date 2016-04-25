@@ -6,7 +6,7 @@ use function::factorial;
 use result::Result;
 use super::{Distribution, Univariate, Discrete};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Binomial {
     p: f64,
     n: i64,

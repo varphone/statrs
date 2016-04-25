@@ -4,7 +4,7 @@ use error::StatsError;
 use result::Result;
 use super::{Distribution, Univariate, Continuous};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Uniform {
     min: f64,
     max: f64,

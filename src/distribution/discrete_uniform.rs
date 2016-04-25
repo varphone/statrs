@@ -4,7 +4,7 @@ use error::StatsError;
 use result::Result;
 use super::{Distribution, Univariate, Discrete};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct DiscreteUniform {
     min: i64,
     max: i64,

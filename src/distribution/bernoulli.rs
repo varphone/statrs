@@ -2,7 +2,7 @@ use rand::Rng;
 use result::Result;
 use super::{Binomial, Distribution, Univariate, Discrete};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Bernoulli {
     b: Binomial,
 }
