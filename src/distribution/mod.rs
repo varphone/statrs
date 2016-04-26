@@ -10,6 +10,7 @@ pub use self::gamma::Gamma;
 pub use self::log_normal::LogNormal;
 pub use self::normal::Normal;
 pub use self::poisson::Poisson;
+pub use self::student_t::StudentT;
 pub use self::triangular::Triangular;
 pub use self::uniform::Uniform;
 
@@ -23,6 +24,7 @@ mod gamma;
 mod log_normal;
 mod normal;
 mod poisson;
+mod student_t;
 mod triangular;
 mod uniform;
 

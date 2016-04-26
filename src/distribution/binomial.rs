@@ -1,8 +1,7 @@
 use std::f64;
 use rand::Rng;
 use error::StatsError;
-use function::beta;
-use function::factorial;
+use function::{beta, factorial};
 use result::Result;
 use super::{Distribution, Univariate, Discrete};
 

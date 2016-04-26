@@ -133,7 +133,7 @@ impl Continuous for Gamma {
     }
 }
 
-fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
+pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
     if rate == f64::INFINITY {
         return shape;
     }

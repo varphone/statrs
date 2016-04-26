@@ -2,8 +2,7 @@ use std::f64;
 use std::i64;
 use rand::Rng;
 use error::StatsError;
-use function::factorial;
-use function::gamma;
+use function::{factorial, gamma};
 use result::Result;
 use super::{Distribution, Univariate, Discrete};
 
