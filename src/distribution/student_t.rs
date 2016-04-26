@@ -1,7 +1,7 @@
 use std::f64;
 use rand::Rng;
 use error::StatsError;
-use function;
+use function::{beta, gamma};
 use result::Result;
 use super::{Distribution, Univariate, Continuous};
 use super::normal;
@@ -82,9 +82,9 @@ impl Univariate for StudentT {
         }
 
         (self.freedom + 1.0) / 2.0 *
-        (function::gamma::digamma((self.freedom + 1.0) / 2.0).unwrap() -
-         function::gamma::digamma(self.freedom / 2.0).unwrap()) +
-        (self.freedom.sqrt() * function::beta::beta(self.freedom / 2.0, 0.5).unwrap()).ln()
+        (gamma::digamma((self.freedom + 1.0) / 2.0).unwrap() -
+         gamma::digamma(self.freedom / 2.0).unwrap()) +
+        (self.freedom.sqrt() * beta::beta(self.freedom / 2.0, 0.5).unwrap()).ln()
     }
 
     fn skewness(&self) -> f64 {
@@ -104,7 +104,7 @@ impl Univariate for StudentT {
         } else {
             let k = (x - self.location) / self.scale;
             let h = self.freedom / (self.freedom + k * k);
-            let ib = 0.5 * function::beta::beta_reg(self.freedom / 2.0, 0.5, h).unwrap();
+            let ib = 0.5 * beta::beta_reg(self.freedom / 2.0, 0.5, h).unwrap();
             if x <= self.location {
                 ib
             } else {
@@ -132,8 +132,7 @@ impl Continuous for StudentT {
             self.n.pdf(x)
         } else {
             let d = (x - self.location) / self.scale;
-            (function::gamma::ln_gamma((self.freedom + 1.0) / 2.0) -
-             function::gamma::ln_gamma(self.freedom / 2.0))
+            (gamma::ln_gamma((self.freedom + 1.0) / 2.0) - gamma::ln_gamma(self.freedom / 2.0))
                 .exp() *
             (1.0 + d * d / self.freedom).powf(-0.5 * (self.freedom + 1.0)) /
             (self.freedom * f64::consts::PI).sqrt() / self.scale
@@ -145,9 +144,9 @@ impl Continuous for StudentT {
             self.n.ln_pdf(x)
         } else {
             let d = (x - self.location) / self.scale;
-            function::gamma::ln_gamma((self.freedom + 1.0) / 2.0) -
+            gamma::ln_gamma((self.freedom + 1.0) / 2.0) -
             0.5 * ((self.freedom + 1.0) * (1.0 + d * d / self.freedom).ln()) -
-            function::gamma::ln_gamma(self.freedom / 2.0) -
+            gamma::ln_gamma(self.freedom / 2.0) -
             0.5 * (self.freedom * f64::consts::PI).ln() - self.scale.ln()
         }
     }
