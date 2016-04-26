@@ -8,8 +8,8 @@ use super::{Distribution, Univariate, Continuous};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Normal {
-    mu: f64,
-    sigma: f64,
+    mean: f64,
+    std_dev: f64,
 }
 
 impl Normal {
@@ -18,8 +18,8 @@ impl Normal {
             Err(StatsError::BadParams)
         } else {
             Ok(Normal {
-                mu: mean,
-                sigma: std_dev,
+                mean: mean,
+                std_dev: std_dev,
             })
         }
     }
@@ -27,25 +27,25 @@ impl Normal {
 
 impl Distribution for Normal {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        sample_unchecked(r, self.mu, self.sigma)
+        sample_unchecked(r, self.mean, self.std_dev)
     }
 }
 
 impl Univariate for Normal {
     fn mean(&self) -> f64 {
-        self.mu
+        self.mean
     }
 
     fn variance(&self) -> f64 {
-        self.sigma * self.sigma
+        self.std_dev * self.std_dev
     }
 
     fn std_dev(&self) -> f64 {
-        self.sigma
+        self.std_dev
     }
 
     fn entropy(&self) -> f64 {
-        self.sigma.ln() + consts::LN_SQRT_2PIE
+        self.std_dev.ln() + consts::LN_SQRT_2PIE
     }
 
     fn skewness(&self) -> f64 {
@@ -53,17 +53,17 @@ impl Univariate for Normal {
     }
 
     fn median(&self) -> f64 {
-        self.mu
+        self.mean
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        0.5 * erf::erfc((self.mu - x) / (self.sigma * f64::consts::SQRT_2))
+        0.5 * erf::erfc((self.mean - x) / (self.std_dev * f64::consts::SQRT_2))
     }
 }
 
 impl Continuous for Normal {
     fn mode(&self) -> f64 {
-        self.mu
+        self.mean
     }
 
     fn min(&self) -> f64 {
@@ -75,13 +75,13 @@ impl Continuous for Normal {
     }
 
     fn pdf(&self, x: f64) -> f64 {
-        let d = (x - self.mu) / self.sigma;
-        (-0.5 * d * d).exp() / (consts::SQRT_2PI * self.sigma)
+        let d = (x - self.mean) / self.std_dev;
+        (-0.5 * d * d).exp() / (consts::SQRT_2PI * self.std_dev)
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
-        let d = (x - self.mu) / self.sigma;
-        (-0.5 * d * d) - consts::LN_SQRT_2PI - self.sigma.ln()
+        let d = (x - self.mean) / self.std_dev;
+        (-0.5 * d * d) - consts::LN_SQRT_2PI - self.std_dev.ln()
     }
 }
 

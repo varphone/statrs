@@ -9,18 +9,18 @@ use super::normal;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct LogNormal {
-    mu: f64,
-    sigma: f64,
+    location: f64,
+    scale: f64,
 }
 
 impl LogNormal {
-    pub fn new(mean: f64, std_dev: f64) -> Result<LogNormal> {
-        if mean.is_nan() || std_dev.is_nan() || std_dev <= 0.0 {
+    pub fn new(location: f64, scale: f64) -> Result<LogNormal> {
+        if location.is_nan() || scale.is_nan() || scale <= 0.0 {
             Err(StatsError::BadParams)
         } else {
             Ok(LogNormal {
-                mu: mean,
-                sigma: std_dev,
+                location: location,
+                scale: scale,
             })
         }
     }
@@ -28,18 +28,18 @@ impl LogNormal {
 
 impl Distribution for LogNormal {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        normal::sample_unchecked(r, self.mu, self.sigma).exp()
+        normal::sample_unchecked(r, self.location, self.scale).exp()
     }
 }
 
 impl Univariate for LogNormal {
     fn mean(&self) -> f64 {
-        (self.mu + self.sigma * self.sigma / 2.0).exp()
+        (self.location + self.scale * self.scale / 2.0).exp()
     }
 
     fn variance(&self) -> f64 {
-        let sigma2 = self.sigma * self.sigma;
-        (sigma2.exp() - 1.0) * (self.mu + self.mu + sigma2).exp()
+        let sigma2 = self.scale * self.scale;
+        (sigma2.exp() - 1.0) * (self.location + self.location + sigma2).exp()
     }
 
     fn std_dev(&self) -> f64 {
@@ -47,30 +47,30 @@ impl Univariate for LogNormal {
     }
 
     fn entropy(&self) -> f64 {
-        0.5 + self.sigma.ln() + self.mu + consts::LN_SQRT_2PI
+        0.5 + self.scale.ln() + self.location + consts::LN_SQRT_2PI
     }
 
     fn skewness(&self) -> f64 {
-        let expsigma2 = (self.sigma * self.sigma).exp();
+        let expsigma2 = (self.scale * self.scale).exp();
         (expsigma2 + 2.0) * (expsigma2 - 1.0).sqrt()
     }
 
     fn median(&self) -> f64 {
-        self.mu.exp()
+        self.location.exp()
     }
 
     fn cdf(&self, x: f64) -> f64 {
         if x < 0.0 {
             0.0
         } else {
-            0.5 * erf::erfc((self.mu - x.ln()) / (self.sigma * f64::consts::SQRT_2))
+            0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
         }
     }
 }
 
 impl Continuous for LogNormal {
     fn mode(&self) -> f64 {
-        (self.mu - self.sigma * self.sigma).exp()
+        (self.location - self.scale * self.scale).exp()
     }
 
     fn min(&self) -> f64 {
@@ -85,8 +85,8 @@ impl Continuous for LogNormal {
         if x < 0.0 {
             0.0
         } else {
-            let d = (x.ln() - self.mu) / self.sigma;
-            (-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.sigma)
+            let d = (x.ln() - self.location) / self.scale;
+            (-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.scale)
         }
     }
 
@@ -94,8 +94,8 @@ impl Continuous for LogNormal {
         if x < 0.0 {
             f64::NEG_INFINITY
         } else {
-            let d = (x.ln() - self.mu) / self.sigma;
-            (-0.5 * d * d) - consts::LN_SQRT_2PI - (x * self.sigma).ln()
+            let d = (x.ln() - self.location) / self.scale;
+            (-0.5 * d * d) - consts::LN_SQRT_2PI - (x * self.scale).ln()
         }
     }
 }
