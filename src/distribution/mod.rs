@@ -13,6 +13,7 @@ pub use self::poisson::Poisson;
 pub use self::student_t::StudentT;
 pub use self::triangular::Triangular;
 pub use self::uniform::Uniform;
+pub use self::weibull::Weibull;
 
 mod bernoulli;
 mod binomial;
@@ -27,6 +28,7 @@ mod poisson;
 mod student_t;
 mod triangular;
 mod uniform;
+mod weibull;
 
 /// Distribution is trait that should be implemented
 /// by structs that represent a statistical distribution

@@ -3,3 +3,4 @@ pub mod erf;
 pub mod evaluate;
 pub mod factorial;
 pub mod gamma;
+pub mod stable;
