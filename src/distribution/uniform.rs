@@ -95,6 +95,7 @@ impl Continuous for Uniform {
     }
 }
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
     use std::f64;
@@ -258,10 +259,7 @@ mod test {
         test_case(-5.0, 100.0, f64::NEG_INFINITY, |x| x.ln_pdf(101.0));
         test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(-5.0));
         test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(10.0));
-        test_case(0.0,
-                  f64::INFINITY,
-                  f64::NEG_INFINITY,
-                  |x| x.ln_pdf(f64::INFINITY));
+        test_case(0.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
     }
 
     #[test]

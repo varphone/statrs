@@ -148,6 +148,7 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
     }
 }
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
     use std::f64;
@@ -234,27 +235,13 @@ mod test {
         test_case(-5.0, 8.0, -3.5, (151.75f64 / 18.0).sqrt(), |x| x.std_dev());
         test_case(-5.0, 8.0, 5.0, (139.0f64 / 18.0).sqrt(), |x| x.std_dev());
         test_case(-5.0, -3.0, -4.0, (3.0f64 / 18.0).sqrt(), |x| x.std_dev());
-        test_case(15.0,
-                  134.0,
-                  21.0,
-                  (13483.0f64 / 18.0).sqrt(),
-                  |x| x.std_dev());
+        test_case(15.0, 134.0, 21.0, (13483.0f64 / 18.0).sqrt(), |x| x.std_dev());
     }
 
     #[test]
     fn test_entropy() {
-        test_almost(0.0,
-                    1.0,
-                    0.5,
-                    -0.1931471805599453094172,
-                    1e-16,
-                    |x| x.entropy());
-        test_almost(0.0,
-                    1.0,
-                    0.75,
-                    -0.1931471805599453094172,
-                    1e-16,
-                    |x| x.entropy());
+        test_almost(0.0, 1.0, 0.5, -0.1931471805599453094172, 1e-16, |x| x.entropy());
+        test_almost(0.0, 1.0, 0.75, -0.1931471805599453094172, 1e-16, |x| x.entropy());
         test_case(-5.0, 8.0, -3.5, 2.371802176901591426636, |x| x.entropy());
         test_case(-5.0, 8.0, 5.0, 2.371802176901591426636, |x| x.entropy());
         test_case(-5.0, -3.0, -4.0, 0.5, |x| x.entropy());
@@ -268,11 +255,7 @@ mod test {
         test_case(-5.0, 8.0, -3.5, 0.5375093589712976359809, |x| x.skewness());
         test_case(-5.0, 8.0, 5.0, -0.4445991743012595633537, |x| x.skewness());
         test_case(-5.0, -3.0, -4.0, 0.0, |x| x.skewness());
-        test_case(15.0,
-                  134.0,
-                  21.0,
-                  0.5605920922751860613217,
-                  |x| x.skewness());
+        test_case(15.0, 134.0, 21.0, 0.5605920922751860613217, |x| x.skewness());
     }
 
     #[test]
@@ -289,25 +272,10 @@ mod test {
     fn test_median() {
         test_case(0.0, 1.0, 0.5, 0.5, |x| x.median());
         test_case(0.0, 1.0, 0.75, 0.6123724356957945245493, |x| x.median());
-        test_almost(-5.0,
-                    8.0,
-                    -3.5,
-                    -0.6458082328952913226724,
-                    1e-15,
-                    |x| x.median());
-        test_almost(-5.0,
-                    8.0,
-                    5.0,
-                    3.062257748298549652367,
-                    1e-15,
-                    |x| x.median());
+        test_almost(-5.0, 8.0, -3.5, -0.6458082328952913226724, 1e-15, |x| x.median());
+        test_almost(-5.0, 8.0, 5.0, 3.062257748298549652367, 1e-15, |x| x.median());
         test_case(-5.0, -3.0, -4.0, -4.0, |x| x.median());
-        test_almost(15.0,
-                    134.0,
-                    21.0,
-                    52.00304883716712238797,
-                    1e-14,
-                    |x| x.median());
+        test_almost(15.0, 134.0, 21.0, 52.00304883716712238797, 1e-14, |x| x.median());
     }
 
     #[test]
@@ -338,21 +306,9 @@ mod test {
         test_case(0.0, 1.0, 0.5, 0.0, |x| x.ln_pdf(0.75));
         test_case(-5.0, 8.0, -3.5, f64::NEG_INFINITY, |x| x.ln_pdf(-5.1));
         test_case(-5.0, 8.0, -3.5, f64::NEG_INFINITY, |x| x.ln_pdf(8.1));
-        test_case(-5.0,
-                  8.0,
-                  -3.5,
-                  0.1025641025641025641026f64.ln(),
-                  |x| x.ln_pdf(-4.0));
-        test_case(-5.0,
-                  8.0,
-                  -3.5,
-                  0.1538461538461538461538f64.ln(),
-                  |x| x.ln_pdf(-3.5));
-        test_case(-5.0,
-                  8.0,
-                  -3.5,
-                  0.05351170568561872909699f64.ln(),
-                  |x| x.ln_pdf(4.0));
+        test_case(-5.0, 8.0, -3.5, 0.1025641025641025641026f64.ln(), |x| x.ln_pdf(-4.0));
+        test_case(-5.0, 8.0, -3.5, 0.1538461538461538461538f64.ln(), |x| x.ln_pdf(-3.5));
+        test_case(-5.0, 8.0, -3.5, 0.05351170568561872909699f64.ln(), |x| x.ln_pdf(4.0));
         test_case(-5.0, -3.0, -4.0, f64::NEG_INFINITY, |x| x.ln_pdf(-5.1));
         test_case(-5.0, -3.0, -4.0, f64::NEG_INFINITY, |x| x.ln_pdf(-2.9));
         test_case(-5.0, -3.0, -4.0, 0.5f64.ln(), |x| x.ln_pdf(-4.5));
