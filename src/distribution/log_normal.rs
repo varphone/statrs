@@ -157,9 +157,9 @@ mod test {
 
     #[test]
     fn test_variance() {
-// note: variance seems to be only accurate to around 15 orders
-// of magnitude. Hopefully in the future we can extend the precision
-// of this function
+        // note: variance seems to be only accurate to around 15 orders
+        // of magnitude. Hopefully in the future we can extend the precision
+        // of this function
         test_almost(-1.0, 0.1, 0.001373811865368952608715, 1e-16, |x| x.variance());
         test_case(-1.0, 1.5, 10.898468544015731954, |x| x.variance());
         test_case(-1.0, 2.5, 36245.39726189994988081, |x| x.variance());
