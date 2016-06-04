@@ -252,4 +252,28 @@ mod test {
         test_case(3.0, f64::INFINITY, |x| x.max());
         test_case(f64::INFINITY, f64::INFINITY, |x| x.max());
     }
+    
+    #[test]
+    fn test_pdf() {
+        test_case(1.0, 0.0, |x| x.pdf(0.0));
+        test_almost(1.0, 0.79390509495402353102, 1e-15, |x| x.pdf(0.1));
+        test_almost(1.0, 0.48394144903828669960, 1e-15, |x| x.pdf(1.0));
+        test_almost(1.0, 2.1539520085086552718e-7, 1e-22, |x| x.pdf(5.5));
+        test_case(1.0, 0.0, |x| x.pdf(f64::INFINITY));
+        test_case(2.0, 0.0, |x| x.pdf(0.0));
+        test_almost(2.0, 0.099501247919268231335, 1e-16, |x| x.pdf(0.1));
+        test_almost(2.0, 0.60653065971263342360, 1e-15, |x| x.pdf(1.0));
+        test_almost(2.0, 1.4847681768496578863e-6, 1e-21, |x| x.pdf(5.5));
+        test_case(2.0, 0.0, |x| x.pdf(f64::INFINITY));
+        test_case(2.5, 0.0, |x| x.pdf(0.0));
+        test_almost(2.5, 0.029191065334961657461, 1e-16, |x| x.pdf(0.1));
+        test_almost(2.5, 0.56269645152636456261, 1e-15, |x| x.pdf(1.0));
+        test_almost(2.5, 3.2304380188895211768e-6, 1e-20, |x| x.pdf(5.5));
+        test_case(2.5, 0.0, |x| x.pdf(f64::INFINITY));
+        test_case(f64::INFINITY, 0.0, |x| x.pdf(0.0));
+        test_case(f64::INFINITY, 0.0, |x| x.pdf(0.1));
+        test_case(f64::INFINITY, 0.0, |x| x.pdf(1.0));
+        test_case(f64::INFINITY, 0.0, |x| x.pdf(5.5));
+        test_case(f64::INFINITY, 0.0, |x| x.pdf(f64::INFINITY));
+    }
 }
