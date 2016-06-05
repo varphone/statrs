@@ -64,8 +64,10 @@ impl Univariate for Chi {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        if x == f64::INFINITY || self.freedom == f64::INFINITY {
+        if x == f64::INFINITY {
             1.0
+        } else if self.freedom == f64::INFINITY {
+            0.0  
         } else {
             gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0).unwrap()
         }
@@ -275,5 +277,53 @@ mod test {
         test_case(f64::INFINITY, 0.0, |x| x.pdf(1.0));
         test_case(f64::INFINITY, 0.0, |x| x.pdf(5.5));
         test_case(f64::INFINITY, 0.0, |x| x.pdf(f64::INFINITY));
+    }
+    
+    #[test]
+    fn test_ln_pdf() {
+        test_case(1.0, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
+        test_almost(1.0, -0.23079135264472743236, 1e-15, |x| x.ln_pdf(0.1));
+        test_almost(1.0, -0.72579135264472743236, 1e-15, |x| x.ln_pdf(1.0));
+        test_almost(1.0, -15.350791352644727432, 1e-14, |x| x.ln_pdf(5.5));
+        test_case(1.0, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
+        test_case(2.0, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
+        test_almost(2.0, -2.3075850929940456840, 1e-15, |x| x.ln_pdf(0.1));
+        test_almost(2.0, -0.5, 1e-15, |x| x.ln_pdf(1.0));
+        test_almost(2.0, -13.420251907761574765, 1e-15, |x| x.ln_pdf(5.5));
+        test_case(2.0, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
+        test_case(2.5, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
+        test_almost(2.5, -3.5338925982092416919, 1e-15, |x| x.ln_pdf(0.1));
+        test_almost(2.5, -0.57501495871817316589, 1e-15, |x| x.ln_pdf(1.0));
+        test_almost(2.5, -12.642892820360535314, 1e-16, |x| x.ln_pdf(5.5));
+        test_case(2.5, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
+        test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
+        test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(0.1));
+        test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(1.0));
+        test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(5.5));
+        test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
+    }
+    
+    #[test]
+    fn test_cdf() {
+        test_case(1.0, 0.0, |x| x.cdf(0.0));
+        test_almost(1.0, 0.079655674554057962931, 1e-16, |x| x.cdf(0.1));
+        test_almost(1.0, 0.68268949213708589717, 1e-15, |x| x.cdf(1.0));
+        test_case(1.0, 0.99999996202087506822, |x| x.cdf(5.5));
+        test_case(1.0, 1.0, |x| x.cdf(f64::INFINITY));
+        test_case(2.0, 0.0, |x| x.cdf(0.0));
+        test_almost(2.0, 0.0049875208073176866474, 1e-17, |x| x.cdf(0.1));
+        test_almost(2.0, 0.39346934028736657640, 1e-15, |x| x.cdf(1.0));
+        test_case(2.0, 0.99999973004214966370, |x| x.cdf(5.5));
+        test_case(2.0, 1.0, |x| x.cdf(f64::INFINITY));
+        test_case(2.5, 0.0, |x| x.cdf(0.0));
+        test_almost(2.5, 0.0011702413714030096290, 1e-18, |x| x.cdf(0.1));
+        test_almost(2.5, 0.28378995266531297417, 1e-16, |x| x.cdf(1.0));
+        test_case(2.5, 0.99999940337322804750, |x| x.cdf(5.5));
+        test_case(2.5, 1.0, |x| x.cdf(f64::INFINITY));
+        test_case(f64::INFINITY, 0.0, |x| x.cdf(0.0));
+        test_case(f64::INFINITY, 0.0, |x| x.cdf(0.1));
+        test_case(f64::INFINITY, 0.0, |x| x.cdf(1.0));
+        test_case(f64::INFINITY, 0.0, |x| x.cdf(5.5));
+        test_case(f64::INFINITY, 1.0, |x| x.cdf(f64::INFINITY));
     }
 }
