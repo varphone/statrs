@@ -8,11 +8,11 @@ when not.
 - [x] Bernoulli
 - [ ] Beta
 - [x] Binomial
-- [ ] Chi
+- [x] Chi
 - [x] ChiSquared
 - [x] ContinuousUniform
 - [x] DiscreteUniform
-- [ ] Exponential
+- [x] Exponential
 - [x] Gamma
 - [x] LogNormal
 - [x] Normal
