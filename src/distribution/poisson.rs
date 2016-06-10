@@ -138,6 +138,7 @@ mod test {
     use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
+    use std::i64;
     use distribution::{Univariate, Discrete};
     use prec;
     use super::Poisson;
@@ -210,5 +211,43 @@ mod test {
         test_case(1.5, (1.5f64).sqrt(), |x| x.std_dev());
         test_case(5.4, (5.4f64).sqrt(), |x| x.std_dev());
         test_case(10.8, (10.8f64).sqrt(), |x| x.std_dev());
+    }
+    
+    #[test]
+    fn test_entropy() {
+        test_almost(1.5, 1.531959153102376331946, 1e-15, |x| x.entropy());
+        test_almost(5.4, 2.244941839577643504608, 1e-15, |x| x.entropy());
+        test_case(10.8, 2.600596429676975222694, |x| x.entropy());
+    }
+    
+    #[test]
+    fn test_skewness() {
+        test_almost(1.5, 0.8164965809277260327324, 1e-15, |x| x.skewness());
+        test_almost(5.4, 0.4303314829119352094644, 1e-16, |x| x.skewness());
+        test_almost(10.8, 0.3042903097250922852539, 1e-16, |x| x.skewness());
+    }
+    
+    #[test]
+    fn test_median() {
+        test_case(1.5, 1.0, |x| x.median());
+        test_case(5.4, 5.0, |x| x.median());
+        test_case(10.8, 11.0, |x| x.median());
+    }
+    
+    #[test]
+    fn test_mode() {
+        test_case(1.5, 1, |x| x.mode());
+        test_case(5.4, 5, |x| x.mode());
+        test_case(10.8, 10, |x| x.mode());
+    }
+    
+    #[test]
+    fn test_min_max() {
+        test_case(1.5, 0, |x| x.min());
+        test_case(5.4, 0, |x| x.min());
+        test_case(10.8, 0, |x| x.min());
+        test_case(1.5, i64::MAX, |x| x.max());
+        test_case(5.4, i64::MAX, |x| x.max());
+        test_case(10.8, i64::MAX, |x| x.max());
     }
 }
