@@ -133,6 +133,14 @@ mod test {
         assert!(prec::almost_eq(expected, x, acc));
     }
     
+    fn test_is_nan<F>(rate: f64, eval: F)
+        where F : Fn(Exponential) -> f64 
+    {
+        let n = try_create(rate);
+        let x = eval(n);
+        assert!(x.is_nan());
+    }
+    
     #[test]
     fn test_create() {
         create_case(0.1);
@@ -205,5 +213,25 @@ mod test {
         test_case(0.1, f64::INFINITY, |x| x.max());
         test_case(1.0, f64::INFINITY, |x| x.max());
         test_case(10.0, f64::INFINITY, |x| x.max());
+    }
+    
+    #[test]
+    fn test_pdf() {
+        test_case(0.1, 0.1, |x| x.pdf(0.0));
+        test_case(1.0, 1.0, |x| x.pdf(0.0));
+        test_case(10.0, 10.0, |x| x.pdf(0.0));
+        test_is_nan(f64::INFINITY, |x| x.pdf(0.0));
+        test_case(0.1, 0.09900498337491680535739, |x| x.pdf(0.1));
+        test_almost(1.0, 0.9048374180359595731642, 1e-15, |x| x.pdf(0.1));
+        test_case(10.0, 3.678794411714423215955, |x| x.pdf(0.1));
+        test_is_nan(f64::INFINITY, |x| x.pdf(0.1));
+        test_case(0.1, 0.09048374180359595731642, |x| x.pdf(1.0));
+        test_case(1.0, 0.3678794411714423215955, |x| x.pdf(1.0));
+        test_almost(10.0, 4.539992976248485153559e-4, 1e-19, |x| x.pdf(1.0));
+        test_is_nan(f64::INFINITY, |x| x.pdf(1.0));
+        test_case(0.1, 0.0, |x| x.pdf(f64::INFINITY));
+        test_case(1.0, 0.0, |x| x.pdf(f64::INFINITY));
+        test_case(10.0, 0.0, |x| x.pdf(f64::INFINITY));
+        test_is_nan(f64::INFINITY, |x| x.pdf(f64::INFINITY));
     }
 }
