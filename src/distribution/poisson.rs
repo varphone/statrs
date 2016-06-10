@@ -13,7 +13,7 @@ pub struct Poisson {
 
 impl Poisson {
     pub fn new(lambda: f64) -> Result<Poisson> {
-        if lambda.is_nan() || lambda < 0.0 {
+        if lambda.is_nan() || lambda <= 0.0 {
             Err(StatsError::BadParams)
         } else {
             Ok(Poisson { lambda: lambda })
@@ -129,5 +129,86 @@ fn sample_unchecked<R: Rng>(r: &mut R, lambda: f64) -> f64 {
                 return n;
             }
         }
+    }
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+#[cfg(test)]
+mod test {
+    use std::cmp::PartialEq;
+    use std::fmt::Debug;
+    use std::f64;
+    use distribution::{Univariate, Discrete};
+    use prec;
+    use super::Poisson;
+    
+    fn try_create(lambda: f64) -> Poisson {
+        let n = Poisson::new(lambda);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+
+    fn create_case(lambda: f64) {
+        let n = try_create(lambda);
+        assert_eq!(lambda, n.lambda());
+    }
+
+    fn bad_create_case(lambda: f64) {
+        let n = Poisson::new(lambda);
+        assert!(n.is_err());
+    }
+
+    fn test_case<T, F>(lambda: f64, expected: T, eval: F)
+        where T: PartialEq + Debug,
+              F: Fn(Poisson) -> T
+    {
+
+        let n = try_create(lambda);
+        let x = eval(n);
+        assert_eq!(expected, x);
+    }
+
+    fn test_almost<F>(lambda: f64, expected: f64, acc: f64, eval: F)
+        where F: Fn(Poisson) -> f64
+    {
+
+        let n = try_create(lambda);
+        let x = eval(n);
+        assert!(prec::almost_eq(expected, x, acc));
+    }
+    
+    #[test]
+    fn test_create() {
+        create_case(1.5);
+        create_case(5.4);
+        create_case(10.8);
+    }
+    
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(f64::NAN);
+        bad_create_case(-1.5);
+        bad_create_case(0.0);
+    }
+    
+    #[test]
+    fn test_mean() {
+        test_case(1.5, 1.5, |x| x.mean());
+        test_case(5.4, 5.4, |x| x.mean());
+        test_case(10.8, 10.8, |x| x.mean());
+    }
+    
+    #[test]
+    fn test_variance() {
+        test_case(1.5, 1.5, |x| x.variance());
+        test_case(5.4, 5.4, |x| x.variance());
+        test_case(10.8, 10.8, |x| x.variance());
+    }
+    
+    #[test]
+    fn test_std_dev() {
+        test_case(1.5, (1.5f64).sqrt(), |x| x.std_dev());
+        test_case(5.4, (5.4f64).sqrt(), |x| x.std_dev());
+        test_case(10.8, (10.8f64).sqrt(), |x| x.std_dev());
     }
 }
