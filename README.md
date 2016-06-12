@@ -16,7 +16,7 @@ when not.
 - [x] Gamma
 - [x] LogNormal
 - [x] Normal
-- [ ] Poisson
+- [x] Poisson
 - [ ] StudentT
 - [x] Triangular
 - [ ] Weibull
