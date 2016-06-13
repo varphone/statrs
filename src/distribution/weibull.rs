@@ -73,11 +73,8 @@ impl Univariate for Weibull {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            0.0
-        } else {
-            -stable::exp_minus_one(x.powf(self.shape) * self.scale_pow_shape_inv)
-        }
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
+        -stable::exp_minus_one(x.powf(self.shape) * self.scale_pow_shape_inv)
     }
 }
 
@@ -99,6 +96,7 @@ impl Continuous for Weibull {
     }
 
     fn pdf(&self, x: f64) -> f64 {
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         match (x, self.shape) {
             (0.0, 1.0) => self.shape / self.scale,
             (_, _) if x >= 0.0 => {
@@ -111,6 +109,7 @@ impl Continuous for Weibull {
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         match (x, self.shape) {
             (0.0, 1.0) => self.shape.ln() - self.scale.ln(),
             (_, _) if x >= 0.0 => {

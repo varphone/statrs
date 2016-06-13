@@ -59,11 +59,8 @@ impl Univariate for Exponential {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            0.0
-        } else {
-            1.0 - (-self.rate * x).exp()
-        }
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
+        1.0 - (-self.rate * x).exp()
     }
 }
 
@@ -81,14 +78,12 @@ impl Continuous for Exponential {
     }
 
     fn pdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            0.0
-        } else {
-            self.rate * (-self.rate * x).exp()
-        }
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
+        self.rate * (-self.rate * x).exp()
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         self.rate.ln() - self.rate * x
     }
 }
@@ -100,54 +95,58 @@ mod test {
     use distribution::{Univariate, Continuous};
     use prec;
     use super::Exponential;
-    
+
     fn try_create(rate: f64) -> Exponential {
         let n = Exponential::new(rate);
         assert!(n.is_ok());
         n.unwrap()
     }
-    
+
     fn create_case(rate: f64) {
         let n = try_create(rate);
         assert_eq!(rate, n.rate());
     }
-    
+
     fn bad_create_case(rate: f64) {
         let n = Exponential::new(rate);
         assert!(n.is_err());
     }
 
-    fn test_case<F>(rate: f64, expected: f64, eval: F)
+    fn get_value<F>(rate: f64, eval: F) -> f64
         where F: Fn(Exponential) -> f64
     {
         let n = try_create(rate);
-        let x = eval(n);
+        eval(n)
+    }
+
+    fn test_case<F>(rate: f64, expected: f64, eval: F)
+        where F: Fn(Exponential) -> f64
+    {
+        let x = get_value(rate, eval);
         assert_eq!(expected, x);
     }
 
     fn test_almost<F>(rate: f64, expected: f64, acc: f64, eval: F)
         where F: Fn(Exponential) -> f64
     {
-        let n = try_create(rate);
-        let x = eval(n);
+        let x = get_value(rate, eval);
         assert!(prec::almost_eq(expected, x, acc));
     }
-    
+
     fn test_is_nan<F>(rate: f64, eval: F)
-        where F : Fn(Exponential) -> f64 
+        where F : Fn(Exponential) -> f64
     {
-        let n = try_create(rate);
-        let x = eval(n);
+        let x = get_value(rate, eval);
         assert!(x.is_nan());
     }
-    
+
     #[test]
     fn test_create() {
         create_case(0.1);
         create_case(1.0);
         create_case(10.0);
     }
-    
+
     #[test]
     fn test_bad_create() {
         bad_create_case(f64::NAN);
@@ -155,56 +154,56 @@ mod test {
         bad_create_case(-1.0);
         bad_create_case(-10.0);
     }
-    
+
     #[test]
     fn test_mean() {
         test_case(0.1, 10.0, |x| x.mean());
         test_case(1.0, 1.0, |x| x.mean());
         test_case(10.0, 0.1, |x| x.mean());
     }
-    
+
     #[test]
     fn test_variance() {
         test_almost(0.1, 100.0, 1e-13, |x| x.variance());
         test_case(1.0, 1.0, |x| x.variance());
         test_case(10.0, 0.01, |x| x.variance());
     }
-    
+
     #[test]
     fn test_std_dev() {
         test_case(0.1, 10.0, |x| x.std_dev());
         test_case(1.0, 1.0, |x| x.std_dev());
         test_case(10.0, 0.1, |x| x.std_dev());
     }
-    
+
     #[test]
     fn test_entropy() {
         test_almost(0.1, 3.302585092994045684018, 1e-15, |x| x.entropy());
         test_case(1.0, 1.0, |x| x.entropy());
         test_almost(10.0, -1.302585092994045684018, 1e-15, |x| x.entropy());
     }
-    
+
     #[test]
     fn test_skewness() {
         test_case(0.1, 2.0, |x| x.skewness());
         test_case(1.0, 2.0, |x| x.skewness());
         test_case(10.0, 2.0, |x| x.skewness());
     }
-    
+
     #[test]
     fn test_median() {
         test_almost(0.1, 6.931471805599453094172, 1e-15, |x| x.median());
         test_case(1.0, f64::consts::LN_2, |x| x.median());
         test_case(10.0, 0.06931471805599453094172, |x| x.median());
     }
-    
+
     #[test]
     fn test_mode() {
         test_case(0.1, 0.0, |x| x.mode());
         test_case(1.0, 0.0, |x| x.mode());
         test_case(10.0, 0.0, |x| x.mode());
     }
-    
+
     #[test]
     fn test_min_max() {
         test_case(0.1, 0.0, |x| x.min());
@@ -214,7 +213,7 @@ mod test {
         test_case(1.0, f64::INFINITY, |x| x.max());
         test_case(10.0, f64::INFINITY, |x| x.max());
     }
-    
+
     #[test]
     fn test_pdf() {
         test_case(0.1, 0.1, |x| x.pdf(0.0));
@@ -234,7 +233,13 @@ mod test {
         test_case(10.0, 0.0, |x| x.pdf(f64::INFINITY));
         test_is_nan(f64::INFINITY, |x| x.pdf(f64::INFINITY));
     }
-    
+
+    #[test]
+    #[should_panic]
+    fn test_neg_pdf() {
+        get_value(0.1, |x| x.pdf(-1.0));
+    }
+
     #[test]
     fn test_ln_pdf() {
         test_almost(0.1, -2.302585092994045684018, 1e-15, |x| x.ln_pdf(0.0));
@@ -254,7 +259,13 @@ mod test {
         test_case(10.0, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
         test_is_nan(f64::INFINITY, |x| x.ln_pdf(f64::INFINITY));
     }
-    
+
+    #[test]
+    #[should_panic]
+    fn test_neg_ln_pdf() {
+        get_value(0.1, |x| x.ln_pdf(-1.0));
+    }
+
     #[test]
     fn test_cdf() {
         test_case(0.1, 0.0, |x| x.cdf(0.0));
@@ -273,5 +284,11 @@ mod test {
         test_case(1.0, 1.0, |x| x.cdf(f64::INFINITY));
         test_case(10.0, 1.0, |x| x.cdf(f64::INFINITY));
         test_case(f64::INFINITY, 1.0, |x| x.cdf(f64::INFINITY));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_neg_cdf() {
+        get_value(0.1, |x| x.cdf(-1.0));
     }
 }

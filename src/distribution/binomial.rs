@@ -76,9 +76,7 @@ impl Univariate for Binomial {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            return 0.0;
-        }
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         if x >= self.n as f64 {
             return 1.0;
         }
@@ -105,7 +103,8 @@ impl Discrete for Binomial {
     }
 
     fn pmf(&self, x: i64) -> f64 {
-        if x < 0 || x > self.n {
+        assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
+        if x > self.n {
             return 0.0;
         }
         if self.p == 0.0 {
@@ -128,7 +127,8 @@ impl Discrete for Binomial {
     }
 
     fn ln_pmf(&self, x: i64) -> f64 {
-        if x < 0 || x > self.n {
+        assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
+        if x > self.n {
             return f64::NEG_INFINITY;
         }
         if self.p == 0.0 {
@@ -176,22 +176,26 @@ mod test {
         assert!(n.is_err());
     }
 
+    fn get_value<T, F>(p: f64, n: i64, eval: F) -> T
+        where T: PartialEq + Debug,
+              F: Fn(Binomial) -> T
+    {
+        let n = try_create(p, n);
+        eval(n)
+    }
+
     fn test_case<T, F>(p: f64, n: i64, expected: T, eval: F)
         where T: PartialEq + Debug,
               F: Fn(Binomial) -> T
     {
-
-        let n = try_create(p, n);
-        let x = eval(n);
+        let x = get_value(p, n, eval);
         assert_eq!(expected, x);
     }
 
     fn test_almost<F>(p: f64, n: i64, expected: f64, acc: f64, eval: F)
         where F: Fn(Binomial) -> f64
     {
-
-        let n = try_create(p, n);
-        let x = eval(n);
+        let x = get_value(p, n, eval);
         assert!(prec::almost_eq(expected, x, acc));
     }
 
@@ -294,6 +298,12 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_neg_pmf() {
+        get_value(0.0, 1, |x| x.pmf(-1));
+    }
+
+    #[test]
     fn test_ln_pmf() {
         test_case(0.0, 1, 0.0, |x| x.ln_pmf(0));
         test_case(0.0, 1, f64::NEG_INFINITY, |x| x.ln_pmf(1));
@@ -322,6 +332,12 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_neg_ln_pmf() {
+        get_value(0.0, 1, |x| x.ln_pmf(-1));
+    }
+
+    #[test]
     fn test_cdf() {
         test_case(0.0, 1, 1.0, |x| x.cdf(0.0));
         test_case(0.0, 1, 1.0, |x| x.cdf(1.0));
@@ -347,5 +363,11 @@ mod test {
         test_case(1.0, 10, 0.0, |x| x.cdf(0.0));
         test_case(1.0, 10, 0.0, |x| x.cdf(1.0));
         test_case(1.0, 10, 1.0, |x| x.cdf(10.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_neg_cdf() {
+        get_value(0.0, 1, |x| x.cdf(-1.0));
     }
 }

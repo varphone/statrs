@@ -12,6 +12,10 @@ pub enum StatsError {
     ArgIntervalExcl(&'static str, f64, f64),
     ArgIntervalExclMin(&'static str, f64, f64),
     ArgIntervalExclMax(&'static str, f64, f64),
+    ArgGt(&'static str, f64),
+    ArgGte(&'static str, f64),
+    ArgLt(&'static str, f64),
+    ArgLte(&'static str, f64),
 }
 
 impl Error for StatsError {
@@ -37,6 +41,14 @@ impl fmt::Display for StatsError {
             }
             StatsError::ArgIntervalExclMax(s, min, max) => {
                 write!(f, "Argument {} not within interval [{}, {})", s, min, max)
+            }
+            StatsError::ArgGt(s, val) => write!(f, "Argument {} must be greater than {}", s, val),
+            StatsError::ArgGte(s, val) => {
+                write!(f, "Argument {} must be greater than or equal to {}", s, val)
+            }
+            StatsError::ArgLt(s, val) => write!(f, "Argument {} must be less than {}", s, val),
+            StatsError::ArgLte(s, val) => {
+                write!(f, "Argument {} must be less than or equal to {}", s, val)
             }
         }
     }

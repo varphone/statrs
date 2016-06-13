@@ -51,17 +51,14 @@ impl Distribution for StudentT {
 
 impl Univariate for StudentT {
     fn mean(&self) -> f64 {
-        if self.freedom <= 1.0 {
-            panic!("Cannot calculate mean for StudentT distribution with freedom <= 1.0");
-        }
+        assert!(self.freedom > 1.0,
+                format!("{}", StatsError::ArgGt("freedom", 1.0)));
         self.location
     }
 
     fn variance(&self) -> f64 {
-        if self.freedom <= 1.0 {
-            panic!("Cannot calculate variance for StudentT distribution with freedom <= 1.0");
-        }
-
+        assert!(self.freedom > 1.0,
+                format!("{}", StatsError::ArgGt("freedom", 1.0)));
         if self.freedom == f64::INFINITY {
             self.scale * self.scale
         } else if self.freedom > 2.0 {
@@ -76,21 +73,18 @@ impl Univariate for StudentT {
     }
 
     fn entropy(&self) -> f64 {
-        if self.location != 0.0 || self.scale != 1.0 {
-            panic!("Cannot calculate entropy for StudentT distribution where location is not 0 \
-                    and scale is not 1");
-        }
+        assert!(self.location == 0.0 && self.scale == 1.0,
+                "Cannot calculate entropy for StudentT distribution where location is not 0 and \
+                 scale is not 1");
 
         (self.freedom + 1.0) / 2.0 *
-        (gamma::digamma((self.freedom + 1.0) / 2.0).unwrap() -
-         gamma::digamma(self.freedom / 2.0).unwrap()) +
-        (self.freedom.sqrt() * beta::beta(self.freedom / 2.0, 0.5).unwrap()).ln()
+        (gamma::digamma((self.freedom + 1.0) / 2.0) - gamma::digamma(self.freedom / 2.0)) +
+        (self.freedom.sqrt() * beta::beta(self.freedom / 2.0, 0.5)).ln()
     }
 
     fn skewness(&self) -> f64 {
-        if self.freedom <= 3.0 {
-            panic!("Cannot calculate skewness for StudentT distribution where freedom <= 3");
-        }
+        assert!(self.freedom > 1.0,
+                format!("{}", StatsError::ArgGt("freedom", 3.0)));
         0.0
     }
 
@@ -149,5 +143,67 @@ impl Continuous for StudentT {
             gamma::ln_gamma(self.freedom / 2.0) -
             0.5 * (self.freedom * f64::consts::PI).ln() - self.scale.ln()
         }
+    }
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+#[cfg(test)]
+mod test {
+    use std::f64;
+    use distribution::{Univariate, Continuous};
+    use prec;
+    use super::StudentT;
+
+    fn try_create(location: f64, scale: f64, freedom: f64) -> StudentT {
+        let n = StudentT::new(location, scale, freedom);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+
+    fn create_case(location: f64, scale: f64, freedom: f64) {
+        let n = try_create(location, scale, freedom);
+        assert_eq!(n.location(), location);
+        assert_eq!(n.scale(), scale);
+        assert_eq!(n.freedom(), freedom);
+    }
+
+    fn bad_create_case(location: f64, scale: f64, freedom: f64) {
+        let n = StudentT::new(location, scale, freedom);
+        assert!(n.is_err());
+    }
+
+    fn test_case<F>(location: f64, scale: f64, freedom: f64, expected: f64, eval: F)
+        where F: Fn(StudentT) -> f64
+    {
+
+        let n = try_create(location, scale, freedom);
+        let x = eval(n);
+        assert_eq!(expected, x);
+    }
+
+    fn test_almost<F>(location: f64, scale: f64, freedom: f64, expected: f64, acc: f64, eval: F)
+        where F: Fn(StudentT) -> f64
+    {
+
+        let n = try_create(location, scale, freedom);
+        let x = eval(n);
+        assert!(prec::almost_eq(expected, x, acc));
+    }
+
+    #[test]
+    fn test_create() {
+        create_case(0.0, 0.1, 1.0);
+        create_case(0.0, 1.0, 1.0);
+        create_case(-5.0, 1.0, 3.0);
+        create_case(10.0, 10.0, f64::INFINITY);
+    }
+
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(f64::NAN, 1.0, 1.0);
+        bad_create_case(0.0, f64::NAN, 1.0);
+        bad_create_case(0.0, 1.0, f64::NAN);
+        bad_create_case(0.0, -10.0, 1.0);
+        bad_create_case(0.0, 10.0, -1.0);
     }
 }

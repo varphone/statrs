@@ -60,11 +60,8 @@ impl Univariate for LogNormal {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            0.0
-        } else {
-            0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
-        }
+        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
     }
 }
 
@@ -82,21 +79,15 @@ impl Continuous for LogNormal {
     }
 
     fn pdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            0.0
-        } else {
-            let d = (x.ln() - self.location) / self.scale;
-            (-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.scale)
-        }
+        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        let d = (x.ln() - self.location) / self.scale;
+        (-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.scale)
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            f64::NEG_INFINITY
-        } else {
-            let d = (x.ln() - self.location) / self.scale;
-            (-0.5 * d * d) - consts::LN_SQRT_2PI - (x * self.scale).ln()
-        }
+        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        let d = (x.ln() - self.location) / self.scale;
+        (-0.5 * d * d) - consts::LN_SQRT_2PI - (x * self.scale).ln()
     }
 }
 
@@ -119,21 +110,24 @@ mod test {
         assert!(n.is_err());
     }
 
+    fn get_value<F>(mean: f64, std_dev: f64, eval: F) -> f64
+        where F: Fn(LogNormal) -> f64
+    {
+        let n = try_create(mean, std_dev);
+        eval(n)
+    }
+
     fn test_case<F>(mean: f64, std_dev: f64, expected: f64, eval: F)
         where F: Fn(LogNormal) -> f64
     {
-
-        let n = try_create(mean, std_dev);
-        let x = eval(n);
+        let x = get_value(mean, std_dev, eval);
         assert_eq!(expected, x);
     }
 
     fn test_almost<F>(mean: f64, std_dev: f64, expected: f64, acc: f64, eval: F)
         where F: Fn(LogNormal) -> f64
     {
-
-        let n = try_create(mean, std_dev);
-        let x = eval(n);
+        let x = get_value(mean, std_dev, eval);
         assert!(prec::almost_eq(expected, x, acc));
     }
 
@@ -157,9 +151,6 @@ mod test {
 
     #[test]
     fn test_variance() {
-        // note: variance seems to be only accurate to around 15 orders
-        // of magnitude. Hopefully in the future we can extend the precision
-        // of this function
         test_almost(-1.0, 0.1, 0.001373811865368952608715, 1e-16, |x| x.variance());
         test_case(-1.0, 1.5, 10.898468544015731954, |x| x.variance());
         test_case(-1.0, 2.5, 36245.39726189994988081, |x| x.variance());
@@ -336,7 +327,6 @@ mod test {
 
     #[test]
     fn test_pdf() {
-        test_case(-0.1, 0.1, 0.0, |x| x.pdf(-0.1));
         test_almost(-0.1, 0.1, 1.7968349035073582236359415565799753846986440127816e-104, 1e-118, |x| x.pdf(0.1));
         test_almost(-0.1, 0.1, 0.00000018288923328441197822391757965928083462391836798722, 1e-21, |x| x.pdf(0.5));
         test_case(-0.1, 0.1, 2.3363114904470413709866234247494393485647978367885, |x| x.pdf(0.8));
@@ -367,8 +357,13 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_neg_pdf() {
+        get_value(0.0, 1.0, |x| x.pdf(0.0));
+    }
+
+    #[test]
     fn test_ln_pdf() {
-        test_case(-0.1, 0.1, f64::NEG_INFINITY, |x| x.ln_pdf(-0.1));
         test_case(-0.1, 0.1, -238.88282294119596467794686179588610665317241097599, |x| x.ln_pdf(0.1));
         test_almost(-0.1, 0.1, -15.514385149961296196003163062199569075052113039686, 1e-14, |x| x.ln_pdf(0.5));
         test_case(-0.1, 0.1, 0.84857339958981283964373051826407417105725729082041, |x| x.ln_pdf(0.8));
@@ -399,8 +394,13 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_neg_ln_pdf() {
+        get_value(0.0, 1.0, |x| x.ln_pdf(0.0));
+    }
+
+    #[test]
     fn test_cdf() {
-        test_case(-0.1, 0.1, 0.0, |x| x.cdf(-0.1));
         test_almost(-0.1, 0.1, 0.0, 1e-107, |x| x.cdf(0.1));
         test_almost(-0.1, 0.1, 0.0000000015011556178148777579869633555518882664666520593658, 1e-19, |x| x.cdf(0.5));
         test_almost(-0.1, 0.1, 0.10908001076375810900224507908874442583171381706127, 1e-11, |x| x.cdf(0.8));
@@ -428,5 +428,11 @@ mod test {
         test_almost(2.5, 2.5, 0.027363708266690978870139978537188410215717307180775, 1e-11, |x| x.cdf(0.1));
         test_almost(2.5, 2.5, 0.10075543423327634536450625420610429181921642201567, 1e-11, |x| x.cdf(0.5));
         test_almost(2.5, 2.5, 0.13802019192453118732001307556787218421918336849121, 1e-11, |x| x.cdf(0.8));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_neg_cdf() {
+        get_value(0.0, 1.0, |x| x.cdf(0.0));
     }
 }

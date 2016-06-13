@@ -9,6 +9,7 @@ pub fn erf(x: f64) -> f64 {
         0.0 => 0.0,
         f64::INFINITY => 1.0,
         f64::NEG_INFINITY => -1.0,
+        _ if x.is_nan() => f64::NAN,
         _ => erf_impl(x, false),
     }
 }
@@ -40,6 +41,7 @@ pub fn erfc(x: f64) -> f64 {
         0.0 => 1.0,
         f64::INFINITY => 0.0,
         f64::NEG_INFINITY => 2.0,
+        _ if x.is_nan() => f64::NAN,
         _ => erf_impl(x, true),
     }
 }

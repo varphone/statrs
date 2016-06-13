@@ -59,7 +59,8 @@ impl Univariate for Poisson {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        1.0 - gamma::gamma_lr(x + 1.0, self.lambda).unwrap()
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
+        1.0 - gamma::gamma_lr(x + 1.0, self.lambda)
     }
 }
 
@@ -77,16 +78,12 @@ impl Discrete for Poisson {
     }
 
     fn pmf(&self, x: i64) -> f64 {
-        if x < 0 {
-            panic!("{}", StatsError::ArgNotNegative("x"));
-        }
+        assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
         (-self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)).exp()
     }
 
     fn ln_pmf(&self, x: i64) -> f64 {
-        if x < 0 {
-            panic!("{}", StatsError::ArgNotNegative("x"));
-        }
+        assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
         -self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)
     }
 }
@@ -142,7 +139,7 @@ mod test {
     use distribution::{Univariate, Discrete};
     use prec;
     use super::Poisson;
-    
+
     fn try_create(lambda: f64) -> Poisson {
         let n = Poisson::new(lambda);
         assert!(n.is_ok());
@@ -159,88 +156,92 @@ mod test {
         assert!(n.is_err());
     }
 
+    fn get_value<T, F>(lambda: f64, eval: F) -> T
+        where T: PartialEq + Debug,
+              F: Fn(Poisson) -> T
+    {
+        let n = try_create(lambda);
+        eval(n)
+    }
+
     fn test_case<T, F>(lambda: f64, expected: T, eval: F)
         where T: PartialEq + Debug,
               F: Fn(Poisson) -> T
     {
-
-        let n = try_create(lambda);
-        let x = eval(n);
+        let x = get_value(lambda, eval);
         assert_eq!(expected, x);
     }
 
     fn test_almost<F>(lambda: f64, expected: f64, acc: f64, eval: F)
         where F: Fn(Poisson) -> f64
     {
-
-        let n = try_create(lambda);
-        let x = eval(n);
+        let x = get_value(lambda, eval);
         assert!(prec::almost_eq(expected, x, acc));
     }
-    
+
     #[test]
     fn test_create() {
         create_case(1.5);
         create_case(5.4);
         create_case(10.8);
     }
-    
+
     #[test]
     fn test_bad_create() {
         bad_create_case(f64::NAN);
         bad_create_case(-1.5);
         bad_create_case(0.0);
     }
-    
+
     #[test]
     fn test_mean() {
         test_case(1.5, 1.5, |x| x.mean());
         test_case(5.4, 5.4, |x| x.mean());
         test_case(10.8, 10.8, |x| x.mean());
     }
-    
+
     #[test]
     fn test_variance() {
         test_case(1.5, 1.5, |x| x.variance());
         test_case(5.4, 5.4, |x| x.variance());
         test_case(10.8, 10.8, |x| x.variance());
     }
-    
+
     #[test]
     fn test_std_dev() {
         test_case(1.5, (1.5f64).sqrt(), |x| x.std_dev());
         test_case(5.4, (5.4f64).sqrt(), |x| x.std_dev());
         test_case(10.8, (10.8f64).sqrt(), |x| x.std_dev());
     }
-    
+
     #[test]
     fn test_entropy() {
         test_almost(1.5, 1.531959153102376331946, 1e-15, |x| x.entropy());
         test_almost(5.4, 2.244941839577643504608, 1e-15, |x| x.entropy());
         test_case(10.8, 2.600596429676975222694, |x| x.entropy());
     }
-    
+
     #[test]
     fn test_skewness() {
         test_almost(1.5, 0.8164965809277260327324, 1e-15, |x| x.skewness());
         test_almost(5.4, 0.4303314829119352094644, 1e-16, |x| x.skewness());
         test_almost(10.8, 0.3042903097250922852539, 1e-16, |x| x.skewness());
     }
-    
+
     #[test]
     fn test_median() {
         test_case(1.5, 1.0, |x| x.median());
         test_case(5.4, 5.0, |x| x.median());
         test_case(10.8, 11.0, |x| x.median());
     }
-    
+
     #[test]
     fn test_mode() {
         test_case(1.5, 1, |x| x.mode());
         test_case(5.4, 5, |x| x.mode());
         test_case(10.8, 10, |x| x.mode());
     }
-    
+
     #[test]
     fn test_min_max() {
         test_case(1.5, 0, |x| x.min());
@@ -250,7 +251,7 @@ mod test {
         test_case(5.4, i64::MAX, |x| x.max());
         test_case(10.8, i64::MAX, |x| x.max());
     }
-    
+
     #[test]
     fn test_pmf() {
         test_almost(1.5, 0.334695240222645000000000000000, 1e-15, |x| x.pmf(1));
@@ -263,7 +264,13 @@ mod test {
         test_almost(10.8, 0.121365183659420000000000000000, 1e-15, |x| x.pmf(10));
         test_almost(10.8, 0.003908139778574110000000000000, 1e-16, |x| x.pmf(20));
     }
-    
+
+    #[test]
+    #[should_panic]
+    fn test_neg_pmf() {
+        get_value(1.5, |x| x.pmf(-1));
+    }
+
     #[test]
     fn test_ln_pmf() {
         test_almost(1.5, -1.09453489189183485135413967177, 1e-15, |x| x.ln_pmf(1));
@@ -276,7 +283,13 @@ mod test {
         test_almost(10.8, -2.10895123177378079525424989992, 1e-14, |x| x.ln_pmf(10));
         test_almost(10.8, -5.54469377815000936289610059500, 1e-14, |x| x.ln_pmf(20));
     }
-    
+
+    #[test]
+    #[should_panic]
+    fn test_neg_ln_pmf() {
+        get_value(1.5, |x| x.ln_pmf(-1));
+    }
+
     #[test]
     fn test_cdf() {
         test_almost(1.5, 0.5578254003710750000000, 1e-15, |x| x.cdf(1.0));
@@ -288,5 +301,11 @@ mod test {
         test_almost(10.8, 0.0002407141402518290000, 1e-16, |x| x.cdf(1.0));
         test_almost(10.8, 0.4839692359955690000000, 1e-15, |x| x.cdf(10.0));
         test_almost(10.8, 0.9961800769608090000000, 1e-15, |x| x.cdf(20.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_neg_cdf() {
+        get_value(1.5, |x| x.cdf(-1.0));
     }
 }

@@ -2,7 +2,6 @@ use std::f64;
 use consts;
 use error::StatsError;
 use prec;
-use result::Result;
 
 /// The order of approximation for the gamma_ln function
 const GAMMA_N: usize = 11;
@@ -75,47 +74,41 @@ pub fn gamma(x: f64) -> f64 {
 /// Computes the upper incomplete gamma function
 /// Gamma(a,x) = int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0
 /// where a is the argument for the gamma function and
-/// x is the lower intergral limit
-pub fn gamma_ui(a: f64, x: f64) -> Result<f64> {
-    match gamma_ur(a, x) {
-        Ok(v) => Ok(v * gamma(a)),
-        Err(e) => Err(e),
-    }
+/// x is the lower intergral limit.
+/// Panics if a or x are less than 0.0
+pub fn gamma_ui(a: f64, x: f64) -> f64 {
+    gamma_ur(a, x) * gamma(a)
 }
 
 /// Computes the lower incomplete gamma function
 /// gamma(a,x) = int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0
 /// where a is the argument for the gamma function and x
 /// is the upper integral limit
-pub fn gamma_li(a: f64, x: f64) -> Result<f64> {
-    match gamma_lr(a, x) {
-        Ok(v) => Ok(v * gamma(a)),
-        Err(e) => Err(e),
-    }
+/// Panics if a or x are less than 0.0
+pub fn gamma_li(a: f64, x: f64) -> f64 {
+    gamma_lr(a, x) * gamma(a)
 }
 
 /// Computes the upper incomplete regularized gamma function
 /// Q(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0
 /// where a is the argument for the gamma function and
-/// x is the lower integral limit
-pub fn gamma_ur(a: f64, x: f64) -> Result<f64> {
+/// x is the lower integral limit.
+/// Panics if a or x are less than 0.0
+pub fn gamma_ur(a: f64, x: f64) -> f64 {
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
     let big_inv = 2.22044604925031308085e-16;
 
     if x < 1.0 || x <= a {
-        return match gamma_lr(a, x) {
-            Ok(v) => Ok(1.0 - v),
-            Err(e) => Err(e),
-        };
+        return 1.0 - gamma_lr(a, x);
     }
 
     let mut ax = a * x.ln() - x - ln_gamma(a);
     if ax < -709.78271289338399 {
         return if a < x {
-            Ok(0.0)
+            0.0
         } else {
-            Ok(1.0)
+            1.0
         };
     }
 
@@ -158,36 +151,34 @@ pub fn gamma_ur(a: f64, x: f64) -> Result<f64> {
             }
         }
     }
-    Ok(ans * ax)
+    ans * ax
 }
 
 /// Computes the lower incomplete regularized gamma function
 /// P(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for real a > 0, x > 0
-/// where a is the argument for the gamma function and x is the upper integral limit
-pub fn gamma_lr(a: f64, x: f64) -> Result<f64> {
+/// where a is the argument for the gamma function and x is the upper integral limit.
+/// Panics if a or x are less than 0.0
+pub fn gamma_lr(a: f64, x: f64) -> f64 {
+    assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
+    assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
+
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
     let big_inv = 2.22044604925031308085e-16;
 
-    if a < 0.0 {
-        return Err(StatsError::ArgMustBePositive("a"));
-    }
-    if x < 0.0 {
-        return Err(StatsError::ArgMustBePositive("x"));
+    if prec::almost_eq(a, 0.0, prec::DEFAULT_F64_ACC) {
+        return 1.0;
     }
     if prec::almost_eq(a, 0.0, prec::DEFAULT_F64_ACC) {
-        return Ok(1.0);
-    }
-    if prec::almost_eq(a, 0.0, prec::DEFAULT_F64_ACC) {
-        return Ok(0.0);
+        return 0.0;
     }
 
     let ax = a * x.ln() - x - ln_gamma(a);
     if ax < -709.78271289338399 {
         if a < x {
-            return Ok(1.0);
+            return 1.0;
         }
-        return Ok(0.0);
+        return 0.0;
     }
     if x <= 1.0 || x <= a {
         let mut r2 = a;
@@ -202,7 +193,7 @@ pub fn gamma_lr(a: f64, x: f64) -> Result<f64> {
                 break;
             }
         }
-        return Ok(ax.exp() * ans2 / a);
+        return ax.exp() * ans2 / a;
     }
 
     let mut y = 1.0 - a;
@@ -246,7 +237,7 @@ pub fn gamma_lr(a: f64, x: f64) -> Result<f64> {
             }
         }
     }
-    Ok(1.0 - ax.exp() * ans)
+    1.0 - ax.exp() * ans
 }
 
 
@@ -254,7 +245,7 @@ pub fn gamma_lr(a: f64, x: f64) -> Result<f64> {
 /// the gamma function. The implementation is based on
 /// "Algorithm AS 103", Jose Bernardo, Applied Statistics, Volume 25, NUmber 3
 /// 1976, pages 315 - 317
-pub fn digamma(x: f64) -> Result<f64> {
+pub fn digamma(x: f64) -> f64 {
     let c = 12.0;
     let d1 = -0.57721566490153286;
     let d2 = 1.6449340668482264365;
@@ -265,18 +256,17 @@ pub fn digamma(x: f64) -> Result<f64> {
     let s6 = 1.0 / 240.0;
     let s7 = 1.0 / 132.0;
 
-    if x == f64::NEG_INFINITY {
-        return Err(StatsError::ArgIntervalExclMin("x", f64::NEG_INFINITY, f64::INFINITY));
+    if x == f64::NEG_INFINITY || x.is_nan() {
+        return f64::NAN;
     }
     if x <= 0.0 && x.floor() == x {
-        return Ok(f64::NEG_INFINITY);
+        return f64::NEG_INFINITY;
     }
     if x < 0.0 {
-        return digamma(1.0 - x)
-                   .and_then(|v| Ok(v + f64::consts::PI / (-f64::consts::PI * x).tan()));
+        return digamma(1.0 - x) + f64::consts::PI / (-f64::consts::PI * x).tan();
     }
     if x <= s {
-        return Ok(d1 - 1.0 / x + d2 * x);
+        return d1 - 1.0 / x + d2 * x;
     }
 
     let mut result = 0.0;
@@ -293,6 +283,5 @@ pub fn digamma(x: f64) -> Result<f64> {
 
         result -= r * (s3 - (r * (s4 - (r * (s5 - (r * (s6 - (r * s7))))))));
     }
-
-    Ok(result)
+    result
 }

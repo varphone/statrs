@@ -50,8 +50,8 @@ impl Univariate for Chi {
 
     fn entropy(&self) -> f64 {
         gamma::ln_gamma(self.freedom / 2.0) +
-        (self.freedom - (2.0f64).ln() -
-         (self.freedom - 1.0) * gamma::digamma(self.freedom / 2.0).unwrap()) / 2.0
+        (self.freedom - (2.0f64).ln() - (self.freedom - 1.0) * gamma::digamma(self.freedom / 2.0)) /
+        2.0
     }
 
     fn skewness(&self) -> f64 {
@@ -64,21 +64,21 @@ impl Univariate for Chi {
     }
 
     fn cdf(&self, x: f64) -> f64 {
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         if x == f64::INFINITY {
             1.0
         } else if self.freedom == f64::INFINITY {
-            0.0  
+            0.0
         } else {
-            gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0).unwrap()
+            gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0)
         }
     }
 }
 
 impl Continuous for Chi {
     fn mode(&self) -> f64 {
-        if self.freedom < 1.0 {
-            panic!("Cannot calculate Chi distribution mode for freedom < 1");
-        }
+        assert!(self.freedom >= 1.0,
+                format!("{}", StatsError::ArgGte("freedom", 1.0)));
         (self.freedom - 1.0).sqrt()
     }
 
@@ -91,6 +91,7 @@ impl Continuous for Chi {
     }
 
     fn pdf(&self, x: f64) -> f64 {
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         match (self.freedom, x) {
             (f64::INFINITY, _) | (_, f64::INFINITY) | (_, 0.0) => 0.0,
             (_, _) if self.freedom > 160.0 => self.ln_pdf(x),
@@ -102,6 +103,7 @@ impl Continuous for Chi {
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         match (self.freedom, x) {
             (f64::INFINITY, _) | (_, f64::INFINITY) | (_, 0.0) => f64::NEG_INFINITY,
             (_, _) => {
@@ -119,7 +121,7 @@ mod test {
     use distribution::{Univariate, Continuous};
     use prec;
     use super::Chi;
-    
+
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);
         assert!(n.is_ok());
@@ -136,37 +138,41 @@ mod test {
         assert!(n.is_err());
     }
 
-    fn test_case<F>(freedom: f64, expected: f64, eval: F)
+    fn get_value<F>(freedom: f64, eval: F) -> f64
         where F: Fn(Chi) -> f64
     {
         let n = try_create(freedom);
-        let x = eval(n);
+        eval(n)
+    }
+
+    fn test_case<F>(freedom: f64, expected: f64, eval: F)
+        where F: Fn(Chi) -> f64
+    {
+        let x = get_value(freedom, eval);
         assert_eq!(expected, x);
     }
 
     fn test_almost<F>(freedom: f64, expected: f64, acc: f64, eval: F)
         where F: Fn(Chi) -> f64
     {
-        let n = try_create(freedom);
-        let x = eval(n);
+        let x = get_value(freedom, eval);
         assert!(prec::almost_eq(expected, x, acc));
     }
-    
+
     fn test_is_nan<F>(freedom: f64, eval: F)
-        where F : Fn(Chi) -> f64 
+        where F : Fn(Chi) -> f64
     {
-        let n = try_create(freedom);
-        let x = eval(n);
+        let x = get_value(freedom, eval);
         assert!(x.is_nan());
     }
-    
+
     #[test]
     fn test_create() {
         create_case(1.0);
         create_case(3.0);
         create_case(f64::INFINITY);
     }
-    
+
     #[test]
     fn test_bad_create() {
         bad_create_case(0.0);
@@ -175,7 +181,7 @@ mod test {
         bad_create_case(f64::NEG_INFINITY);
         bad_create_case(f64::NAN);
     }
-    
+
     #[test]
     fn test_mean() {
         test_almost(1.0, 0.7978845608028653558799, 1e-15, |x| x.mean());
@@ -184,7 +190,7 @@ mod test {
         test_almost(5.0, 2.12769216214097428235, 1e-14, |x| x.mean());
         test_is_nan(f64::INFINITY, |x| x.mean());
     }
-    
+
     #[test]
     fn test_variance() {
         test_almost(1.0, 0.3633802276324186569245, 1e-15, |x| x.variance());
@@ -193,7 +199,7 @@ mod test {
         test_almost(3.0, 0.4535209105296746277, 1e-14, |x| x.variance());
         test_is_nan(f64::INFINITY, |x| x.variance());
     }
-    
+
     #[test]
     fn test_std_dev() {
         test_almost(1.0, 0.6028102749890869742759, 1e-15, |x| x.std_dev());
@@ -202,7 +208,7 @@ mod test {
         test_almost(3.0, 0.67343961164285148374, 1e-14, |x| x.std_dev());
         test_is_nan(f64::INFINITY, |x| x.std_dev());
     }
-    
+
     #[test]
     fn test_entropy() {
         test_almost(1.0, 0.7257913526447274323631, 1e-15, |x| x.entropy());
@@ -211,7 +217,7 @@ mod test {
         test_almost(3.0, 0.99615419810620560239, 1e-14, |x| x.entropy());
         test_is_nan(f64::INFINITY, |x| x.entropy());
     }
-    
+
     #[test]
     fn test_skewness() {
         test_almost(1.0, 0.995271746431156042444, 1e-14, |x| x.skewness());
@@ -220,18 +226,13 @@ mod test {
         test_almost(3.0, 0.485692828049590809, 1e-12, |x| x.skewness());
         test_is_nan(f64::INFINITY, |x| x.skewness());
     }
-    
+
     #[test]
     #[should_panic]
     fn test_median() {
-        // should always panic
-        test_case(1.0, 0.0, |x| x.median());
-        test_case(2.0, 0.0, |x| x.median());
-        test_case(2.5, 0.0, |x| x.median());
-        test_case(3.0, 0.0, |x| x.median());
-        test_case(f64::INFINITY, 0.0, |x| x.median());
+        get_value(1.0, |x| x.median());
     }
-    
+
     #[test]
     fn test_mode() {
         test_case(1.0, 0.0, |x| x.mode());
@@ -240,7 +241,7 @@ mod test {
         test_case(3.0, f64::consts::SQRT_2, |x| x.mode());
         test_case(f64::INFINITY, f64::INFINITY, |x| x.mode());
     }
-    
+
     #[test]
     fn test_min_max() {
         test_case(1.0, 0.0, |x| x.min());
@@ -254,7 +255,7 @@ mod test {
         test_case(3.0, f64::INFINITY, |x| x.max());
         test_case(f64::INFINITY, f64::INFINITY, |x| x.max());
     }
-    
+
     #[test]
     fn test_pdf() {
         test_case(1.0, 0.0, |x| x.pdf(0.0));
@@ -278,7 +279,13 @@ mod test {
         test_case(f64::INFINITY, 0.0, |x| x.pdf(5.5));
         test_case(f64::INFINITY, 0.0, |x| x.pdf(f64::INFINITY));
     }
-    
+
+    #[test]
+    #[should_panic]
+    fn test_neg_pdf() {
+        get_value(1.0, |x| x.pdf(-1.0));
+    }
+
     #[test]
     fn test_ln_pdf() {
         test_case(1.0, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
@@ -302,7 +309,13 @@ mod test {
         test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(5.5));
         test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
     }
-    
+
+    #[test]
+    #[should_panic]
+    fn test_neg_ln_pdf() {
+        get_value(1.0, |x| x.ln_pdf(-1.0));
+    }
+
     #[test]
     fn test_cdf() {
         test_case(1.0, 0.0, |x| x.cdf(0.0));
@@ -325,5 +338,11 @@ mod test {
         test_case(f64::INFINITY, 0.0, |x| x.cdf(1.0));
         test_case(f64::INFINITY, 0.0, |x| x.cdf(5.5));
         test_case(f64::INFINITY, 1.0, |x| x.cdf(f64::INFINITY));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_neg_cdf() {
+        get_value(1.0, |x| x.cdf(-1.0));
     }
 }

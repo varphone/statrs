@@ -135,7 +135,6 @@ mod test {
         where T: PartialEq + Debug,
               F: Fn(DiscreteUniform) -> T
     {
-
         let n = try_create(min, max);
         let x = eval(n);
         assert_eq!(expected, x);
