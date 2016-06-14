@@ -11,7 +11,6 @@ pub struct StudentT {
     location: f64,
     scale: f64,
     freedom: f64,
-    n: normal::Normal,
 }
 
 impl StudentT {
@@ -24,7 +23,6 @@ impl StudentT {
                 location: location,
                 scale: scale,
                 freedom: freedom,
-                n: normal::Normal::new(location, scale).unwrap(),
             })
         }
     }
@@ -94,7 +92,7 @@ impl Univariate for StudentT {
 
     fn cdf(&self, x: f64) -> f64 {
         if self.freedom == f64::INFINITY {
-            self.n.cdf(x)
+            normal::cdf_unchecked(x, self.location, self.scale)
         } else {
             let k = (x - self.location) / self.scale;
             let h = self.freedom / (self.freedom + k * k);
@@ -123,7 +121,7 @@ impl Continuous for StudentT {
 
     fn pdf(&self, x: f64) -> f64 {
         if self.freedom >= 1e8 {
-            self.n.pdf(x)
+            normal::pdf_unchecked(x, self.location, self.scale)
         } else {
             let d = (x - self.location) / self.scale;
             (gamma::ln_gamma((self.freedom + 1.0) / 2.0) - gamma::ln_gamma(self.freedom / 2.0))
@@ -135,7 +133,7 @@ impl Continuous for StudentT {
 
     fn ln_pdf(&self, x: f64) -> f64 {
         if self.freedom >= 1e8 {
-            self.n.ln_pdf(x)
+            normal::ln_pdf_unchecked(x, self.location, self.scale)
         } else {
             let d = (x - self.location) / self.scale;
             gamma::ln_gamma((self.freedom + 1.0) / 2.0) -
