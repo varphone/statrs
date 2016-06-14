@@ -57,7 +57,7 @@ impl Univariate for Normal {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-       cdf_unchecked(x, self.mean, self.std_dev)
+        cdf_unchecked(x, self.mean, self.std_dev)
     }
 }
 
@@ -86,14 +86,14 @@ impl Continuous for Normal {
 /// performs an unchecked cdf calculation for a normal distribution
 /// with the given mean and standard deviation at x
 pub fn cdf_unchecked(x: f64, mean: f64, std_dev: f64) -> f64 {
-     0.5 * erf::erfc((mean - x) / (std_dev * f64::consts::SQRT_2))
+    0.5 * erf::erfc((mean - x) / (std_dev * f64::consts::SQRT_2))
 }
 
 /// performs an unchecked pdf calculation for a normal distribution
 /// with the given mean and standard deviation at x
 pub fn pdf_unchecked(x: f64, mean: f64, std_dev: f64) -> f64 {
     let d = (x - mean) / std_dev;
-        (-0.5 * d * d).exp() / (consts::SQRT_2PI * std_dev)
+    (-0.5 * d * d).exp() / (consts::SQRT_2PI * std_dev)
 }
 
 /// performs an unchecked log(pdf) calculation for a normal distribution
