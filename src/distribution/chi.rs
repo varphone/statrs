@@ -92,24 +92,23 @@ impl Continuous for Chi {
 
     fn pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        match (self.freedom, x) {
-            (f64::INFINITY, _) | (_, f64::INFINITY) | (_, 0.0) => 0.0,
-            (_, _) if self.freedom > 160.0 => self.ln_pdf(x),
-            (_, _) => {
-                (2.0f64).powf(1.0 - self.freedom / 2.0) * x.powf(self.freedom - 1.0) *
-                (-x * x / 2.0).exp() / gamma::gamma(self.freedom / 2.0)
-            }
+        if self.freedom == f64::INFINITY || x == f64::INFINITY || x == 0.0 {
+            0.0
+        } else if self.freedom > 160.0 {
+            self.ln_pdf(x)
+        } else {
+            (2.0f64).powf(1.0 - self.freedom / 2.0) * x.powf(self.freedom - 1.0) *
+            (-x * x / 2.0).exp() / gamma::gamma(self.freedom / 2.0)
         }
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        match (self.freedom, x) {
-            (f64::INFINITY, _) | (_, f64::INFINITY) | (_, 0.0) => f64::NEG_INFINITY,
-            (_, _) => {
-                (1.0 - self.freedom / 2.0) * (2.0f64).ln() + ((self.freedom - 1.0) * x.ln()) -
-                x * x / 2.0 - gamma::ln_gamma(self.freedom / 2.0)
-            }
+        if self.freedom == f64::INFINITY || x == f64::INFINITY || x == 0.0 {
+            f64::NEG_INFINITY
+        } else {
+            (1.0 - self.freedom / 2.0) * (2.0f64).ln() + ((self.freedom - 1.0) * x.ln()) -
+            x * x / 2.0 - gamma::ln_gamma(self.freedom / 2.0)
         }
     }
 }

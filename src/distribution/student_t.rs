@@ -81,7 +81,7 @@ impl Univariate for StudentT {
     }
 
     fn skewness(&self) -> f64 {
-        assert!(self.freedom > 1.0,
+        assert!(self.freedom > 3.0,
                 format!("{}", StatsError::ArgGt("freedom", 3.0)));
         0.0
     }

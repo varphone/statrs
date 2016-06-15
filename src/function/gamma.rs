@@ -3,9 +3,6 @@ use consts;
 use error::StatsError;
 use prec;
 
-/// The order of approximation for the gamma_ln function
-const GAMMA_N: usize = 11;
-
 /// Auxiliary variable when evaluating the gamma_ln function
 const GAMMA_R: f64 = 10.900511;
 
@@ -29,18 +26,18 @@ const GAMMA_DK: &'static [f64] = &[2.48574089138753565546e-5,
 /// Glendon Ralph Pugh, 2004 p. 116
 pub fn ln_gamma(x: f64) -> f64 {
     if x < 0.5 {
-        let mut s = GAMMA_DK[0];
-        for i in 1..GAMMA_N {
-            s += GAMMA_DK[i] / (i as f64 - x);
-        }
+        let s = GAMMA_DK.iter()
+                        .enumerate()
+                        .skip(1)
+                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
         consts::LN_PI - (f64::consts::PI * x).sin().ln() - s.ln() - consts::LN_2_SQRT_E_OVER_PI -
         (0.5 - x) * ((0.5 - x + GAMMA_R) / f64::consts::E).ln()
     } else {
-        let mut s = GAMMA_DK[0];
-        for i in 1..GAMMA_N {
-            s += GAMMA_DK[i] / (x + i as f64 - 1.0);
-        }
+        let s = GAMMA_DK.iter()
+                        .enumerate()
+                        .skip(1)
+                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
         s.ln() + consts::LN_2_SQRT_E_OVER_PI +
         (x - 0.5) * ((x - 0.5 + GAMMA_R) / f64::consts::E).ln()
@@ -53,19 +50,19 @@ pub fn ln_gamma(x: f64) -> f64 {
 /// Glendon Ralph Pugh, 2004 p. 116
 pub fn gamma(x: f64) -> f64 {
     if x < 0.5 {
-        let mut s = GAMMA_DK[0];
-        for i in 1..GAMMA_N {
-            s += GAMMA_DK[i] / (i as f64 - x);
-        }
+        let s = GAMMA_DK.iter()
+                        .enumerate()
+                        .skip(1)
+                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
         f64::consts::PI /
         ((f64::consts::PI * x).sin() * s * consts::TWO_SQRT_E_OVER_PI *
          ((0.5 - x + GAMMA_R) / f64::consts::E).powf(0.5 - x))
     } else {
-        let mut s = GAMMA_DK[0];
-        for i in 1..GAMMA_N {
-            s += GAMMA_DK[i] / (x + i as f64 - 1.0);
-        }
+        let s = GAMMA_DK.iter()
+                        .enumerate()
+                        .skip(1)
+                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
         s * consts::TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / f64::consts::E).powf(x - 0.5)
     }
@@ -122,9 +119,9 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
     let mut qkm1 = z * x;
     let mut ans = pkm1 / qkm1;
     loop {
-        y = y + 1.0;
-        z = z + 2.0;
-        c = c + 1.0;
+        y += 1.0;
+        z += 2.0;
+        c += 1.0;
         let yc = y * c;
         let pk = pkm1 * z - pkm2 * yc;
         let qk = qkm1 * z - qkm2 * yc;
@@ -243,7 +240,7 @@ pub fn gamma_lr(a: f64, x: f64) -> f64 {
 
 /// Computes the Digamma function which is defined as the derivative of
 /// the gamma function. The implementation is based on
-/// "Algorithm AS 103", Jose Bernardo, Applied Statistics, Volume 25, NUmber 3
+/// "Algorithm AS 103", Jose Bernardo, Applied Statistics, Volume 25, Number 3
 /// 1976, pages 315 - 317
 pub fn digamma(x: f64) -> f64 {
     let c = 12.0;

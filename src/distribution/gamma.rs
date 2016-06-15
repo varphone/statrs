@@ -44,16 +44,18 @@ impl Distribution for Gamma {
 
 impl Univariate for Gamma {
     fn mean(&self) -> f64 {
-        match (self.shape, self.rate) {
-            (_, f64::INFINITY) => self.shape,
-            (_, _) => self.shape / self.rate,
+        if self.rate == f64::INFINITY {
+            self.shape
+        } else {
+            self.shape / self.rate
         }
     }
 
     fn variance(&self) -> f64 {
-        match (self.shape, self.rate) {
-            (_, f64::INFINITY) => 0.0,
-            (_, _) => self.shape / (self.rate * self.rate),
+        if self.rate == f64::INFINITY {
+            0.0
+        } else {
+            self.shape / (self.rate * self.rate)
         }
     }
 
@@ -62,19 +64,19 @@ impl Univariate for Gamma {
     }
 
     fn entropy(&self) -> f64 {
-        match (self.shape, self.rate) {
-            (_, f64::INFINITY) => 0.0,
-            (_, _) => {
-                self.shape - self.rate.ln() + gamma::ln_gamma(self.shape) +
-                (1.0 - self.shape) * gamma::digamma(self.shape)
-            }
+        if self.rate == f64::INFINITY {
+            0.0
+        } else {
+            self.shape - self.rate.ln() + gamma::ln_gamma(self.shape) +
+            (1.0 - self.shape) * gamma::digamma(self.shape)
         }
     }
 
     fn skewness(&self) -> f64 {
-        match (self.shape, self.rate) {
-            (_, f64::INFINITY) => 0.0,
-            (_, _) => 2.0 / self.shape.sqrt(),
+        if self.rate == f64::INFINITY {
+            0.0
+        } else {
+            2.0 / self.shape.sqrt()
         }
     }
 
@@ -84,19 +86,22 @@ impl Univariate for Gamma {
 
     fn cdf(&self, x: f64) -> f64 {
         assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        match (self.shape, self.rate) {
-            (_, f64::INFINITY) if x == self.shape => 1.0,
-            (_, f64::INFINITY) => 0.0,
-            (_, _) => gamma::gamma_lr(self.shape, x * self.rate),
+        if x == self.shape && self.rate == f64::INFINITY {
+            1.0
+        } else if self.rate == f64::INFINITY {
+            0.0
+        } else {
+            gamma::gamma_lr(self.shape, x * self.rate)
         }
     }
 }
 
 impl Continuous for Gamma {
     fn mode(&self) -> f64 {
-        match (self.shape, self.rate) {
-            (_, f64::INFINITY) => self.shape,
-            (_, _) => (self.shape - 1.0) / self.rate,
+        if self.rate == f64::INFINITY {
+            self.shape
+        } else {
+            (self.shape - 1.0) / self.rate
         }
     }
 
@@ -110,28 +115,31 @@ impl Continuous for Gamma {
 
     fn pdf(&self, x: f64) -> f64 {
         assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        match (self.shape, self.rate) {
-            (_, f64::INFINITY) if x == self.shape => f64::INFINITY,
-            (_, f64::INFINITY) => 0.0,
-            (1.0, _) => self.rate * (-self.rate * x).exp(),
-            (_, _) if self.shape > 160.0 => self.ln_pdf(x).exp(),
-            (_, _) => {
-                self.rate.powf(self.shape) * x.powf(self.shape - 1.0) * (-self.rate * x).exp() /
-                gamma::gamma(self.shape)
-            }
+        if x == self.shape && self.rate == f64::INFINITY {
+            f64::INFINITY
+        } else if self.rate == f64::INFINITY {
+            0.0
+        } else if self.shape == 1.0 {
+            self.rate * (-self.rate * x).exp()
+        } else if self.shape > 160.0 {
+            self.ln_pdf(x).exp()
+        } else {
+            self.rate.powf(self.shape) * x.powf(self.shape - 1.0) * (-self.rate * x).exp() /
+            gamma::gamma(self.shape)
         }
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
         assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        match (self.shape, self.rate) {
-            (_, f64::INFINITY) if x == self.shape => f64::INFINITY,
-            (_, f64::INFINITY) => f64::NEG_INFINITY,
-            (1.0, _) => self.rate.ln() - self.rate * x,
-            (_, _) => {
-                self.shape * self.rate.ln() + (self.shape - 1.0) * x.ln() - self.rate * x -
-                gamma::ln_gamma(self.shape)
-            }
+        if x == self.shape && self.rate == f64::INFINITY {
+            f64::INFINITY
+        } else if self.rate == f64::INFINITY {
+            f64::NEG_INFINITY
+        } else if self.shape == 1.0 {
+            self.rate.ln() - self.rate * x
+        } else {
+            self.shape * self.rate.ln() + (self.shape - 1.0) * x.ln() - self.rate * x -
+            gamma::ln_gamma(self.shape)
         }
     }
 }
@@ -141,14 +149,16 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
         return shape;
     }
 
-    let mut a = shape;
-    let mut afix = 1.0;
-
-    if shape < 1.0 {
-        a = shape + 1.0;
-        afix = r.next_f64().powf(1.0 / shape);
-    }
-
+    let a = if shape < 1.0 {
+        shape + 1.0
+    } else {
+        shape
+    };
+    let afix = if shape < 1.0 {
+        r.next_f64().powf(1.0 / shape)
+    } else {
+        1.0
+    };
     let d = a - 1.0 / 3.0;
     let c = 1.0 / (9.0 * d).sqrt();
     loop {
@@ -159,8 +169,8 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
             v = 1.0 + c * x;
         }
 
-        v = v * v * v;
-        x = x * x;
+        v *= v * v;
+        x *= x;
         let u = r.next_f64();
         if u < 1.0 - 0.0331 * x * x {
             return afix * d * v / rate;

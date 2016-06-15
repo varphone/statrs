@@ -100,7 +100,7 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> Result<f64> {
 
         d = 1.0 / d;
         let del = d * c;
-        h = h * del;
+        h *= del;
 
         if (del - 1.0).abs() <= eps {
             return if symm_transform {

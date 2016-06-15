@@ -61,10 +61,12 @@ static START: Once = ONCE_INIT;
 fn get_fcache() -> &'static [f64; CACHE_SIZE] {
     unsafe {
         START.call_once(|| {
-            for i in 1..CACHE_SIZE {
-                FCACHE[i] = FCACHE[i - 1] * i as f64;
-            }
+            (1..CACHE_SIZE).fold(FCACHE[0], |acc, i| {
+                let fac = acc * i as f64;
+                FCACHE[i] = fac;
+                fac
+            });
         });
-        return FCACHE;
+        FCACHE
     }
 }
