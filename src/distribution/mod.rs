@@ -1,4 +1,5 @@
 use rand::Rng;
+use super::result::Result;
 
 pub use self::bernoulli::Bernoulli;
 pub use self::binomial::Binomial;
@@ -30,16 +31,40 @@ mod triangular;
 mod uniform;
 mod weibull;
 
-/// Distribution is trait that should be implemented
-/// by structs that represent a statistical distribution
+/// The `Distribution` trait is used to specify an interface
+/// for sampling distributions
+///
+/// # Examples  
+///
+/// A trivial implementation that just samples from the supplied
+/// random number generator
+///
+/// ```
+/// use rand::StdRng;
+///
+/// struct Foo;
+///
+/// impl Distribution for Foo {
+///     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
+///         r.next_f64()
+///     }
+/// }
+/// ```
 pub trait Distribution {
-    /// Draws a random sample according to the distribution
-    /// and the supplied random number generator
+    /// Draws a random sample using the supplied random number generator
     fn sample<R: Rng>(&self, r: &mut R) -> f64;
 }
 
-/// Univariate should be implemented by structs
-/// representing a univariate statistical distribution.
+/// The `Univariate` trait extends the `Distribution` 
+/// trait provides an interface for interacting with
+/// univariate statistical distributions.
+///
+/// # Remarks
+///
+/// All methods provided by the `Univariate` trait are unchecked, meaning
+/// they will panic if in an invalid state or encountering invalid input
+/// depending on the implementing Distribution. The `CheckedUnivariate`
+/// trait provides a panic-safe interface for univariate distributions
 pub trait Univariate : Distribution {
     fn mean(&self) -> f64;
     fn variance(&self) -> f64;
@@ -50,9 +75,23 @@ pub trait Univariate : Distribution {
     fn cdf(&self, x: f64) -> f64;
 }
 
-/// Continuous should be implemented by structs
-/// representing a continuous univariate statistical
-/// distribution
+/// The `CheckedUnivariate` trait extends the `Distribution` trait and
+/// provides a checked interface for interacting with univariate statistical
+/// distributions. This means implementors should return an `Err` instead of
+/// panicking on an invalid state or input.
+pub trait CheckedUnivariate : Distribution {
+    fn mean(&self) -> Result<f64>;
+    fn variance(&self) -> Result<f64>;
+    fn std_dev(&self) -> Result<f64>;
+    fn entropy(&self) -> Result<f64>;
+    fn skewness(&self) -> Result<f64>;
+    fn median(&self) -> Result<f64>;
+    fn cdf(&self) -> Result<f64>;
+}
+
+/// The `Continuous` trait extends the `Univariate`
+/// trait and provides an interface for interacting with continuous
+/// univariate statistical distributions
 pub trait Continuous : Univariate {
     fn mode(&self) -> f64;
     fn min(&self) -> f64;
@@ -61,13 +100,39 @@ pub trait Continuous : Univariate {
     fn ln_pdf(&self, x: f64) -> f64;
 }
 
-/// Discrete should be implemented by structs
-/// representing a discrete univariate statistical
-/// distribution
+/// The `CheckedContinous` trait extendds the `CheckedUnivariate`
+/// trait and provides a checked interface for interacting with
+/// continous univariate statistical distributions. This means 
+/// implementors should return an `Err` instead of panicking on
+/// an invalid state or input.
+pub trait CheckedContinuous : CheckedUnivariate {
+    fn mode(&self) -> Result<f64>;
+    fn min(&self) -> Result<f64>;
+    fn max(&self) -> Result<f64>;
+    fn pdf(&self, x: f64) -> Result<f64>;
+    fn ln_pdf(&self, x: f64) -> Result<f64>;
+}
+
+/// The `Discrete` trait extends the `Univariate`
+/// trait and provides an interface for interacting with discrete
+/// univariate statistical distributions
 pub trait Discrete : Univariate {
     fn mode(&self) -> i64;
     fn min(&self) -> i64;
     fn max(&self) -> i64;
     fn pmf(&self, x: i64) -> f64;
     fn ln_pmf(&self, x: i64) -> f64;
+}
+
+/// The `CheckedDiscrete` trait extends the `CheckedUnivariate` trait
+/// and provides a checked interface for interacting with discrete
+/// univariate statistical distributions. This means implementors
+/// should return an `Err` instead of panicking on an invalid state
+/// or input
+pub trait CheckedDiscrete : CheckedUnivariate {
+    fn mode(&self) -> Result<i64>;
+    fn min(&self) -> Result<i64>;
+    fn max(&self) -> Result<i64>;
+    fn pmf(&self, x: i64) -> Result<f64>;
+    fn ln_pmf(&self, x: i64) -> Result<f64>;
 }
