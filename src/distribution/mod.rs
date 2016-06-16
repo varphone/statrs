@@ -1,3 +1,6 @@
+//! Defines common interfaces for interacting with statistical distributions and provides
+//! concrete implementations for a variety of distributions. 
+
 use rand::Rng;
 use super::result::Result;
 
@@ -62,8 +65,8 @@ pub trait Distribution {
 /// # Remarks
 ///
 /// All methods provided by the `Univariate` trait are unchecked, meaning
-/// they will panic if in an invalid state or encountering invalid input
-/// depending on the implementing Distribution. The `CheckedUnivariate`
+/// they can panic if in an invalid state or encountering invalid input
+/// depending on the implementing distribution. The `CheckedUnivariate`
 /// trait provides a panic-safe interface for univariate distributions
 pub trait Univariate : Distribution {
     fn mean(&self) -> f64;
@@ -92,6 +95,13 @@ pub trait CheckedUnivariate : Distribution {
 /// The `Continuous` trait extends the `Univariate`
 /// trait and provides an interface for interacting with continuous
 /// univariate statistical distributions
+///
+/// # Remarks
+///
+/// All methods provided by the `Continuous` trait are unchecked, meaning
+/// they can panic if in an invalid state or encountering invalid input
+/// depending on the implementing distribution. The `CheckedContinuous`
+/// trait provides a panic-safe interface for continuous distributions
 pub trait Continuous : Univariate {
     fn mode(&self) -> f64;
     fn min(&self) -> f64;
@@ -100,7 +110,7 @@ pub trait Continuous : Univariate {
     fn ln_pdf(&self, x: f64) -> f64;
 }
 
-/// The `CheckedContinous` trait extendds the `CheckedUnivariate`
+/// The `CheckedContinous` trait extends the `CheckedUnivariate`
 /// trait and provides a checked interface for interacting with
 /// continous univariate statistical distributions. This means 
 /// implementors should return an `Err` instead of panicking on
@@ -116,6 +126,13 @@ pub trait CheckedContinuous : CheckedUnivariate {
 /// The `Discrete` trait extends the `Univariate`
 /// trait and provides an interface for interacting with discrete
 /// univariate statistical distributions
+///
+/// # Remakrs
+///
+/// All methods provided by the `Discrete` trait are unchecked, meaning
+/// they can panic if in an invalid state or encountering invalid input
+/// depending on the implementing distribution. The `CheckedDiscrete` trait
+/// provides a panic-safe interface for discrete distributions
 pub trait Discrete : Univariate {
     fn mode(&self) -> i64;
     fn min(&self) -> i64;

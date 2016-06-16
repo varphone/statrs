@@ -1,3 +1,5 @@
+//! Provides utility functions for working with floating point precision
+
 /// Standard epsilon, maximum relative precision of IEEE 754 double-precision
 /// floating point numbers (64 bit). 2^-53
 pub const F64_PREC: f64 = 0.00000000000000011102230246251565;

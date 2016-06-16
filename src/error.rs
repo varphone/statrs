@@ -2,19 +2,30 @@ use std::error::Error;
 use std::fmt;
 
 /// Enumeration of possible errors thrown
-/// within the statrs library
+/// within the `statrs` library
 #[derive(Debug)]
 pub enum StatsError {
+    /// Generic bad input parameter error
     BadParams,
+    /// An argument should have been positive and was not
     ArgMustBePositive(&'static str),
+    /// An argument should have been non-negative and was not
     ArgNotNegative(&'static str),
+    /// An argument should have fallen between an inclusive range but didn't
     ArgIntervalIncl(&'static str, f64, f64),
+    /// An argument should have fallen between an exclusive range but didn't
     ArgIntervalExcl(&'static str, f64, f64),
+    /// An argument should have fallen in a range excluding the min but didn't
     ArgIntervalExclMin(&'static str, f64, f64),
+    /// An argument should have falled in a range excluding the max but didn't
     ArgIntervalExclMax(&'static str, f64, f64),
+    /// An argument must have been greater than a value but wasn't
     ArgGt(&'static str, f64),
+    /// An argument must have been greater than or equal to a value but wasn't
     ArgGte(&'static str, f64),
+    /// An argument must have been less than a value but wasn't
     ArgLt(&'static str, f64),
+    /// An argument must have been less than or equal to a value but wasn't
     ArgLte(&'static str, f64),
 }
 
