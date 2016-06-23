@@ -5,6 +5,7 @@ All unit tests are borrowed from the Math.NET source when possible and filled in
 when not.  
 
 ## Planned for v 0.1.0
+Unchecked implementations and doc comments for:
 - [x] Bernoulli
 - [ ] Beta
 - [x] Binomial
