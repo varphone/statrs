@@ -69,12 +69,96 @@ pub trait Distribution {
 /// depending on the implementing distribution. The `CheckedUnivariate`
 /// trait provides a panic-safe interface for univariate distributions
 pub trait Univariate : Distribution {
+    /// Returns the mean for a given distribution. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.5, n.mean());
+    /// ```
     fn mean(&self) -> f64;
+    
+    /// Returns the variance for a given distribution. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(1.0 / 12.0, n.variance());
+    /// ```
     fn variance(&self) -> f64;
+    
+    /// Returns the standard deviation for a given distribution. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// 
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev());
+    /// ```
     fn std_dev(&self) -> f64;
+    
+    /// Returns the entropy for a given distribution. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.0, n.entropy());
+    /// ```
     fn entropy(&self) -> f64;
+    
+    /// Returns the skewness for a given distribution. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.0, n.skewness());
+    /// ```
     fn skewness(&self) -> f64;
+    
+    /// Returns the median for a given distribution. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.5, n.median());
+    /// ```
     fn median(&self) -> f64;
+    
+    /// Returns the cumulative distribution function calculated
+    /// at `x` for a given distribution. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.5, n.cdf(0.5));
+    /// ```
     fn cdf(&self, x: f64) -> f64;
 }
 
