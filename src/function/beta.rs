@@ -6,9 +6,9 @@ use result::Result;
 
 /// Computes the natural logarithm
 /// of the Euler Beta function
-/// where a is the first Beta parameter
-/// and b is the second Beta parameter
-/// and a > 0, b > 0. Panics if a <= 0.0 or b <= 0.0
+/// where `a` is the first Beta parameter
+/// and `b` is the second Beta parameter
+/// and `a > 0`, `b > 0`. Panics if `a <= 0.0` or `b <= 0.0`
 pub fn ln_beta(a: f64, b: f64) -> f64 {
     assert!(a > 0.0, format!("{}", StatsError::ArgMustBePositive("a")));
     assert!(b > 0.0, format!("{}", StatsError::ArgMustBePositive("b")));
@@ -16,18 +16,18 @@ pub fn ln_beta(a: f64, b: f64) -> f64 {
 }
 
 /// Computes the Euler Beta function
-/// where a is the first Beta parameter
-/// and b is the second Beta parameter.
-/// Panics if a <= 0.0 or b <= 0.0
+/// where `a` is the first Beta parameter
+/// and `b` is the second Beta parameter.
+/// Panics if `a <= 0.0` or `b <= 0.0`
 pub fn beta(a: f64, b: f64) -> f64 {
     ln_beta(a, b).exp()
 }
 
 /// Computes the regularized lower incomplete beta function
-/// I_x(a,b) = 1/Beta(a,b) * int(t^(a-1)*(1-t)^(b-1), t=0..x)
-/// a > 0, b > 0, 1 >= x >= 0 where a is the first Beta parameter,
-/// b is the second Beta parameter, and x is the upper limit of the
-/// integral. Panics if a < 0.0, b < 0.0, x < 0.0, or x > 1.0
+/// `I_x(a,b) = 1/Beta(a,b) * int(t^(a-1)*(1-t)^(b-1), t=0..x)`
+/// `a > 0`, `b > 0`, `1 >= x >= 0` where `a` is the first Beta parameter,
+/// `b` is the second Beta parameter, and `x` is the upper limit of the
+/// integral. Panics if `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
 pub fn beta_reg(a: f64, b: f64, x: f64) -> Result<f64> {
     assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
     assert!(b >= 0.0, format!("{}", StatsError::ArgNotNegative("b")));

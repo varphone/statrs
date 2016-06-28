@@ -1,7 +1,6 @@
 use function::evaluate;
 
-// exp_minus_one calculates a numerically
-// stable exp(x) - 1
+/// Calculates a numerically stable `exp(x) - 1`
 pub fn exp_minus_one(pow: f64) -> f64 {
     let x = pow.abs();
     if x > 0.1 {

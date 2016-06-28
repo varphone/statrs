@@ -33,7 +33,7 @@ pub fn erf_inv(x: f64) -> f64 {
 }
 
 /// `erfc` calculates the complementary error function
-/// at x.
+/// at `x`.
 pub fn erfc(x: f64) -> f64 {
     if x.is_nan() {
         f64::NAN
@@ -47,7 +47,7 @@ pub fn erfc(x: f64) -> f64 {
 }
 
 /// `erfc_inv` calculates the complementary inverse
-/// error function at x.
+/// error function at `x`.
 pub fn erfc_inv(x: f64) -> f64 {
     if x <= 0.0 {
         f64::INFINITY

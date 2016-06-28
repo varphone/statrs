@@ -7,9 +7,9 @@ use function::gamma;
 /// overflowing
 pub const MAX_ARG: u64 = 170;
 
-/// Computes the factorial function x -> x! for
-/// 170 >= x >= 0. All factorials larger than 170!
-/// will overflow an f64. 
+/// Computes the factorial function `x -> x!` for
+/// `170 >= x >= 0`. All factorials larger than `170!`
+/// will overflow an `f64`. 
 pub fn factorial(x: u64) -> f64 {
     if x > MAX_ARG {
         f64::INFINITY
@@ -18,8 +18,8 @@ pub fn factorial(x: u64) -> f64 {
     }
 }
 
-/// Computes the logarithmic factorial function x -> ln(x!)
-/// for x >= 0. 
+/// Computes the logarithmic factorial function `x -> ln(x!)`
+/// for `x >= 0`. 
 pub fn ln_factorial(x: u64) -> f64 {
     if x <= 1 {
         0.0
@@ -30,8 +30,8 @@ pub fn ln_factorial(x: u64) -> f64 {
     }
 }
 
-/// Computes the binomial coefficient n choose k
-/// where k and n are non-negative values
+/// Computes the binomial coefficient `n choose k`
+/// where `k` and `n` are non-negative values
 pub fn binomial(n: u64, k: u64) -> f64 {
     if k > n {
         0.0
@@ -41,7 +41,7 @@ pub fn binomial(n: u64, k: u64) -> f64 {
 }
 
 /// Computes the natural logarithm of the binomial coefficient
-/// ln(n choose k) where k and n are non-negative values
+/// `ln(n choose k)` where `k` and `n` are non-negative values
 pub fn ln_binomial(n: u64, k: u64) -> f64 {
     if k > n {
         0.0
