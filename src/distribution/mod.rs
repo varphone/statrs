@@ -164,7 +164,7 @@ pub trait Univariate : Distribution {
 
 /// The `CheckedUnivariate` trait extends the `Distribution` trait and
 /// provides a checked interface for interacting with univariate statistical
-/// distributions. This means implementors should return an `Err` instead of
+/// distributions. This means implementors should return an `StatsError` instead of
 /// panicking on an invalid state or input.
 pub trait CheckedUnivariate : Distribution {
     /// Returns the mean for a given distribution or a `StatsError`
@@ -289,7 +289,7 @@ pub trait Continuous : Univariate {
 /// The `CheckedContinous` trait extends the `CheckedUnivariate`
 /// trait and provides a checked interface for interacting with
 /// continous univariate statistical distributions. This means 
-/// implementors should return an `Err` instead of panicking on
+/// implementors should return an `StatsError` instead of panicking on
 /// an invalid state or input.
 pub trait CheckedContinuous : CheckedUnivariate {
     fn mode(&self) -> Result<f64>;
@@ -320,7 +320,7 @@ pub trait Discrete : Univariate {
 /// The `CheckedDiscrete` trait extends the `CheckedUnivariate` trait
 /// and provides a checked interface for interacting with discrete
 /// univariate statistical distributions. This means implementors
-/// should return an `Err` instead of panicking on an invalid state
+/// should return an `StatsError` instead of panicking on an invalid state
 /// or input
 pub trait CheckedDiscrete : CheckedUnivariate {
     fn mode(&self) -> Result<i64>;
