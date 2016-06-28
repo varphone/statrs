@@ -167,12 +167,104 @@ pub trait Univariate : Distribution {
 /// distributions. This means implementors should return an `Err` instead of
 /// panicking on an invalid state or input.
 pub trait CheckedUnivariate : Distribution {
+    /// Returns the mean for a given distribution or a `StatsError`
+    /// depending on the implementor. This method should not panic
+    /// but return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.5, n.mean().unwrap());
+    /// ```
     fn mean(&self) -> Result<f64>;
+    
+    /// Returns the variance for a given distribution or a `StatsError`
+    /// depending on the implementor. This method should not panic
+    /// but return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(1.0 / 12.0, n.variance().unwrap());
+    /// ```
     fn variance(&self) -> Result<f64>;
+    
+    /// Returns the standard deviation for a given distribution or
+    /// a `StatsError` depending on the implementor. This method should
+    /// not panic but return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// 
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev().unwrap());
+    /// ```
     fn std_dev(&self) -> Result<f64>;
+    
+    /// Returns the entropy for a given distribution or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.0, n.entropy().unwrap());
+    /// ```
     fn entropy(&self) -> Result<f64>;
+    
+    /// Returns the skewness for a given distribution or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.0, n.skewness().unwrap());
+    /// ```
     fn skewness(&self) -> Result<f64>;
+    
+    /// Returns the median for a given distribution or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.5, n.median());
+    /// ```
     fn median(&self) -> Result<f64>;
+    
+    /// Returns the cumulative distribution function calculated
+    /// at `x` for a given distribution or a `StatsError` depending
+    /// on the implementor. This method should not panic but return a
+    /// `StatsError` instead. `StatsError`s should be returned for argument
+    /// bound violations.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0, 1).unwrap();
+    /// assert_eq!(0.5, n.cdf(0.5));
+    /// ```
     fn cdf(&self) -> Result<f64>;
 }
 
