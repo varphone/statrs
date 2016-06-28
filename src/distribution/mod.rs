@@ -77,7 +77,7 @@ pub trait Univariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.5, n.mean());
     /// ```
     fn mean(&self) -> f64;
@@ -90,7 +90,7 @@ pub trait Univariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(1.0 / 12.0, n.variance());
     /// ```
     fn variance(&self) -> f64;
@@ -103,7 +103,7 @@ pub trait Univariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     /// 
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev());
     /// ```
     fn std_dev(&self) -> f64;
@@ -116,7 +116,7 @@ pub trait Univariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.0, n.entropy());
     /// ```
     fn entropy(&self) -> f64;
@@ -129,7 +129,7 @@ pub trait Univariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.0, n.skewness());
     /// ```
     fn skewness(&self) -> f64;
@@ -142,7 +142,7 @@ pub trait Univariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.5, n.median());
     /// ```
     fn median(&self) -> f64;
@@ -156,7 +156,7 @@ pub trait Univariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.5, n.cdf(0.5));
     /// ```
     fn cdf(&self, x: f64) -> f64;
@@ -176,7 +176,7 @@ pub trait CheckedUnivariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.5, n.mean().unwrap());
     /// ```
     fn mean(&self) -> Result<f64>;
@@ -190,7 +190,7 @@ pub trait CheckedUnivariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(1.0 / 12.0, n.variance().unwrap());
     /// ```
     fn variance(&self) -> Result<f64>;
@@ -204,7 +204,7 @@ pub trait CheckedUnivariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     /// 
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev().unwrap());
     /// ```
     fn std_dev(&self) -> Result<f64>;
@@ -218,7 +218,7 @@ pub trait CheckedUnivariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.0, n.entropy().unwrap());
     /// ```
     fn entropy(&self) -> Result<f64>;
@@ -232,7 +232,7 @@ pub trait CheckedUnivariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.0, n.skewness().unwrap());
     /// ```
     fn skewness(&self) -> Result<f64>;
@@ -246,7 +246,7 @@ pub trait CheckedUnivariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.5, n.median());
     /// ```
     fn median(&self) -> Result<f64>;
@@ -262,7 +262,7 @@ pub trait CheckedUnivariate : Distribution {
     /// ```
     /// use statrs::distribution::Uniform;
     ///
-    /// let n = Uniform::new(0, 1).unwrap();
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.5, n.cdf(0.5));
     /// ```
     fn cdf(&self) -> Result<f64>;
