@@ -177,9 +177,9 @@ pub trait CheckedUnivariate : Distribution {
     /// use statrs::distribution::Uniform;
     ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.5, n.mean().unwrap());
+    /// assert_eq!(0.5, n.checked_mean().unwrap());
     /// ```
-    fn mean(&self) -> Result<f64>;
+    fn checked_mean(&self) -> Result<f64>;
     
     /// Returns the variance for a given distribution or a `StatsError`
     /// depending on the implementor. This method should not panic
@@ -191,9 +191,9 @@ pub trait CheckedUnivariate : Distribution {
     /// use statrs::distribution::Uniform;
     ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(1.0 / 12.0, n.variance().unwrap());
+    /// assert_eq!(1.0 / 12.0, n.checked_variance().unwrap());
     /// ```
-    fn variance(&self) -> Result<f64>;
+    fn checked_variance(&self) -> Result<f64>;
     
     /// Returns the standard deviation for a given distribution or
     /// a `StatsError` depending on the implementor. This method should
@@ -205,9 +205,9 @@ pub trait CheckedUnivariate : Distribution {
     /// use statrs::distribution::Uniform;
     /// 
     /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev().unwrap());
+    /// assert_eq!((1f64 / 12f64).sqrt(), n.checked_std_dev().unwrap());
     /// ```
-    fn std_dev(&self) -> Result<f64>;
+    fn checked_std_dev(&self) -> Result<f64>;
     
     /// Returns the entropy for a given distribution or a `StatsError`
     /// depending on the implementor. This method should not panic but
@@ -219,9 +219,9 @@ pub trait CheckedUnivariate : Distribution {
     /// use statrs::distribution::Uniform;
     ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.0, n.entropy().unwrap());
+    /// assert_eq!(0.0, n.checked_entropy().unwrap());
     /// ```
-    fn entropy(&self) -> Result<f64>;
+    fn checked_entropy(&self) -> Result<f64>;
     
     /// Returns the skewness for a given distribution or a `StatsError`
     /// depending on the implementor. This method should not panic but
@@ -233,9 +233,9 @@ pub trait CheckedUnivariate : Distribution {
     /// use statrs::distribution::Uniform;
     ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.0, n.skewness().unwrap());
+    /// assert_eq!(0.0, n.checked_skewness().unwrap());
     /// ```
-    fn skewness(&self) -> Result<f64>;
+    fn checked_skewness(&self) -> Result<f64>;
     
     /// Returns the median for a given distribution or a `StatsError`
     /// depending on the implementor. This method should not panic but
@@ -247,9 +247,9 @@ pub trait CheckedUnivariate : Distribution {
     /// use statrs::distribution::Uniform;
     ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.5, n.median());
+    /// assert_eq!(0.5, n.checked_median().unwrap());
     /// ```
-    fn median(&self) -> Result<f64>;
+    fn checked_median(&self) -> Result<f64>;
     
     /// Returns the cumulative distribution function calculated
     /// at `x` for a given distribution or a `StatsError` depending
@@ -263,9 +263,9 @@ pub trait CheckedUnivariate : Distribution {
     /// use statrs::distribution::Uniform;
     ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.5, n.cdf(0.5));
+    /// assert_eq!(0.5, n.checked_cdf(0.5).unwrap());
     /// ```
-    fn cdf(&self) -> Result<f64>;
+    fn checked_cdf(&self) -> Result<f64>;
 }
 
 /// The `Continuous` trait extends the `Univariate`
@@ -279,10 +279,66 @@ pub trait CheckedUnivariate : Distribution {
 /// depending on the implementing distribution. The `CheckedContinuous`
 /// trait provides a panic-safe interface for continuous distributions
 pub trait Continuous : Univariate {
+    /// Returns the mode for a given distribution. May panic depending on
+    /// the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.5, n.mode());
+    /// ```
     fn mode(&self) -> f64;
+    
+    /// Returns the minimum value in the domain of a given distribution 
+    /// representable by a double-precision float. May panic depending on
+    /// the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.0, n.min());
+    /// ```
     fn min(&self) -> f64;
+    
+    /// Returns the maximum value in the domain of a given distribution 
+    /// representable by a double-precision float. May panic depending on
+    /// the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(1.0, n.min());
+    /// ```
     fn max(&self) -> f64;
+    
+    /// Returns the probability density function calculated at `x` for a given distribution. 
+    /// May panic depending on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(1.0, n.pdf(0.5));
+    /// ```
     fn pdf(&self, x: f64) -> f64;
+    
+    /// Returns the log of the probability density function calculated at `x` for a given distribution. 
+    /// May panic depending on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.0, n.ln_pdf(0.5));
+    /// ```
     fn ln_pdf(&self, x: f64) -> f64;
 }
 
@@ -292,18 +348,79 @@ pub trait Continuous : Univariate {
 /// implementors should return an `StatsError` instead of panicking on
 /// an invalid state or input.
 pub trait CheckedContinuous : CheckedUnivariate {
-    fn mode(&self) -> Result<f64>;
-    fn min(&self) -> Result<f64>;
-    fn max(&self) -> Result<f64>;
-    fn pdf(&self, x: f64) -> Result<f64>;
-    fn ln_pdf(&self, x: f64) -> Result<f64>;
+    /// Returns the mode for a given distribution or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.5, n.checked_mode().unwrap());
+    /// ```
+    fn checked_mode(&self) -> Result<f64>;
+    
+    /// Returns the minimum value in the domain of a given distribution 
+    /// representable by a double-precision float or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.0, n.checked_min().unwrap());
+    /// ```
+    fn checked_min(&self) -> Result<f64>;
+    
+    /// Returns the maximum value in the domain of a given distribution 
+    /// representable by a double-precision float or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(1.0, n.checked_max().unwrap());
+    /// ```
+    fn checked_max(&self) -> Result<f64>;
+    
+    /// Returns the probability density function calculated at `x` 
+    /// for a given distribution or a `StatsError` depending on the implementor. 
+    /// This method should not panic but return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(1.0, n.checked_pdf(0.5).unwrap());
+    /// ```
+    fn checked_pdf(&self, x: f64) -> Result<f64>;
+    
+    /// Returns the log of the probability density function calculated at `x` 
+    /// for a given distribution or a `StatsError` depending on the implementor. 
+    /// This method should not panic but return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(1.0, n.checked_pdf(0.5).unwrap());
+    /// ```
+    fn checked_ln_pdf(&self, x: f64) -> Result<f64>;
 }
 
 /// The `Discrete` trait extends the `Univariate`
 /// trait and provides an interface for interacting with discrete
 /// univariate statistical distributions
 ///
-/// # Remakrs
+/// # Remarks
 ///
 /// All methods provided by the `Discrete` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
@@ -323,9 +440,9 @@ pub trait Discrete : Univariate {
 /// should return an `StatsError` instead of panicking on an invalid state
 /// or input
 pub trait CheckedDiscrete : CheckedUnivariate {
-    fn mode(&self) -> Result<i64>;
-    fn min(&self) -> Result<i64>;
-    fn max(&self) -> Result<i64>;
-    fn pmf(&self, x: i64) -> Result<f64>;
-    fn ln_pmf(&self, x: i64) -> Result<f64>;
+    fn checked_mode(&self) -> Result<i64>;
+    fn checked_min(&self) -> Result<i64>;
+    fn checked_max(&self) -> Result<i64>;
+    fn checked_pmf(&self, x: i64) -> Result<f64>;
+    fn checked_ln_pmf(&self, x: i64) -> Result<f64>;
 }
