@@ -2,7 +2,7 @@ use std::f64;
 use rand::Rng;
 use error::StatsError;
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
+use super::{Distribution, Univariate, CheckedUnivariate, Continuous, CheckedContinuous};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Uniform {
@@ -65,6 +65,36 @@ impl Univariate for Uniform {
     }
 }
 
+impl CheckedUnivariate for Uniform {
+    fn checked_mean(&self) -> Result<f64> {
+        Ok(self.mean())
+    }
+    
+    fn checked_variance(&self) -> Result<f64> {
+        Ok(self.variance())
+    }
+    
+    fn checked_std_dev(&self) -> Result<f64> {
+        Ok(self.std_dev())
+    }
+    
+    fn checked_entropy(&self) -> Result<f64> {
+        Ok(self.entropy())
+    }
+    
+    fn checked_skewness(&self) -> Result<f64> {
+        Ok(self.skewness())
+    }
+    
+    fn checked_median(&self) -> Result<f64> {
+        Ok(self.median())
+    }
+    
+    fn checked_cdf(&self, x: f64) -> Result<f64> {
+        Ok(self.cdf(x))
+    }
+}
+
 impl Continuous for Uniform {
     fn mode(&self) -> f64 {
         (self.min + self.max) / 2.0
@@ -92,6 +122,28 @@ impl Continuous for Uniform {
         } else {
             -(self.max - self.min).ln()
         }
+    }
+}
+
+impl CheckedContinuous for Uniform {
+    fn checked_mode(&self) -> Result<f64> {
+        Ok(self.mode())
+    }
+
+    fn checked_min(&self) -> Result<f64> {
+        Ok(self.min())
+    }
+
+    fn checked_max(&self) -> Result<f64> {
+        Ok(self.max())
+    }
+
+    fn checked_pdf(&self, x: f64) -> Result<f64> {
+        Ok(self.pdf(x))
+    }
+
+    fn checked_ln_pdf(&self, x: f64) -> Result<f64> {
+       Ok(self.ln_pdf(x))
     }
 }
 

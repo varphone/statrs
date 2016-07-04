@@ -271,7 +271,7 @@ pub trait CheckedUnivariate : Distribution {
     /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.5, n.checked_cdf(0.5).unwrap());
     /// ```
-    fn checked_cdf(&self) -> Result<f64>;
+    fn checked_cdf(&self, x: f64) -> Result<f64>;
 }
 
 /// The `Continuous` trait extends the `Univariate`
