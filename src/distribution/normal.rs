@@ -1,5 +1,6 @@
 use std::f64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use consts;
 use error::StatsError;
 use function::erf;
@@ -22,6 +23,18 @@ impl Normal {
                 std_dev: std_dev,
             })
         }
+    }
+}
+
+impl Sample<f64> for Normal {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for Normal {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 

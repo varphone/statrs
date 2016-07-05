@@ -1,6 +1,7 @@
 use std::f64;
 use std::i64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{factorial, gamma};
 use result::Result;
@@ -22,6 +23,18 @@ impl Poisson {
 
     pub fn lambda(&self) -> f64 {
         self.lambda
+    }
+}
+
+impl Sample<f64> for Poisson {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for Poisson {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 

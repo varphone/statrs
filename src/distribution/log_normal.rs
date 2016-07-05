@@ -1,5 +1,6 @@
 use std::f64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use consts;
 use error::StatsError;
 use function::erf;
@@ -23,6 +24,18 @@ impl LogNormal {
                 scale: scale,
             })
         }
+    }
+}
+
+impl Sample<f64> for LogNormal {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for LogNormal {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 

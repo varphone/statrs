@@ -1,5 +1,6 @@
 use std::f64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
 use super::{Distribution, Univariate, Continuous};
@@ -42,6 +43,18 @@ impl Triangular {
 
     pub fn mode(&self) -> f64 {
         self.mode
+    }
+}
+
+impl Sample<f64> for Triangular {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for Triangular {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 

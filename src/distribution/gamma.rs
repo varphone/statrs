@@ -1,5 +1,6 @@
 use std::f64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::gamma;
 use result::Result;
@@ -33,6 +34,18 @@ impl Gamma {
 
     pub fn rate(&self) -> f64 {
         self.rate
+    }
+}
+
+impl Sample<f64> for Gamma {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for Gamma {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 

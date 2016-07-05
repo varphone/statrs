@@ -1,4 +1,5 @@
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use result::Result;
 use super::{Binomial, Distribution, Univariate, Discrete};
 
@@ -18,6 +19,18 @@ impl Bernoulli {
 
     pub fn n(&self) -> f64 {
         1.0
+    }
+}
+
+impl Sample<f64> for Bernoulli {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for Bernoulli {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 

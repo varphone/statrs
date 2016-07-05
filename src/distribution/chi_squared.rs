@@ -1,5 +1,6 @@
 use std::f64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use result::Result;
 use super::{Gamma, Distribution, Univariate, Continuous};
 
@@ -29,6 +30,18 @@ impl ChiSquared {
 
     pub fn rate(&self) -> f64 {
         self.g.rate()
+    }
+}
+
+impl Sample<f64> for ChiSquared {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for ChiSquared {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 

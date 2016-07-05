@@ -2,7 +2,6 @@
 //! concrete implementations for a variety of distributions.
 
 use rand::Rng;
-use super::result::Result;
 
 pub use self::bernoulli::Bernoulli;
 pub use self::binomial::Binomial;

@@ -1,5 +1,6 @@
 use std::f64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
 use super::{Distribution, Univariate, Discrete};
@@ -20,6 +21,18 @@ impl DiscreteUniform {
                 max: max,
             })
         }
+    }
+}
+
+impl Sample<f64> for DiscreteUniform {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for DiscreteUniform {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 

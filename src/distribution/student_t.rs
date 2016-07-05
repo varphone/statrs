@@ -1,5 +1,6 @@
 use std::f64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, gamma};
 use result::Result;
@@ -37,6 +38,18 @@ impl StudentT {
 
     pub fn freedom(&self) -> f64 {
         self.freedom
+    }
+}
+
+impl Sample<f64> for StudentT {
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for StudentT {
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
     }
 }
 
