@@ -72,8 +72,7 @@ pub trait Distribution {
 ///
 /// All methods provided by the `Univariate` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
-/// depending on the implementing distribution. The `CheckedUnivariate`
-/// trait provides a panic-safe interface for univariate distributions
+/// depending on the implementing distribution. 
 pub trait Univariate : Distribution {
     /// Returns the mean for a given distribution. May panic depending
     /// on the implementor.
@@ -176,8 +175,7 @@ pub trait Univariate : Distribution {
 ///
 /// All methods provided by the `Continuous` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
-/// depending on the implementing distribution. The `CheckedContinuous`
-/// trait provides a panic-safe interface for continuous distributions
+/// depending on the implementing distribution. 
 pub trait Continuous : Univariate {
     /// Returns the mode for a given distribution. May panic depending on
     /// the implementor.
@@ -255,8 +253,7 @@ pub trait Continuous : Univariate {
 ///
 /// All methods provided by the `Discrete` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
-/// depending on the implementing distribution. The `CheckedDiscrete` trait
-/// provides a panic-safe interface for discrete distributions
+/// depending on the implementing distribution.
 pub trait Discrete : Univariate {
     /// Returns the mode for a given distribution. May panic depending on
     /// the implementor.
