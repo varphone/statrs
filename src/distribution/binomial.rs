@@ -3,7 +3,7 @@ use rand::Rng;
 use error::StatsError;
 use function::{beta, factorial};
 use result::Result;
-use super::{Distribution, Univariate, CheckedUnivariate, Discrete, CheckedDiscrete};
+use super::{Distribution, Univariate, Discrete};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Binomial {
@@ -26,50 +26,6 @@ impl Binomial {
 
     pub fn n(&self) -> i64 {
         self.n
-    }
-
-    fn unchecked_cdf(&self, x: f64) -> f64 {
-        if x >= self.n as f64 {
-            1.0
-        } else {
-            let k = x.floor();
-            beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p).unwrap()
-        }
-    }
-
-    fn unchecked_pmf(&self, x: i64) -> f64 {
-        if x > self.n {
-            0.0
-        } else {
-            match self.p {
-                0.0 if x == 0 => 1.0,
-                0.0 => 0.0,
-                1.0 if x == self.n => 1.0,
-                1.0 => 0.0,
-                _ => {
-                    (factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
-                     (self.n - x) as f64 * (1.0 - self.p).ln())
-                        .exp()
-                }
-            }
-        }
-    }
-
-    fn unchecked_ln_pmf(&self, x: i64) -> f64 {
-        if x > self.n {
-            f64::NEG_INFINITY
-        } else {
-            match self.p {
-                0.0 if x == 0 => 0.0,
-                0.0 => f64::NEG_INFINITY,
-                1.0 if x == self.n => 0.0,
-                1.0 => f64::NEG_INFINITY,
-                _ => {
-                    factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
-                    (self.n - x) as f64 * (1.0 - self.p).ln()
-                }
-            }
-        }
     }
 }
 
@@ -120,41 +76,13 @@ impl Univariate for Binomial {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        self.unchecked_cdf(x)
-    }
-}
-
-impl CheckedUnivariate for Binomial {
-    fn checked_mean(&self) -> Result<f64> {
-        Ok(self.mean())
-    }
-
-    fn checked_variance(&self) -> Result<f64> {
-        Ok(self.variance())
-    }
-
-    fn checked_std_dev(&self) -> Result<f64> {
-        Ok(self.std_dev())
-    }
-
-    fn checked_entropy(&self) -> Result<f64> {
-        Ok(self.entropy())
-    }
-
-    fn checked_skewness(&self) -> Result<f64> {
-        Ok(self.skewness())
-    }
-
-    fn checked_median(&self) -> Result<f64> {
-        Ok(self.median())
-    }
-
-    fn checked_cdf(&self, x: f64) -> Result<f64> {
         if x < 0.0 {
-            Err(StatsError::ArgNotNegative("x"))
+            0.0
+        } else if x >= self.n as f64 {
+            1.0
         } else {
-            Ok(self.unchecked_cdf(x))
+            let k = x.floor();
+            beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p)
         }
     }
 }
@@ -177,42 +105,37 @@ impl Discrete for Binomial {
     }
 
     fn pmf(&self, x: i64) -> f64 {
-        assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
-        self.unchecked_pmf(x)
-    }
-
-    fn ln_pmf(&self, x: i64) -> f64 {
-        assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
-        self.unchecked_ln_pmf(x)
-    }
-}
-
-impl CheckedDiscrete for Binomial {
-    fn checked_mode(&self) -> Result<i64> {
-        Ok(self.mode())
-    }
-
-    fn checked_min(&self) -> Result<i64> {
-        Ok(self.min())
-    }
-
-    fn checked_max(&self) -> Result<i64> {
-        Ok(self.max())
-    }
-
-    fn checked_pmf(&self, x: i64) -> Result<f64> {
-        if x < 0 {
-            Err(StatsError::ArgNotNegative("x"))
+        if x > self.n || x < 0 {
+            0.0
         } else {
-            Ok(self.unchecked_pmf(x))
+            match self.p {
+                0.0 if x == 0 => 1.0,
+                0.0 => 0.0,
+                1.0 if x == self.n => 1.0,
+                1.0 => 0.0,
+                _ => {
+                    (factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
+                     (self.n - x) as f64 * (1.0 - self.p).ln())
+                        .exp()
+                }
+            }
         }
     }
 
-    fn checked_ln_pmf(&self, x: i64) -> Result<f64> {
-        if x < 0 {
-            Err(StatsError::ArgNotNegative("x"))
+    fn ln_pmf(&self, x: i64) -> f64 {
+        if x > self.n || x < 0 {
+            f64::NEG_INFINITY
         } else {
-            Ok(self.unchecked_ln_pmf(x))
+            match self.p {
+                0.0 if x == 0 => 0.0,
+                0.0 => f64::NEG_INFINITY,
+                1.0 if x == self.n => 0.0,
+                1.0 => f64::NEG_INFINITY,
+                _ => {
+                    factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
+                    (self.n - x) as f64 * (1.0 - self.p).ln()
+                }
+            }
         }
     }
 }
@@ -365,12 +288,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
-    fn test_neg_pmf() {
-        get_value(0.0, 1, |x| x.pmf(-1));
-    }
-
-    #[test]
     fn test_ln_pmf() {
         test_case(0.0, 1, 0.0, |x| x.ln_pmf(0));
         test_case(0.0, 1, f64::NEG_INFINITY, |x| x.ln_pmf(1));
@@ -399,12 +316,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
-    fn test_neg_ln_pmf() {
-        get_value(0.0, 1, |x| x.ln_pmf(-1));
-    }
-
-    #[test]
     fn test_cdf() {
         test_case(0.0, 1, 1.0, |x| x.cdf(0.0));
         test_case(0.0, 1, 1.0, |x| x.cdf(1.0));
@@ -430,11 +341,5 @@ mod test {
         test_case(1.0, 10, 0.0, |x| x.cdf(0.0));
         test_case(1.0, 10, 0.0, |x| x.cdf(1.0));
         test_case(1.0, 10, 1.0, |x| x.cdf(10.0));
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_neg_cdf() {
-        get_value(0.0, 1, |x| x.cdf(-1.0));
     }
 }

@@ -11,15 +11,12 @@ pub struct ChiSquared {
 
 impl ChiSquared {
     pub fn new(freedom: f64) -> Result<ChiSquared> {
-        match Gamma::new(freedom / 2.0, 0.5) {
-            Ok(g) => {
-                Ok(ChiSquared {
-                    freedom: freedom,
-                    g: g,
-                })
+        Gamma::new(freedom / 2.0, 0.5).map(|g| {
+            ChiSquared {
+                freedom: freedom,
+                g: g,
             }
-            Err(e) => Err(e),
-        }
+        })
     }
 
     pub fn freedom(&self) -> f64 {

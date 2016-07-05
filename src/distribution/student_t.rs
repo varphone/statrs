@@ -96,7 +96,7 @@ impl Univariate for StudentT {
         } else {
             let k = (x - self.location) / self.scale;
             let h = self.freedom / (self.freedom + k * k);
-            let ib = 0.5 * beta::beta_reg(self.freedom / 2.0, 0.5, h).unwrap();
+            let ib = 0.5 * beta::beta_reg(self.freedom / 2.0, 0.5, h);
             if x <= self.location {
                 ib
             } else {

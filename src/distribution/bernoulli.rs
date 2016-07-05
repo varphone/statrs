@@ -9,10 +9,7 @@ pub struct Bernoulli {
 
 impl Bernoulli {
     pub fn new(p: f64) -> Result<Bernoulli> {
-        match Binomial::new(p, 1) {
-            Ok(b) => Ok(Bernoulli { b: b }),
-            Err(e) => Err(e),
-        }
+        Binomial::new(p, 1).map(|b| Bernoulli { b: b })
     }
 
     pub fn p(&self) -> f64 {

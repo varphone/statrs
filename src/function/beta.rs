@@ -2,7 +2,6 @@ use std::f64;
 use error::StatsError;
 use function::gamma;
 use prec;
-use result::Result;
 
 /// Computes the natural logarithm
 /// of the Euler Beta function
@@ -28,7 +27,7 @@ pub fn beta(a: f64, b: f64) -> f64 {
 /// `a > 0`, `b > 0`, `1 >= x >= 0` where `a` is the first Beta parameter,
 /// `b` is the second Beta parameter, and `x` is the upper limit of the
 /// integral. Panics if `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
-pub fn beta_reg(a: f64, b: f64, x: f64) -> Result<f64> {
+pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
     assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
     assert!(b >= 0.0, format!("{}", StatsError::ArgNotNegative("b")));
     assert!(x >= 0.0 && x <= 1.0,
@@ -104,16 +103,16 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> Result<f64> {
 
         if (del - 1.0).abs() <= eps {
             return if symm_transform {
-                Ok(1.0 - bt * h / a)
+                1.0 - bt * h / a
             } else {
-                Ok(bt * h / a)
+                bt * h / a
             };
         }
     }
 
     if symm_transform {
-        Ok(1.0 - bt * h / a)
+        1.0 - bt * h / a
     } else {
-        Ok(bt * h / a)
+        bt * h / a
     }
 }

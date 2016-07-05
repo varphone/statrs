@@ -166,7 +166,7 @@ pub fn gamma_lr(a: f64, x: f64) -> f64 {
     if prec::almost_eq(a, 0.0, prec::DEFAULT_F64_ACC) {
         return 1.0;
     }
-    if prec::almost_eq(a, 0.0, prec::DEFAULT_F64_ACC) {
+    if prec::almost_eq(x, 0.0, prec::DEFAULT_F64_ACC) {
         return 0.0;
     }
 
