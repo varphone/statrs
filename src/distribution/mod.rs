@@ -519,9 +519,77 @@ pub trait Discrete : Univariate {
 /// should return an `StatsError` instead of panicking on an invalid state
 /// or input
 pub trait CheckedDiscrete : CheckedUnivariate {
+    /// Returns the mode for a given distribution or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedDiscrete, Binomial};
+    ///
+    /// let n = Binomial::new(0.5, 10).unwrap();
+    /// assert_eq!(5, n.checked_mode().unwrap());
+    /// ```
     fn checked_mode(&self) -> Result<i64>;
+    
+    /// Returns the minimum value in the domain of a given distribution 
+    /// representable by a double-precision float or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedDiscrete, Binomial};
+    ///
+    /// let n = Binomial::new(0.5, 10).unwrap();
+    /// assert_eq!(0, n.checked_min().unwrap());
+    /// ```
     fn checked_min(&self) -> Result<i64>;
+
+    /// Returns the maximum value in the domain of a given distribution 
+    /// representable by a double-precision float or a `StatsError`
+    /// depending on the implementor. This method should not panic but
+    /// return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedDiscrete, Binomial};
+    ///
+    /// let n = Binomial::new(0.5, 10).unwrap();
+    /// assert_eq!(10, n.checked_max().unwrap());
+    /// ```
     fn checked_max(&self) -> Result<i64>;
+
+    /// Returns the probability mass function calculated at `x` 
+    /// for a given distribution or a `StatsError` depending on the implementor. 
+    /// This method should not panic but return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedDiscrete, Binomial};
+    /// use statrs::prec;
+    ///
+    /// let n = Binomial::new(0.5, 10).unwrap();
+    /// assert!(prec::almost_eq(n.checked_pmf(5).unwrap(), 0.24609375, 1e-15));
+    /// ```
     fn checked_pmf(&self, x: i64) -> Result<f64>;
+
+    /// Returns the log of the probability mass function calculated at `x` 
+    /// for a given distribution or a `StatsError` depending on the implementor. 
+    /// This method should not panic but return a `StatsError` instead.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedDiscrete, Binomial};
+    /// use statrs::prec;
+    ///
+    /// let n = Binomial::new(0.5, 10).unwrap();
+    /// assert!(prec::almost_eq(n.checked_ln_pmf(5).unwrap(), (0.24609375f64).ln(), 1e-15));
+    /// ```
     fn checked_ln_pmf(&self, x: i64) -> Result<f64>;
 }
