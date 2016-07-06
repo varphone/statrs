@@ -7,7 +7,6 @@ when not.
 ## Planned for v 0.1.0
 Unchecked implementations and doc comments for:
 - [x] Bernoulli
-- [ ] Beta
 - [x] Binomial
 - [x] Chi
 - [x] ChiSquared
@@ -18,9 +17,12 @@ Unchecked implementations and doc comments for:
 - [x] LogNormal
 - [x] Normal
 - [x] Poisson
-- [ ] StudentT
+- [x] StudentT
 - [x] Triangular
 - [ ] Weibull
+
+## Planned for v 0.1.1
+- [ ] Beta
 
 ## Future roadmap
 - [ ] Categorical
