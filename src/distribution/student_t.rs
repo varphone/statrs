@@ -161,6 +161,7 @@ impl Continuous for StudentT {
 #[cfg(test)]
 mod test {
     use std::f64;
+    use std::panic;
     use distribution::{Univariate, Continuous};
     use prec;
     use super::StudentT;
@@ -182,23 +183,36 @@ mod test {
         let n = StudentT::new(location, scale, freedom);
         assert!(n.is_err());
     }
+    
+    fn get_value<F>(location: f64, scale: f64, freedom: f64, eval: F) -> f64
+        where F: Fn(StudentT) -> f64
+    {
+        let n = try_create(location, scale, freedom);
+        eval(n)
+    }
 
     fn test_case<F>(location: f64, scale: f64, freedom: f64, expected: f64, eval: F)
         where F: Fn(StudentT) -> f64
     {
-
-        let n = try_create(location, scale, freedom);
-        let x = eval(n);
+        let x = get_value(location, scale, freedom, eval);
         assert_eq!(expected, x);
     }
 
     fn test_almost<F>(location: f64, scale: f64, freedom: f64, expected: f64, acc: f64, eval: F)
         where F: Fn(StudentT) -> f64
     {
-
-        let n = try_create(location, scale, freedom);
-        let x = eval(n);
+        let x = get_value(location, scale, freedom, eval);
         assert!(prec::almost_eq(expected, x, acc));
+    }
+    
+    fn test_panic<F>(location: f64, scale: f64, freedom: f64, eval: F)
+        where F : Fn(StudentT) -> f64,
+              F : panic::UnwindSafe
+    {
+        let result = panic::catch_unwind(|| {
+            get_value(location, scale, freedom, eval)
+        });
+        assert!(result.is_err());
     }
 
     #[test]
@@ -216,5 +230,140 @@ mod test {
         bad_create_case(0.0, 1.0, f64::NAN);
         bad_create_case(0.0, -10.0, 1.0);
         bad_create_case(0.0, 10.0, -1.0);
+    }
+    
+    #[test]
+    fn test_mean() {
+        test_panic(0.0, 1.0, 1.0, |x| x.mean());
+        test_panic(0.0, 0.1, 1.0, |x| x.mean());
+        test_case(0.0, 1.0, 3.0, 0.0, |x| x.mean());
+        test_panic(0.0, 10.0, 1.0, |x| x.mean());
+        test_case(0.0, 10.0, 2.0, 0.0, |x| x.mean());
+        test_case(0.0, 10.0, f64::INFINITY, 0.0, |x| x.mean());
+        test_panic(10.0, 1.0, 1.0, |x| x.mean());
+        test_case(-5.0, 100.0, 1.5, -5.0, |x| x.mean());
+        test_panic(0.0, f64::INFINITY, 1.0, |x| x.mean());
+    }
+    
+    #[test]
+    fn test_variance() {
+        test_panic(0.0, 1.0, 1.0, |x| x.variance());
+        test_panic(0.0, 0.1, 1.0, |x| x.variance());
+        test_case(0.0, 1.0, 3.0, 3.0, |x| x.variance());
+        test_panic(0.0, 10.0, 1.0, |x| x.variance());
+        test_case(0.0, 10.0, 2.0, f64::INFINITY, |x| x.variance());
+        test_case(0.0, 10.0, 2.5, 500.0, |x| x.variance());
+        test_panic(10.0, 1.0, 1.0, |x| x.variance());
+        test_case(10.0, 1.0, 2.5, 5.0, |x| x.variance());
+        test_case(-5.0, 100.0, 1.5, f64::INFINITY, |x| x.variance());
+        test_panic(0.0, f64::INFINITY, 1.0, |x| x.variance());
+    }
+    
+    #[test]
+    fn test_std_dev() {
+        test_panic(0.0, 1.0, 1.0, |x| x.std_dev());
+        test_panic(0.0, 0.1, 1.0, |x| x.std_dev());
+        test_case(0.0, 1.0, 3.0, 1.7320508075688772935274463415059, |x| x.std_dev());
+        test_panic(0.0, 10.0, 1.0, |x| x.std_dev());
+        test_case(0.0, 10.0, 2.0, f64::INFINITY, |x| x.std_dev());
+        test_case(0.0, 10.0, 2.5, 22.360679774997896964091736687313, |x| x.std_dev());
+        test_case(0.0, 10.0, f64::INFINITY, 10.0, |x| x.std_dev());
+        test_panic(10.0, 1.0, 1.0, |x| x.std_dev());
+        test_case(10.0, 1.0, 2.5, 2.2360679774997896964091736687313, |x| x.std_dev());
+        test_case(-5.0, 100.0, 1.5, f64::INFINITY, |x| x.std_dev());
+        test_panic(0.0, f64::INFINITY, 1.0, |x| x.std_dev());
+    }
+    
+    #[test]
+    fn test_mode() {
+        test_case(0.0, 1.0, 1.0, 0.0, |x| x.mode());
+        test_case(0.0, 0.1, 1.0, 0.0, |x| x.mode());
+        test_case(0.0, 1.0, 3.0, 0.0, |x| x.mode());
+        test_case(0.0, 10.0, 1.0, 0.0, |x| x.mode());
+        test_case(0.0, 10.0, 2.0, 0.0, |x| x.mode());
+        test_case(0.0, 10.0, 2.5, 0.0, |x| x.mode());
+        test_case(0.0, 10.0, f64::INFINITY, 0.0, |x| x.mode());
+        test_case(10.0, 1.0, 1.0, 10.0, |x| x.mode());
+        test_case(10.0, 1.0, 2.5, 10.0, |x| x.mode());
+        test_case(-5.0, 100.0, 1.5, -5.0, |x| x.mode());
+        test_case(0.0, f64::INFINITY, 1.0, 0.0, |x| x.mode());
+    }
+    
+    #[test]
+    fn test_median() {
+        test_case(0.0, 1.0, 1.0, 0.0, |x| x.median());
+        test_case(0.0, 0.1, 1.0, 0.0, |x| x.median());
+        test_case(0.0, 1.0, 3.0, 0.0, |x| x.median());
+        test_case(0.0, 10.0, 1.0, 0.0, |x| x.median());
+        test_case(0.0, 10.0, 2.0, 0.0, |x| x.median());
+        test_case(0.0, 10.0, 2.5, 0.0, |x| x.median());
+        test_case(0.0, 10.0, f64::INFINITY, 0.0, |x| x.median());
+        test_case(10.0, 1.0, 1.0, 10.0, |x| x.median());
+        test_case(10.0, 1.0, 2.5, 10.0, |x| x.median());
+        test_case(-5.0, 100.0, 1.5, -5.0, |x| x.median());
+        test_case(0.0, f64::INFINITY, 1.0, 0.0, |x| x.median());
+    }
+    
+    #[test]
+    fn test_min_max() {
+        test_case(0.0, 1.0, 1.0, f64::NEG_INFINITY, |x| x.min());
+        test_case(2.5, 100.0, 1.5, f64::NEG_INFINITY, |x| x.min());
+        test_case(10.0, f64::INFINITY, 3.5, f64::NEG_INFINITY, |x| x.min());
+        test_case(0.0, 1.0, 1.0, f64::INFINITY, |x| x.max());
+        test_case(2.5, 100.0, 1.5, f64::INFINITY, |x| x.max());
+        test_case(10.0, f64::INFINITY, 5.5, f64::INFINITY, |x| x.max());
+    }
+    
+    #[test]
+    fn test_pdf() {
+        test_almost(0.0, 1.0, 1.0, 0.318309886183791, 1e-15, |x| x.pdf(0.0));
+        test_almost(0.0, 1.0, 1.0, 0.159154943091895, 1e-15, |x| x.pdf(1.0));
+        test_almost(0.0, 1.0, 1.0, 0.159154943091895, 1e-15, |x| x.pdf(-1.0));
+        test_almost(0.0, 1.0, 1.0, 0.063661977236758, 1e-15, |x| x.pdf(2.0));
+        test_almost(0.0, 1.0, 1.0, 0.063661977236758, 1e-15, |x| x.pdf(-2.0));
+        test_almost(0.0, 1.0, 2.0, 0.353553390593274, 1e-15, |x| x.pdf(0.0));
+        test_almost(0.0, 1.0, 2.0, 0.192450089729875, 1e-15, |x| x.pdf(1.0));
+        test_almost(0.0, 1.0, 2.0, 0.192450089729875, 1e-15, |x| x.pdf(-1.0));
+        test_almost(0.0, 1.0, 2.0, 0.068041381743977, 1e-15, |x| x.pdf(2.0));
+        test_almost(0.0, 1.0, 2.0, 0.068041381743977, 1e-15, |x| x.pdf(-2.0));
+        test_almost(0.0, 1.0, f64::INFINITY, 0.398942280401433, 1e-15, |x| x.pdf(0.0));
+        test_almost(0.0, 1.0, f64::INFINITY, 0.241970724519143, 1e-15, |x| x.pdf(1.0));
+        test_almost(0.0, 1.0, f64::INFINITY, 0.053990966513188, 1e-15, |x| x.pdf(2.0));
+    }
+    
+    #[test]
+    fn test_ln_pdf() {
+        test_almost(0.0, 1.0, 1.0, -1.144729885849399, 1e-14, |x| x.ln_pdf(0.0));
+        test_almost(0.0, 1.0, 1.0, -1.837877066409348, 1e-14, |x| x.ln_pdf(1.0));
+        test_almost(0.0, 1.0, 1.0, -1.837877066409348, 1e-14, |x| x.ln_pdf(-1.0));
+        test_almost(0.0, 1.0, 1.0, -2.754167798283503, 1e-14, |x| x.ln_pdf(2.0));
+        test_almost(0.0, 1.0, 1.0, -2.754167798283503, 1e-14, |x| x.ln_pdf(-2.0));
+        test_almost(0.0, 1.0, 2.0, -1.039720770839917, 1e-14, |x| x.ln_pdf(0.0));
+        test_almost(0.0, 1.0, 2.0, -1.647918433002166, 1e-14, |x| x.ln_pdf(1.0));
+        test_almost(0.0, 1.0, 2.0, -1.647918433002166, 1e-14, |x| x.ln_pdf(-1.0));
+        test_almost(0.0, 1.0, 2.0, -2.687639203842085, 1e-14, |x| x.ln_pdf(2.0));
+        test_almost(0.0, 1.0, 2.0, -2.687639203842085, 1e-14, |x| x.ln_pdf(-2.0));
+        test_almost(0.0, 1.0, f64::INFINITY, -0.918938533204672, 1e-14, |x| x.ln_pdf(0.0));
+        test_almost(0.0, 1.0, f64::INFINITY, -1.418938533204674, 1e-14, |x| x.ln_pdf(1.0));
+        test_almost(0.0, 1.0, f64::INFINITY, -2.918938533204674, 1e-14, |x| x.ln_pdf(2.0));
+    }
+    
+    #[test]
+    fn test_cdf() {
+        test_case(0.0, 1.0, 1.0, 0.5, |x| x.cdf(0.0));
+        test_almost(0.0, 1.0, 1.0, 0.75, 1e-15, |x| x.cdf(1.0));
+        test_almost(0.0, 1.0, 1.0, 0.25, 1e-15, |x| x.cdf(-1.0));
+        test_almost(0.0, 1.0, 1.0, 0.852416382349567, 1e-15, |x| x.cdf(2.0));
+        test_almost(0.0, 1.0, 1.0, 0.147583617650433, 1e-15, |x| x.cdf(-2.0));
+        test_case(0.0, 1.0, 2.0, 0.5, |x| x.cdf(0.0));
+        test_almost(0.0, 1.0, 2.0, 0.788675134594813, 1e-15, |x| x.cdf(1.0));
+        test_almost(0.0, 1.0, 2.0, 0.211324865405187, 1e-15, |x| x.cdf(-1.0));
+        test_almost(0.0, 1.0, 2.0, 0.908248290463863, 1e-15, |x| x.cdf(2.0));
+        test_almost(0.0, 1.0, 2.0, 0.091751709536137, 1e-15, |x| x.cdf(-2.0));
+        test_case(0.0, 1.0, f64::INFINITY, 0.5, |x| x.cdf(0.0));
+        
+        // TODO: these are curiously low accuracy and should be re-examined
+        test_almost(0.0, 1.0, f64::INFINITY, 0.841344746068543, 1e-10, |x| x.cdf(1.0));
+        test_almost(0.0, 1.0, f64::INFINITY, 0.977249868051821, 1e-11, |x| x.cdf(2.0));
     }
 }
