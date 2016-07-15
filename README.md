@@ -1,5 +1,7 @@
 # statrs  
   
+[![Build Status](https://travis-ci.org/boxtown/statrs.svg?branch=master)](https://travis-ci.org/boxtown/verto)  
+  
 A work-in-progress port of the Math.NET Numerics distributions package to Rust.  
 All unit tests are borrowed from the Math.NET source when possible and filled in  
 when not.  
