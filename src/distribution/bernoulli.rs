@@ -91,36 +91,74 @@ impl IndependentSample<f64> for Bernoulli {
 }
 
 impl Distribution for Bernoulli {
+    /// Draws and returns a random sample from the
+    /// Bernoulli distribution where the returned
+    /// values are `1` with probability `p` and `0`
+    /// with probability `1-p`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    ///
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Bernoulli, Distribution};
+    /// 
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Bernoulli::new(0.5).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         self.b.sample(r)
     }
 }
 
 impl Univariate for Bernoulli {
+    /// Returns the mean of the Bernoulli
+    /// distribution
     fn mean(&self) -> f64 {
         self.b.mean()
     }
 
+    /// Returns the variance of the Bernoulli
+    /// distribution
     fn variance(&self) -> f64 {
         self.b.variance()
     }
 
+    /// Returns the standard deviation of the
+    /// Bernoulli distribution
     fn std_dev(&self) -> f64 {
         self.b.std_dev()
     }
 
+    /// Returns the entropy of the Bernoulli
+    /// distribution
     fn entropy(&self) -> f64 {
         self.b.entropy()
     }
 
+    /// Returns the skewness of the Bernoulli
+    /// distribution
     fn skewness(&self) -> f64 {
         self.b.skewness()
     }
 
+    /// Returns the median of the Bernoulli
+    /// distribution
     fn median(&self) -> f64 {
         self.b.median()
     }
 
+    /// Calculates and returns the cumulative distribution
+    /// function for the Bernoulli distribution at `x`.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `0.0` if `x < 0.0` and `1.0` if `x >= 1.0`
     fn cdf(&self, x: f64) -> f64 {
         self.b.cdf(x)
     }
