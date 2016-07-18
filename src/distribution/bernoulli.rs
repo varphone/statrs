@@ -79,20 +79,27 @@ impl Bernoulli {
 }
 
 impl Sample<f64> for Bernoulli {
+    /// Generate a random sample from a Bernoulli
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1)
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for Bernoulli {
+    /// Generate a random independent sample from a Bernoulli
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1)
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution for Bernoulli {
-    /// Draws and returns a random sample from the
-    /// Bernoulli distribution where the returned
+    /// Generate a random sample from the
+    /// Bernoulli distribution using `r` as the source
+    /// of randomness where the generated
     /// values are `1` with probability `p` and `0`
     /// with probability `1-p`.
     ///
@@ -101,7 +108,6 @@ impl Distribution for Bernoulli {
     /// ```
     /// # extern crate rand;
     /// # extern crate statrs;
-    ///
     /// use rand::StdRng;
     /// use statrs::distribution::{Bernoulli, Distribution};
     /// 
