@@ -87,11 +87,17 @@ impl Binomial {
 }
 
 impl Sample<f64> for Binomial {
+    /// Generate a random sample from a Binomial
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1)
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
+/// Generate a random independent sample from a Binomial
+/// distribution using `r` as the source of randomness.
+/// Refer [here](#method.sample-1)
 impl IndependentSample<f64> for Binomial {
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
@@ -99,6 +105,24 @@ impl IndependentSample<f64> for Binomial {
 }
 
 impl Distribution for Binomial {
+    /// Generate a random sample from the Binomial distribution
+    /// using `r` as the source of randomness  where the range of
+    /// values is `[0.0, n]`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Binomial, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Binomial::new(0.5, 5).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         (0..self.n).fold(0.0, |acc, _| {
             let n = r.next_f64();
@@ -112,18 +136,22 @@ impl Distribution for Binomial {
 }
 
 impl Univariate for Binomial {
+    /// Returns the mean of the Binomial distribution
     fn mean(&self) -> f64 {
         self.p * self.n as f64
     }
 
+    /// Returns the variance of the Binomial distribution
     fn variance(&self) -> f64 {
         self.p * (1.0 - self.p) * self.n as f64
     }
 
+    /// Returns the standard deviation of the Binomial distribution
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 
+    /// Returns the entropy of the Binomial distribution
     fn entropy(&self) -> f64 {
         match self.p {
             0.0 | 1.0 => 0.0,
@@ -136,6 +164,7 @@ impl Univariate for Binomial {
         }
     }
 
+    /// Returns the skewness of the Binomial distribution
     fn skewness(&self) -> f64 {
         (1.0 - 2.0 * self.p) / (self.n as f64 * self.p * (1.0 - self.p)).sqrt()
     }

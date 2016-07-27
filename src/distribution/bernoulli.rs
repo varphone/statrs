@@ -125,36 +125,76 @@ impl Distribution for Bernoulli {
 impl Univariate for Bernoulli {
     /// Returns the mean of the Bernoulli
     /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// p
+    /// ```
     fn mean(&self) -> f64 {
         self.b.mean()
     }
 
     /// Returns the variance of the Bernoulli
     /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// p * (1 - p)
+    /// ```
     fn variance(&self) -> f64 {
         self.b.variance()
     }
 
     /// Returns the standard deviation of the
     /// Bernoulli distribution
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// sqrt(p * (1 - p))
+    /// ```
     fn std_dev(&self) -> f64 {
         self.b.std_dev()
     }
 
     /// Returns the entropy of the Bernoulli
     /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// q = (1 - p)
+    /// -q * ln(q) - p * ln(p)
+    /// ```
     fn entropy(&self) -> f64 {
         self.b.entropy()
     }
 
     /// Returns the skewness of the Bernoulli
     /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// q = (1 - p)
+    /// (1 - 2p) / sqrt(p * q)
+    /// ```
     fn skewness(&self) -> f64 {
         self.b.skewness()
     }
 
     /// Returns the median of the Bernoulli
     /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// if p < 0.5 { 0 }
+    /// else if p > 0.5 { 1 }
+    /// else { 0.5 }
+    /// ```
     fn median(&self) -> f64 {
         self.b.median()
     }
@@ -165,6 +205,14 @@ impl Univariate for Bernoulli {
     /// # Remarks
     ///
     /// Returns `0.0` if `x < 0.0` and `1.0` if `x >= 1.0`
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// if x < 0 { 0 }
+    /// else if x >= 1 { 1 }
+    /// else { 1 - p }
+    /// ```
     fn cdf(&self, x: f64) -> f64 {
         self.b.cdf(x)
     }
@@ -172,18 +220,37 @@ impl Univariate for Bernoulli {
 
 impl Discrete for Bernoulli {
     /// Returns the mode of the Bernoulli distribution
+    ///
+    /// # Formula
+    /// 
+    /// ```
+    /// if p < 0.5 { 0 }
+    /// else { 1 }
+    /// ```
     fn mode(&self) -> i64 {
         self.b.mode()
     }
 
     /// Returns the minimum value in the domain of the
     /// Bernoulli distribution
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// 0
+    /// ```
     fn min(&self) -> i64 {
         0
     }
 
     /// Returns the maximum value in the domain of the
     /// Bernoulli distribution
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// 1
+    /// ```
     fn max(&self) -> i64 {
         1
     }
@@ -193,7 +260,15 @@ impl Discrete for Bernoulli {
     ///
     /// # Remarks
     ///
-    /// Returns `0.0` if `x < 0.0 || x > 1.0`
+    /// Returns `0.0` if `x < 0 || x > 1`
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// if x < 0 || x > 1 { 0.0 }
+    /// else if x == 0 { 1 - p }
+    /// else { p }
+    /// ```
     fn pmf(&self, x: i64) -> f64 {
         self.b.pmf(x)
     }
@@ -203,7 +278,15 @@ impl Discrete for Bernoulli {
     ///
     /// # Remarks
     ///
-    /// Returns `f64::NEG_INFINITY` if `x < 0.0 || x > 1.0`
+    /// Returns `f64::NEG_INFINITY` if `x < 0 || x > 1`
+    ///
+    /// # Formula
+    ///
+    /// ```
+    /// if x < 0 || x > 1 { -INF }
+    /// else if x == 0 { ln(1 - p) }
+    /// else { ln(p) }
+    /// ```
     fn ln_pmf(&self, x: i64) -> f64 {
         self.b.ln_pmf(x)
     }
