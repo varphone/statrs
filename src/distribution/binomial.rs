@@ -6,6 +6,20 @@ use function::{beta, factorial};
 use result::Result;
 use super::{Distribution, Univariate, Discrete};
 
+/// Implements the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
+/// distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{Binomial, Univariate, Discrete};
+///
+/// let n = Binomial::new(0.5, 5).unwrap();
+/// assert_eq!(n.mean(), 2.5);
+/// assert_eq!(n.pmf(0), 0.03125);
+/// assert_eq!(n.pmf(3), 0.3125);
+/// assert_eq!(n.pmf(6), 0.0);
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Binomial {
     p: f64,
@@ -13,6 +27,26 @@ pub struct Binomial {
 }
 
 impl Binomial {
+    /// Constructs a new Binomial distribution
+    /// with a given `p` probability of success of `n`
+    /// trials.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `p` is `NaN`, less than `0.0`,
+    /// greater than `1.0`, or if `n` is less than `0`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Binomial;
+    ///
+    /// let mut result = Binomial::new(0.5, 5);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Binomial::new(-0.5, -5);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(p: f64, n: i64) -> Result<Binomial> {
         if p.is_nan() || p < 0.0 || p > 1.0 || n < 0 {
             Err(StatsError::BadParams)
@@ -21,10 +55,32 @@ impl Binomial {
         }
     }
 
+    /// Returns the probability of success `p` of
+    /// the Binomial distribution.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Binomial;
+    /// 
+    /// let n = Binomial::new(0.5, 5).unwrap();
+    /// assert_eq!(n.p(), 0.5);
+    /// ```
     pub fn p(&self) -> f64 {
         self.p
     }
 
+    /// Returns the number of trials `n` of the
+    /// Binomial distribution.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Binomial;
+    ///
+    /// let n = Binomial::new(0.5, 5).unwrap();
+    /// assert_eq!(n.n(), 5);
+    /// ```
     pub fn n(&self) -> i64 {
         self.n
     }

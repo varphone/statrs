@@ -29,8 +29,8 @@ impl Bernoulli {
     ///
     /// # Errors
     ///
-    /// Returns an error if `p` is `NaN, less than `0`
-    /// or greater than `1`
+    /// Returns an error if `p` is `NaN`, less than `0.0`
+    /// or greater than `1.0`
     ///
     /// # Examples
     ///
@@ -71,10 +71,10 @@ impl Bernoulli {
     /// use statrs::distribution::Bernoulli;
     ///
     /// let n = Bernoulli::new(0.5).unwrap();
-    /// assert_eq!(n.n(), 1.0);
+    /// assert_eq!(n.n(), 1);
     /// ```
-    pub fn n(&self) -> f64 {
-        1.0
+    pub fn n(&self) -> i64 {
+        1
     }
 }
 
@@ -159,7 +159,7 @@ impl Univariate for Bernoulli {
         self.b.median()
     }
 
-    /// Calculates and returns the cumulative distribution
+    /// Calculates the cumulative distribution
     /// function for the Bernoulli distribution at `x`.
     ///
     /// # Remarks
@@ -171,22 +171,39 @@ impl Univariate for Bernoulli {
 }
 
 impl Discrete for Bernoulli {
+    /// Returns the mode of the Bernoulli distribution
     fn mode(&self) -> i64 {
         self.b.mode()
     }
 
+    /// Returns the minimum value in the domain of the
+    /// Bernoulli distribution
     fn min(&self) -> i64 {
         0
     }
 
+    /// Returns the maximum value in the domain of the
+    /// Bernoulli distribution
     fn max(&self) -> i64 {
         1
     }
 
+    /// Calculates the probability mass function for the
+    /// Bernoulli distribution at `x`.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `0.0` if `x < 0.0 || x > 1.0`
     fn pmf(&self, x: i64) -> f64 {
         self.b.pmf(x)
     }
 
+    /// Calculates the log probability mass function for the
+    /// Bernoulli distribution at `x`.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NEG_INFINITY` if `x < 0.0 || x > 1.0`
     fn ln_pmf(&self, x: i64) -> f64 {
         self.b.ln_pmf(x)
     }
