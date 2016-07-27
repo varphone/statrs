@@ -217,20 +217,63 @@ impl Univariate for Chi {
 }
 
 impl Continuous for Chi {
+    /// Returns the mode for the Chi distribution
+    ///
+    /// # Panics
+    ///
+    /// If `freedom < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(k - 1)
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom
     fn mode(&self) -> f64 {
         assert!(self.freedom >= 1.0,
                 format!("{}", StatsError::ArgGte("freedom", 1.0)));
         (self.freedom - 1.0).sqrt()
     }
 
+    /// Returns the minimum value in the domain of the Chi distribution
+    /// representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn min(&self) -> f64 {
         0.0
     }
 
+    /// Returns the maximum value in the domain of the Chi distribution
+    /// representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
     fn max(&self) -> f64 {
         f64::INFINITY
     }
 
+    /// Calculates the probability density function for the Chi
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (2^(1 - (k / 2)) * x^(k - 1) * e^(-x^2 / 2)) / Γ(k / 2)
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         if self.freedom == f64::INFINITY || x == f64::INFINITY || x == 0.0 {
@@ -243,6 +286,18 @@ impl Continuous for Chi {
         }
     }
 
+    /// Calculates the log probability density function for the Chi distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((2^(1 - (k / 2)) * x^(k - 1) * e^(-x^2 / 2)) / Γ(k / 2))
+    /// ```
     fn ln_pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         if self.freedom == f64::INFINITY || x == f64::INFINITY || x == 0.0 {
