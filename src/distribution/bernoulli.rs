@@ -128,7 +128,7 @@ impl Univariate for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// p
     /// ```
     fn mean(&self) -> f64 {
@@ -140,7 +140,7 @@ impl Univariate for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// p * (1 - p)
     /// ```
     fn variance(&self) -> f64 {
@@ -152,7 +152,7 @@ impl Univariate for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// sqrt(p * (1 - p))
     /// ```
     fn std_dev(&self) -> f64 {
@@ -164,7 +164,7 @@ impl Univariate for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// q = (1 - p)
     /// -q * ln(q) - p * ln(p)
     /// ```
@@ -177,7 +177,7 @@ impl Univariate for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// q = (1 - p)
     /// (1 - 2p) / sqrt(p * q)
     /// ```
@@ -190,7 +190,7 @@ impl Univariate for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// if p < 0.5 { 0 }
     /// else if p > 0.5 { 1 }
     /// else { 0.5 }
@@ -208,7 +208,7 @@ impl Univariate for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// if x < 0 { 0 }
     /// else if x >= 1 { 1 }
     /// else { 1 - p }
@@ -223,7 +223,7 @@ impl Discrete for Bernoulli {
     ///
     /// # Formula
     /// 
-    /// ```
+    /// ```ignore
     /// if p < 0.5 { 0 }
     /// else { 1 }
     /// ```
@@ -232,11 +232,12 @@ impl Discrete for Bernoulli {
     }
 
     /// Returns the minimum value in the domain of the
-    /// Bernoulli distribution
+    /// Bernoulli distribution representable by a 64-
+    /// bit integer
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// 0
     /// ```
     fn min(&self) -> i64 {
@@ -244,11 +245,12 @@ impl Discrete for Bernoulli {
     }
 
     /// Returns the maximum value in the domain of the
-    /// Bernoulli distribution
+    /// Bernoulli distribution representable by a 64-
+    /// bit integer
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// 1
     /// ```
     fn max(&self) -> i64 {
@@ -264,7 +266,7 @@ impl Discrete for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// if x < 0 || x > 1 { 0.0 }
     /// else if x == 0 { 1 - p }
     /// else { p }
@@ -282,7 +284,7 @@ impl Discrete for Bernoulli {
     ///
     /// # Formula
     ///
-    /// ```
+    /// ```ignore
     /// if x < 0 || x > 1 { -INF }
     /// else if x == 0 { ln(1 - p) }
     /// else { ln(p) }

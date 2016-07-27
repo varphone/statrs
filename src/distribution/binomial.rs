@@ -137,21 +137,45 @@ impl Distribution for Binomial {
 
 impl Univariate for Binomial {
     /// Returns the mean of the Binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// p * n
+    /// ```
     fn mean(&self) -> f64 {
         self.p * self.n as f64
     }
 
     /// Returns the variance of the Binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// n * p * (1 - p)
+    /// ```
     fn variance(&self) -> f64 {
         self.p * (1.0 - self.p) * self.n as f64
     }
 
     /// Returns the standard deviation of the Binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(n * p * (1 - p))
+    /// ```
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 
     /// Returns the entropy of the Binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / 2) * ln (2 * π * e * n * p * (1 - p))
+    /// ```
     fn entropy(&self) -> f64 {
         match self.p {
             0.0 | 1.0 => 0.0,
@@ -165,14 +189,41 @@ impl Univariate for Binomial {
     }
 
     /// Returns the skewness of the Binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 - 2p) / sqrt(n * p * (1 - p)))
+    /// ```
     fn skewness(&self) -> f64 {
         (1.0 - 2.0 * self.p) / (self.n as f64 * self.p * (1.0 - self.p)).sqrt()
     }
 
+    /// Returns the median of the Binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// floor(n * p)
+    /// ```
     fn median(&self) -> f64 {
         (self.p * self.n as f64).floor()
     }
 
+    /// Calulcates the cumulative distribution function for the
+    /// Binomial distribution at `x`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `0,0` if `x < 0.0` and `1.0` if `x >= n`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// I_(1 - p)(n - x, 1 + x)
+    /// ```
+    ///
+    /// where `I_(x)(a, b)` is the regularized incomplete beta function
     fn cdf(&self, x: f64) -> f64 {
         if x < 0.0 {
             0.0
@@ -186,6 +237,13 @@ impl Univariate for Binomial {
 }
 
 impl Discrete for Binomial {
+    /// Returns the mode for the Binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// floor((n + 1) * p)
+    /// ```
     fn mode(&self) -> i64 {
         match self.p {
             0.0 => 0,
@@ -194,14 +252,44 @@ impl Discrete for Binomial {
         }
     }
 
+    /// Returns the minimum value in the domain of the
+    /// Binomial distribution representable by a 64-bit
+    /// integer
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn min(&self) -> i64 {
         0
     }
 
+    /// Returns the maximum value in the domain of the
+    /// Binomial distribution representable by a 64-bit
+    /// integer
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// n
+    /// ```
     fn max(&self) -> i64 {
         self.n
     }
 
+    /// Calculates the probability mass function for the Binomial
+    /// distribution at `x`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `0` if `x > n || x < 0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (n choose k) * p^k * (1 - p)^(n - k)
+    /// ```
     fn pmf(&self, x: i64) -> f64 {
         if x > self.n || x < 0 {
             0.0
@@ -220,6 +308,18 @@ impl Discrete for Binomial {
         }
     }
 
+    /// Calculates the log probability mass function for the Binomial
+    /// distribution at `x`
+    ///
+    /// # Remarks
+    /// 
+    /// Returns `f64::NEG_INFINITY` if `x > n || x < 0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((n choose k) * p^k * (1 - p)^(n - k))
+    /// ```
     fn ln_pmf(&self, x: i64) -> f64 {
         if x > self.n || x < 0 {
             f64::NEG_INFINITY
