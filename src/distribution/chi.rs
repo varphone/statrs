@@ -7,12 +7,44 @@ use result::Result;
 use super::{Distribution, Univariate, Continuous};
 use super::normal;
 
+/// Implements the [Chi](https://en.wikipedia.org/wiki/Chi_distribution)
+/// distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{Chi, Univariate, Continuous};
+/// use statrs::prec;
+///
+/// let n = Chi::new(2.0).unwrap();
+/// assert!(prec::almost_eq(n.mean(), 1.25331413731550025121, 1e-14));
+/// assert!(prec::almost_eq(n.pdf(1.0), 0.60653065971263342360, 1e-15));
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Chi {
     freedom: f64,
 }
 
 impl Chi {
+    /// Constructs a new Chi distribution
+    /// with `freedom` degrees of freedom
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `freedom` is `NaN` or
+    /// less than or equal to `0.0`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Chi;
+    ///
+    /// let mut result = Chi::new(2.0);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Binomial::new(0.0);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(freedom: f64) -> Result<Chi> {
         if freedom.is_nan() || freedom <= 0.0 {
             Err(StatsError::BadParams)
@@ -21,24 +53,58 @@ impl Chi {
         }
     }
 
+    /// Returns the degrees of freedom of
+    /// the Binomial distribution.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Chi;
+    /// 
+    /// let n = Chi::new(2.0).unwrap();
+    /// assert_eq!(n.freedom(), 2.0);
+    /// ```
     pub fn freedom(&self) -> f64 {
         self.freedom
     }
 }
 
 impl Sample<f64> for Chi {
+    /// Generate a random sample from a Chi
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1)
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for Chi {
+    /// Generate a random independent sample from a Chi
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1)
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution for Chi {
+    /// Generate a random sample from the Chi distribution
+    /// using `r` as the source of randomness
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Chi, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Chi::new(0.5, 5).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         (0..self.freedom as i64)
             .fold(0.0,
@@ -48,43 +114,105 @@ impl Distribution for Chi {
 }
 
 impl Univariate for Chi {
+    /// Returns the mean of the Chi distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt2 * Γ((k + 1) / 2) / Γ(k / 2)
+    /// ```
+    ///
+    /// where `k` is degrees of freedom and `Γ` is the gamma function
     fn mean(&self) -> f64 {
         f64::consts::SQRT_2 * gamma::gamma((self.freedom + 1.0) / 2.0) /
         gamma::gamma(self.freedom / 2.0)
     }
 
+    /// Returns the variance of the Chi distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// k - μ^2
+    /// ```
+    ///
+    /// where `k` is degrees of freedom and `μ` is the mean
+    /// of the distribution
     fn variance(&self) -> f64 {
         self.freedom - self.mean() * self.mean()
     }
 
+    /// Returns the standard deviation of the Chi distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(k - μ^2)
+    /// ```
+    ///
+    /// where `k` is degrees of freedom and `μ` is the mean
+    /// of the distribution
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 
+    /// Returns the entropy of the Chi distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(Γ(k / 2)) + 0.5 * (k - ln2 - (k - 1) * ψ(k / 2))
+    /// ```
+    ///
+    /// where `k` is degrees of freedom, `Γ` is the gamma function,
+    /// and `ψ` is the digamma function
     fn entropy(&self) -> f64 {
         gamma::ln_gamma(self.freedom / 2.0) +
         (self.freedom - (2.0f64).ln() - (self.freedom - 1.0) * gamma::digamma(self.freedom / 2.0)) /
         2.0
     }
 
+    /// Returns the skewness of the Chi distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (μ / σ^3) * (1 - 2σ^2)
+    /// ```
+    /// where `μ` is the mean and `σ` the standard deviation
+    /// of the distribution
     fn skewness(&self) -> f64 {
         let sigma = self.std_dev();
         self.mean() * (1.0 - 2.0 * sigma * sigma) / (sigma * sigma * sigma)
     }
 
+    /// This method is unimplemented and will panic when called.
+    ///
+    /// # Panics
+    ///
+    /// Always
     fn median(&self) -> f64 {
         unimplemented!()
     }
 
+    /// Calculates the cumulative distribution function for the Chi
+    /// distribution at `x`.
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// P(k / 2, x^2 / 2)
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom and `P` is
+    /// the regularized Gamma function
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        if x == f64::INFINITY {
-            1.0
-        } else if self.freedom == f64::INFINITY {
-            0.0
-        } else {
-            gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0)
-        }
+        gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0)
     }
 }
 
