@@ -4,6 +4,20 @@ use rand::distributions::{Sample, IndependentSample};
 use result::Result;
 use super::{Gamma, Distribution, Univariate, Continuous};
 
+/// Implements the [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
+/// distribution which is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
+/// (reference [Here](/struct.Gamma.html))
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{ChiSquared, Univariate, Continuous};
+/// use statrs::prec;
+///
+/// let n = ChiSquared::new(3.0).unwrap();
+/// assert_eq!(n.mean(), 3.0);
+/// assert!(prec::almost_eq(n.pdf(4.0), 0.107981933026376103901, 1e-15));
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct ChiSquared {
     freedom: f64,
