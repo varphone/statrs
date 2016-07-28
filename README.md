@@ -10,12 +10,12 @@ when not.
 
 | Distribution      | Implemented | Doc Comments |
 |-------------------|:-----------:|:------------:|
-| Bernoulli         | yes         | no           |
-| Binomial          | yes         | no           |
-| Chi               | yes         | no           |
-| ChiSquared        | yes         | no           |
+| Bernoulli         | yes         | yes          |
+| Binomial          | yes         | yes          |
+| Chi               | yes         | yes          |
+| ChiSquared        | yes         | yes          |
 | ContinuousUniform | yes         | no           |
-| DiscreteUniform   | yes         | no           |
+| DiscreteUniform   | yes         | yes          |
 | Exponential       | yes         | no           |
 | Gamma             | yes         | no           |
 | LogNormal         | yes         | no           |
