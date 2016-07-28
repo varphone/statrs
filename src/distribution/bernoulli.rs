@@ -24,7 +24,7 @@ pub struct Bernoulli {
 }
 
 impl Bernoulli {
-    /// Constructs a new Bernoulli distribution with
+    /// Constructs a new bernoulli distribution with
     /// the given `p` probability of success.
     ///
     /// # Errors
@@ -48,7 +48,7 @@ impl Bernoulli {
     }
 
     /// Returns the probability of success `p` of the
-    /// Bernoulli distribution.
+    /// bernoulli distribution.
     ///
     /// # Examples
     ///
@@ -63,7 +63,7 @@ impl Bernoulli {
     }
 
     /// Returns the number of trials `n` of the
-    /// Bernoulli distribution. Will always be `1.0`.
+    /// bernoulli distribution. Will always be `1.0`.
     ///
     /// # Examples
     ///
@@ -79,7 +79,7 @@ impl Bernoulli {
 }
 
 impl Sample<f64> for Bernoulli {
-    /// Generate a random sample from a Bernoulli
+    /// Generate a random sample from a bernoulli
     /// distribution using `r` as the source of randomness.
     /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
@@ -88,7 +88,7 @@ impl Sample<f64> for Bernoulli {
 }
 
 impl IndependentSample<f64> for Bernoulli {
-    /// Generate a random independent sample from a Bernoulli
+    /// Generate a random independent sample from a bernoulli
     /// distribution using `r` as the source of randomness.
     /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
@@ -98,7 +98,7 @@ impl IndependentSample<f64> for Bernoulli {
 
 impl Distribution for Bernoulli {
     /// Generate a random sample from the
-    /// Bernoulli distribution using `r` as the source
+    /// bernoulli distribution using `r` as the source
     /// of randomness where the generated
     /// values are `1` with probability `p` and `0`
     /// with probability `1-p`.
@@ -123,7 +123,7 @@ impl Distribution for Bernoulli {
 }
 
 impl Univariate for Bernoulli {
-    /// Returns the mean of the Bernoulli
+    /// Returns the mean of the bernoulli
     /// distribution
     ///
     /// # Formula
@@ -135,7 +135,7 @@ impl Univariate for Bernoulli {
         self.b.mean()
     }
 
-    /// Returns the variance of the Bernoulli
+    /// Returns the variance of the bernoulli
     /// distribution
     ///
     /// # Formula
@@ -148,7 +148,7 @@ impl Univariate for Bernoulli {
     }
 
     /// Returns the standard deviation of the
-    /// Bernoulli distribution
+    /// bernoulli distribution
     ///
     /// # Formula
     ///
@@ -159,7 +159,7 @@ impl Univariate for Bernoulli {
         self.b.std_dev()
     }
 
-    /// Returns the entropy of the Bernoulli
+    /// Returns the entropy of the bernoulli
     /// distribution
     ///
     /// # Formula
@@ -172,7 +172,7 @@ impl Univariate for Bernoulli {
         self.b.entropy()
     }
 
-    /// Returns the skewness of the Bernoulli
+    /// Returns the skewness of the bernoulli
     /// distribution
     ///
     /// # Formula
@@ -185,7 +185,7 @@ impl Univariate for Bernoulli {
         self.b.skewness()
     }
 
-    /// Returns the median of the Bernoulli
+    /// Returns the median of the bernoulli
     /// distribution
     ///
     /// # Formula
@@ -200,7 +200,7 @@ impl Univariate for Bernoulli {
     }
 
     /// Calculates the cumulative distribution
-    /// function for the Bernoulli distribution at `x`.
+    /// function for the bernoulli distribution at `x`.
     ///
     /// # Remarks
     ///
@@ -219,7 +219,7 @@ impl Univariate for Bernoulli {
 }
 
 impl Discrete for Bernoulli {
-    /// Returns the mode of the Bernoulli distribution
+    /// Returns the mode of the bernoulli distribution
     ///
     /// # Formula
     /// 
@@ -232,7 +232,7 @@ impl Discrete for Bernoulli {
     }
 
     /// Returns the minimum value in the domain of the
-    /// Bernoulli distribution representable by a 64-
+    /// bernoulli distribution representable by a 64-
     /// bit integer
     ///
     /// # Formula
@@ -245,7 +245,7 @@ impl Discrete for Bernoulli {
     }
 
     /// Returns the maximum value in the domain of the
-    /// Bernoulli distribution representable by a 64-
+    /// bernoulli distribution representable by a 64-
     /// bit integer
     ///
     /// # Formula
@@ -258,7 +258,7 @@ impl Discrete for Bernoulli {
     }
 
     /// Calculates the probability mass function for the
-    /// Bernoulli distribution at `x`.
+    /// bernoulli distribution at `x`.
     ///
     /// # Remarks
     ///
@@ -276,7 +276,7 @@ impl Discrete for Bernoulli {
     }
 
     /// Calculates the log probability mass function for the
-    /// Bernoulli distribution at `x`.
+    /// bernoulli distribution at `x`.
     ///
     /// # Remarks
     ///

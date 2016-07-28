@@ -5,6 +5,18 @@ use error::StatsError;
 use result::Result;
 use super::{Distribution, Univariate, Discrete};
 
+/// Implements the [Discrete Uniform](https://en.wikipedia.org/wiki/Discrete_uniform_distribution)
+/// distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{DiscreteUniform, Univariate, Discrete};
+///
+/// let n = DiscreteUniform::new(0, 5).unwrap();
+/// assert_eq!(n.mean(), 2.5);
+/// assert_eq!(n.pmf(3), 1.0 / 6.0);
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct DiscreteUniform {
     min: i64,
@@ -12,6 +24,7 @@ pub struct DiscreteUniform {
 }
 
 impl DiscreteUniform {
+    /// Constructs a new discrete uniform distribution
     pub fn new(min: i64, max: i64) -> Result<DiscreteUniform> {
         if max < min {
             Err(StatsError::BadParams)

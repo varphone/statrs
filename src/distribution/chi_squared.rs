@@ -25,7 +25,7 @@ pub struct ChiSquared {
 }
 
 impl ChiSquared {
-    /// Constructs a new Chi-squared distribution with `freedom`
+    /// Constructs a new chi-squared distribution with `freedom`
     /// degrees of freedom. This is equivalent to a Gamma distribution
     /// with a shape of `freedom / 2.0` and a rate of `0.5`.
     ///
@@ -54,7 +54,7 @@ impl ChiSquared {
         })
     }
 
-    /// Returns the degrees of freedom of the Chi-squared
+    /// Returns the degrees of freedom of the chi-squared
     /// distribution
     ///
     /// # Examples
@@ -99,7 +99,7 @@ impl ChiSquared {
 }
 
 impl Sample<f64> for ChiSquared {
-    /// Generate a random sample from a Chi-squared
+    /// Generate a random sample from a chi-squared
     /// distribution using `r` as the source of randomness.
     /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
@@ -117,7 +117,7 @@ impl IndependentSample<f64> for ChiSquared {
 }
 
 impl Distribution for ChiSquared {
-    /// Generate a random sample from the Chi-squared distribution
+    /// Generate a random sample from the chi-squared distribution
     /// using `r` as the source of randomness
     ///
     /// # Examples
@@ -141,7 +141,7 @@ impl Distribution for ChiSquared {
 }
 
 impl Univariate for ChiSquared {
-    /// Returns the mean of the Chi-squared distribution
+    /// Returns the mean of the chi-squared distribution
     ///
     /// # Formula
     ///
@@ -154,7 +154,7 @@ impl Univariate for ChiSquared {
         self.g.mean()
     }
 
-    /// Returns the variance of the Chi-squared distribution
+    /// Returns the variance of the chi-squared distribution
     ///
     /// # Formula
     ///
@@ -167,7 +167,7 @@ impl Univariate for ChiSquared {
         self.g.variance()
     }
 
-    /// Returns the standard deviation of the Chi-squared distribution
+    /// Returns the standard deviation of the chi-squared distribution
     ///
     /// # Formula
     ///
@@ -180,7 +180,7 @@ impl Univariate for ChiSquared {
         self.g.std_dev()
     }
 
-    /// Returns the entropy of the Chi-squared distribution
+    /// Returns the entropy of the chi-squared distribution
     ///
     /// # Formula
     ///
@@ -194,7 +194,7 @@ impl Univariate for ChiSquared {
         self.g.entropy()
     }
 
-    /// Returns the skewness of the Chi-squared distribution
+    /// Returns the skewness of the chi-squared distribution
     ///
     /// # Formula
     ///
@@ -207,7 +207,7 @@ impl Univariate for ChiSquared {
         self.g.skewness()
     }
 
-    /// Returns the median  of the Chi-squared distribution
+    /// Returns the median  of the chi-squared distribution
     ///
     /// # Formula
     ///
@@ -226,7 +226,7 @@ impl Univariate for ChiSquared {
     }
 
     /// Calculates the cumulative distribution function for the
-    /// Chi-squared distribution at `x`
+    /// chi-squared distribution at `x`
     ///
     /// # Panics
     ///
@@ -246,7 +246,7 @@ impl Univariate for ChiSquared {
 }
 
 impl Continuous for ChiSquared {
-    /// Returns the mode of the Chi-squared distribution
+    /// Returns the mode of the chi-squared distribution
     ///
     /// # Formula
     ///
@@ -260,7 +260,7 @@ impl Continuous for ChiSquared {
     }
 
     /// Returns the minimum value in the domain of the
-    /// Chi-squared distribution representable by a double precision
+    /// chi-squared distribution representable by a double precision
     /// float
     ///
     /// # Formula
@@ -273,7 +273,7 @@ impl Continuous for ChiSquared {
     }
 
     /// Returns the maximum value in the domain of the
-    /// Chi-squared distribution representable by a double precision
+    /// chi-squared distribution representable by a double precision
     /// float
     ///
     /// # Formula
@@ -285,7 +285,7 @@ impl Continuous for ChiSquared {
         f64::INFINITY
     }
 
-    /// Calculates the probability density function for the Chi-squared
+    /// Calculates the probability density function for the chi-squared
     /// distribution at `x`
     ///
     /// # Panics
@@ -303,7 +303,7 @@ impl Continuous for ChiSquared {
         self.g.pdf(x)
     }
 
-    /// Calculates the log probability density function for the Chi-squared
+    /// Calculates the log probability density function for the chi-squared
     /// distribution at `x`
     ///
     /// # Panics

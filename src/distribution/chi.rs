@@ -26,7 +26,7 @@ pub struct Chi {
 }
 
 impl Chi {
-    /// Constructs a new Chi distribution
+    /// Constructs a new chi distribution
     /// with `freedom` degrees of freedom
     ///
     /// # Errors
@@ -54,7 +54,7 @@ impl Chi {
     }
 
     /// Returns the degrees of freedom of
-    /// the Chi distribution.
+    /// the chi distribution.
     ///
     /// # Examples
     ///
@@ -70,7 +70,7 @@ impl Chi {
 }
 
 impl Sample<f64> for Chi {
-    /// Generate a random sample from a Chi
+    /// Generate a random sample from a chi
     /// distribution using `r` as the source of randomness.
     /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
@@ -79,7 +79,7 @@ impl Sample<f64> for Chi {
 }
 
 impl IndependentSample<f64> for Chi {
-    /// Generate a random independent sample from a Chi
+    /// Generate a random independent sample from a chi
     /// distribution using `r` as the source of randomness.
     /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
@@ -88,7 +88,7 @@ impl IndependentSample<f64> for Chi {
 }
 
 impl Distribution for Chi {
-    /// Generate a random sample from the Chi distribution
+    /// Generate a random sample from the chi distribution
     /// using `r` as the source of randomness
     ///
     /// # Examples
@@ -115,7 +115,7 @@ impl Distribution for Chi {
 }
 
 impl Univariate for Chi {
-    /// Returns the mean of the Chi distribution
+    /// Returns the mean of the chi distribution
     ///
     /// # Formula
     ///
@@ -129,7 +129,7 @@ impl Univariate for Chi {
         gamma::gamma(self.freedom / 2.0)
     }
 
-    /// Returns the variance of the Chi distribution
+    /// Returns the variance of the chi distribution
     ///
     /// # Formula
     ///
@@ -143,7 +143,7 @@ impl Univariate for Chi {
         self.freedom - self.mean() * self.mean()
     }
 
-    /// Returns the standard deviation of the Chi distribution
+    /// Returns the standard deviation of the chi distribution
     ///
     /// # Formula
     ///
@@ -157,7 +157,7 @@ impl Univariate for Chi {
         self.variance().sqrt()
     }
 
-    /// Returns the entropy of the Chi distribution
+    /// Returns the entropy of the chi distribution
     ///
     /// # Formula
     ///
@@ -173,7 +173,7 @@ impl Univariate for Chi {
         2.0
     }
 
-    /// Returns the skewness of the Chi distribution
+    /// Returns the skewness of the chi distribution
     ///
     /// # Formula
     ///
@@ -196,7 +196,7 @@ impl Univariate for Chi {
         unimplemented!()
     }
 
-    /// Calculates the cumulative distribution function for the Chi
+    /// Calculates the cumulative distribution function for the chi
     /// distribution at `x`.
     ///
     /// # Panics
@@ -222,7 +222,7 @@ impl Univariate for Chi {
 }
 
 impl Continuous for Chi {
-    /// Returns the mode for the Chi distribution
+    /// Returns the mode for the chi distribution
     ///
     /// # Panics
     ///
@@ -241,7 +241,7 @@ impl Continuous for Chi {
         (self.freedom - 1.0).sqrt()
     }
 
-    /// Returns the minimum value in the domain of the Chi distribution
+    /// Returns the minimum value in the domain of the chi distribution
     /// representable by a double precision float
     ///
     /// # Formula
@@ -253,7 +253,7 @@ impl Continuous for Chi {
         0.0
     }
 
-    /// Returns the maximum value in the domain of the Chi distribution
+    /// Returns the maximum value in the domain of the chi distribution
     /// representable by a double precision float
     ///
     /// # Formula
@@ -265,7 +265,7 @@ impl Continuous for Chi {
         f64::INFINITY
     }
 
-    /// Calculates the probability density function for the Chi
+    /// Calculates the probability density function for the chi
     /// distribution at `x`
     ///
     /// # Panics
@@ -291,7 +291,7 @@ impl Continuous for Chi {
         }
     }
 
-    /// Calculates the log probability density function for the Chi distribution
+    /// Calculates the log probability density function for the chi distribution
     /// at `x`
     ///
     /// # Panics

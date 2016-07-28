@@ -27,7 +27,7 @@ pub struct Binomial {
 }
 
 impl Binomial {
-    /// Constructs a new Binomial distribution
+    /// Constructs a new binomial distribution
     /// with a given `p` probability of success of `n`
     /// trials.
     ///
@@ -56,7 +56,7 @@ impl Binomial {
     }
 
     /// Returns the probability of success `p` of
-    /// the Binomial distribution.
+    /// the binomial distribution.
     ///
     /// # Examples
     ///
@@ -71,7 +71,7 @@ impl Binomial {
     }
 
     /// Returns the number of trials `n` of the
-    /// Binomial distribution.
+    /// binomial distribution.
     ///
     /// # Examples
     ///
@@ -87,7 +87,7 @@ impl Binomial {
 }
 
 impl Sample<f64> for Binomial {
-    /// Generate a random sample from a Binomial
+    /// Generate a random sample from a binomial
     /// distribution using `r` as the source of randomness.
     /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
@@ -95,7 +95,7 @@ impl Sample<f64> for Binomial {
     }
 }
 
-/// Generate a random independent sample from a Binomial
+/// Generate a random independent sample from a binomial
 /// distribution using `r` as the source of randomness.
 /// Refer [here](#method.sample-1) for implementation details
 impl IndependentSample<f64> for Binomial {
@@ -105,7 +105,7 @@ impl IndependentSample<f64> for Binomial {
 }
 
 impl Distribution for Binomial {
-    /// Generate a random sample from the Binomial distribution
+    /// Generate a random sample from the binomial distribution
     /// using `r` as the source of randomness  where the range of
     /// values is `[0.0, n]`.
     ///
@@ -136,7 +136,7 @@ impl Distribution for Binomial {
 }
 
 impl Univariate for Binomial {
-    /// Returns the mean of the Binomial distribution
+    /// Returns the mean of the binomial distribution
     ///
     /// # Formula
     ///
@@ -147,7 +147,7 @@ impl Univariate for Binomial {
         self.p * self.n as f64
     }
 
-    /// Returns the variance of the Binomial distribution
+    /// Returns the variance of the binomial distribution
     ///
     /// # Formula
     ///
@@ -158,7 +158,7 @@ impl Univariate for Binomial {
         self.p * (1.0 - self.p) * self.n as f64
     }
 
-    /// Returns the standard deviation of the Binomial distribution
+    /// Returns the standard deviation of the binomial distribution
     ///
     /// # Formula
     ///
@@ -169,7 +169,7 @@ impl Univariate for Binomial {
         self.variance().sqrt()
     }
 
-    /// Returns the entropy of the Binomial distribution
+    /// Returns the entropy of the binomial distribution
     ///
     /// # Formula
     ///
@@ -188,7 +188,7 @@ impl Univariate for Binomial {
         }
     }
 
-    /// Returns the skewness of the Binomial distribution
+    /// Returns the skewness of the binomial distribution
     ///
     /// # Formula
     ///
@@ -199,7 +199,7 @@ impl Univariate for Binomial {
         (1.0 - 2.0 * self.p) / (self.n as f64 * self.p * (1.0 - self.p)).sqrt()
     }
 
-    /// Returns the median of the Binomial distribution
+    /// Returns the median of the binomial distribution
     ///
     /// # Formula
     ///
@@ -211,7 +211,7 @@ impl Univariate for Binomial {
     }
 
     /// Calulcates the cumulative distribution function for the
-    /// Binomial distribution at `x`
+    /// binomial distribution at `x`
     ///
     /// # Remarks
     ///
@@ -237,7 +237,7 @@ impl Univariate for Binomial {
 }
 
 impl Discrete for Binomial {
-    /// Returns the mode for the Binomial distribution
+    /// Returns the mode for the binomial distribution
     ///
     /// # Formula
     ///
@@ -253,7 +253,7 @@ impl Discrete for Binomial {
     }
 
     /// Returns the minimum value in the domain of the
-    /// Binomial distribution representable by a 64-bit
+    /// binomial distribution representable by a 64-bit
     /// integer
     ///
     /// # Formula
@@ -266,7 +266,7 @@ impl Discrete for Binomial {
     }
 
     /// Returns the maximum value in the domain of the
-    /// Binomial distribution representable by a 64-bit
+    /// binomial distribution representable by a 64-bit
     /// integer
     ///
     /// # Formula
@@ -278,7 +278,7 @@ impl Discrete for Binomial {
         self.n
     }
 
-    /// Calculates the probability mass function for the Binomial
+    /// Calculates the probability mass function for the binomial
     /// distribution at `x`
     ///
     /// # Remarks
@@ -308,7 +308,7 @@ impl Discrete for Binomial {
         }
     }
 
-    /// Calculates the log probability mass function for the Binomial
+    /// Calculates the log probability mass function for the binomial
     /// distribution at `x`
     ///
     /// # Remarks
