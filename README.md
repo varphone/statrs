@@ -16,7 +16,7 @@ when not.
 | ChiSquared        | yes         | yes          |
 | ContinuousUniform | yes         | no           |
 | DiscreteUniform   | yes         | yes          |
-| Exponential       | yes         | no           |
+| Exponential       | yes         | yes          |
 | Gamma             | yes         | no           |
 | LogNormal         | yes         | no           |
 | Normal            | yes         | no           |
