@@ -89,7 +89,7 @@ impl Binomial {
 impl Sample<f64> for Binomial {
     /// Generate a random sample from a Binomial
     /// distribution using `r` as the source of randomness.
-    /// Refer [here](#method.sample-1)
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
@@ -97,7 +97,7 @@ impl Sample<f64> for Binomial {
 
 /// Generate a random independent sample from a Binomial
 /// distribution using `r` as the source of randomness.
-/// Refer [here](#method.sample-1)
+/// Refer [here](#method.sample-1) for implementation details
 impl IndependentSample<f64> for Binomial {
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)

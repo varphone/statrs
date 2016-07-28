@@ -72,7 +72,7 @@ impl Chi {
 impl Sample<f64> for Chi {
     /// Generate a random sample from a Chi
     /// distribution using `r` as the source of randomness.
-    /// Refer [here](#method.sample-1)
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
@@ -81,7 +81,7 @@ impl Sample<f64> for Chi {
 impl IndependentSample<f64> for Chi {
     /// Generate a random independent sample from a Chi
     /// distribution using `r` as the source of randomness.
-    /// Refer [here](#method.sample-1)
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
@@ -96,6 +96,7 @@ impl Distribution for Chi {
     /// ```
     /// # extern crate rand;
     /// # extern crate statrs;
+    ///
     /// use rand::StdRng;
     /// use statrs::distribution::{Chi, Distribution};
     ///

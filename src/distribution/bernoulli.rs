@@ -5,7 +5,7 @@ use super::{Binomial, Distribution, Univariate, Discrete};
 
 /// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
 /// distribution which is a special case of the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
-/// distribution where `n = 1`
+/// distribution where `n = 1` (referenced [Here](./struct.Binomial.html))
 ///
 /// # Examples
 ///
@@ -81,7 +81,7 @@ impl Bernoulli {
 impl Sample<f64> for Bernoulli {
     /// Generate a random sample from a Bernoulli
     /// distribution using `r` as the source of randomness.
-    /// Refer [here](#method.sample-1)
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
@@ -90,7 +90,7 @@ impl Sample<f64> for Bernoulli {
 impl IndependentSample<f64> for Bernoulli {
     /// Generate a random independent sample from a Bernoulli
     /// distribution using `r` as the source of randomness.
-    /// Refer [here](#method.sample-1)
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }

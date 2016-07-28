@@ -98,7 +98,7 @@ impl Univariate for Gamma {
     }
 
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        assert!(x >= 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         if x == self.shape && self.rate == f64::INFINITY {
             1.0
         } else if self.rate == f64::INFINITY {
@@ -127,7 +127,7 @@ impl Continuous for Gamma {
     }
 
     fn pdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        assert!(x >= 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         if x == self.shape && self.rate == f64::INFINITY {
             f64::INFINITY
         } else if self.rate == f64::INFINITY {
@@ -143,7 +143,7 @@ impl Continuous for Gamma {
     }
 
     fn ln_pdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        assert!(x >= 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         if x == self.shape && self.rate == f64::INFINITY {
             f64::INFINITY
         } else if self.rate == f64::INFINITY {
@@ -335,14 +335,19 @@ mod test {
 
     #[test]
     fn test_pdf() {
+        test_case(1.0, 0.1, 0.10000000000000000555111512312578270211815834045410156, |x| x.pdf(0.0));
         test_case(1.0, 0.1, 0.090483741803595961836995913651194571475319347018875963, |x| x.pdf(1.0));
         test_case(1.0, 0.1, 0.036787944117144234201693506390001264039984687455876246, |x| x.pdf(10.0));
+        test_case(1.0, 1.0, 1.0, |x| x.pdf(0.0));
         test_case(1.0, 1.0, 0.36787944117144232159552377016146086744581113103176804, |x| x.pdf(1.0));
         test_case(1.0, 1.0, 0.000045399929762484851535591515560550610237918088866564953, |x| x.pdf(10.0));
+        test_case(10.0, 10.0, 0.0, |x| x.pdf(0.0));
         test_almost(10.0, 10.0, 1.2511003572113329898476497894772544708420990097708588, 1e-14, |x| x.pdf(1.0));
         test_almost(10.0, 10.0, 1.0251532120868705806216092933926141802686541811003037e-30, 1e-44, |x| x.pdf(10.0));
+        test_case(10.0, 10.0, 0.0, |x| x.pdf(0.0));
         test_almost(10.0, 1.0, 0.0000010137771196302974029859010421116095333052555418644397, 1e-20, |x| x.pdf(1.0));
         test_almost(10.0, 1.0, 0.12511003572113329898476497894772544708420990097708601, 1e-15, |x| x.pdf(10.0));
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.pdf(0.0));
         test_case(10.0, f64::INFINITY, 0.0, |x| x.pdf(1.0));
         test_case(10.0, f64::INFINITY, f64::INFINITY, |x| x.pdf(10.0));
     }
@@ -350,19 +355,24 @@ mod test {
     #[test]
     #[should_panic]
     fn test_neg_pdf() {
-        get_value(1.0, 0.1, |x| x.pdf(0.0));
+        get_value(1.0, 0.1, |x| x.pdf(-1.0));
     }
 
     #[test]
     fn test_ln_pdf() {
+        test_case(1.0, 0.1, -2.3025850929940456285068402234265387271634735938763824, |x| x.ln_pdf(0.0));
         test_case(1.0, 0.1, -2.402585092994045634057955346552321429281631934330484, |x| x.ln_pdf(1.0));
         test_case(1.0, 0.1, -3.3025850929940456285068402234265387271634735938763824, |x| x.ln_pdf(10.0));
+        test_case(1.0, 1.0, 0.0, |x| x.ln_pdf(0.0));
         test_case(1.0, 1.0, -1.0, |x| x.ln_pdf(1.0));
         test_case(1.0, 1.0, -10.0, |x| x.ln_pdf(10.0));
+        test_case(10.0, 10.0, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
         test_almost(10.0, 10.0, 0.22402344985898722897219667227693591172986563062456522, 1e-15, |x| x.ln_pdf(1.0));
         test_case(10.0, 10.0, -69.052710713194601614865880235563786219860220971716511, |x| x.ln_pdf(10.0));
+        test_case(10.0, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
         test_almost(10.0, 1.0, -13.801827480081469611207717874566706164281149255663166, 1e-14, |x| x.ln_pdf(1.0));
         test_almost(10.0, 1.0,  -2.0785616431350584550457947824074282958712358580042068, 1e-14, |x| x.ln_pdf(10.0));
+        test_case(10.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
         test_case(10.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(1.0));
         test_case(10.0, f64::INFINITY, f64::INFINITY, |x| x.ln_pdf(10.0));
     }
@@ -370,19 +380,24 @@ mod test {
     #[test]
     #[should_panic]
     fn test_neg_ln_pdf() {
-        get_value(1.0, 0.1, |x| x.ln_pdf(0.0));
+        get_value(1.0, 0.1, |x| x.ln_pdf(-1.0));
     }
 
     #[test]
     fn test_cdf() {
+        test_case(1.0, 0.1, 0.0, |x| x.cdf(0.0));
         test_almost(1.0, 0.1, 0.095162581964040431858607615783064404690935346242622848, 1e-16, |x| x.cdf(1.0));
         test_almost(1.0, 0.1, 0.63212055882855767840447622983853913255418886896823196, 1e-15, |x| x.cdf(10.0));
+        test_case(1.0, 1.0, 0.0, |x| x.cdf(0.0));
         test_almost(1.0, 1.0, 0.63212055882855767840447622983853913255418886896823196, 1e-15, |x| x.cdf(1.0));
         test_case(1.0, 1.0, 0.99995460007023751514846440848443944938976208191113396,|x| x.cdf(10.0));
+        test_case(10.0, 10.0, 0.0, |x| x.cdf(0.0));
         test_almost(10.0, 10.0, 0.54207028552814779168583514294066541824736464003242184, 1e-15, |x| x.cdf(1.0));
         test_case(10.0, 10.0, 0.99999999999999999999999999999988746526039157266114706, |x| x.cdf(10.0));
+        test_case(10.0, 1.0, 0.0, |x| x.cdf(0.0));
         test_almost(10.0, 1.0, 0.00000011142547833872067735305068724025236288094949815466035, 1e-21, |x| x.cdf(1.0));
         test_almost(10.0, 1.0, 0.54207028552814779168583514294066541824736464003242184, 1e-15, |x| x.cdf(10.0));
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.cdf(0.0));
         test_case(10.0, f64::INFINITY, 0.0, |x| x.cdf(1.0));
         test_case(10.0, f64::INFINITY, 1.0, |x| x.cdf(10.0));
     }
@@ -390,6 +405,6 @@ mod test {
     #[test]
     #[should_panic]
     fn test_neg_cdf() {
-        get_value(1.0, 0.1, |x| x.cdf(0.0));
+        get_value(1.0, 0.1, |x| x.cdf(-1.0));
     }
 }
