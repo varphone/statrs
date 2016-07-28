@@ -24,7 +24,24 @@ pub struct DiscreteUniform {
 }
 
 impl DiscreteUniform {
-    /// Constructs a new discrete uniform distribution
+    /// Constructs a new discrete uniform distribution with a minimum value
+    /// of `min` and a maximum value of `max`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `max < min`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::DiscreteUniform;
+    ///
+    /// let mut result = DiscreteUniform::new(0, 5);
+    /// assert!(result.is_ok());
+    ///
+    /// result = DiscreteUniform::new(5, 0);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(min: i64, max: i64) -> Result<DiscreteUniform> {
         if max < min {
             Err(StatsError::BadParams)
@@ -38,50 +55,128 @@ impl DiscreteUniform {
 }
 
 impl Sample<f64> for DiscreteUniform {
+    /// Generate a random sample from a discrete uniform
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for DiscreteUniform {
+    /// Generate a random independent sample from a discrete uniform
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution for DiscreteUniform {
+    /// Generate a random sample from the discrete uniform distribution
+    /// using `r` as the source of randomness in the range `[min, max]`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    ///
+    /// use rand::StdRng;
+    /// use statrs::distribution::{DiscreteUniform, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = DiscreteUniform::new(0, 5).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         r.gen_range(self.min, self.max + 1) as f64
     }
 }
 
 impl Univariate for DiscreteUniform {
+    /// Returns the mean of the discrete uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (min + max) / 2
+    /// ```
     fn mean(&self) -> f64 {
         (self.min + self.max) as f64 / 2.0
     }
 
+    /// Returns the variance of the discrete uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ((max - min + 1)^2 - 1) / 12
+    /// ```
     fn variance(&self) -> f64 {
         let diff = (self.max - self.min) as f64;
         ((diff + 1.0) * (diff + 1.0) - 1.0) / 12.0
     }
 
+    /// Returns the standard deviation of the discrete uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(((max - min + 1)^2 - 1) / 12)
+    /// ```
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 
+    /// Returns the entropy of the discrete uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(max - min + 1)
+    /// ```
     fn entropy(&self) -> f64 {
         let diff = (self.max - self.min) as f64;
         (diff + 1.0).ln()
     }
 
+    /// Returns the skewness of the discrete uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn skewness(&self) -> f64 {
         0.0
     }
 
+    /// Returns the median of the discrete uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (max + min) / 2
+    /// ```
     fn median(&self) -> f64 {
         (self.min + self.max) as f64 / 2.0
     }
 
+    /// Calculates the cumulative distribution function for the
+    /// discrete uniform distribution at `x`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `0.0` if `x < min` and `1.0` if `x >= max`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (floor(x) - min + 1) / (max - min + 1) 
+    /// ```
     fn cdf(&self, x: f64) -> f64 {
         if x < self.min as f64 {
             return 0.0;
@@ -93,7 +188,7 @@ impl Univariate for DiscreteUniform {
         let lower = self.min as f64;
         let upper = self.max as f64;
         let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
-        if x > 1.0 {
+        if ans > 1.0 {
             1.0
         } else {
             ans
@@ -102,18 +197,54 @@ impl Univariate for DiscreteUniform {
 }
 
 impl Discrete for DiscreteUniform {
+    /// Returns the mode for the discrete uniform distribution
+    ///
+    /// # Remarks
+    ///
+    /// Since every element has an equal probability, mode simply
+    /// returns the middle element
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// N/A // (max + min) / 2 for the middle element
+    /// ```
     fn mode(&self) -> i64 {
         ((self.min + self.max) as f64 / 2.0).floor() as i64
     }
 
+    /// Returns the minimum value in the domain of the discrete uniform
+    /// distribution
+    ///
+    /// # Remarks
+    ///
+    /// This is the same value as the minimum passed into the constructor
     fn min(&self) -> i64 {
         self.min
     }
 
+    /// Returns the maximum value in the domain of the discrete uniform
+    /// distribution
+    ///
+    /// # Remarks
+    ///
+    /// This is the same value as the maximum passed into the constructor
     fn max(&self) -> i64 {
         self.max
     }
 
+    /// Calculates the probability mass function for the discrete uniform
+    /// distribution at `x`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `0.0` if `x` is not in `[min, max]`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 / (max - min + 1)
+    /// ```
     fn pmf(&self, x: i64) -> f64 {
         if x >= self.min && x <= self.max {
             1.0 / (self.max - self.min + 1) as f64
@@ -122,6 +253,18 @@ impl Discrete for DiscreteUniform {
         }
     }
 
+    /// Calculates the log probability mass function for the discrete uniform
+    /// distribution at `x`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NEG_INFINITY` if `x` is not in `[min, max]`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(1 / (max - min + 1))
+    /// ```
     fn ln_pmf(&self, x: i64) -> f64 {
         if x >= self.min && x <= self.max {
             -((self.max - self.min + 1) as f64).ln()
