@@ -97,7 +97,7 @@ impl Distribution for Exponential {
     ///
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
-    /// let n = Exponential::new(0, 5).unwrap();
+    /// let n = Exponential::new(1.0).unwrap();
     /// print!("{}", n.sample::<StdRng>(&mut r));   
     /// # }
     /// ```
