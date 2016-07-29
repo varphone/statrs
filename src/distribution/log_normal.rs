@@ -195,7 +195,7 @@ impl Univariate for LogNormal {
     /// (1 / 2) + (1 / 2) * erf((ln(x) - μ) / sqrt(2) * σ)
     /// ```
     ///
-    /// where `μ` is the location and `σ` is the scale, and `erf` is the
+    /// where `μ` is the location, `σ` is the scale, and `erf` is the
     /// error function
     fn cdf(&self, x: f64) -> f64 {
         assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
@@ -204,24 +204,77 @@ impl Univariate for LogNormal {
 }
 
 impl Continuous for LogNormal {
+    /// Returns the mode of the log-normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// e^(μ - σ^2)
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale
     fn mode(&self) -> f64 {
         (self.location - self.scale * self.scale).exp()
     }
 
+    /// Returns the minimum value in the domain of the log-normal
+    /// distribution representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn min(&self) -> f64 {
         0.0
     }
 
+    /// Returns the maximum value in the domain of the log-normal
+    /// distribution representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
     fn max(&self) -> f64 {
         f64::INFINITY
     }
 
+    /// Calculates the probability density function for the log-normal
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / xσ * sqrt(2π)) * e^(-((ln(x) - μ)^2) / 2σ^2)
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale
     fn pdf(&self, x: f64) -> f64 {
         assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         let d = (x.ln() - self.location) / self.scale;
         (-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.scale)
     }
 
+    /// Calculates the log probability density function for the log-normal
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((1 / xσ * sqrt(2π)) * e^(-((ln(x) - μ)^2) / 2σ^2))
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale
     fn ln_pdf(&self, x: f64) -> f64 {
         assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         let d = (x.ln() - self.location) / self.scale;
