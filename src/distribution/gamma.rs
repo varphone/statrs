@@ -244,7 +244,7 @@ impl Univariate for Gamma {
     /// # Remarks
     ///
     /// Even though technically the Gamma function only supports `x ∈ (0, inf)`,
-    /// we allow `x` to be 0.0 in which case the method simply returns `0.0`.
+    /// we allow `x` to be `0.0` in which case the method simply returns `0.0`.
     /// This behavior is borrowed from the Math.NET implementation and may
     /// be changed in the future
     ///
@@ -327,7 +327,7 @@ impl Continuous for Gamma {
     /// # Remarks
     ///
     /// Even though technically the Gamma function only supports `x ∈ (0, inf)`,
-    /// we allow `x` to be 0.0 in which case the method simply returns `0.0`.
+    /// we allow `x` to be `0.0` in which case the method simply returns `0.0`.
     /// This behavior is borrowed from the Math.NET implementation and may
     /// be changed in the future.
     ///
@@ -367,7 +367,7 @@ impl Continuous for Gamma {
     /// # Remarks
     ///
     /// Even though technically the Gamma function only supports `x ∈ (0, inf)`,
-    /// we allow `x` to be 0.0 in which case the method simply returns `0.0`.
+    /// we allow `x` to be `0.0` in which case the method simply returns `0.0`.
     /// This behavior is borrowed from the Math.NET implementation and may
     /// be changed in the future
     ///
