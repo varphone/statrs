@@ -143,7 +143,7 @@ impl Univariate for Gamma {
     ///
     /// # Remarks
     ///
-    /// Returns shape if rate is infinite. This behavior 
+    /// Returns `shape` if `rate == f64::INFINITY`. This behavior 
     /// is borrowed from the Math.NET implementation
     ///
     /// # Formula
@@ -272,7 +272,7 @@ impl Continuous for Gamma {
     ///
     /// # Remarks
     ///
-    /// Returns shape if rate is infinite. This behavior
+    /// Returns `shape` if `rate ==f64::INFINITY`. This behavior
     /// is borrowed from the Math.NET implementation
     ///
     /// # Formula
