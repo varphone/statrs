@@ -66,7 +66,7 @@ impl Gamma {
     /// ```
     /// use statrs::distribution::Gamma;
     ///
-    /// let n = Gamma::new(3.0, 1.0),unwrap();
+    /// let n = Gamma::new(3.0, 1.0).unwrap();
     /// assert_eq!(n.shape(), 3.0);
     /// ```
     pub fn shape(&self) -> f64 {
@@ -78,7 +78,7 @@ impl Gamma {
     /// # Examples
     ///
     /// ```
-    /// use statrs::distribution::Gammma;
+    /// use statrs::distribution::Gamma;
     ///
     /// let n = Gamma::new(3.0, 1.0).unwrap();
     /// assert_eq!(n.rate(), 1.0);
@@ -125,7 +125,7 @@ impl Distribution for Gamma {
     /// # extern crate rand;
     /// # extern crate statrs;
     /// use rand::StdRng;
-    /// use statrs::distribution::{Ga,,a, Distribution};
+    /// use statrs::distribution::{Gamma, Distribution};
     ///
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
