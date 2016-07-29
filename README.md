@@ -17,7 +17,7 @@ when not.
 | ContinuousUniform | yes         | no           |
 | DiscreteUniform   | yes         | yes          |
 | Exponential       | yes         | yes          |
-| Gamma             | yes         | no           |
+| Gamma             | yes         | yes          |
 | LogNormal         | yes         | no           |
 | Normal            | yes         | no           |
 | Poisson           | yes         | no           |
