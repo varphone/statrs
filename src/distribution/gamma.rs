@@ -124,7 +124,6 @@ impl Distribution for Gamma {
     /// ```
     /// # extern crate rand;
     /// # extern crate statrs;
-    ///
     /// use rand::StdRng;
     /// use statrs::distribution::{Ga,,a, Distribution};
     ///

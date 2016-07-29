@@ -96,7 +96,6 @@ impl Distribution for Chi {
     /// ```
     /// # extern crate rand;
     /// # extern crate statrs;
-    ///
     /// use rand::StdRng;
     /// use statrs::distribution::{Chi, Distribution};
     ///

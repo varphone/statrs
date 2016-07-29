@@ -92,7 +92,6 @@ impl Distribution for Exponential {
     /// ```
     /// # extern crate rand;
     /// # extern crate statrs;
-    ///
     /// use rand::StdRng;
     /// use statrs::distribution::{Exponential, Distribution};
     ///
