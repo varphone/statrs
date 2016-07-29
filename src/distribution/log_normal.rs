@@ -8,6 +8,19 @@ use result::Result;
 use super::{Distribution, Univariate, Continuous};
 use super::normal;
 
+/// Implements the [log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution) 
+/// distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{LogNormal, Univariate, Continuous};
+/// use statrs::prec;
+/// 
+/// let n = LogNormal::new(0.0, 1.0).unwrap();
+/// assert_eq!(n.mean(), (0.5f64).exp());
+/// assert!(prec::almost_eq(n.pdf(1.0), 0.3989422804014326779399, 1e-16));
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct LogNormal {
     location: f64,
@@ -15,6 +28,25 @@ pub struct LogNormal {
 }
 
 impl LogNormal {
+    /// Constructs a new log-normal distribution with a location of `location`
+    /// and a scale of `scale`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `location` or `scale` are `NaN`.
+    /// Returns an error if `scale <= 0.0`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::LogNormal;
+    ///
+    /// let mut result = LogNormal::new(0.0, 1.0);
+    /// assert!(result.is_ok());
+    ///
+    /// result = LogNormal::new(0.0, 0.0);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(location: f64, scale: f64) -> Result<LogNormal> {
         if location.is_nan() || scale.is_nan() || scale <= 0.0 {
             Err(StatsError::BadParams)
@@ -28,50 +60,143 @@ impl LogNormal {
 }
 
 impl Sample<f64> for LogNormal {
+    /// Generate a random sample from a log-normal
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for LogNormal {
+    /// Generate a random independent sample from a log-normal
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution for LogNormal {
+    /// Generate a random sample from the log-normal distribution
+    /// using `r` as the source of randomness. Uses the Box-Muller
+    /// algorithm
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{LogNormal, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = LogNormal::new(0.0, 1.0).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         normal::sample_unchecked(r, self.location, self.scale).exp()
     }
 }
 
 impl Univariate for LogNormal {
+    /// Returns the mean of the log-normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// e^(μ + σ^2 / 2)
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale
     fn mean(&self) -> f64 {
         (self.location + self.scale * self.scale / 2.0).exp()
     }
 
+    /// Returns the variance of the log-normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (e^(σ^2) - 1) * e^(2μ + σ^2)
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale
     fn variance(&self) -> f64 {
         let sigma2 = self.scale * self.scale;
         (sigma2.exp() - 1.0) * (self.location + self.location + sigma2).exp()
     }
 
+    /// Returns the standard deviation of the log-normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt((e^(σ^2) - 1) * e^(2μ + σ^2))
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 
+    /// Returns the entropy of the log-normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(σe^(μ + 1 / 2) * sqrt(2π))
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale
     fn entropy(&self) -> f64 {
         0.5 + self.scale.ln() + self.location + consts::LN_SQRT_2PI
     }
 
+    /// Returns the skewness of the log-normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (e^(σ^2) + 2) * sqrt(e^(σ^2) - 1)
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale
     fn skewness(&self) -> f64 {
         let expsigma2 = (self.scale * self.scale).exp();
         (expsigma2 + 2.0) * (expsigma2 - 1.0).sqrt()
     }
 
+    /// Returns the median of the log-normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// e^μ
+    /// ```
+    ///
+    /// where `μ` is the location
     fn median(&self) -> f64 {
         self.location.exp()
     }
 
+    /// Calculates the cumulative distribution function for the log-normal distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / 2) + (1 / 2) * erf((ln(x) - μ) / sqrt(2) * σ)
+    /// ```
+    ///
+    /// where `μ` is the location and `σ` is the scale, and `erf` is the
+    /// error function
     fn cdf(&self, x: f64) -> f64 {
         assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
@@ -350,9 +475,9 @@ mod test {
         test_almost(-0.1, 2.5, 0.31029619474753883558901295436486123689563749784867, 1e-16, |x| x.pdf(0.5));
         test_almost(-0.1, 2.5, 0.19922929916156673799861939824205622734205083805245, 1e-16, |x| x.pdf(0.8));
 
-        // Test removed because it was causing compiler issues (see issue 31407 for rust)
-        // test_almost(1.5, 0.1, 4.1070141770545881694056265342787422035256248474059e-313, 1e-322, |x| x.pdf(0.1));
-        //
+// Test removed because it was causing compiler issues (see issue 31407 for rust)
+// test_almost(1.5, 0.1, 4.1070141770545881694056265342787422035256248474059e-313, 1e-322, |x| x.pdf(0.1));
+//
 
         test_almost(1.5, 0.1, 2.8602688726477103843476657332784045661507239533567e-104, 1e-116, |x| x.pdf(0.5));
         test_case(1.5, 0.1, 1.6670425710002183246335601541889400558525870482613e-64, |x| x.pdf(0.8));
