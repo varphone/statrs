@@ -199,7 +199,8 @@ impl Univariate for Gamma {
     /// α - ln(β) + ln(Γ(α)) + (1 - α) * ψ(α)
     /// ```
     ///
-    /// where `α` is the shape and `β` is the rate
+    // where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
+    /// and `ψ` is digamma
     fn entropy(&self) -> f64 {
         if self.rate == f64::INFINITY {
             0.0
