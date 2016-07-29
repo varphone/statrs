@@ -19,8 +19,8 @@ when not.
 | DiscreteUniform   | yes         | yes          |
 | Exponential       | yes         | yes          |
 | Gamma             | yes         | yes          |
-| LogNormal         | yes         | no           |
-| Normal            | yes         | no           |
+| LogNormal         | yes         | yes          |
+| Normal            | yes         | yes          |
 | Poisson           | yes         | no           |
 | StudentT          | yes         | no           |
 | Triangular        | yes         | no           |
