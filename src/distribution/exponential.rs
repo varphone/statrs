@@ -6,7 +6,8 @@ use result::Result;
 use super::{Distribution, Univariate, Continuous};
 
 /// Implements the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
-/// distribution
+/// distribution and is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
+/// (referenced [here](./struct.Gamma.html))
 ///
 /// # Examples
 ///
@@ -24,7 +25,7 @@ pub struct Exponential {
 
 impl Exponential {
     /// Constructs a new exponential distribution with a 
-    /// rate of `rate`.
+    /// rate (λ) of `rate`.
     ///
     /// # Errors
     ///

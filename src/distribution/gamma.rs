@@ -7,6 +7,18 @@ use result::Result;
 use super::{Distribution, Univariate, Continuous};
 use super::normal;
 
+/// Implements the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{Gamma, Univariate, Continuous};
+/// use statrs::prec;
+///
+/// let n = Gamma::new(3.0, 1.0).unwrap();
+/// assert_eq!(n.mean(), 3.0);
+/// assert!(prec::almost_eq(n.pdf(2.0), 0.270670566473225383788, 1e-15));
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Gamma {
     shape: f64,
@@ -14,6 +26,25 @@ pub struct Gamma {
 }
 
 impl Gamma {
+    /// Constructs a new gamma distribution with a shape (α)
+    /// of `shape` and a rate (β) of `rate`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `shape` or `rate` are `NaN`.
+    /// Also returns an error if `shape <= 0.0` or `rate <= 0.0`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Gamma;
+    ///
+    /// let mut result = Gamma::new(3.0, 1.0);
+    /// assert!(result.is_ok());
+    ///
+    /// let result = Gamma::new(0.0, 0.0);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(shape: f64, rate: f64) -> Result<Gamma> {
         let is_nan = shape.is_nan() || rate.is_nan();
         match (shape, rate, is_nan) {
@@ -28,34 +59,101 @@ impl Gamma {
         }
     }
 
+    /// Returns the shape (α) of the gamma distribution
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Gamma;
+    ///
+    /// let n = Gamma::new(3.0, 1.0),unwrap();
+    /// assert_eq!(n.shape(), 3.0);
+    /// ```
     pub fn shape(&self) -> f64 {
         self.shape
     }
 
+    /// Returns the rate (β) of the gamma distribution
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Gammma;
+    ///
+    /// let n = Gamma::new(3.0, 1.0).unwrap();
+    /// assert_eq!(n.rate(), 1.0);
+    /// ```
     pub fn rate(&self) -> f64 {
         self.rate
     }
 }
 
 impl Sample<f64> for Gamma {
+    /// Generate a random sample from a gamma
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for Gamma {
+    /// Generate a random independent sample from a gamma
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution for Gamma {
+    /// Generate a random sample from a gamma distribution using
+    /// `r` as the source of randomness. The implementation is based
+    /// on:
+    /// <br />
+    /// <div>
+    /// <i>"A Simple Method for Generating Gamma Variables"</i> - Marsaglia & Tsang
+    /// </div>
+    /// <div>
+    /// ACM Transactions on Mathematical Software, Vol. 26, No. 3, September 2000, Pages 363-372
+    /// </div>
+    /// <br />
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    ///
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Ga,,a, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Gamma::new(3.0, 1.0).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         sample_unchecked(r, self.shape, self.rate)
     }
 }
 
 impl Univariate for Gamma {
+    /// Returns the mean of the gamma distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns shape if rate is infinite. This behavior 
+    /// is borrowed from the Math.NET implementation
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// α / β
+    /// ```
+    ///
+    /// where `α` is the shape and `β` is the rate
     fn mean(&self) -> f64 {
         if self.rate == f64::INFINITY {
             self.shape
@@ -64,6 +162,15 @@ impl Univariate for Gamma {
         }
     }
 
+    /// Returns the variance of the gamma distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// α / β^2
+    /// ```
+    ///
+    /// where `α` is the shape and `β` is the rate
     fn variance(&self) -> f64 {
         if self.rate == f64::INFINITY {
             0.0
@@ -72,10 +179,28 @@ impl Univariate for Gamma {
         }
     }
 
+    /// Returns the standard deviation of the gamma distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(α) / β
+    /// ```
+    ///
+    /// where `α` is the shape and `β` is the rate
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 
+    /// Returns the entropy of the gamma distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// α - ln(β) + ln(Γ(α)) + (1 - α) * ψ(α)
+    /// ```
+    ///
+    /// where `α` is the shape and `β` is the rate
     fn entropy(&self) -> f64 {
         if self.rate == f64::INFINITY {
             0.0
@@ -85,18 +210,52 @@ impl Univariate for Gamma {
         }
     }
 
+    /// Returns the skewness of the gamma distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 2 / sqrt(α)
+    /// ```
+    ///
+    /// where `α` is the shape
     fn skewness(&self) -> f64 {
-        if self.rate == f64::INFINITY {
-            0.0
-        } else {
-            2.0 / self.shape.sqrt()
-        }
+        2.0 / self.shape.sqrt()
     }
 
+    /// There is no simple closed form solution for the median
+    /// of a gamma distribution so as of now, this method is unimplemented
+    /// and will panic.
+    ///
+    /// # Panics
+    ///
+    /// Always
     fn median(&self) -> f64 {
         unimplemented!()
     }
 
+    /// Calculates the cumulative distribution function for the gamma distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Remarks
+    ///
+    /// Even though technically the Gamma function only supports `x ∈ (0, inf)`,
+    /// we allow `x` to be 0.0 in which case the method simply returns `0.0`.
+    /// This behavior is borrowed from the Math.NET implementation and may
+    /// be changed in the future
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / Γ(α)) * γ(α, β * x)
+    /// ```
+    ///
+    /// where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
+    /// and `γ` is the lower incomplete gamma function
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         if x == self.shape && self.rate == f64::INFINITY {
@@ -110,6 +269,20 @@ impl Univariate for Gamma {
 }
 
 impl Continuous for Gamma {
+    /// Returns the mode for the gamma distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns shape if rate is infinite. This behavior
+    /// is borrowed from the Math.NET implementation
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (α - 1) / β
+    /// ```
+    ///
+    /// where `α` is the shape and `β` is the rate
     fn mode(&self) -> f64 {
         if self.rate == f64::INFINITY {
             self.shape
@@ -118,14 +291,56 @@ impl Continuous for Gamma {
         }
     }
 
+    /// Returns the minimum value in the domain of the
+    /// gamma distribution representable by a double precision
+    /// float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn min(&self) -> f64 {
         0.0
     }
 
+    /// Returns the maximum value in the domain of the
+    /// gamma distribution representable by a double precision
+    /// float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
     fn max(&self) -> f64 {
         f64::INFINITY
     }
 
+    /// Calculates the probability density function for the gamma distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Remarks
+    ///
+    /// Even though technically the Gamma function only supports `x ∈ (0, inf)`,
+    /// we allow `x` to be 0.0 in which case the method simply returns `0.0`.
+    /// This behavior is borrowed from the Math.NET implementation and may
+    /// be changed in the future.
+    ///
+    /// Returns `f64::INFINITY` if `x == shape && rate == f64::INFINITY`
+    /// Otherwise returns `0.0` if `rate == f64::INFINITY`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (β^α / Γ(α)) * x^(α - 1) * e ^(-β * x)
+    /// ```
+    ///
+    /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         if x == self.shape && self.rate == f64::INFINITY {
@@ -142,6 +357,30 @@ impl Continuous for Gamma {
         }
     }
 
+    /// Calculates the log probability density function for the gamma distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Remarks
+    ///
+    /// Even though technically the Gamma function only supports `x ∈ (0, inf)`,
+    /// we allow `x` to be 0.0 in which case the method simply returns `0.0`.
+    /// This behavior is borrowed from the Math.NET implementation and may
+    /// be changed in the future
+    ///
+    /// Returns `f64::INFINITY` if `x == shape && rate == f64::INFINITY`
+    /// Otherwise returns `f64::NEG_INFINITY` if `rate == f64::INFINITY`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((β^α / Γ(α)) * x^(α - 1) * e ^(-β * x))
+    /// ```
+    ///
+    /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn ln_pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         if x == self.shape && self.rate == f64::INFINITY {
@@ -157,6 +396,16 @@ impl Continuous for Gamma {
     }
 }
 
+/// Samples from a gamma distribution with a shape of `shape` and a
+/// rate of `rate` using `r` as the source of randomness. Implementation from:
+/// <br />
+/// <div>
+/// <i>"A Simple Method for Generating Gamma Variables"</i> - Marsaglia & Tsang
+/// </div>
+/// <div>
+/// ACM Transactions on Mathematical Software, Vol. 26, No. 3, September 2000, Pages 363-372
+/// </div>
+/// <br />
 pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
     if rate == f64::INFINITY {
         return shape;
@@ -301,7 +550,7 @@ mod test {
         test_case(1.0, 1.0, 2.0, |x| x.skewness());
         test_case(10.0, 10.0, 0.63245553203367586639977870888654370674391102786504337, |x| x.skewness());
         test_case(10.0, 1.0, 0.63245553203367586639977870888654370674391102786504337, |x| x.skewness());
-        test_case(10.0, f64::INFINITY, 0.0, |x| x.skewness());
+        test_case(10.0, f64::INFINITY, 0.63245553203367586639977870888654370674391102786504337, |x| x.skewness());
     }
 
     #[test]
