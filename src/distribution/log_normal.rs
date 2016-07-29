@@ -8,7 +8,7 @@ use result::Result;
 use super::{Distribution, Univariate, Continuous};
 use super::normal;
 
-/// Implements the [log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution) 
+/// Implements the [Log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution) 
 /// distribution
 ///
 /// # Examples

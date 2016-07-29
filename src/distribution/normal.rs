@@ -7,6 +7,18 @@ use function::erf;
 use result::Result;
 use super::{Distribution, Univariate, Continuous};
 
+/// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
+/// distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{Normal, Univariate, Continuous};
+///
+/// let n = Normal::new(0.0, 1.0).unwrap();
+/// assert_eq!(n.mean(), 0.0);
+/// assert_eq!(n.pdf(1.0), 0.2419707245191433497978);
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Normal {
     mean: f64,
@@ -14,6 +26,25 @@ pub struct Normal {
 }
 
 impl Normal {
+    ///  Constructs a new normal distribution with a mean of `mean`
+    /// and a standard deviation of `std_dev`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `mean` or `std_dev` are `NaN` or if 
+    /// `std_dev <= 0.0`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Normal;
+    ///
+    /// let mut result = Normal::new(0.0, 1.0);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Normal::new(0.0, 0.0);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(mean: f64, std_dev: f64) -> Result<Normal> {
         if mean.is_nan() || std_dev.is_nan() || std_dev <= 0.0 {
             Err(StatsError::BadParams)
@@ -27,70 +58,195 @@ impl Normal {
 }
 
 impl Sample<f64> for Normal {
+    /// Generate a random sample from a normal
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for Normal {
+    /// Generate a random independent sample from a normal
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution for Normal {
+    /// Generate a random sample from the normal distribution
+    /// using `r` as the source of randomness. Uses the Box-Muller
+    /// algorithm
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Normal, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Normal::new(0.0, 1.0).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         sample_unchecked(r, self.mean, self.std_dev)
     }
 }
 
 impl Univariate for Normal {
+    /// Returns the mean of the normal distribution
+    ///
+    /// # Remarks
+    ///
+    /// This is the same mean used to construct the distribution
     fn mean(&self) -> f64 {
         self.mean
     }
 
+    /// Returns the variance of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// σ^2
+    /// ```
+    ///
+    /// where `σ` is the standard deviation
     fn variance(&self) -> f64 {
         self.std_dev * self.std_dev
     }
 
+    /// Returns the standard deviation of the normal distribution
+    ///
+    /// # Remarks
+    ///
+    /// This is the same standard deviation used to construct the
+    /// distribution
     fn std_dev(&self) -> f64 {
         self.std_dev
     }
 
+    /// Returns the entropy of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / 2) * ln(2σ^2 * π * e)
+    /// ```
+    ///
+    /// where `σ` is the standard deviation
     fn entropy(&self) -> f64 {
         self.std_dev.ln() + consts::LN_SQRT_2PIE
     }
 
+    /// Returns the skewness of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn skewness(&self) -> f64 {
         0.0
     }
 
+    /// Returns the median of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// μ
+    /// ```
+    ///
+    /// where `μ` is the mean
     fn median(&self) -> f64 {
         self.mean
     }
 
+    /// Calculates the cumulative distribution function for the
+    /// normal distribution at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / 2) * (1 + erf((x - μ) / (σ * sqrt(2))))
+    /// ```
+    ///
+    /// where `μ` is the mean, `σ` is the standard deviation, and
+    /// `erf` is the error function
     fn cdf(&self, x: f64) -> f64 {
         cdf_unchecked(x, self.mean, self.std_dev)
     }
 }
 
 impl Continuous for Normal {
+    /// Returns the mode of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// μ
+    /// ```
+    ///
+    /// where `μ` is the mean
     fn mode(&self) -> f64 {
         self.mean
     }
 
+    /// Returns the minimum value in the domain of the
+    /// normal distribution representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// -INF
+    /// ```
     fn min(&self) -> f64 {
         f64::NEG_INFINITY
     }
 
+    /// Returns the maximum value in the domain of the
+    /// normal distribution representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
     fn max(&self) -> f64 {
         f64::INFINITY
     }
 
+    /// Calculates the probability density function for the normal distribution
+    /// at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / sqrt(2σ^2 * π)) * e^(-(x - μ)^2 / 2σ^2)
+    /// ```
+    ///
+    /// where `μ` is the mean and `σ` is the standard deviation
     fn pdf(&self, x: f64) -> f64 {
         pdf_unchecked(x, self.mean, self.std_dev)
     }
 
+    /// Calculates the log probability density function for the normal distribution
+    /// at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((1 / sqrt(2σ^2 * π)) * e^(-(x - μ)^2 / 2σ^2))
+    /// ```
+    ///
+    /// where `μ` is the mean and `σ` is the standard deviation
     fn ln_pdf(&self, x: f64) -> f64 {
         ln_pdf_unchecked(x, self.mean, self.std_dev)
     }
