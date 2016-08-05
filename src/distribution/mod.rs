@@ -262,9 +262,9 @@ pub trait Continuous<T, K> : Distribution<K> {
     fn ln_pdf(&self, x: T) -> K;
 }
 
-/// The `Discrete` trait extends the `Univariate`
+/// The `Discrete` trait extends the `Distribution`
 /// trait and provides an interface for interacting with discrete
-/// univariate statistical distributions
+/// statistical distributions
 ///
 /// # Remarks
 ///
