@@ -5,7 +5,7 @@ use consts;
 use error::StatsError;
 use function::erf;
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
+use super::*;
 
 /// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
 /// distribution
@@ -13,7 +13,7 @@ use super::{Distribution, Univariate, Continuous};
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Normal, Univariate, Continuous};
+/// use statrs::distribution::{Normal, Mean, Continuous};
 ///
 /// let n = Normal::new(0.0, 1.0).unwrap();
 /// assert_eq!(n.mean(), 0.0);
@@ -75,7 +75,7 @@ impl IndependentSample<f64> for Normal {
     }
 }
 
-impl Distribution for Normal {
+impl Distribution<f64> for Normal {
     /// Generate a random sample from the normal distribution
     /// using `r` as the source of randomness. Uses the Box-Muller
     /// algorithm
@@ -99,76 +99,7 @@ impl Distribution for Normal {
     }
 }
 
-impl Univariate for Normal {
-    /// Returns the mean of the normal distribution
-    ///
-    /// # Remarks
-    ///
-    /// This is the same mean used to construct the distribution
-    fn mean(&self) -> f64 {
-        self.mean
-    }
-
-    /// Returns the variance of the normal distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// σ^2
-    /// ```
-    ///
-    /// where `σ` is the standard deviation
-    fn variance(&self) -> f64 {
-        self.std_dev * self.std_dev
-    }
-
-    /// Returns the standard deviation of the normal distribution
-    ///
-    /// # Remarks
-    ///
-    /// This is the same standard deviation used to construct the
-    /// distribution
-    fn std_dev(&self) -> f64 {
-        self.std_dev
-    }
-
-    /// Returns the entropy of the normal distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// (1 / 2) * ln(2σ^2 * π * e)
-    /// ```
-    ///
-    /// where `σ` is the standard deviation
-    fn entropy(&self) -> f64 {
-        self.std_dev.ln() + consts::LN_SQRT_2PIE
-    }
-
-    /// Returns the skewness of the normal distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 0
-    /// ```
-    fn skewness(&self) -> f64 {
-        0.0
-    }
-
-    /// Returns the median of the normal distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// μ
-    /// ```
-    ///
-    /// where `μ` is the mean
-    fn median(&self) -> f64 {
-        self.mean
-    }
-
+impl Univariate<f64, f64> for Normal {
     /// Calculates the cumulative distribution function for the
     /// normal distribution at `x`
     ///
@@ -182,21 +113,6 @@ impl Univariate for Normal {
     /// `erf` is the error function
     fn cdf(&self, x: f64) -> f64 {
         cdf_unchecked(x, self.mean, self.std_dev)
-    }
-}
-
-impl Continuous for Normal {
-    /// Returns the mode of the normal distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// μ
-    /// ```
-    ///
-    /// where `μ` is the mean
-    fn mode(&self) -> f64 {
-        self.mean
     }
 
     /// Returns the minimum value in the domain of the
@@ -222,7 +138,103 @@ impl Continuous for Normal {
     fn max(&self) -> f64 {
         f64::INFINITY
     }
+}
 
+impl Mean<f64, f64> for Normal {
+    /// Returns the mean of the normal distribution
+    ///
+    /// # Remarks
+    ///
+    /// This is the same mean used to construct the distribution
+    fn mean(&self) -> f64 {
+        self.mean
+    }
+}
+
+impl Variance<f64, f64> for Normal {
+    /// Returns the variance of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// σ^2
+    /// ```
+    ///
+    /// where `σ` is the standard deviation
+    fn variance(&self) -> f64 {
+        self.std_dev * self.std_dev
+    }
+
+    /// Returns the standard deviation of the normal distribution
+    ///
+    /// # Remarks
+    ///
+    /// This is the same standard deviation used to construct the
+    /// distribution
+    fn std_dev(&self) -> f64 {
+        self.std_dev
+    }
+}
+
+impl Entropy<f64> for Normal {
+    /// Returns the entropy of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / 2) * ln(2σ^2 * π * e)
+    /// ```
+    ///
+    /// where `σ` is the standard deviation
+    fn entropy(&self) -> f64 {
+        self.std_dev.ln() + consts::LN_SQRT_2PIE
+    }
+}
+
+impl Skewness<f64, f64> for Normal {
+    /// Returns the skewness of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
+    fn skewness(&self) -> f64 {
+        0.0
+    }
+}
+
+impl Median<f64> for Normal {
+    /// Returns the median of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// μ
+    /// ```
+    ///
+    /// where `μ` is the mean
+    fn median(&self) -> f64 {
+        self.mean
+    }
+}
+
+impl Mode<f64, f64> for Normal {
+    /// Returns the mode of the normal distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// μ
+    /// ```
+    ///
+    /// where `μ` is the mean
+    fn mode(&self) -> f64 {
+        self.mean
+    }
+}
+
+impl Continuous<f64, f64> for Normal {
     /// Calculates the probability density function for the normal distribution
     /// at `x`
     ///
@@ -298,9 +310,8 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::Normal;
 
     fn try_create(mean: f64, std_dev: f64) -> Normal {
         let n = Normal::new(mean, std_dev);

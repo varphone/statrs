@@ -4,8 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::gamma;
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
-use super::normal;
+use super::*;
 
 /// Implements the [Chi](https://en.wikipedia.org/wiki/Chi_distribution)
 /// distribution
@@ -13,7 +12,7 @@ use super::normal;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Chi, Univariate, Continuous};
+/// use statrs::distribution::{Chi, Mean, Continuous};
 /// use statrs::prec;
 ///
 /// let n = Chi::new(2.0).unwrap();
@@ -87,7 +86,7 @@ impl IndependentSample<f64> for Chi {
     }
 }
 
-impl Distribution for Chi {
+impl Distribution<f64> for Chi {
     /// Generate a random sample from the chi distribution
     /// using `r` as the source of randomness
     ///
@@ -108,12 +107,62 @@ impl Distribution for Chi {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         (0..self.freedom as i64)
             .fold(0.0,
-                  |acc, _| acc + normal::sample_unchecked(r, 0.0, 1.0).powf(2.0))
+                  |acc, _| acc + super::normal::sample_unchecked(r, 0.0, 1.0).powf(2.0))
             .sqrt()
     }
 }
 
-impl Univariate for Chi {
+impl Univariate<f64, f64> for Chi {
+    /// Calculates the cumulative distribution function for the chi
+    /// distribution at `x`.
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// P(k / 2, x^2 / 2)
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom and `P` is
+    /// the regularized Gamma function
+    fn cdf(&self, x: f64) -> f64 {
+        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
+        if self.freedom == f64::INFINITY || x == f64::INFINITY {
+            1.0
+        } else {
+            gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0)
+        }
+    }
+
+    /// Returns the minimum value in the domain of the chi distribution
+    /// representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
+    fn min(&self) -> f64 {
+        0.0
+    }
+
+    /// Returns the maximum value in the domain of the chi distribution
+    /// representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
+    fn max(&self) -> f64 {
+        f64::INFINITY
+    }
+}
+
+impl Mean<f64, f64> for Chi {
     /// Returns the mean of the chi distribution
     ///
     /// # Formula
@@ -127,7 +176,9 @@ impl Univariate for Chi {
         f64::consts::SQRT_2 * gamma::gamma((self.freedom + 1.0) / 2.0) /
         gamma::gamma(self.freedom / 2.0)
     }
+}
 
+impl Variance<f64, f64> for Chi {
     /// Returns the variance of the chi distribution
     ///
     /// # Formula
@@ -155,7 +206,9 @@ impl Univariate for Chi {
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
+}
 
+impl Entropy<f64> for Chi {
     /// Returns the entropy of the chi distribution
     ///
     /// # Formula
@@ -171,7 +224,9 @@ impl Univariate for Chi {
         (self.freedom - (2.0f64).ln() - (self.freedom - 1.0) * gamma::digamma(self.freedom / 2.0)) /
         2.0
     }
+}
 
+impl Skewness<f64, f64> for Chi {
     /// Returns the skewness of the chi distribution
     ///
     /// # Formula
@@ -185,42 +240,9 @@ impl Univariate for Chi {
         let sigma = self.std_dev();
         self.mean() * (1.0 - 2.0 * sigma * sigma) / (sigma * sigma * sigma)
     }
-
-    /// This method is unimplemented and will panic when called.
-    ///
-    /// # Panics
-    ///
-    /// Always
-    fn median(&self) -> f64 {
-        unimplemented!()
-    }
-
-    /// Calculates the cumulative distribution function for the chi
-    /// distribution at `x`.
-    ///
-    /// # Panics
-    ///
-    /// If `x < 0.0`
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// P(k / 2, x^2 / 2)
-    /// ```
-    ///
-    /// where `k` is the degrees of freedom and `P` is
-    /// the regularized Gamma function
-    fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        if self.freedom == f64::INFINITY || x == f64::INFINITY {
-            1.0
-        } else {
-            gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0)
-        }
-    }
 }
 
-impl Continuous for Chi {
+impl Mode<f64, f64> for Chi {
     /// Returns the mode for the chi distribution
     ///
     /// # Panics
@@ -239,31 +261,9 @@ impl Continuous for Chi {
                 format!("{}", StatsError::ArgGte("freedom", 1.0)));
         (self.freedom - 1.0).sqrt()
     }
+}
 
-    /// Returns the minimum value in the domain of the chi distribution
-    /// representable by a double precision float
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 0
-    /// ```
-    fn min(&self) -> f64 {
-        0.0
-    }
-
-    /// Returns the maximum value in the domain of the chi distribution
-    /// representable by a double precision float
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// INF
-    /// ```
-    fn max(&self) -> f64 {
-        f64::INFINITY
-    }
-
+impl Continuous<f64, f64> for Chi {
     /// Calculates the probability density function for the chi
     /// distribution at `x`
     ///
@@ -317,9 +317,8 @@ impl Continuous for Chi {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::Chi;
 
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);
@@ -424,12 +423,6 @@ mod test {
         test_almost(2.5, 0.5458487096285153216, 1e-12, |x| x.skewness());
         test_almost(3.0, 0.485692828049590809, 1e-12, |x| x.skewness());
         test_is_nan(f64::INFINITY, |x| x.skewness());
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_median() {
-        get_value(1.0, |x| x.median());
     }
 
     #[test]

@@ -4,7 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, factorial};
 use result::Result;
-use super::{Distribution, Univariate, Discrete};
+use super::*;
 
 /// Implements the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
 /// distribution
@@ -12,7 +12,7 @@ use super::{Distribution, Univariate, Discrete};
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Binomial, Univariate, Discrete};
+/// use statrs::distribution::{Binomial, Mean, Discrete};
 ///
 /// let n = Binomial::new(0.5, 5).unwrap();
 /// assert_eq!(n.mean(), 2.5);
@@ -104,7 +104,7 @@ impl IndependentSample<f64> for Binomial {
     }
 }
 
-impl Distribution for Binomial {
+impl Distribution<f64> for Binomial {
     /// Generate a random sample from the binomial distribution
     /// using `r` as the source of randomness  where the range of
     /// values is `[0.0, n]`.
@@ -135,81 +135,7 @@ impl Distribution for Binomial {
     }
 }
 
-impl Univariate for Binomial {
-    /// Returns the mean of the binomial distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// p * n
-    /// ```
-    fn mean(&self) -> f64 {
-        self.p * self.n as f64
-    }
-
-    /// Returns the variance of the binomial distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// n * p * (1 - p)
-    /// ```
-    fn variance(&self) -> f64 {
-        self.p * (1.0 - self.p) * self.n as f64
-    }
-
-    /// Returns the standard deviation of the binomial distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// sqrt(n * p * (1 - p))
-    /// ```
-    fn std_dev(&self) -> f64 {
-        self.variance().sqrt()
-    }
-
-    /// Returns the entropy of the binomial distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// (1 / 2) * ln (2 * π * e * n * p * (1 - p))
-    /// ```
-    fn entropy(&self) -> f64 {
-        match self.p {
-            0.0 | 1.0 => 0.0,
-            _ => {
-                (0..self.n + 1).fold(0.0, |acc, x| {
-                    let p = self.pmf(x);
-                    acc - p * p.ln()
-                })
-            }
-        }
-    }
-
-    /// Returns the skewness of the binomial distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// (1 - 2p) / sqrt(n * p * (1 - p)))
-    /// ```
-    fn skewness(&self) -> f64 {
-        (1.0 - 2.0 * self.p) / (self.n as f64 * self.p * (1.0 - self.p)).sqrt()
-    }
-
-    /// Returns the median of the binomial distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// floor(n * p)
-    /// ```
-    fn median(&self) -> f64 {
-        (self.p * self.n as f64).floor()
-    }
-
+impl Univariate<i64, f64> for Binomial {
     /// Calulcates the cumulative distribution function for the
     /// binomial distribution at `x`
     ///
@@ -232,23 +158,6 @@ impl Univariate for Binomial {
         } else {
             let k = x.floor();
             beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p)
-        }
-    }
-}
-
-impl Discrete for Binomial {
-    /// Returns the mode for the binomial distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// floor((n + 1) * p)
-    /// ```
-    fn mode(&self) -> i64 {
-        match self.p {
-            0.0 => 0,
-            1.0 => self.n,
-            _ => ((self.n as f64 + 1.0) * self.p).floor() as i64,
         }
     }
 
@@ -277,7 +186,110 @@ impl Discrete for Binomial {
     fn max(&self) -> i64 {
         self.n
     }
+}
 
+impl Mean<f64, f64> for Binomial {
+    /// Returns the mean of the binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// p * n
+    /// ```
+    fn mean(&self) -> f64 {
+        self.p * self.n as f64
+    }
+}
+
+impl Variance<f64, f64> for Binomial {
+    /// Returns the variance of the binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// n * p * (1 - p)
+    /// ```
+    fn variance(&self) -> f64 {
+        self.p * (1.0 - self.p) * self.n as f64
+    }
+
+    /// Returns the standard deviation of the binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(n * p * (1 - p))
+    /// ```
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
+    }
+}
+
+impl Entropy<f64> for Binomial {
+    /// Returns the entropy of the binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / 2) * ln (2 * π * e * n * p * (1 - p))
+    /// ```
+    fn entropy(&self) -> f64 {
+        match self.p {
+            0.0 | 1.0 => 0.0,
+            _ => {
+                (0..self.n + 1).fold(0.0, |acc, x| {
+                    let p = self.pmf(x);
+                    acc - p * p.ln()
+                })
+            }
+        }
+    }
+}
+
+impl Skewness<f64, f64> for Binomial {
+    /// Returns the skewness of the binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 - 2p) / sqrt(n * p * (1 - p)))
+    /// ```
+    fn skewness(&self) -> f64 {
+        (1.0 - 2.0 * self.p) / (self.n as f64 * self.p * (1.0 - self.p)).sqrt()
+    }
+}
+
+impl Median<f64> for Binomial {
+    /// Returns the median of the binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// floor(n * p)
+    /// ```
+    fn median(&self) -> f64 {
+        (self.p * self.n as f64).floor()
+    }
+}
+
+impl Mode<i64, f64> for Binomial {
+    /// Returns the mode for the binomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// floor((n + 1) * p)
+    /// ```
+    fn mode(&self) -> i64 {
+        match self.p {
+            0.0 => 0,
+            1.0 => self.n,
+            _ => ((self.n as f64 + 1.0) * self.p).floor() as i64,
+        }
+    }
+}
+
+impl Discrete<i64, f64> for Binomial {
     /// Calculates the probability mass function for the binomial
     /// distribution at `x`
     ///
@@ -344,9 +356,8 @@ mod test {
     use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
-    use distribution::{Univariate, Discrete};
+    use distribution::*;
     use prec;
-    use super::Binomial;
 
     fn try_create(p: f64, n: i64) -> Binomial {
         let n = Binomial::new(p, n);

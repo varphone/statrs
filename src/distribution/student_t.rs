@@ -4,8 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, gamma};
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
-use super::normal;
+use super::*;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct StudentT {
@@ -53,20 +52,49 @@ impl IndependentSample<f64> for StudentT {
     }
 }
 
-impl Distribution for StudentT {
+impl Distribution<f64> for StudentT {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         let gamma = super::gamma::sample_unchecked(r, 0.5 * self.freedom, 0.5);
-        normal::sample_unchecked(r, self.location, self.scale * (self.freedom / gamma).sqrt())
+        super::normal::sample_unchecked(r,
+                                        self.location,
+                                        self.scale * (self.freedom / gamma).sqrt())
     }
 }
 
-impl Univariate for StudentT {
+impl Univariate<f64, f64> for StudentT {
+    fn cdf(&self, x: f64) -> f64 {
+        if self.freedom == f64::INFINITY {
+            super::normal::cdf_unchecked(x, self.location, self.scale)
+        } else {
+            let k = (x - self.location) / self.scale;
+            let h = self.freedom / (self.freedom + k * k);
+            let ib = 0.5 * beta::beta_reg(self.freedom / 2.0, 0.5, h);
+            if x <= self.location {
+                ib
+            } else {
+                1.0 - ib
+            }
+        }
+    }
+
+    fn min(&self) -> f64 {
+        f64::NEG_INFINITY
+    }
+
+    fn max(&self) -> f64 {
+        f64::INFINITY
+    }
+}
+
+impl Mean<f64, f64> for StudentT {
     fn mean(&self) -> f64 {
         assert!(self.freedom > 1.0,
                 format!("{}", StatsError::ArgGt("freedom", 1.0)));
         self.location
     }
+}
 
+impl Variance<f64, f64> for StudentT {
     fn variance(&self) -> f64 {
         assert!(self.freedom > 1.0,
                 format!("{}", StatsError::ArgGt("freedom", 1.0)));
@@ -82,7 +110,9 @@ impl Univariate for StudentT {
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
+}
 
+impl Entropy<f64> for StudentT {
     fn entropy(&self) -> f64 {
         assert!(self.location == 0.0 && self.scale == 1.0,
                 "Cannot calculate entropy for StudentT distribution where location is not 0 and \
@@ -92,49 +122,32 @@ impl Univariate for StudentT {
         (gamma::digamma((self.freedom + 1.0) / 2.0) - gamma::digamma(self.freedom / 2.0)) +
         (self.freedom.sqrt() * beta::beta(self.freedom / 2.0, 0.5)).ln()
     }
+}
 
+impl Skewness<f64, f64> for StudentT {
     fn skewness(&self) -> f64 {
         assert!(self.freedom > 3.0,
                 format!("{}", StatsError::ArgGt("freedom", 3.0)));
         0.0
     }
+}
 
+impl Median<f64> for StudentT {
     fn median(&self) -> f64 {
         self.location
     }
-
-    fn cdf(&self, x: f64) -> f64 {
-        if self.freedom == f64::INFINITY {
-            normal::cdf_unchecked(x, self.location, self.scale)
-        } else {
-            let k = (x - self.location) / self.scale;
-            let h = self.freedom / (self.freedom + k * k);
-            let ib = 0.5 * beta::beta_reg(self.freedom / 2.0, 0.5, h);
-            if x <= self.location {
-                ib
-            } else {
-                1.0 - ib
-            }
-        }
-    }
 }
 
-impl Continuous for StudentT {
+impl Mode<f64, f64> for StudentT {
     fn mode(&self) -> f64 {
         self.location
     }
+}
 
-    fn min(&self) -> f64 {
-        f64::NEG_INFINITY
-    }
-
-    fn max(&self) -> f64 {
-        f64::INFINITY
-    }
-
+impl Continuous<f64, f64> for StudentT {
     fn pdf(&self, x: f64) -> f64 {
         if self.freedom >= 1e8 {
-            normal::pdf_unchecked(x, self.location, self.scale)
+            super::normal::pdf_unchecked(x, self.location, self.scale)
         } else {
             let d = (x - self.location) / self.scale;
             (gamma::ln_gamma((self.freedom + 1.0) / 2.0) - gamma::ln_gamma(self.freedom / 2.0))
@@ -146,7 +159,7 @@ impl Continuous for StudentT {
 
     fn ln_pdf(&self, x: f64) -> f64 {
         if self.freedom >= 1e8 {
-            normal::ln_pdf_unchecked(x, self.location, self.scale)
+            super::normal::ln_pdf_unchecked(x, self.location, self.scale)
         } else {
             let d = (x - self.location) / self.scale;
             gamma::ln_gamma((self.freedom + 1.0) / 2.0) -
@@ -162,9 +175,8 @@ impl Continuous for StudentT {
 mod test {
     use std::f64;
     use std::panic;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::StudentT;
 
     fn try_create(location: f64, scale: f64, freedom: f64) -> StudentT {
         let n = StudentT::new(location, scale, freedom);
@@ -183,7 +195,7 @@ mod test {
         let n = StudentT::new(location, scale, freedom);
         assert!(n.is_err());
     }
-    
+
     fn get_value<F>(location: f64, scale: f64, freedom: f64, eval: F) -> f64
         where F: Fn(StudentT) -> f64
     {
@@ -204,7 +216,7 @@ mod test {
         let x = get_value(location, scale, freedom, eval);
         assert!(prec::almost_eq(expected, x, acc));
     }
-    
+
     fn test_panic<F>(location: f64, scale: f64, freedom: f64, eval: F)
         where F : Fn(StudentT) -> f64,
               F : panic::UnwindSafe
@@ -231,7 +243,7 @@ mod test {
         bad_create_case(0.0, -10.0, 1.0);
         bad_create_case(0.0, 10.0, -1.0);
     }
-    
+
     #[test]
     fn test_mean() {
         test_panic(0.0, 1.0, 1.0, |x| x.mean());
@@ -244,7 +256,7 @@ mod test {
         test_case(-5.0, 100.0, 1.5, -5.0, |x| x.mean());
         test_panic(0.0, f64::INFINITY, 1.0, |x| x.mean());
     }
-    
+
     #[test]
     fn test_variance() {
         test_panic(0.0, 1.0, 1.0, |x| x.variance());
@@ -258,7 +270,7 @@ mod test {
         test_case(-5.0, 100.0, 1.5, f64::INFINITY, |x| x.variance());
         test_panic(0.0, f64::INFINITY, 1.0, |x| x.variance());
     }
-    
+
     #[test]
     fn test_std_dev() {
         test_panic(0.0, 1.0, 1.0, |x| x.std_dev());
@@ -273,7 +285,7 @@ mod test {
         test_case(-5.0, 100.0, 1.5, f64::INFINITY, |x| x.std_dev());
         test_panic(0.0, f64::INFINITY, 1.0, |x| x.std_dev());
     }
-    
+
     #[test]
     fn test_mode() {
         test_case(0.0, 1.0, 1.0, 0.0, |x| x.mode());
@@ -288,7 +300,7 @@ mod test {
         test_case(-5.0, 100.0, 1.5, -5.0, |x| x.mode());
         test_case(0.0, f64::INFINITY, 1.0, 0.0, |x| x.mode());
     }
-    
+
     #[test]
     fn test_median() {
         test_case(0.0, 1.0, 1.0, 0.0, |x| x.median());
@@ -303,7 +315,7 @@ mod test {
         test_case(-5.0, 100.0, 1.5, -5.0, |x| x.median());
         test_case(0.0, f64::INFINITY, 1.0, 0.0, |x| x.median());
     }
-    
+
     #[test]
     fn test_min_max() {
         test_case(0.0, 1.0, 1.0, f64::NEG_INFINITY, |x| x.min());
@@ -313,7 +325,7 @@ mod test {
         test_case(2.5, 100.0, 1.5, f64::INFINITY, |x| x.max());
         test_case(10.0, f64::INFINITY, 5.5, f64::INFINITY, |x| x.max());
     }
-    
+
     #[test]
     fn test_pdf() {
         test_almost(0.0, 1.0, 1.0, 0.318309886183791, 1e-15, |x| x.pdf(0.0));
@@ -330,7 +342,7 @@ mod test {
         test_almost(0.0, 1.0, f64::INFINITY, 0.241970724519143, 1e-15, |x| x.pdf(1.0));
         test_almost(0.0, 1.0, f64::INFINITY, 0.053990966513188, 1e-15, |x| x.pdf(2.0));
     }
-    
+
     #[test]
     fn test_ln_pdf() {
         test_almost(0.0, 1.0, 1.0, -1.144729885849399, 1e-14, |x| x.ln_pdf(0.0));
@@ -347,7 +359,7 @@ mod test {
         test_almost(0.0, 1.0, f64::INFINITY, -1.418938533204674, 1e-14, |x| x.ln_pdf(1.0));
         test_almost(0.0, 1.0, f64::INFINITY, -2.918938533204674, 1e-14, |x| x.ln_pdf(2.0));
     }
-    
+
     #[test]
     fn test_cdf() {
         test_case(0.0, 1.0, 1.0, 0.5, |x| x.cdf(0.0));
@@ -361,8 +373,8 @@ mod test {
         test_almost(0.0, 1.0, 2.0, 0.908248290463863, 1e-15, |x| x.cdf(2.0));
         test_almost(0.0, 1.0, 2.0, 0.091751709536137, 1e-15, |x| x.cdf(-2.0));
         test_case(0.0, 1.0, f64::INFINITY, 0.5, |x| x.cdf(0.0));
-        
-        // TODO: these are curiously low accuracy and should be re-examined
+
+// TODO: these are curiously low accuracy and should be re-examined
         test_almost(0.0, 1.0, f64::INFINITY, 0.841344746068543, 1e-10, |x| x.cdf(1.0));
         test_almost(0.0, 1.0, f64::INFINITY, 0.977249868051821, 1e-11, |x| x.cdf(2.0));
     }

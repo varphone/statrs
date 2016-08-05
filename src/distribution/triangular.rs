@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
+use super::*;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Triangular {
@@ -58,52 +58,13 @@ impl IndependentSample<f64> for Triangular {
     }
 }
 
-impl Distribution for Triangular {
+impl Distribution<f64> for Triangular {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         sample_unchecked(r, self.min, self.max, self.mode)
     }
 }
 
-impl Univariate for Triangular {
-    fn mean(&self) -> f64 {
-        (self.min + self.max + self.mode) / 3.0
-    }
-
-    fn variance(&self) -> f64 {
-        let a = self.min;
-        let b = self.max;
-        let c = self.mode;
-        (a * a + b * b + c * c - a * b - a * c - b * c) / 18.0
-    }
-
-    fn std_dev(&self) -> f64 {
-        self.variance().sqrt()
-    }
-
-    fn entropy(&self) -> f64 {
-        0.5 + ((self.max - self.min) / 2.0).ln()
-    }
-
-    fn skewness(&self) -> f64 {
-        let a = self.min;
-        let b = self.max;
-        let c = self.mode;
-        let q = f64::consts::SQRT_2 * (a + b - 2.0 * c) * (2.0 * a - b - c) * (a - 2.0 * b + c);
-        let d = 5.0 * (a * a + b * b + c * c - a * b - a * c - b * c).powf(3.0 / 2.0);
-        q / d
-    }
-
-    fn median(&self) -> f64 {
-        let a = self.min;
-        let b = self.max;
-        let c = self.mode;
-        if c >= (a + b) / 2.0 {
-            a + ((b - a) * (c - a) / 2.0).sqrt()
-        } else {
-            b - ((b - a) * (b - c) / 2.0).sqrt()
-        }
-    }
-
+impl Univariate<f64, f64> for Triangular {
     fn cdf(&self, x: f64) -> f64 {
         let a = self.min;
         let b = self.max;
@@ -119,12 +80,6 @@ impl Univariate for Triangular {
         }
         1.0
     }
-}
-
-impl Continuous for Triangular {
-    fn mode(&self) -> f64 {
-        self.mode
-    }
 
     fn min(&self) -> f64 {
         self.min
@@ -133,7 +88,64 @@ impl Continuous for Triangular {
     fn max(&self) -> f64 {
         self.max
     }
+}
 
+impl Mean<f64, f64> for Triangular {
+    fn mean(&self) -> f64 {
+        (self.min + self.max + self.mode) / 3.0
+    }
+}
+
+impl Variance<f64, f64> for Triangular {
+    fn variance(&self) -> f64 {
+        let a = self.min;
+        let b = self.max;
+        let c = self.mode;
+        (a * a + b * b + c * c - a * b - a * c - b * c) / 18.0
+    }
+
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
+    }
+}
+
+impl Entropy<f64> for Triangular {
+    fn entropy(&self) -> f64 {
+        0.5 + ((self.max - self.min) / 2.0).ln()
+    }
+}
+
+impl Skewness<f64, f64> for Triangular {
+    fn skewness(&self) -> f64 {
+        let a = self.min;
+        let b = self.max;
+        let c = self.mode;
+        let q = f64::consts::SQRT_2 * (a + b - 2.0 * c) * (2.0 * a - b - c) * (a - 2.0 * b + c);
+        let d = 5.0 * (a * a + b * b + c * c - a * b - a * c - b * c).powf(3.0 / 2.0);
+        q / d
+    }
+}
+
+impl Median<f64> for Triangular {
+    fn median(&self) -> f64 {
+        let a = self.min;
+        let b = self.max;
+        let c = self.mode;
+        if c >= (a + b) / 2.0 {
+            a + ((b - a) * (c - a) / 2.0).sqrt()
+        } else {
+            b - ((b - a) * (b - c) / 2.0).sqrt()
+        }
+    }
+}
+
+impl Mode<f64, f64> for Triangular {
+    fn mode(&self) -> f64 {
+        self.mode
+    }
+}
+
+impl Continuous<f64, f64> for Triangular {
     fn pdf(&self, x: f64) -> f64 {
         let a = self.min;
         let b = self.max;
@@ -165,9 +177,8 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::Triangular;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
         let n = Triangular::new(min, max, mode);

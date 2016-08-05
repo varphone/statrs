@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use result::Result;
-use super::{Binomial, Distribution, Univariate, Discrete};
+use super::*;
 
 /// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
 /// distribution which is a special case of the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
@@ -10,7 +10,7 @@ use super::{Binomial, Distribution, Univariate, Discrete};
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Bernoulli, Univariate, Discrete};
+/// use statrs::distribution::{Bernoulli, Mean, Discrete};
 ///
 /// let n = Bernoulli::new(0.5).unwrap(); 
 /// assert_eq!(n.mean(), 0.5);
@@ -96,7 +96,7 @@ impl IndependentSample<f64> for Bernoulli {
     }
 }
 
-impl Distribution for Bernoulli {
+impl Distribution<f64> for Bernoulli {
     /// Generate a random sample from the
     /// bernoulli distribution using `r` as the source
     /// of randomness where the generated
@@ -122,83 +122,7 @@ impl Distribution for Bernoulli {
     }
 }
 
-impl Univariate for Bernoulli {
-    /// Returns the mean of the bernoulli
-    /// distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// p
-    /// ```
-    fn mean(&self) -> f64 {
-        self.b.mean()
-    }
-
-    /// Returns the variance of the bernoulli
-    /// distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// p * (1 - p)
-    /// ```
-    fn variance(&self) -> f64 {
-        self.b.variance()
-    }
-
-    /// Returns the standard deviation of the
-    /// bernoulli distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// sqrt(p * (1 - p))
-    /// ```
-    fn std_dev(&self) -> f64 {
-        self.b.std_dev()
-    }
-
-    /// Returns the entropy of the bernoulli
-    /// distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// q = (1 - p)
-    /// -q * ln(q) - p * ln(p)
-    /// ```
-    fn entropy(&self) -> f64 {
-        self.b.entropy()
-    }
-
-    /// Returns the skewness of the bernoulli
-    /// distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// q = (1 - p)
-    /// (1 - 2p) / sqrt(p * q)
-    /// ```
-    fn skewness(&self) -> f64 {
-        self.b.skewness()
-    }
-
-    /// Returns the median of the bernoulli
-    /// distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// if p < 0.5 { 0 }
-    /// else if p > 0.5 { 1 }
-    /// else { 0.5 }
-    /// ```
-    fn median(&self) -> f64 {
-        self.b.median()
-    }
-
+impl Univariate<i64, f64> for Bernoulli {
     /// Calculates the cumulative distribution
     /// function for the bernoulli distribution at `x`.
     ///
@@ -215,20 +139,6 @@ impl Univariate for Bernoulli {
     /// ```
     fn cdf(&self, x: f64) -> f64 {
         self.b.cdf(x)
-    }
-}
-
-impl Discrete for Bernoulli {
-    /// Returns the mode of the bernoulli distribution
-    ///
-    /// # Formula
-    /// 
-    /// ```ignore
-    /// if p < 0.5 { 0 }
-    /// else { 1 }
-    /// ```
-    fn mode(&self) -> i64 {
-        self.b.mode()
     }
 
     /// Returns the minimum value in the domain of the
@@ -256,7 +166,109 @@ impl Discrete for Bernoulli {
     fn max(&self) -> i64 {
         1
     }
+}
 
+impl Mean<f64, f64> for Bernoulli {
+    /// Returns the mean of the bernoulli
+    /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// p
+    /// ```
+    fn mean(&self) -> f64 {
+        self.b.mean()
+    }
+}
+
+impl Variance<f64, f64> for Bernoulli {
+    /// Returns the variance of the bernoulli
+    /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// p * (1 - p)
+    /// ```
+    fn variance(&self) -> f64 {
+        self.b.variance()
+    }
+
+    /// Returns the standard deviation of the bernoulli
+    /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(p * (1 - p))
+    /// ```
+    fn std_dev(&self) -> f64 {
+        self.b.std_dev()
+    }
+}
+
+impl Entropy<f64> for Bernoulli {
+    /// Returns the entropy of the bernoulli
+    /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// q = (1 - p)
+    /// -q * ln(q) - p * ln(p)
+    /// ```
+    fn entropy(&self) -> f64 {
+        self.b.entropy()
+    }
+}
+
+impl Skewness<f64, f64> for Bernoulli {
+    /// Returns the skewness of the bernoulli
+    /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// q = (1 - p)
+    /// (1 - 2p) / sqrt(p * q)
+    /// ```
+    fn skewness(&self) -> f64 {
+        self.b.skewness()
+    }
+}
+
+impl Median<f64> for Bernoulli {
+    /// Returns the median of the bernoulli
+    /// distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// if p < 0.5 { 0 }
+    /// else if p > 0.5 { 1 }
+    /// else { 0.5 }
+    /// ```
+    fn median(&self) -> f64 {
+        self.b.median()
+    }
+}
+
+impl Mode<i64, f64> for Bernoulli {
+    /// Returns the mode of the bernoulli distribution
+    ///
+    /// # Formula
+    /// 
+    /// ```ignore
+    /// if p < 0.5 { 0 }
+    /// else { 1 }
+    /// ```
+    fn mode(&self) -> i64 {
+        self.b.mode()
+    }
+}
+
+impl Discrete<i64, f64> for Bernoulli {
     /// Calculates the probability mass function for the
     /// bernoulli distribution at `x`.
     ///

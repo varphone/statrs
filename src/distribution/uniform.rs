@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
+use super::*;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Uniform {
@@ -36,37 +36,13 @@ impl IndependentSample<f64> for Uniform {
     }
 }
 
-impl Distribution for Uniform {
+impl Distribution<f64> for Uniform {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         r.gen_range(self.min, self.max + 1.0)
     }
 }
 
-impl Univariate for Uniform {
-    fn mean(&self) -> f64 {
-        (self.min + self.max) / 2.0
-    }
-
-    fn variance(&self) -> f64 {
-        (self.max - self.min) * (self.max - self.min) / 12.0
-    }
-
-    fn std_dev(&self) -> f64 {
-        self.variance().sqrt()
-    }
-
-    fn entropy(&self) -> f64 {
-        (self.max - self.min).ln()
-    }
-
-    fn skewness(&self) -> f64 {
-        0.0
-    }
-
-    fn median(&self) -> f64 {
-        (self.min + self.max) / 2.0
-    }
-
+impl Univariate<f64, f64> for Uniform {
     fn cdf(&self, x: f64) -> f64 {
         if x <= self.min {
             return 0.0;
@@ -76,12 +52,6 @@ impl Univariate for Uniform {
         }
         (x - self.min) / (self.max - self.min)
     }
-}
-
-impl Continuous for Uniform {
-    fn mode(&self) -> f64 {
-        (self.min + self.max) / 2.0
-    }
 
     fn min(&self) -> f64 {
         self.min
@@ -90,7 +60,49 @@ impl Continuous for Uniform {
     fn max(&self) -> f64 {
         self.max
     }
+}
 
+impl Mean<f64, f64> for Uniform {
+    fn mean(&self) -> f64 {
+        (self.min + self.max) / 2.0
+    }
+}
+
+impl Variance<f64, f64> for Uniform {
+    fn variance(&self) -> f64 {
+        (self.max - self.min) * (self.max - self.min) / 12.0
+    }
+
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
+    }
+}
+
+impl Entropy<f64> for Uniform {
+    fn entropy(&self) -> f64 {
+        (self.max - self.min).ln()
+    }
+}
+
+impl Skewness<f64, f64> for Uniform {
+    fn skewness(&self) -> f64 {
+        0.0
+    }
+}
+
+impl Median<f64> for Uniform {
+    fn median(&self) -> f64 {
+        (self.min + self.max) / 2.0
+    }
+}
+
+impl Mode<f64, f64> for Uniform {
+    fn mode(&self) -> f64 {
+        (self.min + self.max) / 2.0
+    }
+}
+
+impl Continuous<f64, f64> for Uniform {
     fn pdf(&self, x: f64) -> f64 {
         if x < self.min || x > self.max {
             0.0
@@ -112,9 +124,8 @@ impl Continuous for Uniform {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::Uniform;
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let n = Uniform::new(min, max);

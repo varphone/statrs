@@ -2,7 +2,7 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use result::Result;
-use super::{Gamma, Distribution, Univariate, Continuous};
+use super::*;
 
 /// Implements the [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
 /// distribution which is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
@@ -11,7 +11,7 @@ use super::{Gamma, Distribution, Univariate, Continuous};
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{ChiSquared, Univariate, Continuous};
+/// use statrs::distribution::{ChiSquared, Mean, Continuous};
 /// use statrs::prec;
 ///
 /// let n = ChiSquared::new(3.0).unwrap();
@@ -116,7 +116,7 @@ impl IndependentSample<f64> for ChiSquared {
     }
 }
 
-impl Distribution for ChiSquared {
+impl Distribution<f64> for ChiSquared {
     /// Generate a random sample from the chi-squared distribution
     /// using `r` as the source of randomness
     ///
@@ -139,91 +139,7 @@ impl Distribution for ChiSquared {
     }
 }
 
-impl Univariate for ChiSquared {
-    /// Returns the mean of the chi-squared distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// k
-    /// ```
-    ///
-    /// where `k` is the degrees of freedom
-    fn mean(&self) -> f64 {
-        self.g.mean()
-    }
-
-    /// Returns the variance of the chi-squared distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 2k
-    /// ```
-    ///
-    /// where `k` is the degrees of freedom
-    fn variance(&self) -> f64 {
-        self.g.variance()
-    }
-
-    /// Returns the standard deviation of the chi-squared distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// sqrt(2k)
-    /// ```
-    ///
-    /// where `k` is the degrees of freedom
-    fn std_dev(&self) -> f64 {
-        self.g.std_dev()
-    }
-
-    /// Returns the entropy of the chi-squared distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// (k / 2) + ln(2 * Γ(k / 2)) + (1 - (k / 2)) * ψ(k / 2)
-    /// ```
-    ///
-    /// where `k` is the degrees of freedom, `Γ` is the gamma function,
-    /// and `ψ` is the digamma function
-    fn entropy(&self) -> f64 {
-        self.g.entropy()
-    }
-
-    /// Returns the skewness of the chi-squared distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// sqrt(8 / k)
-    /// ```
-    ///
-    /// where `k` is the degrees of freedom
-    fn skewness(&self) -> f64 {
-        self.g.skewness()
-    }
-
-    /// Returns the median  of the chi-squared distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// k * (1 - (2 / 9k))^3
-    /// ```
-    fn median(&self) -> f64 {
-        if self.freedom < 1.0 {
-            // if k is small, calculate using expansion of formula
-            self.freedom - 2.0 / 3.0 + 12.0 / (81.0 * self.freedom) -
-            8.0 / (729.0 * self.freedom * self.freedom)
-        } else {
-            // if k is large enough, median heads toward k - 2/3
-            self.freedom - 2.0 / 3.0
-        }
-    }
-
+impl Univariate<f64, f64> for ChiSquared {
     /// Calculates the cumulative distribution function for the
     /// chi-squared distribution at `x`
     ///
@@ -241,21 +157,6 @@ impl Univariate for ChiSquared {
     /// and `γ` is the lower incomplete gamma function
     fn cdf(&self, x: f64) -> f64 {
         self.g.cdf(x)
-    }
-}
-
-impl Continuous for ChiSquared {
-    /// Returns the mode of the chi-squared distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// k - 2
-    /// ```
-    ///
-    /// where `k` is the degrees of freedom
-    fn mode(&self) -> f64 {
-        self.g.mode()
     }
 
     /// Returns the minimum value in the domain of the
@@ -283,7 +184,118 @@ impl Continuous for ChiSquared {
     fn max(&self) -> f64 {
         f64::INFINITY
     }
+}
 
+impl Mean<f64, f64> for ChiSquared {
+    /// Returns the mean of the chi-squared distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// k
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom
+    fn mean(&self) -> f64 {
+        self.g.mean()
+    }
+}
+
+impl Variance<f64, f64> for ChiSquared {
+    /// Returns the variance of the chi-squared distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 2k
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom
+    fn variance(&self) -> f64 {
+        self.g.variance()
+    }
+
+    /// Returns the standard deviation of the chi-squared distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(2k)
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom
+    fn std_dev(&self) -> f64 {
+        self.g.std_dev()
+    }
+}
+
+impl Entropy<f64> for ChiSquared {
+    /// Returns the entropy of the chi-squared distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (k / 2) + ln(2 * Γ(k / 2)) + (1 - (k / 2)) * ψ(k / 2)
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom, `Γ` is the gamma function,
+    /// and `ψ` is the digamma function
+    fn entropy(&self) -> f64 {
+        self.g.entropy()
+    }
+}
+
+impl Skewness<f64, f64> for ChiSquared {
+    /// Returns the skewness of the chi-squared distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(8 / k)
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom
+    fn skewness(&self) -> f64 {
+        self.g.skewness()
+    }
+}
+
+impl Median<f64> for ChiSquared {
+    /// Returns the median  of the chi-squared distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// k * (1 - (2 / 9k))^3
+    /// ```
+    fn median(&self) -> f64 {
+        if self.freedom < 1.0 {
+            // if k is small, calculate using expansion of formula
+            self.freedom - 2.0 / 3.0 + 12.0 / (81.0 * self.freedom) -
+            8.0 / (729.0 * self.freedom * self.freedom)
+        } else {
+            // if k is large enough, median heads toward k - 2/3
+            self.freedom - 2.0 / 3.0
+        }
+    }
+}
+
+impl Mode<f64, f64> for ChiSquared {
+    /// Returns the mode of the chi-squared distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// k - 2
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom
+    fn mode(&self) -> f64 {
+        self.g.mode()
+    }
+}
+
+impl Continuous<f64, f64> for ChiSquared {
     /// Calculates the probability density function for the chi-squared
     /// distribution at `x`
     ///
@@ -323,9 +335,8 @@ impl Continuous for ChiSquared {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::Univariate;
+    use distribution::*;
     use prec;
-    use super::ChiSquared;
 
     fn try_create(freedom: f64) -> ChiSquared {
         let n = ChiSquared::new(freedom);

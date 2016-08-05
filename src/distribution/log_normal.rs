@@ -5,8 +5,7 @@ use consts;
 use error::StatsError;
 use function::erf;
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
-use super::normal;
+use super::*;
 
 /// Implements the [Log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution) 
 /// distribution
@@ -14,7 +13,7 @@ use super::normal;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{LogNormal, Univariate, Continuous};
+/// use statrs::distribution::{LogNormal, Mean, Continuous};
 /// use statrs::prec;
 /// 
 /// let n = LogNormal::new(0.0, 1.0).unwrap();
@@ -77,7 +76,7 @@ impl IndependentSample<f64> for LogNormal {
     }
 }
 
-impl Distribution for LogNormal {
+impl Distribution<f64> for LogNormal {
     /// Generate a random sample from the log-normal distribution
     /// using `r` as the source of randomness. Uses the Box-Muller
     /// algorithm
@@ -97,11 +96,57 @@ impl Distribution for LogNormal {
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        normal::sample_unchecked(r, self.location, self.scale).exp()
+        super::normal::sample_unchecked(r, self.location, self.scale).exp()
     }
 }
 
-impl Univariate for LogNormal {
+impl Univariate<f64, f64> for LogNormal {
+    /// Calculates the cumulative distribution function for the log-normal distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / 2) + (1 / 2) * erf((ln(x) - μ) / sqrt(2) * σ)
+    /// ```
+    ///
+    /// where `μ` is the location, `σ` is the scale, and `erf` is the
+    /// error function
+    fn cdf(&self, x: f64) -> f64 {
+        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
+    }
+
+    /// Returns the minimum value in the domain of the log-normal
+    /// distribution representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
+    fn min(&self) -> f64 {
+        0.0
+    }
+
+    /// Returns the maximum value in the domain of the log-normal
+    /// distribution representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
+    fn max(&self) -> f64 {
+        f64::INFINITY
+    }
+}
+
+impl Mean<f64, f64> for LogNormal {
     /// Returns the mean of the log-normal distribution
     ///
     /// # Formula
@@ -114,7 +159,9 @@ impl Univariate for LogNormal {
     fn mean(&self) -> f64 {
         (self.location + self.scale * self.scale / 2.0).exp()
     }
+}
 
+impl Variance<f64, f64> for LogNormal {
     /// Returns the variance of the log-normal distribution
     ///
     /// # Formula
@@ -141,7 +188,9 @@ impl Univariate for LogNormal {
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
+}
 
+impl Entropy<f64> for LogNormal {
     /// Returns the entropy of the log-normal distribution
     ///
     /// # Formula
@@ -154,7 +203,9 @@ impl Univariate for LogNormal {
     fn entropy(&self) -> f64 {
         0.5 + self.scale.ln() + self.location + consts::LN_SQRT_2PI
     }
+}
 
+impl Skewness<f64, f64> for LogNormal {
     /// Returns the skewness of the log-normal distribution
     ///
     /// # Formula
@@ -168,7 +219,9 @@ impl Univariate for LogNormal {
         let expsigma2 = (self.scale * self.scale).exp();
         (expsigma2 + 2.0) * (expsigma2 - 1.0).sqrt()
     }
+}
 
+impl Median<f64> for LogNormal {
     /// Returns the median of the log-normal distribution
     ///
     /// # Formula
@@ -181,29 +234,9 @@ impl Univariate for LogNormal {
     fn median(&self) -> f64 {
         self.location.exp()
     }
-
-    /// Calculates the cumulative distribution function for the log-normal distribution
-    /// at `x`
-    ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// (1 / 2) + (1 / 2) * erf((ln(x) - μ) / sqrt(2) * σ)
-    /// ```
-    ///
-    /// where `μ` is the location, `σ` is the scale, and `erf` is the
-    /// error function
-    fn cdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
-    }
 }
 
-impl Continuous for LogNormal {
+impl Mode<f64, f64> for LogNormal {
     /// Returns the mode of the log-normal distribution
     ///
     /// # Formula
@@ -216,31 +249,9 @@ impl Continuous for LogNormal {
     fn mode(&self) -> f64 {
         (self.location - self.scale * self.scale).exp()
     }
+}
 
-    /// Returns the minimum value in the domain of the log-normal
-    /// distribution representable by a double precision float
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 0
-    /// ```
-    fn min(&self) -> f64 {
-        0.0
-    }
-
-    /// Returns the maximum value in the domain of the log-normal
-    /// distribution representable by a double precision float
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// INF
-    /// ```
-    fn max(&self) -> f64 {
-        f64::INFINITY
-    }
-
+impl Continuous<f64, f64> for LogNormal {
     /// Calculates the probability density function for the log-normal
     /// distribution at `x`
     ///
@@ -286,9 +297,8 @@ impl Continuous for LogNormal {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::LogNormal;
 
     fn try_create(mean: f64, std_dev: f64) -> LogNormal {
         let n = LogNormal::new(mean, std_dev);

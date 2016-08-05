@@ -4,15 +4,14 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::gamma;
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
-use super::normal;
+use super::*;
 
 /// Implements the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
 ///
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Gamma, Univariate, Continuous};
+/// use statrs::distribution::{Gamma, Mean, Continuous};
 /// use statrs::prec;
 ///
 /// let n = Gamma::new(3.0, 1.0).unwrap();
@@ -106,7 +105,7 @@ impl IndependentSample<f64> for Gamma {
     }
 }
 
-impl Distribution for Gamma {
+impl Distribution<f64> for Gamma {
     /// Generate a random sample from a gamma distribution using
     /// `r` as the source of randomness. The implementation is based
     /// on:
@@ -138,7 +137,61 @@ impl Distribution for Gamma {
     }
 }
 
-impl Univariate for Gamma {
+impl Univariate<f64, f64> for Gamma {
+    /// Calculates the cumulative distribution function for the gamma distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / Γ(α)) * γ(α, β * x)
+    /// ```
+    ///
+    /// where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
+    /// and `γ` is the lower incomplete gamma function
+    fn cdf(&self, x: f64) -> f64 {
+        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        if x == self.shape && self.rate == f64::INFINITY {
+            1.0
+        } else if self.rate == f64::INFINITY {
+            0.0
+        } else {
+            gamma::gamma_lr(self.shape, x * self.rate)
+        }
+    }
+
+    /// Returns the minimum value in the domain of the
+    /// gamma distribution representable by a double precision
+    /// float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
+    fn min(&self) -> f64 {
+        0.0
+    }
+
+    /// Returns the maximum value in the domain of the
+    /// gamma distribution representable by a double precision
+    /// float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
+    fn max(&self) -> f64 {
+        f64::INFINITY
+    }
+}
+
+impl Mean<f64, f64> for Gamma {
     /// Returns the mean of the gamma distribution
     ///
     /// # Remarks
@@ -160,7 +213,9 @@ impl Univariate for Gamma {
             self.shape / self.rate
         }
     }
+}
 
+impl Variance<f64, f64> for Gamma {
     /// Returns the variance of the gamma distribution
     ///
     /// # Formula
@@ -190,7 +245,9 @@ impl Univariate for Gamma {
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
+}
 
+impl Entropy<f64> for Gamma {
     /// Returns the entropy of the gamma distribution
     ///
     /// # Formula
@@ -209,7 +266,9 @@ impl Univariate for Gamma {
             (1.0 - self.shape) * gamma::digamma(self.shape)
         }
     }
+}
 
+impl Skewness<f64, f64> for Gamma {
     /// Returns the skewness of the gamma distribution
     ///
     /// # Formula
@@ -222,46 +281,9 @@ impl Univariate for Gamma {
     fn skewness(&self) -> f64 {
         2.0 / self.shape.sqrt()
     }
-
-    /// There is no simple closed form solution for the median
-    /// of a gamma distribution so as of now, this method is unimplemented
-    /// and will panic.
-    ///
-    /// # Panics
-    ///
-    /// Always
-    fn median(&self) -> f64 {
-        unimplemented!()
-    }
-
-    /// Calculates the cumulative distribution function for the gamma distribution
-    /// at `x`
-    ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// (1 / Γ(α)) * γ(α, β * x)
-    /// ```
-    ///
-    /// where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
-    /// and `γ` is the lower incomplete gamma function
-    fn cdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        if x == self.shape && self.rate == f64::INFINITY {
-            1.0
-        } else if self.rate == f64::INFINITY {
-            0.0
-        } else {
-            gamma::gamma_lr(self.shape, x * self.rate)
-        }
-    }
 }
 
-impl Continuous for Gamma {
+impl Mode<f64, f64> for Gamma {
     /// Returns the mode for the gamma distribution
     ///
     /// # Remarks
@@ -283,33 +305,9 @@ impl Continuous for Gamma {
             (self.shape - 1.0) / self.rate
         }
     }
+}
 
-    /// Returns the minimum value in the domain of the
-    /// gamma distribution representable by a double precision
-    /// float
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 0
-    /// ```
-    fn min(&self) -> f64 {
-        0.0
-    }
-
-    /// Returns the maximum value in the domain of the
-    /// gamma distribution representable by a double precision
-    /// float
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// INF
-    /// ```
-    fn max(&self) -> f64 {
-        f64::INFINITY
-    }
-
+impl Continuous<f64, f64> for Gamma {
     /// Calculates the probability density function for the gamma distribution
     /// at `x`
     ///
@@ -407,10 +405,10 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
     let d = a - 1.0 / 3.0;
     let c = 1.0 / (9.0 * d).sqrt();
     loop {
-        let mut x = normal::sample_unchecked(r, 0.0, 1.0);
+        let mut x = super::normal::sample_unchecked(r, 0.0, 1.0);
         let mut v = 1.0 + c * x;
         while v <= 0.0 {
-            x = normal::sample_unchecked(r, 0.0, 1.0);
+            x = super::normal::sample_unchecked(r, 0.0, 1.0);
             v = 1.0 + c * x;
         }
 
@@ -430,9 +428,8 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::Gamma;
 
     fn try_create(shape: f64, rate: f64) -> Gamma {
         let n = Gamma::new(shape, rate);
@@ -543,12 +540,6 @@ mod test {
         test_case(10.0, 10.0, 0.9, |x| x.mode());
         test_case(10.0, 1.0, 9.0, |x| x.mode());
         test_case(10.0, f64::INFINITY, 10.0, |x| x.mode());
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_median() {
-        get_value(1.0, 0.1, |x| x.median());
     }
 
     #[test]

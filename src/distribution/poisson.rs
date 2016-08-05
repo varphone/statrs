@@ -5,7 +5,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{factorial, gamma};
 use result::Result;
-use super::{Distribution, Univariate, Discrete};
+use super::*;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Poisson {
@@ -38,48 +38,16 @@ impl IndependentSample<f64> for Poisson {
     }
 }
 
-impl Distribution for Poisson {
+impl Distribution<f64> for Poisson {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         sample_unchecked(r, self.lambda)
     }
 }
 
-impl Univariate for Poisson {
-    fn mean(&self) -> f64 {
-        self.lambda
-    }
-
-    fn variance(&self) -> f64 {
-        self.lambda
-    }
-
-    fn std_dev(&self) -> f64 {
-        self.variance().sqrt()
-    }
-
-    fn entropy(&self) -> f64 {
-        0.5 * (2.0 * f64::consts::PI * f64::consts::E * self.lambda).ln() -
-        1.0 / (12.0 * self.lambda) - 1.0 / (24.0 * self.lambda * self.lambda) -
-        19.0 / (360.0 * self.lambda * self.lambda * self.lambda)
-    }
-
-    fn skewness(&self) -> f64 {
-        1.0 / self.lambda.sqrt()
-    }
-
-    fn median(&self) -> f64 {
-        (self.lambda + 1.0 / 3.0 - 0.02 / self.lambda).floor()
-    }
-
+impl Univariate<i64, f64> for Poisson {
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         1.0 - gamma::gamma_lr(x + 1.0, self.lambda)
-    }
-}
-
-impl Discrete for Poisson {
-    fn mode(&self) -> i64 {
-        self.lambda.floor() as i64
     }
 
     fn min(&self) -> i64 {
@@ -89,7 +57,51 @@ impl Discrete for Poisson {
     fn max(&self) -> i64 {
         i64::MAX
     }
+}
 
+impl Mean<f64, f64> for Poisson {
+    fn mean(&self) -> f64 {
+        self.lambda
+    }
+}
+
+impl Variance<f64, f64> for Poisson {
+    fn variance(&self) -> f64 {
+        self.lambda
+    }
+
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
+    }
+}
+
+impl Entropy<f64> for Poisson {
+    fn entropy(&self) -> f64 {
+        0.5 * (2.0 * f64::consts::PI * f64::consts::E * self.lambda).ln() -
+        1.0 / (12.0 * self.lambda) - 1.0 / (24.0 * self.lambda * self.lambda) -
+        19.0 / (360.0 * self.lambda * self.lambda * self.lambda)
+    }
+}
+
+impl Skewness<f64, f64> for Poisson {
+    fn skewness(&self) -> f64 {
+        1.0 / self.lambda.sqrt()
+    }
+}
+
+impl Median<f64> for Poisson {
+    fn median(&self) -> f64 {
+        (self.lambda + 1.0 / 3.0 - 0.02 / self.lambda).floor()
+    }
+}
+
+impl Mode<i64, f64> for Poisson {
+    fn mode(&self) -> i64 {
+        self.lambda.floor() as i64
+    }
+}
+
+impl Discrete<i64, f64> for Poisson {
     fn pmf(&self, x: i64) -> f64 {
         assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
         (-self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)).exp()
@@ -149,9 +161,8 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use std::i64;
-    use distribution::{Univariate, Discrete};
+    use distribution::*;
     use prec;
-    use super::Poisson;
 
     fn try_create(lambda: f64) -> Poisson {
         let n = Poisson::new(lambda);

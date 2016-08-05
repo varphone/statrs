@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
+use super::*;
 
 /// Implements the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
 /// distribution and is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
@@ -12,7 +12,7 @@ use super::{Distribution, Univariate, Continuous};
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Exponential, Univariate, Continuous};
+/// use statrs::distribution::{Exponential, Mean, Continuous};
 ///
 /// let n = Exponential::new(1.0).unwrap();
 /// assert_eq!(n.mean(), 1.0);
@@ -83,7 +83,7 @@ impl IndependentSample<f64> for Exponential {
     }
 }
 
-impl Distribution for Exponential {
+impl Distribution<f64> for Exponential {
     /// Generate a random sample from the exponential distribution
     /// using `r` as the source of randomness
     ///
@@ -110,83 +110,7 @@ impl Distribution for Exponential {
     }
 }
 
-impl Univariate for Exponential {
-    /// Returns the mean of the exponential distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 1 / λ
-    /// ```
-    ///
-    /// where `λ` is the rate
-    fn mean(&self) -> f64 {
-        1.0 / self.rate
-    }
-
-    /// Returns the variance of the exponential distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 1 / λ^2
-    /// ```
-    ///
-    /// where `λ` is the rate
-    fn variance(&self) -> f64 {
-        1.0 / (self.rate * self.rate)
-    }
-
-    /// Returns the standard deviation of the exponential distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// sqrt(1 / λ^2)
-    /// ```
-    ///
-    /// where `λ` is the rate
-    fn std_dev(&self) -> f64 {
-        1.0 / self.rate
-    }
-
-    /// Returns the entropy of the exponential distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 1 - ln(λ)
-    /// ```
-    ///
-    /// where `λ` is the rate
-    fn entropy(&self) -> f64 {
-        1.0 - self.rate.ln()
-    }
-
-    /// Returns the skewness of the exponential distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 2
-    /// ```
-    fn skewness(&self) -> f64 {
-        2.0
-    }
-
-    /// Returns the median of the exponential distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// (1 / λ) * ln2
-    /// ```
-    ///
-    /// where `λ` is the rate
-    fn median(&self) -> f64 {
-        f64::consts::LN_2 / self.rate
-    }
-
+impl Univariate<f64, f64> for Exponential {
     /// Calculates the cumulative distribution function for the 
     /// exponential distribution at `x`
     ///
@@ -204,19 +128,6 @@ impl Univariate for Exponential {
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         1.0 - (-self.rate * x).exp()
-    }
-}
-
-impl Continuous for Exponential {
-    /// Returns the mode of the exponential distribution
-    ///
-    /// # Formula
-    ///
-    /// ```ignore
-    /// 0
-    /// ```
-    fn mode(&self) -> f64 {
-        0.0
     }
 
     /// Returns the minimum value in the domain of the exponential
@@ -242,7 +153,108 @@ impl Continuous for Exponential {
     fn max(&self) -> f64 {
         f64::INFINITY
     }
+}
 
+impl Mean<f64, f64> for Exponential {
+    /// Returns the mean of the exponential distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 / λ
+    /// ```
+    ///
+    /// where `λ` is the rate
+    fn mean(&self) -> f64 {
+        1.0 / self.rate
+    }
+}
+
+impl Variance<f64, f64> for Exponential {
+    /// Returns the variance of the exponential distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 / λ^2
+    /// ```
+    ///
+    /// where `λ` is the rate
+    fn variance(&self) -> f64 {
+        1.0 / (self.rate * self.rate)
+    }
+
+    /// Returns the standard deviation of the exponential distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(1 / λ^2)
+    /// ```
+    ///
+    /// where `λ` is the rate
+    fn std_dev(&self) -> f64 {
+        1.0 / self.rate
+    }
+}
+
+impl Entropy<f64> for Exponential {
+    /// Returns the entropy of the exponential distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 - ln(λ)
+    /// ```
+    ///
+    /// where `λ` is the rate
+    fn entropy(&self) -> f64 {
+        1.0 - self.rate.ln()
+    }
+}
+
+impl Skewness<f64, f64> for Exponential {
+    /// Returns the skewness of the exponential distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 2
+    /// ```
+    fn skewness(&self) -> f64 {
+        2.0
+    }
+}
+
+impl Median<f64> for Exponential {
+    /// Returns the median of the exponential distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / λ) * ln2
+    /// ```
+    ///
+    /// where `λ` is the rate
+    fn median(&self) -> f64 {
+        f64::consts::LN_2 / self.rate
+    }
+}
+
+impl Mode<f64, f64> for Exponential {
+    /// Returns the mode of the exponential distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
+    fn mode(&self) -> f64 {
+        0.0
+    }
+}
+
+impl Continuous<f64, f64> for Exponential {
     /// Calculates the probability density function for the exponential
     /// distribution at `x`
     ///
@@ -286,9 +298,8 @@ impl Continuous for Exponential {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::Exponential;
 
     fn try_create(rate: f64) -> Exponential {
         let n = Exponential::new(rate);

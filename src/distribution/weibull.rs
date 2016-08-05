@@ -5,7 +5,7 @@ use consts;
 use error::StatsError;
 use function::{gamma, stable};
 use result::Result;
-use super::{Distribution, Univariate, Continuous};
+use super::*;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Weibull {
@@ -51,56 +51,17 @@ impl IndependentSample<f64> for Weibull {
     }
 }
 
-impl Distribution for Weibull {
+impl Distribution<f64> for Weibull {
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         let x = r.next_f64();
         self.scale * (-x.ln()).powf(1.0 / self.shape)
     }
 }
 
-impl Univariate for Weibull {
-    fn mean(&self) -> f64 {
-        self.scale * gamma::gamma(1.0 + 1.0 / self.shape)
-    }
-
-    fn variance(&self) -> f64 {
-        self.scale * self.scale * gamma::gamma(1.0 + 2.0 / self.shape) - self.mean() * self.mean()
-    }
-
-    fn std_dev(&self) -> f64 {
-        self.variance().sqrt()
-    }
-
-    fn entropy(&self) -> f64 {
-        consts::EULER_MASCHERONI * (1.0 - 1.0 / self.shape) + (self.scale / self.shape).ln() + 1.0
-    }
-
-    fn skewness(&self) -> f64 {
-        let mu = self.mean();
-        let sigma = self.std_dev();
-        let sigma2 = sigma * sigma;
-        let sigma3 = sigma2 * sigma;
-        (self.scale * self.scale * self.scale * gamma::gamma(1.0 + 3.0 / self.shape) -
-         3.0 * sigma2 * mu - (mu * mu * mu)) / sigma3
-    }
-
-    fn median(&self) -> f64 {
-        self.scale * f64::consts::LN_2.powf(1.0 / self.shape)
-    }
-
+impl Univariate<f64, f64> for Weibull {
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         -stable::exp_minus_one(-x.powf(self.shape) * self.scale_pow_shape_inv)
-    }
-}
-
-impl Continuous for Weibull {
-    fn mode(&self) -> f64 {
-        if self.shape <= 1.0 {
-            0.0
-        } else {
-            self.scale * ((self.shape - 1.0) / self.shape).powf(1.0 / self.shape)
-        }
     }
 
     fn min(&self) -> f64 {
@@ -110,7 +71,58 @@ impl Continuous for Weibull {
     fn max(&self) -> f64 {
         f64::INFINITY
     }
+}
 
+impl Mean<f64, f64> for Weibull {
+    fn mean(&self) -> f64 {
+        self.scale * gamma::gamma(1.0 + 1.0 / self.shape)
+    }
+}
+
+impl Variance<f64, f64> for Weibull {
+    fn variance(&self) -> f64 {
+        self.scale * self.scale * gamma::gamma(1.0 + 2.0 / self.shape) - self.mean() * self.mean()
+    }
+
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
+    }
+}
+
+impl Entropy<f64> for Weibull {
+    fn entropy(&self) -> f64 {
+        consts::EULER_MASCHERONI * (1.0 - 1.0 / self.shape) + (self.scale / self.shape).ln() + 1.0
+    }
+}
+
+impl Skewness<f64, f64> for Weibull {
+    fn skewness(&self) -> f64 {
+        let mu = self.mean();
+        let sigma = self.std_dev();
+        let sigma2 = sigma * sigma;
+        let sigma3 = sigma2 * sigma;
+        (self.scale * self.scale * self.scale * gamma::gamma(1.0 + 3.0 / self.shape) -
+         3.0 * sigma2 * mu - (mu * mu * mu)) / sigma3
+    }
+}
+
+impl Median<f64> for Weibull {
+    fn median(&self) -> f64 {
+        self.scale * f64::consts::LN_2.powf(1.0 / self.shape)
+    }
+}
+
+impl Mode<f64, f64> for Weibull {
+    fn mode(&self) -> f64 {
+        if self.shape <= 1.0 {
+            0.0
+        } else {
+            self.scale * ((self.shape - 1.0) / self.shape).powf(1.0 / self.shape)
+        }
+    }
+}
+
+impl Continuous<f64, f64> for Weibull {
     fn pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         match (x, self.shape) {
@@ -141,9 +153,8 @@ impl Continuous for Weibull {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous};
+    use distribution::*;
     use prec;
-    use super::Weibull;
 
     fn try_create(shape: f64, scale: f64) -> Weibull {
         let n = Weibull::new(shape, scale);
