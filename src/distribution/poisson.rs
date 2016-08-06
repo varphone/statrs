@@ -7,12 +7,43 @@ use function::{factorial, gamma};
 use result::Result;
 use super::*;
 
+/// Implements the [Poisson](https://en.wikipedia.org/wiki/Poisson_distribution)
+/// distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{Poisson, Mean, Discrete};
+/// use statrs::prec;
+///
+/// let n = Poisson::new(1.0).unwrap();
+/// assert_eq!(n.mean(), 1.0);
+/// assert!(prec::almost_eq(n.pmf(1), 0.367879441171442, 1e-15));
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Poisson {
     lambda: f64,
 }
 
 impl Poisson {
+    /// Constructs a new poisson distribution with a rate (λ)
+    /// of `lambda`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `lambda` is `NaN` or `lambda <= 0.0`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Poisson;
+    ///
+    /// let mut result = Poisson::new(1.0);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Poisson::new(0.0);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(lambda: f64) -> Result<Poisson> {
         if lambda.is_nan() || lambda <= 0.0 {
             Err(StatsError::BadParams)
@@ -21,61 +52,163 @@ impl Poisson {
         }
     }
 
+    /// Returns the rate (λ) of the poisson distribution
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Poisson;
+    ///
+    /// let n = Poisson::new(1.0).unwrap();
+    /// assert_eq!(n.lambda(), 1.0);
+    /// ```
     pub fn lambda(&self) -> f64 {
         self.lambda
     }
 }
 
 impl Sample<f64> for Poisson {
+    /// Generate a random sample from a poisson
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for Poisson {
+    /// Generate a random independent sample from a poisson
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution<f64> for Poisson {
+    /// Generate a random sample from a poisson distribution using
+    /// `r` as the source of randomness. The implementation is based
+    /// on Knuth's method if lambda < 30.0 or Rejection method PA by
+    /// A. C. Atkinson from the Journal of the Royal Statistical Society
+    /// Series C (Applied Statistics) Vol. 28 No. 1. (1979) pp. 29 - 35
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Poisson, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Poisson::new(1.0).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         sample_unchecked(r, self.lambda)
     }
 }
 
 impl Univariate<i64, f64> for Poisson {
+    /// Calculates the cumulative distribution function for the poisson
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 - P(x + 1, λ)
+    /// ```
+    ///
+    /// where `λ` is the rate and `P` is the lower regularized gamma function
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         1.0 - gamma::gamma_lr(x + 1.0, self.lambda)
     }
 
+    /// Returns the minimum value in the domain of the poisson distribution
+    /// representable by a 64-bit integer
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn min(&self) -> i64 {
         0
     }
 
+    /// Returns the maximum value in the domain of the poisson distribution
+    /// representable by a 64-bit integer
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 2^63 - 1
+    /// ```
     fn max(&self) -> i64 {
         i64::MAX
     }
 }
 
 impl Mean<f64, f64> for Poisson {
+    /// Returns the mean of the poisson distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// λ
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn mean(&self) -> f64 {
         self.lambda
     }
 }
 
 impl Variance<f64, f64> for Poisson {
+    /// Returns the variance of the poisson distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// λ
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn variance(&self) -> f64 {
         self.lambda
     }
 
+    /// Returns the standard deviation of the poisson distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(λ)
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 }
 
 impl Entropy<f64> for Poisson {
+    /// Returns the entropy of the poisson distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / 2) * ln(2πeλ) - 1 / (12λ) - 1 / (24λ^2) - 19 / (360λ^3)
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn entropy(&self) -> f64 {
         0.5 * (2.0 * f64::consts::PI * f64::consts::E * self.lambda).ln() -
         1.0 / (12.0 * self.lambda) - 1.0 / (24.0 * self.lambda * self.lambda) -
@@ -84,29 +217,84 @@ impl Entropy<f64> for Poisson {
 }
 
 impl Skewness<f64, f64> for Poisson {
+    /// Returns the skewness of the poisson distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// λ^(-1/2)
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn skewness(&self) -> f64 {
         1.0 / self.lambda.sqrt()
     }
 }
 
 impl Median<f64> for Poisson {
+    /// Returns the median of the poisson distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// floor(λ + 1 / 3 - 0.02 / λ)
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn median(&self) -> f64 {
         (self.lambda + 1.0 / 3.0 - 0.02 / self.lambda).floor()
     }
 }
 
 impl Mode<i64, f64> for Poisson {
+    /// Returns the mode of the poisson distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// floor(λ)
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn mode(&self) -> i64 {
         self.lambda.floor() as i64
     }
 }
 
 impl Discrete<i64, f64> for Poisson {
+    /// Calculates the probability mass function for the poisson distribution at
+    /// `x`
+    ///
+    /// # Panics
+    ///
+    /// Panics if `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (λ^k * e^(-λ)) / x!
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn pmf(&self, x: i64) -> f64 {
         assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
         (-self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)).exp()
     }
 
+    /// Calculates the log probability mass function for the poisson distribution at
+    /// `x`
+    ///
+    /// # Panics
+    ///
+    /// Panics if `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((λ^k * e^(-λ)) / x!)
+    /// ```
+    ///
+    /// where `λ` is the rate
     fn ln_pmf(&self, x: i64) -> f64 {
         assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
         -self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)
