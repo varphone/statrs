@@ -6,20 +6,51 @@ use function::{beta, gamma};
 use result::Result;
 use super::*;
 
+/// Implements the [Student's T](https://en.wikipedia.org/wiki/Student%27s_t-distribution) distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{StudentsT, Mean, Continuous};
+/// use statrs::prec;
+///
+/// let n = StudentsT::new(0.0, 1.0, 2.0).unwrap();
+/// assert_eq!(n.mean(), 0.0);
+/// assert!(prec::almost_eq(n.pdf(0.0), 0.353553390593274, 1e-15));
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct StudentT {
+pub struct StudentsT {
     location: f64,
     scale: f64,
     freedom: f64,
 }
 
-impl StudentT {
-    pub fn new(location: f64, scale: f64, freedom: f64) -> Result<StudentT> {
+impl StudentsT {
+    /// Constructs a new student's t-distribution with location `location`, scale `scale`,
+    /// and `freedom` freedom.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if any of `location`, `scale`, or `freedom` are `NaN`. 
+    /// Returns an error if `scale <= 0.0` or `freedom <= 0.0`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::StudentsT;
+    ///
+    /// let mut result = StudentsT::new(0.0, 1.0, 2.0);
+    /// assert!(result.is_ok());
+    ///
+    /// result = StudentsT::new(0.0, 0.0, 0.0);
+    /// assert!(result.is_err());
+    /// ```
+    pub fn new(location: f64, scale: f64, freedom: f64) -> Result<StudentsT> {
         let is_nan = location.is_nan() || scale.is_nan() || freedom.is_nan();
         if is_nan || scale <= 0.0 || freedom <= 0.0 {
             Err(StatsError::BadParams)
         } else {
-            Ok(StudentT {
+            Ok(StudentsT {
                 location: location,
                 scale: scale,
                 freedom: freedom,
@@ -27,32 +58,87 @@ impl StudentT {
         }
     }
 
+    /// Returns the location of the student's t-distribution
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::StudentsT;
+    ///
+    /// let n = StudentsT::new(0.0, 1.0, 2.0).unwrap();
+    /// assert_eq!(n.location(), 0.0);
+    /// ```
     pub fn location(&self) -> f64 {
         self.location
     }
 
+    /// Returns the scale of the student's t-distribution
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::StudentsT;
+    ///
+    /// let n = StudentsT::new(0.0, 1.0, 2.0).unwrap();
+    /// assert_eq!(n.scale(), 1.0);
+    /// ```
     pub fn scale(&self) -> f64 {
         self.scale
     }
 
+    /// Returns the freedom of the student's t-distribution
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::StudentsT;
+    ///
+    /// let n = StudentsT::new(0.0, 1.0, 2.0).unwrap();
+    /// assert_eq!(n.freedom(), 2.0);
+    /// ```
     pub fn freedom(&self) -> f64 {
         self.freedom
     }
 }
 
-impl Sample<f64> for StudentT {
+impl Sample<f64> for StudentsT {
+    /// Generate a random sample from a student's t-distribution
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
-impl IndependentSample<f64> for StudentT {
+impl IndependentSample<f64> for StudentsT {
+    /// Generate a random independent sample from a student's t-distribution
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
-impl Distribution<f64> for StudentT {
+impl Distribution<f64> for StudentsT {
+    /// Generate a random sample from a student's t-distribution using
+    /// `r` as the source of randomness. The implementation is based
+    /// on method 2, section 5 in chapter 9 of L. Devroye's 
+    /// <i>"Non-Uniform Random Variate Generation"</i>
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{StudentsT, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = StudentsT::new(0.0, 1.0, 2.0).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         let gamma = super::gamma::sample_unchecked(r, 0.5 * self.freedom, 0.5);
         super::normal::sample_unchecked(r,
@@ -61,7 +147,23 @@ impl Distribution<f64> for StudentT {
     }
 }
 
-impl Univariate<f64, f64> for StudentT {
+impl Univariate<f64, f64> for StudentsT {
+    /// Calculates the cumulative distribution function for the student's t-distribution
+    /// at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// if x < μ {
+    ///     (1 / 2) * I(t, v / 2, 1 / 2)
+    /// } else {
+    ///     1 - (1 / 2) * I(t, v / 2, 1 / 2)
+    /// }
+    /// ```
+    ///
+    /// where `t = v / (v + k^2)`, `k = (x - μ) / σ`, `μ` is the location,
+    /// `σ` is the scale, `v` is the freedom, and `I` is the regularized incomplete
+    /// beta function
     fn cdf(&self, x: f64) -> f64 {
         if self.freedom == f64::INFINITY {
             super::normal::cdf_unchecked(x, self.location, self.scale)
@@ -77,16 +179,45 @@ impl Univariate<f64, f64> for StudentT {
         }
     }
 
+    /// Returns the minimum value in the domain of the student's t-distribution
+    /// representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// -INF
+    /// ```
     fn min(&self) -> f64 {
         f64::NEG_INFINITY
     }
 
+    /// Returns the maximum value in the domain of the student's t-distribution
+    /// representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
     fn max(&self) -> f64 {
         f64::INFINITY
     }
 }
 
-impl Mean<f64, f64> for StudentT {
+impl Mean<f64, f64> for StudentsT {
+    /// Returns the mean of the student's t-distribution
+    ///
+    /// # Panics
+    ///
+    /// If `freedom <= 1.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// μ
+    /// ```
+    ///
+    /// where `μ` is the location
     fn mean(&self) -> f64 {
         assert!(self.freedom > 1.0,
                 format!("{}", StatsError::ArgGt("freedom", 1.0)));
@@ -94,7 +225,26 @@ impl Mean<f64, f64> for StudentT {
     }
 }
 
-impl Variance<f64, f64> for StudentT {
+impl Variance<f64, f64> for StudentsT {
+    /// Returns the variance of the student's t-distribution
+    ///
+    /// # Panics
+    ///
+    /// If `freedom <= 1.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// if v == INF {
+    ///     σ^2
+    /// } else if freedom > 2.0 {
+    ///     v * σ^2 / (v - 2)
+    /// } else {
+    ///     INF
+    /// }
+    /// ```
+    ///
+    /// where `σ` is the scale and `v` is the freedom
     fn variance(&self) -> f64 {
         assert!(self.freedom > 1.0,
                 format!("{}", StatsError::ArgGt("freedom", 1.0)));
@@ -107,15 +257,48 @@ impl Variance<f64, f64> for StudentT {
         }
     }
 
+    /// Returns the standard deviation of the student's t-distribution
+    ///
+    /// # Panics
+    ///
+    /// If `freedom <= 1.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// let variance = if v == INF {
+    ///     σ^2
+    /// } else if freedom > 2.0 {
+    ///     v * σ^2 / (v - 2)
+    /// } else {
+    ///     INF
+    /// }
+    /// sqrt(variance)
+    /// ```
+    ///
+    /// where `σ` is the scale and `v` is the freedom
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 }
 
-impl Entropy<f64> for StudentT {
+impl Entropy<f64> for StudentsT {
+    /// Returns the entropy for the student's t-distribution
+    ///
+    /// # Panics
+    ///
+    /// If `location != 0.0 && scale != 1.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (v + 1) / 2 * (ψ((v + 1) / 2) - ψ(v / 2)) + ln(sqrt(v) * B(v / 2, 1 / 2))
+    /// ```
+    ///
+    /// where `v` is the freedom, `ψ` is the digamma function, and `B` is the beta function
     fn entropy(&self) -> f64 {
         assert!(self.location == 0.0 && self.scale == 1.0,
-                "Cannot calculate entropy for StudentT distribution where location is not 0 and \
+                "Cannot calculate entropy for StudentsT distribution where location is not 0 and \
                  scale is not 1");
 
         (self.freedom + 1.0) / 2.0 *
@@ -124,7 +307,18 @@ impl Entropy<f64> for StudentT {
     }
 }
 
-impl Skewness<f64, f64> for StudentT {
+impl Skewness<f64, f64> for StudentsT {
+    /// Returns the skewness of the student's t-distribution
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 3.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn skewness(&self) -> f64 {
         assert!(self.freedom > 3.0,
                 format!("{}", StatsError::ArgGt("freedom", 3.0)));
@@ -132,19 +326,48 @@ impl Skewness<f64, f64> for StudentT {
     }
 }
 
-impl Median<f64> for StudentT {
+impl Median<f64> for StudentsT {
+    /// Returns the median of the student's t-distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// μ
+    /// ```
+    ///
+    /// where `μ` is the location
     fn median(&self) -> f64 {
         self.location
     }
 }
 
-impl Mode<f64, f64> for StudentT {
+impl Mode<f64, f64> for StudentsT {
+    /// Returns the mode of the student's t-distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// μ
+    /// ```
+    ///
+    /// where `μ` is the location
     fn mode(&self) -> f64 {
         self.location
     }
 }
 
-impl Continuous<f64, f64> for StudentT {
+impl Continuous<f64, f64> for StudentsT {
+    /// Calculates the probability density function for the student's t-distribution
+    /// at `x`
+    ///
+    /// # Formula
+    /// 
+    /// ```ignore
+    /// Γ((v + 1) / 2) / (sqrt(vπ) * Γ(v / 2) * σ) * (1 + k^2 / v)^(-1 / 2 * (v + 1))
+    /// ```
+    ///
+    /// where `k = (x - μ) / σ`, `μ` is the location, `σ` is the scale, `v` is the freedom,
+    /// and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
         if self.freedom >= 1e8 {
             super::normal::pdf_unchecked(x, self.location, self.scale)
@@ -157,6 +380,17 @@ impl Continuous<f64, f64> for StudentT {
         }
     }
 
+    /// Calculates the log probability density function for the student's t-distribution
+    /// at `x`
+    ///
+    /// # Formula
+    /// 
+    /// ```ignore
+    /// ln(Γ((v + 1) / 2) / (sqrt(vπ) * Γ(v / 2) * σ) * (1 + k^2 / v)^(-1 / 2 * (v + 1)))
+    /// ```
+    ///
+    /// where `k = (x - μ) / σ`, `μ` is the location, `σ` is the scale, `v` is the freedom,
+    /// and `Γ` is the gamma function
     fn ln_pdf(&self, x: f64) -> f64 {
         if self.freedom >= 1e8 {
             super::normal::ln_pdf_unchecked(x, self.location, self.scale)
@@ -178,8 +412,8 @@ mod test {
     use distribution::*;
     use prec;
 
-    fn try_create(location: f64, scale: f64, freedom: f64) -> StudentT {
-        let n = StudentT::new(location, scale, freedom);
+    fn try_create(location: f64, scale: f64, freedom: f64) -> StudentsT {
+        let n = StudentsT::new(location, scale, freedom);
         assert!(n.is_ok());
         n.unwrap()
     }
@@ -192,33 +426,33 @@ mod test {
     }
 
     fn bad_create_case(location: f64, scale: f64, freedom: f64) {
-        let n = StudentT::new(location, scale, freedom);
+        let n = StudentsT::new(location, scale, freedom);
         assert!(n.is_err());
     }
 
     fn get_value<F>(location: f64, scale: f64, freedom: f64, eval: F) -> f64
-        where F: Fn(StudentT) -> f64
+        where F: Fn(StudentsT) -> f64
     {
         let n = try_create(location, scale, freedom);
         eval(n)
     }
 
     fn test_case<F>(location: f64, scale: f64, freedom: f64, expected: f64, eval: F)
-        where F: Fn(StudentT) -> f64
+        where F: Fn(StudentsT) -> f64
     {
         let x = get_value(location, scale, freedom, eval);
         assert_eq!(expected, x);
     }
 
     fn test_almost<F>(location: f64, scale: f64, freedom: f64, expected: f64, acc: f64, eval: F)
-        where F: Fn(StudentT) -> f64
+        where F: Fn(StudentsT) -> f64
     {
         let x = get_value(location, scale, freedom, eval);
         assert!(prec::almost_eq(expected, x, acc));
     }
 
     fn test_panic<F>(location: f64, scale: f64, freedom: f64, eval: F)
-        where F : Fn(StudentT) -> f64,
+        where F : Fn(StudentsT) -> f64,
               F : panic::UnwindSafe
     {
         let result = panic::catch_unwind(|| {

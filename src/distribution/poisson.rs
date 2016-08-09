@@ -88,9 +88,9 @@ impl IndependentSample<f64> for Poisson {
 impl Distribution<f64> for Poisson {
     /// Generate a random sample from a poisson distribution using
     /// `r` as the source of randomness. The implementation is based
-    /// on Knuth's method if lambda < 30.0 or Rejection method PA by
-    /// A. C. Atkinson from the Journal of the Royal Statistical Society
-    /// Series C (Applied Statistics) Vol. 28 No. 1. (1979) pp. 29 - 35
+    /// on Knuth's method if `lambda < 30.0` or Rejection method PA by
+    /// A. C. Atkinson from the <i>Journal of the Royal Statistical Society
+    /// Series C (Applied Statistics)</i> Vol. 28 No. 1. (1979) pp. 29 - 35
     ///
     /// # Examples
     ///
