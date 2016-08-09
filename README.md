@@ -23,8 +23,8 @@ Please check out the documentation [here](https://boxtown.io/docs/statrs/head/st
 | Gamma             | yes         | yes          |
 | LogNormal         | yes         | yes          |
 | Normal            | yes         | yes          |
-| Poisson           | yes         | no           |
-| StudentT          | yes         | no           |
+| Poisson           | yes         | yes          |
+| StudentT          | yes         | yes          |
 | Triangular        | yes         | no           |
 | Weibull           | yes         | no           |
 
