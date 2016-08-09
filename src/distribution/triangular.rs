@@ -5,6 +5,17 @@ use error::StatsError;
 use result::Result;
 use super::*;
 
+/// Implements the [Triangular](https://en.wikipedia.org/wiki/Triangular_distribution) distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{Triangular, Mean, Continuous};
+///
+/// let n = Triangular::new(0.0, 5.0, 2.5).unwrap();
+/// assert_eq!(n.mean(), 7.5 / 3.0);
+/// assert_eq!(n.pdf(2.5), 5.0 / 12.5);
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Triangular {
     min: f64,
@@ -13,6 +24,25 @@ pub struct Triangular {
 }
 
 impl Triangular {
+    /// Constructs a new triangular distribution with a minimum of `min`,
+    /// maximum of `max`, and a mode of `mode`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `min`, `max`, or `mode` are `NaN` or `±INF`.
+    /// Returns an error if `max < mode`, `mode < min`, or `max == min`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Triangular;
+    ///
+    /// let mut result = Triangular::new(0.0, 5.0, 2.5);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Triangular::new(2.5, 1.5, 0.0);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(min: f64, max: f64, mode: f64) -> Result<Triangular> {
         if min.is_infinite() || max.is_infinite() || mode.is_infinite() {
             return Err(StatsError::BadParams);
@@ -32,33 +62,44 @@ impl Triangular {
             mode: mode,
         })
     }
-
-    pub fn min(&self) -> f64 {
-        self.min
-    }
-
-    pub fn max(&self) -> f64 {
-        self.max
-    }
-
-    pub fn mode(&self) -> f64 {
-        self.mode
-    }
 }
 
 impl Sample<f64> for Triangular {
+    /// Generate a random sample from a triangular distribution
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for Triangular {
+    /// Generate a random independent sample from a triangular distribution
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution<f64> for Triangular {
+    /// Generate a random sample from a triangular distribution using
+    /// `r` as the source of randomness.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Triangular, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Triangular::new(0.0, 5.0, 2.5).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         sample_unchecked(r, self.min, self.max, self.mode)
     }
