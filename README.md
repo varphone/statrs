@@ -17,7 +17,7 @@ Please check out the documentation [here](https://boxtown.io/docs/statrs/head/st
 | Binomial          | yes         | yes          |
 | Chi               | yes         | yes          |
 | ChiSquared        | yes         | yes          |
-| ContinuousUniform | yes         | no           |
+| ContinuousUniform | yes         | yes          |
 | DiscreteUniform   | yes         | yes          |
 | Exponential       | yes         | yes          |
 | Gamma             | yes         | yes          |
@@ -25,7 +25,7 @@ Please check out the documentation [here](https://boxtown.io/docs/statrs/head/st
 | Normal            | yes         | yes          |
 | Poisson           | yes         | yes          |
 | StudentT          | yes         | yes          |
-| Triangular        | yes         | no           |
+| Triangular        | yes         | yes          |
 | Weibull           | yes         | no           |
 
 ## Planned for v 0.1.1
