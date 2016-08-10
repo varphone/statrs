@@ -106,38 +106,79 @@ impl Distribution<f64> for Triangular {
 }
 
 impl Univariate<f64, f64> for Triangular {
+    /// Calculates the cumulative distribution function for the triangular distribution
+    /// at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// if x <= min {
+    ///     0
+    /// } if min < x <= mode {
+    ///     (x - min)^2 / ((max - min) * (mode - min))
+    /// } else if mode < x < max {
+    ///     1 - (max - min)^2 / ((max - min) * (max - mode))
+    /// } else {
+    ///     1
+    /// }
+    /// ```
     fn cdf(&self, x: f64) -> f64 {
         let a = self.min;
         let b = self.max;
         let c = self.mode;
-        if x < a {
-            return 0.0;
-        }
-        if a <= x && x <= c {
-            return (x - a) * (x - a) / ((b - a) * (c - a));
-        }
-        if c < x && x <= b {
+        if x <= a {
+            0.0
+        } else if a < x && x <= c {
+            (x - a) * (x - a) / ((b - a) * (c - a));
+        } else if c < x && x < b {
             return 1.0 - (b - x) * (b - x) / ((b - a) * (b - c));
+        } else {
+            1.0
         }
-        1.0
     }
 
+    /// Returns the minimum value in the domain of the
+    /// triangular distribution representable by a double precision float
+    ///
+    /// # Remarks
+    ///
+    /// The return value is the same min used to construct the distribution
     fn min(&self) -> f64 {
         self.min
     }
 
+    /// Returns the maximum value in the domain of the
+    /// triangular distribution representable by a double precision float
+    ///
+    /// # Remarks
+    ///
+    /// The return value is the same max used to construct the distribution
     fn max(&self) -> f64 {
         self.max
     }
 }
 
 impl Mean<f64, f64> for Triangular {
+    /// Returns the mean of the triangular distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (min + max + mode) / 3
+    /// ```
     fn mean(&self) -> f64 {
         (self.min + self.max + self.mode) / 3.0
     }
 }
 
 impl Variance<f64, f64> for Triangular {
+    /// Returns the variance of the triangular distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (min^2 + max^2 + mode^2 - min * max - min * mode - max * mode) / 18
+    /// ```
     fn variance(&self) -> f64 {
         let a = self.min;
         let b = self.max;
@@ -145,18 +186,40 @@ impl Variance<f64, f64> for Triangular {
         (a * a + b * b + c * c - a * b - a * c - b * c) / 18.0
     }
 
+    /// Returns the standard deviation of the triangular distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt((min^2 + max^2 + mode^2 - min * max - min * mode - max * mode) / 18)
+    /// ```
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 }
 
 impl Entropy<f64> for Triangular {
+    /// Returns the entropy of the triangular distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 / 2 + ln((max - min) / 2)
+    /// ```
     fn entropy(&self) -> f64 {
         0.5 + ((self.max - self.min) / 2.0).ln()
     }
 }
 
 impl Skewness<f64, f64> for Triangular {
+    /// Returns the skewness of the triangular distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (sqrt(2) * (min + max - 2 * mode) * (2 * min - max - mode) * (min - 2 * max + mode)) / 
+    /// ( 5 * (min^2 + max^2 + mode^2 - min * max - min * mode - max * mode)^(3 / 2))
+    /// ```
     fn skewness(&self) -> f64 {
         let a = self.min;
         let b = self.max;
@@ -168,6 +231,17 @@ impl Skewness<f64, f64> for Triangular {
 }
 
 impl Median<f64> for Triangular {
+    /// Returns the median of the triangular distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// if mode >= (min + max) / 2 {
+    ///     min + sqrt((max - min) * (mode - min) / 2)
+    /// } else {
+    ///     max - sqrt((max - min) * (max - mode) / 2)
+    /// } 
+    /// ```
     fn median(&self) -> f64 {
         let a = self.min;
         let b = self.max;
@@ -181,25 +255,64 @@ impl Median<f64> for Triangular {
 }
 
 impl Mode<f64, f64> for Triangular {
+    /// Returns the mode of the triangular distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// mode
+    /// ```
     fn mode(&self) -> f64 {
         self.mode
     }
 }
 
 impl Continuous<f64, f64> for Triangular {
+    /// Calculates the probability density function for the triangular distribution
+    /// at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// if x < min {
+    ///     0
+    /// } else if min <= x <= mode {
+    ///     2 * (x - min) / ((max - min) * (mode - min))
+    /// } else if mode < x <= max {
+    ///     2 * (max - x) / ((max - min) * (max - mode))
+    /// } else {
+    ///     0
+    /// }
+    /// ```
     fn pdf(&self, x: f64) -> f64 {
         let a = self.min;
         let b = self.max;
         let c = self.mode;
         if a <= x && x <= c {
-            return 2.0 * (x - a) / ((b - a) * (c - a));
+            2.0 * (x - a) / ((b - a) * (c - a));
+        } else if c < x && x <= b {
+            2.0 * (b - x) / ((b - a) * (b - c));
+        } else {
+            0.0
         }
-        if c < x && x <= b {
-            return 2.0 * (b - x) / ((b - a) * (b - c));
-        }
-        0.0
     }
 
+    /// Calculates the log probability density function for the triangular distribution
+    /// at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln( if x < min {
+    ///     0
+    /// } else if min <= x <= mode {
+    ///     2 * (x - min) / ((max - min) * (mode - min))
+    /// } else if mode < x <= max {
+    ///     2 * (max - x) / ((max - min) * (max - mode))
+    /// } else {
+    ///     0
+    /// } )
+    /// ```
     fn ln_pdf(&self, x: f64) -> f64 {
         self.pdf(x).ln()
     }
