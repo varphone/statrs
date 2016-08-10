@@ -129,7 +129,7 @@ impl Univariate<f64, f64> for Triangular {
         if x <= a {
             0.0
         } else if a < x && x <= c {
-            (x - a) * (x - a) / ((b - a) * (c - a));
+            (x - a) * (x - a) / ((b - a) * (c - a))
         } else if c < x && x < b {
             return 1.0 - (b - x) * (b - x) / ((b - a) * (b - c));
         } else {
@@ -289,9 +289,9 @@ impl Continuous<f64, f64> for Triangular {
         let b = self.max;
         let c = self.mode;
         if a <= x && x <= c {
-            2.0 * (x - a) / ((b - a) * (c - a));
+            2.0 * (x - a) / ((b - a) * (c - a))
         } else if c < x && x <= b {
-            2.0 * (b - x) / ((b - a) * (b - c));
+            2.0 * (b - x) / ((b - a) * (b - c))
         } else {
             0.0
         }
