@@ -86,7 +86,7 @@ impl Distribution<f64> for Uniform {
     ///
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
-    /// let n = Uniform::new(0, 5).unwrap();
+    /// let n = Uniform::new(0.0, 5.0).unwrap();
     /// print!("{}", n.sample::<StdRng>(&mut r));   
     /// # }
     /// ```
@@ -109,7 +109,7 @@ impl Univariate<f64, f64> for Uniform {
     /// (x - min) / (max - min) 
     /// ```
     fn cdf(&self, x: f64) -> f64 {
-        if x < self.min {
+        if x <= self.min {
             return 0.0;
         }
         if x >= self.max {
