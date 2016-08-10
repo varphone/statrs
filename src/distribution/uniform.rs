@@ -5,6 +5,17 @@ use error::StatsError;
 use result::Result;
 use super::*;
 
+/// Implements the [Continuous Uniform](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{Uniform, Mean, Continuous};
+///
+/// let n = Uniform::new(0.0, 1.0).unwrap();
+/// assert_eq!(n.mean(), 0.5);
+/// assert_eq!(n.pdf(0.5), 1.0);
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Uniform {
     min: f64,
@@ -12,6 +23,25 @@ pub struct Uniform {
 }
 
 impl Uniform {
+    /// Constructs a new uniform distribution with a min of `min` and a max
+    /// of `max`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `min` or `max` are `NaN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Uniform;
+    /// use std::f64;
+    ///
+    /// let mut result = Uniform::new(0.0, 1.0);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Uniform::new(f64::NAN, f64::NAN);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(min: f64, max: f64) -> Result<Uniform> {
         if min > max || min.is_nan() || max.is_nan() {
             Err(StatsError::BadParams)
@@ -25,26 +55,61 @@ impl Uniform {
 }
 
 impl Sample<f64> for Uniform {
+    /// Generate a random sample from a continuous uniform
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for Uniform {
+    /// Generate a random independent sample from a continuous uniform
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution<f64> for Uniform {
+    /// Generate a random sample from the continuous uniform distribution
+    /// using `r` as the source of randomness in the range `[min, max]`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Uniform, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Uniform::new(0, 5).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         r.gen_range(self.min, self.max + 1.0)
     }
 }
 
 impl Univariate<f64, f64> for Uniform {
+    /// Calculates the cumulative distribution function for the uniform distribution
+    /// at `x`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `0.0` if `x < min` and `1.0` if `x >= max`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (x - min) / (max - min) 
+    /// ```
     fn cdf(&self, x: f64) -> f64 {
-        if x <= self.min {
+        if x < self.min {
             return 0.0;
         }
         if x >= self.max {
@@ -63,46 +128,112 @@ impl Univariate<f64, f64> for Uniform {
 }
 
 impl Mean<f64, f64> for Uniform {
+    /// Returns the mean for the continuous uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (min + max) / 2
+    /// ```
     fn mean(&self) -> f64 {
         (self.min + self.max) / 2.0
     }
 }
 
 impl Variance<f64, f64> for Uniform {
+    /// Returns the variance for the continuous uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (max - min)^2 / 12
+    /// ```
     fn variance(&self) -> f64 {
         (self.max - self.min) * (self.max - self.min) / 12.0
     }
 
+    /// Returns the standard deviation for the continuous uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt((max - min)^2 / 12)
+    /// ```
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 }
 
 impl Entropy<f64> for Uniform {
+    /// Returns the entropy for the continuous uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(max - min)
+    /// ```
     fn entropy(&self) -> f64 {
         (self.max - self.min).ln()
     }
 }
 
 impl Skewness<f64, f64> for Uniform {
+    /// Returns the skewness for the continuous uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn skewness(&self) -> f64 {
         0.0
     }
 }
 
 impl Median<f64> for Uniform {
+    /// Returns the median for the continuous uniform distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (min + max) / 2
+    /// ```
     fn median(&self) -> f64 {
         (self.min + self.max) / 2.0
     }
 }
 
 impl Mode<f64, f64> for Uniform {
+    /// Returns the mode for the continuous uniform distribution
+    ///
+    /// # Remarks
+    ///
+    /// Since every element has an equal probability, mode simply
+    /// returns the middle element
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// N/A // (max + min) / 2 for the middle element
+    /// ```
     fn mode(&self) -> f64 {
         (self.min + self.max) / 2.0
     }
 }
 
 impl Continuous<f64, f64> for Uniform {
+    /// Calculates the probability density function for the continuous uniform
+    /// distribution at `x`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `0.0` if `x` is not in `[min, max]`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 / (max - min)
+    /// ```
     fn pdf(&self, x: f64) -> f64 {
         if x < self.min || x > self.max {
             0.0
@@ -111,6 +242,18 @@ impl Continuous<f64, f64> for Uniform {
         }
     }
 
+    /// Calculates the log probability density function for the continuous uniform
+    /// distribution at `x`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NEG_INFINITY` if `x` is not in `[min, max]`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(1 / (max - min))
+    /// ```
     fn ln_pdf(&self, x: f64) -> f64 {
         if x < self.min || x > self.max {
             f64::NEG_INFINITY
