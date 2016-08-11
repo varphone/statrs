@@ -7,6 +7,19 @@ use function::{gamma, stable};
 use result::Result;
 use super::*;
 
+/// Implements the [Weibull](https://en.wikipedia.org/wiki/Weibull_distribution)
+/// distribution
+///
+/// # Examples
+///
+/// ```
+/// use statrs::distribution::{Weibull, Mean, Continuous};
+/// use statrs::prec;
+///
+/// let n = Weibull::new(10.0, 1.0).unwrap();
+/// assert!(prec::almost_eq(n.mean(), 0.95135076986687318362924871772654021925505786260884, 1e-15));
+/// assert_eq!(n.pdf(1.0), 3.6787944117144232159552377016146086744581113103177);
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Weibull {
     shape: f64,
@@ -15,6 +28,25 @@ pub struct Weibull {
 }
 
 impl Weibull {
+    /// Constructs a new weibull distribution with a shape (k) of `shape`
+    /// and a scale (λ) of `scale`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `shape` or `scale` are `NaN`.
+    /// Returns an error if `shape <= 0.0` or `scale <= 0.0`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Weibull;
+    ///
+    /// let mut result = Weibull::new(10.0, 1.0);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Weibull::new(0.0, 0.0);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(shape: f64, scale: f64) -> Result<Weibull> {
         let is_nan = shape.is_nan() || scale.is_nan();
         match (shape, scale, is_nan) {
@@ -30,28 +62,71 @@ impl Weibull {
         }
     }
 
+    /// Returns the shape of the weibull distribution
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Weibull;
+    ///
+    /// let n = Weibull::new(10.0, 1.0).unwrap();
+    /// assert_eq!(n.shape(), 10.0);
+    /// ```
     pub fn shape(&self) -> f64 {
         self.shape
     }
 
+    /// Returns the scale of the weibull distribution
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Weibull;
+    ///
+    /// let n = Weibull::new(10.0, 1.0).unwrap();
+    /// assert_eq!(n.scale(), 1.0);
+    /// ```
     pub fn scale(&self) -> f64 {
         self.scale
     }
 }
 
 impl Sample<f64> for Weibull {
+    /// Generate a random sample from a weibull
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl IndependentSample<f64> for Weibull {
+    /// Generate a random sample from a weibull
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
     fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
         super::Distribution::sample(self, r)
     }
 }
 
 impl Distribution<f64> for Weibull {
+    /// Generate a random sample from the weibull distribution
+    /// using `r` as the source of randomness
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Weibull, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Weibull::new(10.0, 1.0).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// # }
+    /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         let x = r.next_f64();
         self.scale * (-x.ln()).powf(1.0 / self.shape)
@@ -59,43 +134,124 @@ impl Distribution<f64> for Weibull {
 }
 
 impl Univariate<f64, f64> for Weibull {
+    /// Calculates the cumulative distribution function for the weibull
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 - e^-((x/λ)^k)
+    /// ```
+    ///
+    /// where `k` is the shape and `λ` is the scale
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         -stable::exp_minus_one(-x.powf(self.shape) * self.scale_pow_shape_inv)
     }
 
+    /// Returns the minimum value in the domain of the weibull
+    /// distribution representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
     fn min(&self) -> f64 {
         0.0
     }
 
+    /// Returns the maximum value in the domain of the weibull
+    /// distribution representable by a double precision float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
     fn max(&self) -> f64 {
         f64::INFINITY
     }
 }
 
 impl Mean<f64, f64> for Weibull {
+    /// Returns the mean of the weibull distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// λΓ(1 + 1 / k)
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the scale, and `Γ` is
+    /// the gamma function
     fn mean(&self) -> f64 {
         self.scale * gamma::gamma(1.0 + 1.0 / self.shape)
     }
 }
 
 impl Variance<f64, f64> for Weibull {
+    /// Returns the variance of the weibull distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// λ^2 * (Γ(1 + 2 / k) - Γ(1 + 1 / k)^2)
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the scale, and `Γ` is
+    /// the gamma function
     fn variance(&self) -> f64 {
         self.scale * self.scale * gamma::gamma(1.0 + 2.0 / self.shape) - self.mean() * self.mean()
     }
 
+    /// Returns the standard deviation of the weibull distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(λ^2 * (Γ(1 + 2 / k) - Γ(1 + 1 / k)^2))
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the scale, and `Γ` is
+    /// the gamma function
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
 }
 
 impl Entropy<f64> for Weibull {
+    /// Returns the entropy of the weibull distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// γ(1 - 1 / k) + ln(λ / k) + 1
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the scale, and `γ` is
+    /// the Euler-Mascheroni constant
     fn entropy(&self) -> f64 {
         consts::EULER_MASCHERONI * (1.0 - 1.0 / self.shape) + (self.scale / self.shape).ln() + 1.0
     }
 }
 
 impl Skewness<f64, f64> for Weibull {
+    /// Returns the skewness of the weibull distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (Γ(1 + 3 / k) * λ^3 - 3μσ^2 - μ^3) / σ^3
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the scale, and `Γ` is
+    /// the gamma function, `μ` is the mean of the distribution.
+    /// and `σ` the standard deviation of the distribution
     fn skewness(&self) -> f64 {
         let mu = self.mean();
         let sigma = self.std_dev();
@@ -107,14 +263,36 @@ impl Skewness<f64, f64> for Weibull {
 }
 
 impl Median<f64> for Weibull {
+    /// Returns the median of the weibull distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// λ(ln(2))^(1 / k)
+    /// ```
+    ///
+    /// where `k` is the shape and `λ` is the scale
     fn median(&self) -> f64 {
         self.scale * f64::consts::LN_2.powf(1.0 / self.shape)
     }
 }
 
 impl Mode<f64, f64> for Weibull {
+    /// Returns the median of the weibull distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// if k == 1 {
+    ///     0
+    /// } else {
+    ///     λ((k - 1) / k)^(1 / k)
+    /// }
+    /// ```
+    ///
+    /// where `k` is the shape and `λ` is the scale
     fn mode(&self) -> f64 {
-        if self.shape <= 1.0 {
+        if self.shape == 1.0 {
             0.0
         } else {
             self.scale * ((self.shape - 1.0) / self.shape).powf(1.0 / self.shape)
@@ -123,6 +301,20 @@ impl Mode<f64, f64> for Weibull {
 }
 
 impl Continuous<f64, f64> for Weibull {
+    /// Calculates the probability density function for the weibull
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (k / λ) * (x / λ)^(k - 1) * e^(-(x / λ)^k)
+    /// ```
+    ///
+    /// where `k` is the shape and `λ` is the scale
     fn pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         match (x, self.shape) {
@@ -136,6 +328,20 @@ impl Continuous<f64, f64> for Weibull {
         }
     }
 
+    /// Calculates the log probability density function for the weibull
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x < 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((k / λ) * (x / λ)^(k - 1) * e^(-(x / λ)^k))
+    /// ```
+    ///
+    /// where `k` is the shape and `λ` is the scale
     fn ln_pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         match (x, self.shape) {
