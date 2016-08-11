@@ -19,14 +19,14 @@ Please check out the documentation [here](https://boxtown.io/docs/statrs/0.1.0/s
 
 Add the following to your `Cargo.toml`
 
-```
+```Rust
 [dependencies]
 statrs = "0.1.0"
 ```
 
 and this to your crate root
 
-```
+```Rust
 extern crate statrs;
 ```
   
