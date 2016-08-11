@@ -2,75 +2,60 @@
   
 [![Build Status](https://travis-ci.org/boxtown/statrs.svg?branch=master)](https://travis-ci.org/boxtown/verto)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)  
+
+## Current Version: v0.1.0
+
+Should be stable for both nightly and stable Rust
+
+## Description
   
 A work-in-progress port of the Math.NET Numerics distributions package to Rust.  
 All unit tests are borrowed from the Math.NET source when possible and filled in  
-when not.  
+when not. 
+
+Please check out the documentation [here](https://boxtown.io/docs/statrs/0.1.0/statrs/)
+
+## Usage
+
+Add the following to your `Cargo.toml`
+
+```
+[dependencies]
+statrs = "0.1.0"
+```
+
+and this to your crate root
+
+```
+extern crate statrs;
+```
   
-Please check out the documentation [here](https://boxtown.io/docs/statrs/head/statrs/)
+## Examples
 
-## Planned for v 0.1.0
+Statrs v0.1.0 comes with a number of commonly used distributions including Normal, Gamma, Student's T, Exponential, Weibull, etc.
+The common use case is to set up the distributions and sample from them which depends on the `Rand` crate for random number generation
 
-| Distribution      | Implemented | Doc Comments |
-|-------------------|:-----------:|:------------:|
-| Bernoulli         | yes         | yes          |
-| Binomial          | yes         | yes          |
-| Chi               | yes         | yes          |
-| ChiSquared        | yes         | yes          |
-| ContinuousUniform | yes         | yes          |
-| DiscreteUniform   | yes         | yes          |
-| Exponential       | yes         | yes          |
-| Gamma             | yes         | yes          |
-| LogNormal         | yes         | yes          |
-| Normal            | yes         | yes          |
-| Poisson           | yes         | yes          |
-| StudentT          | yes         | yes          |
-| Triangular        | yes         | yes          |
-| Weibull           | yes         | no           |
+```Rust
+use rand;
+use statrs::distribution::{Exponential, Distribution};
 
-## Planned for v 0.1.1
-| Distribution      | Implemented | Doc Comments |
-|-------------------|:-----------:|:------------:|
-| Beta              | no          | no           |
+let mut r = rand::StdRng::new().unwrap();
+let n = Exponential::new(0.5).unwrap();
+print!("{}", n.Sample::<StdRng>(&mut r);
+```
 
-Tests for special functions:
-- [ ] ln_beta
-- [ ] beta
-- [ ] beta_reg
-- [ ] erf
-- [ ] erf_inv
-- [ ] erfc
-- [ ] erfc_inv
-- [ ] polynomial
-- [ ] series
-- [ ] factorial
-- [ ] ln_factorial
-- [ ] binomial
-- [ ] ln_binomial
-- [ ] ln_gamma
-- [ ] gamma
-- [ ] gamma_ui
-- [ ] gamma_li
-- [ ] gamma_ur
-- [ ] gamma_lr
-- [ ] digamma
-- [ ] exp_minus_one
+Statrs also comes with a number of useful utility traits for more detailed introspection of distributions
 
-## Future roadmap
-- [ ] Categorical
-- [ ] Cauchy
-- [ ] Dirichlet
-- [ ] Erlang
-- [ ] FisherSnedecor
-- [ ] HyperGeometric
-- [ ] InverseGamma
-- [ ] InverseWishart
-- [ ] Laplace
-- [ ] Multinomial
-- [ ] NegativeBinomial
-- [ ] NormalGamma
-- [ ] Pareto
-- [ ] Rayleigh
-- [ ] Stable
-- [ ] Wishart
-- [ ] Zipf
+```Rust
+use statrs::distribution::{Exponential, Mean, Variance, Entropy, Skewness, Univariate, Continuous};
+
+let n = Exponential::new(1.0).unwrap();
+assert_eq!(n.mean(), 1.0);
+assert_eq!(n.variance(), 1.0);
+assert_eq!(n.entropy(), 1.0);
+assert_eq!(n.skewness(), 2.0);
+assert_eq!(n.cdf(1.0), 0.6321205588285576784045);
+assert_eq!(n.pdf(1.0), 0.3678794411714423215955);
+```
+
+as well as utility functions including `erf`, `gamma`, `ln_gamma`, `beta`, etc
