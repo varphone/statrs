@@ -1,7 +1,8 @@
 # statrs  
   
 [![Build Status](https://travis-ci.org/boxtown/statrs.svg?branch=master)](https://travis-ci.org/boxtown/verto)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)  
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/statrs.svg?maxAge=2592000)]()  
 
 ## Current Version: v0.1.0
 
