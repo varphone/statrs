@@ -1,32 +1,47 @@
+//! Provides special functions related to the [beta](https://en.wikipedia.org/wiki/Beta_function)
+//! function
+
 use std::f64;
 use error::StatsError;
 use function::gamma;
 use prec;
 
 /// Computes the natural logarithm
-/// of the Euler Beta function
-/// where `a` is the first Beta parameter
-/// and `b` is the second Beta parameter
-/// and `a > 0`, `b > 0`. Panics if `a <= 0.0` or `b <= 0.0`
+/// of the beta function
+/// where `a` is the first beta parameter
+/// and `b` is the second beta parameter
+/// and `a > 0`, `b > 0`. 
+///  
+/// # Panics 
+/// 
+/// if `a <= 0.0` or `b <= 0.0`
 pub fn ln_beta(a: f64, b: f64) -> f64 {
     assert!(a > 0.0, format!("{}", StatsError::ArgMustBePositive("a")));
     assert!(b > 0.0, format!("{}", StatsError::ArgMustBePositive("b")));
     gamma::ln_gamma(a) + gamma::ln_gamma(b) - gamma::ln_gamma(a + b)
 }
 
-/// Computes the Euler Beta function
-/// where `a` is the first Beta parameter
-/// and `b` is the second Beta parameter.
-/// Panics if `a <= 0.0` or `b <= 0.0`
+/// Computes the beta function
+/// where `a` is the first beta parameter
+/// and `b` is the second beta parameter.
+/// 
+///
+/// # Panics 
+///
+/// if `a <= 0.0` or `b <= 0.0`
 pub fn beta(a: f64, b: f64) -> f64 {
     ln_beta(a, b).exp()
 }
 
 /// Computes the regularized lower incomplete beta function
 /// `I_x(a,b) = 1/Beta(a,b) * int(t^(a-1)*(1-t)^(b-1), t=0..x)`
-/// `a > 0`, `b > 0`, `1 >= x >= 0` where `a` is the first Beta parameter,
-/// `b` is the second Beta parameter, and `x` is the upper limit of the
-/// integral. Panics if `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
+/// `a > 0`, `b > 0`, `1 >= x >= 0` where `a` is the first beta parameter,
+/// `b` is the second beta parameter, and `x` is the upper limit of the
+/// integral. 
+///
+/// # Panics 
+///
+/// if `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
 pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
     assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
     assert!(b >= 0.0, format!("{}", StatsError::ArgNotNegative("b")));
