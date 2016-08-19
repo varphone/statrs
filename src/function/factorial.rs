@@ -10,6 +10,10 @@ pub const MAX_ARG: u64 = 170;
 /// Computes the factorial function `x -> x!` for
 /// `170 >= x >= 0`. All factorials larger than `170!`
 /// will overflow an `f64`. 
+///
+/// # Remarks
+///
+/// Returns `f64::INFINITY` if `x > 170`
 pub fn factorial(x: u64) -> f64 {
     if x > MAX_ARG {
         f64::INFINITY

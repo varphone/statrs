@@ -12,7 +12,7 @@ use prec;
 /// and `b` is the second beta parameter
 /// and `a > 0`, `b > 0`. 
 ///  
-/// # Panics 
+/// # Panic
 /// 
 /// if `a <= 0.0` or `b <= 0.0`
 pub fn ln_beta(a: f64, b: f64) -> f64 {
@@ -33,13 +33,25 @@ pub fn beta(a: f64, b: f64) -> f64 {
     ln_beta(a, b).exp()
 }
 
+/// Computes the lower incomplete (unregularized) beta function
+/// `B(a,b,x) = int(t^(a-1)*(1-t)^(b-1),t=0..x)` for `a > 0, b > 0, 1 >= x >= 0`
+/// where `a` is the first beta parameter, `b` is the second beta parameter, and 
+/// `x` is the upper limit of the integral
+///
+/// # Panic
+///
+/// If `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
+pub fn beta_inc(a: f64, b: f64, x: f64) -> f64 {
+    beta_reg(a, b, x) * beta(a,b)
+}
+
 /// Computes the regularized lower incomplete beta function
 /// `I_x(a,b) = 1/Beta(a,b) * int(t^(a-1)*(1-t)^(b-1), t=0..x)`
 /// `a > 0`, `b > 0`, `1 >= x >= 0` where `a` is the first beta parameter,
 /// `b` is the second beta parameter, and `x` is the upper limit of the
 /// integral. 
 ///
-/// # Panics 
+/// # Panic
 ///
 /// if `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
 pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {

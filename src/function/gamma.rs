@@ -81,7 +81,11 @@ pub fn gamma_ui(a: f64, x: f64) -> f64 {
 /// `gamma(a,x) = int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0`
 /// where `a` is the argument for the gamma function and `x`
 /// is the upper integral limit.
-/// Panics if `a` or `x` are less than `0.0`
+///
+/// 
+/// # Panic 
+/// 
+/// if `a` or `x` are less than `0.0`
 pub fn gamma_li(a: f64, x: f64) -> f64 {
     gamma_lr(a, x) * gamma(a)
 }
@@ -90,7 +94,10 @@ pub fn gamma_li(a: f64, x: f64) -> f64 {
 /// `Q(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0`
 /// where `a` is the argument for the gamma function and
 /// `x` is the lower integral limit.
-/// Panics if `a` or `x` are less than `0.0`
+/// 
+/// # Panic 
+/// 
+/// if `a` or `x` are less than `0.0`
 pub fn gamma_ur(a: f64, x: f64) -> f64 {
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
@@ -154,7 +161,11 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
 /// Computes the lower incomplete regularized gamma function
 /// `P(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for real a > 0, x > 0`
 /// where `a` is the argument for the gamma function and `x` is the upper integral limit.
-/// Panics if `a` or `x` are less than 0.0
+/// 
+///
+/// # Panic 
+///
+/// if `a` or `x` are less than 0.0
 pub fn gamma_lr(a: f64, x: f64) -> f64 {
     assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
     assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
