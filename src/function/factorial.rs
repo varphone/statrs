@@ -56,7 +56,6 @@ pub fn ln_binomial(n: u64, k: u64) -> f64 {
 
 // Initialization for pre-computed cache of 171 factorial
 // values 0!...170!
-//
 const CACHE_SIZE: usize = 171;
 
 static mut FCACHE: &'static mut [f64; CACHE_SIZE] = &mut [1.0; CACHE_SIZE];

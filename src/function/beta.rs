@@ -12,7 +12,7 @@ use prec;
 /// and `b` is the second beta parameter
 /// and `a > 0`, `b > 0`. 
 ///  
-/// # Panic
+/// # Panics
 /// 
 /// if `a <= 0.0` or `b <= 0.0`
 pub fn ln_beta(a: f64, b: f64) -> f64 {
@@ -38,7 +38,7 @@ pub fn beta(a: f64, b: f64) -> f64 {
 /// where `a` is the first beta parameter, `b` is the second beta parameter, and 
 /// `x` is the upper limit of the integral
 ///
-/// # Panic
+/// # Panics
 ///
 /// If `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
 pub fn beta_inc(a: f64, b: f64, x: f64) -> f64 {
@@ -51,7 +51,7 @@ pub fn beta_inc(a: f64, b: f64, x: f64) -> f64 {
 /// `b` is the second beta parameter, and `x` is the upper limit of the
 /// integral. 
 ///
-/// # Panic
+/// # Panics
 ///
 /// if `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
 pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {

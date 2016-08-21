@@ -72,7 +72,10 @@ pub fn gamma(x: f64) -> f64 {
 /// `Gamma(a,x) = int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0`
 /// where `a` is the argument for the gamma function and
 /// `x` is the lower intergral limit.
-/// Panics if `a` or `x` are less than `0.0`
+///
+/// # Panics 
+/// 
+/// if `a` or `x` are less than `0.0`
 pub fn gamma_ui(a: f64, x: f64) -> f64 {
     gamma_ur(a, x) * gamma(a)
 }
@@ -83,7 +86,7 @@ pub fn gamma_ui(a: f64, x: f64) -> f64 {
 /// is the upper integral limit.
 ///
 /// 
-/// # Panic 
+/// # Panics 
 /// 
 /// if `a` or `x` are less than `0.0`
 pub fn gamma_li(a: f64, x: f64) -> f64 {
@@ -95,7 +98,7 @@ pub fn gamma_li(a: f64, x: f64) -> f64 {
 /// where `a` is the argument for the gamma function and
 /// `x` is the lower integral limit.
 /// 
-/// # Panic 
+/// # Panics
 /// 
 /// if `a` or `x` are less than `0.0`
 pub fn gamma_ur(a: f64, x: f64) -> f64 {
@@ -163,7 +166,7 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
 /// where `a` is the argument for the gamma function and `x` is the upper integral limit.
 /// 
 ///
-/// # Panic 
+/// # Panics
 ///
 /// if `a` or `x` are less than 0.0
 pub fn gamma_lr(a: f64, x: f64) -> f64 {
@@ -292,4 +295,34 @@ pub fn digamma(x: f64) -> f64 {
         result -= r * (s3 - (r * (s4 - (r * (s5 - (r * (s6 - (r * s7))))))));
     }
     result
+}
+
+/// Computes the inverse Digamma function
+///
+/// # Remarks
+///
+/// This is the inverse of the logarithm of the gamma function. This function
+/// only returns solutions that are positive. The implementation is based on
+/// the bisection method
+pub fn inv_digamma(p: f64) -> f64 {
+    if p.is_nan() {
+        return f64::NAN;
+    }
+    match p {
+        f64::NEG_INFINITY => 0.0,
+        f64::INFINITY => f64::INFINITY,
+        _ => {
+            let x = p.exp();
+            let d = 1.0;
+            for d > 1e-15 {
+                let v = p - digamma(x)
+                if v.is_sign_positive() {
+                    x += d
+                } else if v != 0 {
+                    x += -d
+                }
+            }
+            x
+        }
+    }
 }
