@@ -35,7 +35,9 @@ pub mod consts;
 pub mod prec;
 
 mod result;
+mod statistics;
 mod error;
 
 pub use result::Result;
+pub use statistics::Statistics;
 pub use error::StatsError;

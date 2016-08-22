@@ -103,7 +103,7 @@ impl Distribution<f64> for Poisson {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Poisson::new(1.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {

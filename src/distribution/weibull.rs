@@ -124,7 +124,7 @@ impl Distribution<f64> for Weibull {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Weibull::new(10.0, 1.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {

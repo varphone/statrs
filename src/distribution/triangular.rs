@@ -97,7 +97,7 @@ impl Distribution<f64> for Triangular {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Triangular::new(0.0, 5.0, 2.5).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
@@ -217,7 +217,7 @@ impl Skewness<f64, f64> for Triangular {
     /// # Formula
     ///
     /// ```ignore
-    /// (sqrt(2) * (min + max - 2 * mode) * (2 * min - max - mode) * (min - 2 * max + mode)) / 
+    /// (sqrt(2) * (min + max - 2 * mode) * (2 * min - max - mode) * (min - 2 * max + mode)) /
     /// ( 5 * (min^2 + max^2 + mode^2 - min * max - min * mode - max * mode)^(3 / 2))
     /// ```
     fn skewness(&self) -> f64 {
@@ -240,7 +240,7 @@ impl Median<f64> for Triangular {
     ///     min + sqrt((max - min) * (mode - min) / 2)
     /// } else {
     ///     max - sqrt((max - min) * (max - mode) / 2)
-    /// } 
+    /// }
     /// ```
     fn median(&self) -> f64 {
         let a = self.min;

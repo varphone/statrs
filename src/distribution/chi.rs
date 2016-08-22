@@ -59,7 +59,7 @@ impl Chi {
     ///
     /// ```
     /// use statrs::distribution::Chi;
-    /// 
+    ///
     /// let n = Chi::new(2.0).unwrap();
     /// assert_eq!(n.freedom(), 2.0);
     /// ```
@@ -101,7 +101,7 @@ impl Distribution<f64> for Chi {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Chi::new(2.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {

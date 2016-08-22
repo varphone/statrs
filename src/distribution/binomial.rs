@@ -62,7 +62,7 @@ impl Binomial {
     ///
     /// ```
     /// use statrs::distribution::Binomial;
-    /// 
+    ///
     /// let n = Binomial::new(0.5, 5).unwrap();
     /// assert_eq!(n.p(), 0.5);
     /// ```
@@ -120,17 +120,13 @@ impl Distribution<f64> for Binomial {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Binomial::new(0.5, 5).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         (0..self.n).fold(0.0, |acc, _| {
             let n = r.next_f64();
-            if n < self.p {
-                acc + 1.0
-            } else {
-                acc
-            }
+            if n < self.p { acc + 1.0 } else { acc }
         })
     }
 }
@@ -324,7 +320,7 @@ impl Discrete<i64, f64> for Binomial {
     /// distribution at `x`
     ///
     /// # Remarks
-    /// 
+    ///
     /// Returns `f64::NEG_INFINITY` if `x > n || x < 0`
     ///
     /// # Formula

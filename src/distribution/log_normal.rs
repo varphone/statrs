@@ -7,7 +7,7 @@ use function::erf;
 use result::Result;
 use super::*;
 
-/// Implements the [Log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution) 
+/// Implements the [Log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution)
 /// distribution
 ///
 /// # Examples
@@ -15,7 +15,7 @@ use super::*;
 /// ```
 /// use statrs::distribution::{LogNormal, Mean, Continuous};
 /// use statrs::prec;
-/// 
+///
 /// let n = LogNormal::new(0.0, 1.0).unwrap();
 /// assert_eq!(n.mean(), (0.5f64).exp());
 /// assert!(prec::almost_eq(n.pdf(1.0), 0.3989422804014326779399, 1e-16));
@@ -92,7 +92,7 @@ impl Distribution<f64> for LogNormal {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = LogNormal::new(0.0, 1.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {

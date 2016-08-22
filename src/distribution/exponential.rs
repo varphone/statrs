@@ -24,7 +24,7 @@ pub struct Exponential {
 }
 
 impl Exponential {
-    /// Constructs a new exponential distribution with a 
+    /// Constructs a new exponential distribution with a
     /// rate (λ) of `rate`.
     ///
     /// # Errors
@@ -98,7 +98,7 @@ impl Distribution<f64> for Exponential {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Exponential::new(1.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
@@ -111,7 +111,7 @@ impl Distribution<f64> for Exponential {
 }
 
 impl Univariate<f64, f64> for Exponential {
-    /// Calculates the cumulative distribution function for the 
+    /// Calculates the cumulative distribution function for the
     /// exponential distribution at `x`
     ///
     /// # Panics

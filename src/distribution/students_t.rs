@@ -31,7 +31,7 @@ impl StudentsT {
     ///
     /// # Errors
     ///
-    /// Returns an error if any of `location`, `scale`, or `freedom` are `NaN`. 
+    /// Returns an error if any of `location`, `scale`, or `freedom` are `NaN`.
     /// Returns an error if `scale <= 0.0` or `freedom <= 0.0`
     ///
     /// # Examples
@@ -122,7 +122,7 @@ impl IndependentSample<f64> for StudentsT {
 impl Distribution<f64> for StudentsT {
     /// Generate a random sample from a student's t-distribution using
     /// `r` as the source of randomness. The implementation is based
-    /// on method 2, section 5 in chapter 9 of L. Devroye's 
+    /// on method 2, section 5 in chapter 9 of L. Devroye's
     /// <i>"Non-Uniform Random Variate Generation"</i>
     ///
     /// # Examples
@@ -136,7 +136,7 @@ impl Distribution<f64> for StudentsT {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = StudentsT::new(0.0, 1.0, 2.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
@@ -171,11 +171,7 @@ impl Univariate<f64, f64> for StudentsT {
             let k = (x - self.location) / self.scale;
             let h = self.freedom / (self.freedom + k * k);
             let ib = 0.5 * beta::beta_reg(self.freedom / 2.0, 0.5, h);
-            if x <= self.location {
-                ib
-            } else {
-                1.0 - ib
-            }
+            if x <= self.location { ib } else { 1.0 - ib }
         }
     }
 
@@ -361,7 +357,7 @@ impl Continuous<f64, f64> for StudentsT {
     /// at `x`
     ///
     /// # Formula
-    /// 
+    ///
     /// ```ignore
     /// Γ((v + 1) / 2) / (sqrt(vπ) * Γ(v / 2) * σ) * (1 + k^2 / v)^(-1 / 2 * (v + 1))
     /// ```
@@ -384,7 +380,7 @@ impl Continuous<f64, f64> for StudentsT {
     /// at `x`
     ///
     /// # Formula
-    /// 
+    ///
     /// ```ignore
     /// ln(Γ((v + 1) / 2) / (sqrt(vπ) * Γ(v / 2) * σ) * (1 + k^2 / v)^(-1 / 2 * (v + 1)))
     /// ```

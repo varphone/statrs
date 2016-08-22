@@ -87,7 +87,7 @@ impl Distribution<f64> for DiscreteUniform {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = DiscreteUniform::new(0, 5).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
@@ -106,7 +106,7 @@ impl Univariate<i64, f64> for DiscreteUniform {
     /// # Formula
     ///
     /// ```ignore
-    /// (floor(x) - min + 1) / (max - min + 1) 
+    /// (floor(x) - min + 1) / (max - min + 1)
     /// ```
     fn cdf(&self, x: f64) -> f64 {
         if x < self.min as f64 {
@@ -119,11 +119,7 @@ impl Univariate<i64, f64> for DiscreteUniform {
         let lower = self.min as f64;
         let upper = self.max as f64;
         let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
-        if ans > 1.0 {
-            1.0
-        } else {
-            ans
-        }
+        if ans > 1.0 { 1.0 } else { ans }
     }
 
     /// Returns the minimum value in the domain of the discrete uniform

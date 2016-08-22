@@ -21,23 +21,23 @@ const GAMMA_DK: &'static [f64] = &[2.48574089138753565546e-5,
 
 /// Computes the logarithm of the gamma function
 /// with an accuracy of 16 floating point digits.
-/// The implementation is derived from 
+/// The implementation is derived from
 /// "An Analysis of the Lanczos Gamma Approximation",
 /// Glendon Ralph Pugh, 2004 p. 116
 pub fn ln_gamma(x: f64) -> f64 {
     if x < 0.5 {
         let s = GAMMA_DK.iter()
-                        .enumerate()
-                        .skip(1)
-                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
+            .enumerate()
+            .skip(1)
+            .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
         consts::LN_PI - (f64::consts::PI * x).sin().ln() - s.ln() - consts::LN_2_SQRT_E_OVER_PI -
         (0.5 - x) * ((0.5 - x + GAMMA_R) / f64::consts::E).ln()
     } else {
         let s = GAMMA_DK.iter()
-                        .enumerate()
-                        .skip(1)
-                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
+            .enumerate()
+            .skip(1)
+            .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
         s.ln() + consts::LN_2_SQRT_E_OVER_PI +
         (x - 0.5) * ((x - 0.5 + GAMMA_R) / f64::consts::E).ln()
@@ -51,18 +51,18 @@ pub fn ln_gamma(x: f64) -> f64 {
 pub fn gamma(x: f64) -> f64 {
     if x < 0.5 {
         let s = GAMMA_DK.iter()
-                        .enumerate()
-                        .skip(1)
-                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
+            .enumerate()
+            .skip(1)
+            .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
         f64::consts::PI /
         ((f64::consts::PI * x).sin() * s * consts::TWO_SQRT_E_OVER_PI *
          ((0.5 - x + GAMMA_R) / f64::consts::E).powf(0.5 - x))
     } else {
         let s = GAMMA_DK.iter()
-                        .enumerate()
-                        .skip(1)
-                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
+            .enumerate()
+            .skip(1)
+            .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
         s * consts::TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / f64::consts::E).powf(x - 0.5)
     }
@@ -73,8 +73,8 @@ pub fn gamma(x: f64) -> f64 {
 /// where `a` is the argument for the gamma function and
 /// `x` is the lower intergral limit.
 ///
-/// # Panics 
-/// 
+/// # Panics
+///
 /// if `a` or `x` are less than `0.0`
 pub fn gamma_ui(a: f64, x: f64) -> f64 {
     gamma_ur(a, x) * gamma(a)
@@ -85,9 +85,9 @@ pub fn gamma_ui(a: f64, x: f64) -> f64 {
 /// where `a` is the argument for the gamma function and `x`
 /// is the upper integral limit.
 ///
-/// 
-/// # Panics 
-/// 
+///
+/// # Panics
+///
 /// if `a` or `x` are less than `0.0`
 pub fn gamma_li(a: f64, x: f64) -> f64 {
     gamma_lr(a, x) * gamma(a)
@@ -97,9 +97,9 @@ pub fn gamma_li(a: f64, x: f64) -> f64 {
 /// `Q(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for a > 0, x > 0`
 /// where `a` is the argument for the gamma function and
 /// `x` is the lower integral limit.
-/// 
+///
 /// # Panics
-/// 
+///
 /// if `a` or `x` are less than `0.0`
 pub fn gamma_ur(a: f64, x: f64) -> f64 {
     let eps = 0.000000000000001;
@@ -112,11 +112,7 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
 
     let mut ax = a * x.ln() - x - ln_gamma(a);
     if ax < -709.78271289338399 {
-        return if a < x {
-            0.0
-        } else {
-            1.0
-        };
+        return if a < x { 0.0 } else { 1.0 };
     }
 
     ax = ax.exp();
@@ -164,7 +160,7 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
 /// Computes the lower incomplete regularized gamma function
 /// `P(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for real a > 0, x > 0`
 /// where `a` is the argument for the gamma function and `x` is the upper integral limit.
-/// 
+///
 ///
 /// # Panics
 ///
@@ -251,7 +247,6 @@ pub fn gamma_lr(a: f64, x: f64) -> f64 {
     1.0 - ax.exp() * ans
 }
 
-
 /// Computes the Digamma function which is defined as the derivative of
 /// the gamma function. The implementation is based on
 /// "Algorithm AS 103", Jose Bernardo, Applied Statistics, Volume 25, Number 3
@@ -306,23 +301,22 @@ pub fn digamma(x: f64) -> f64 {
 /// the bisection method
 pub fn inv_digamma(p: f64) -> f64 {
     if p.is_nan() {
-        return f64::NAN;
-    }
-    match p {
-        f64::NEG_INFINITY => 0.0,
-        f64::INFINITY => f64::INFINITY,
-        _ => {
-            let x = p.exp();
-            let d = 1.0;
-            for d > 1e-15 {
-                let v = p - digamma(x)
-                if v.is_sign_positive() {
-                    x += d
-                } else if v != 0 {
-                    x += -d
-                }
+        f64::NAN
+    } else if p == f64::NEG_INFINITY {
+        0.0
+    } else if p == f64::INFINITY {
+        f64::INFINITY
+    } else {
+        let mut x = p.exp();
+        let d = 1.0;
+        while d > 1e-15 {
+            let v = p - digamma(x);
+            if v.is_sign_positive() {
+                x += d
+            } else if v != 0.0 {
+                x += -d
             }
-            x
         }
+        x
     }
 }

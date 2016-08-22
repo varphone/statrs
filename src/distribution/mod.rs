@@ -37,7 +37,7 @@ mod weibull;
 /// for sampling statistical distributions
 pub trait Distribution<T> {
     /// Draws a random sample using the supplied random number generator
-    /// # Examples  
+    /// # Examples
     ///
     /// A trivial implementation that just samples from the supplied
     /// random number generator
@@ -65,7 +65,7 @@ pub trait Distribution<T> {
 /// The `Univariate` trait is used to specify an interface for univariate
 /// distributions e.g. distributions that have a closed form cumulative distribution
 /// function
-pub trait Univariate<T, K> : Distribution<K> {
+pub trait Univariate<T, K>: Distribution<K> {
     /// Returns the cumulative distribution function calculated
     /// at `x` for a given distribution. May panic depending
     /// on the implementor.
@@ -80,7 +80,7 @@ pub trait Univariate<T, K> : Distribution<K> {
     /// ```
     fn cdf(&self, x: K) -> K;
 
-    /// Returns the minimum value in the domain of a given distribution 
+    /// Returns the minimum value in the domain of a given distribution
     /// representable by a double-precision float. May panic depending on
     /// the implementor.
     ///
@@ -94,7 +94,7 @@ pub trait Univariate<T, K> : Distribution<K> {
     /// ```
     fn min(&self) -> T;
 
-    /// Returns the maximum value in the domain of a given distribution 
+    /// Returns the maximum value in the domain of a given distribution
     /// representable by a double-precision float. May panic depending on
     /// the implementor.
     ///
@@ -109,9 +109,9 @@ pub trait Univariate<T, K> : Distribution<K> {
     fn max(&self) -> T;
 }
 
-/// The `Mean` trait specifies a distribution that has a closed form 
+/// The `Mean` trait specifies a distribution that has a closed form
 /// solution for its mean(s)
-pub trait Mean<T, K> : Distribution<K> {
+pub trait Mean<T, K>: Distribution<K> {
     /// Returns the mean for a given distribution. May panic depending
     /// on the implementor.
     ///
@@ -129,7 +129,7 @@ pub trait Mean<T, K> : Distribution<K> {
 /// The `Variance` trait specifies a distribution that has a closed form solution for
 /// its variance(s). Requires `Mean` since a closed form solution to
 /// variance by definition requires a closed form mean.
-pub trait Variance<T, K> : Mean<T, K> {
+pub trait Variance<T, K>: Mean<T, K> {
     /// Returns the variance for a given distribution. May panic depending
     /// on the implementor.
     ///
@@ -150,7 +150,7 @@ pub trait Variance<T, K> : Mean<T, K> {
     ///
     /// ```
     /// use statrs::distribution::{Variance, Uniform};
-    /// 
+    ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev());
     /// ```
@@ -159,7 +159,7 @@ pub trait Variance<T, K> : Mean<T, K> {
 
 /// The `Entropy` trait specifies a distribution with a closed form solution
 /// for its entropy
-pub trait Entropy<T> : Distribution<T> {
+pub trait Entropy<T>: Distribution<T> {
     /// Returns the entropy for a given distribution. May panic depending
     /// on the implementor.
     ///
@@ -176,7 +176,7 @@ pub trait Entropy<T> : Distribution<T> {
 
 /// The `Skewness` trait specifies a distributions with a closed form solution
 /// for its skewness(s)
-pub trait Skewness<T, K> : Distribution<K> {
+pub trait Skewness<T, K>: Distribution<K> {
     /// Returns the skewness for a given distribution. May panic depending
     /// on the implementor.
     ///
@@ -193,7 +193,7 @@ pub trait Skewness<T, K> : Distribution<K> {
 
 /// The `Median` trait specifies a distribution with a closed form solution
 /// for its median
-pub trait Median<T> : Distribution<T> {
+pub trait Median<T>: Distribution<T> {
     /// Returns the median for a given distribution. May panic depending
     /// on the implementor.
     ///
@@ -210,7 +210,7 @@ pub trait Median<T> : Distribution<T> {
 
 /// The `Mode` trait specififies a distribution with a closed form solution
 /// for its mode(s)
-pub trait Mode<T, K> : Distribution<K> {
+pub trait Mode<T, K>: Distribution<K> {
     /// Returns the mode for a given distribution. May panic depending on
     /// the implementor.
     ///
@@ -233,9 +233,9 @@ pub trait Mode<T, K> : Distribution<K> {
 ///
 /// All methods provided by the `Continuous` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
-/// depending on the implementing distribution. 
-pub trait Continuous<T, K> : Distribution<K> {
-    /// Returns the probability density function calculated at `x` for a given distribution. 
+/// depending on the implementing distribution.
+pub trait Continuous<T, K>: Distribution<K> {
+    /// Returns the probability density function calculated at `x` for a given distribution.
     /// May panic depending on the implementor.
     ///
     /// # Examples
@@ -248,7 +248,7 @@ pub trait Continuous<T, K> : Distribution<K> {
     /// ```
     fn pdf(&self, x: T) -> K;
 
-    /// Returns the log of the probability density function calculated at `x` for a given distribution. 
+    /// Returns the log of the probability density function calculated at `x` for a given distribution.
     /// May panic depending on the implementor.
     ///
     /// # Examples
@@ -271,8 +271,8 @@ pub trait Continuous<T, K> : Distribution<K> {
 /// All methods provided by the `Discrete` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
 /// depending on the implementing distribution.
-pub trait Discrete<T, K> : Distribution<K> {
-    /// Returns the probability mass function calculated at `x` for a given distribution. 
+pub trait Discrete<T, K>: Distribution<K> {
+    /// Returns the probability mass function calculated at `x` for a given distribution.
     /// May panic depending on the implementor.
     ///
     /// # Examples
@@ -286,7 +286,7 @@ pub trait Discrete<T, K> : Distribution<K> {
     /// ```
     fn pmf(&self, x: T) -> K;
 
-    /// Returns the log of the probability mass function calculated at `x` for a given distribution. 
+    /// Returns the log of the probability mass function calculated at `x` for a given distribution.
     /// May panic depending on the implementor.
     ///
     /// # Examples

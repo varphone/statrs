@@ -131,7 +131,7 @@ impl Distribution<f64> for ChiSquared {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = ChiSquared::new(3.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {

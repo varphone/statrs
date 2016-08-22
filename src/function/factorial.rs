@@ -9,7 +9,7 @@ pub const MAX_ARG: u64 = 170;
 
 /// Computes the factorial function `x -> x!` for
 /// `170 >= x >= 0`. All factorials larger than `170!`
-/// will overflow an `f64`. 
+/// will overflow an `f64`.
 ///
 /// # Remarks
 ///
@@ -23,7 +23,7 @@ pub fn factorial(x: u64) -> f64 {
 }
 
 /// Computes the logarithmic factorial function `x -> ln(x!)`
-/// for `x >= 0`. 
+/// for `x >= 0`.
 pub fn ln_factorial(x: u64) -> f64 {
     if x <= 1 {
         0.0

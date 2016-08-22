@@ -129,7 +129,7 @@ impl Distribution<f64> for Gamma {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Gamma::new(3.0, 1.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
@@ -196,7 +196,7 @@ impl Mean<f64, f64> for Gamma {
     ///
     /// # Remarks
     ///
-    /// Returns `shape` if `rate == f64::INFINITY`. This behavior 
+    /// Returns `shape` if `rate == f64::INFINITY`. This behavior
     /// is borrowed from the Math.NET implementation
     ///
     /// # Formula
@@ -392,11 +392,7 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
         return shape;
     }
 
-    let a = if shape < 1.0 {
-        shape + 1.0
-    } else {
-        shape
-    };
+    let a = if shape < 1.0 { shape + 1.0 } else { shape };
     let afix = if shape < 1.0 {
         r.next_f64().powf(1.0 / shape)
     } else {

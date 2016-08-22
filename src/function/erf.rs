@@ -16,8 +16,8 @@ pub fn erf(x: f64) -> f64 {
     }
 }
 
-/// `erf_inv` calculates the inverse error function 
-/// at `x`. 
+/// `erf_inv` calculates the inverse error function
+/// at `x`.
 pub fn erf_inv(x: f64) -> f64 {
     if x == 0.0 {
         0.0
@@ -384,7 +384,7 @@ const ERF_INV_IMPL_CN: &'static [f64] = &[-0.131102781679951906451,
                                           0.285225331782217055858e-7,
                                           -0.681149956853776992068e-9];
 
-///Polynomial coefficients for a denominator of `erf_inv_impl`
+/// Polynomial coefficients for a denominator of `erf_inv_impl`
 /// in the interval [0.75, 1] with x less than 3.
 const ERF_INV_IMPL_CD: &'static [f64] = &[1.0,
                                           3.46625407242567245975,

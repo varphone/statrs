@@ -31,7 +31,7 @@ impl Normal {
     ///
     /// # Errors
     ///
-    /// Returns an error if `mean` or `std_dev` are `NaN` or if 
+    /// Returns an error if `mean` or `std_dev` are `NaN` or if
     /// `std_dev <= 0.0`
     ///
     /// # Examples
@@ -91,7 +91,7 @@ impl Distribution<f64> for Normal {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Normal::new(0.0, 1.0).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));   
+    /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {

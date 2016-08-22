@@ -12,7 +12,7 @@ use super::*;
 /// ```
 /// use statrs::distribution::{Bernoulli, Mean, Discrete};
 ///
-/// let n = Bernoulli::new(0.5).unwrap(); 
+/// let n = Bernoulli::new(0.5).unwrap();
 /// assert_eq!(n.mean(), 0.5);
 /// assert_eq!(n.pmf(0), 0.5);
 /// assert_eq!(n.pmf(1), 0.5);
@@ -110,7 +110,7 @@ impl Distribution<f64> for Bernoulli {
     /// # extern crate statrs;
     /// use rand::StdRng;
     /// use statrs::distribution::{Bernoulli, Distribution};
-    /// 
+    ///
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Bernoulli::new(0.5).unwrap();
@@ -258,7 +258,7 @@ impl Mode<i64, f64> for Bernoulli {
     /// Returns the mode of the bernoulli distribution
     ///
     /// # Formula
-    /// 
+    ///
     /// ```ignore
     /// if p < 0.5 { 0 }
     /// else { 1 }
