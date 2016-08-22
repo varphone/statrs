@@ -47,7 +47,7 @@ impl Statistics for [f64] {
         }
 
         (self.iter()
-                .fold(0.0, |acc, &x| acc + x.ln()) / self.len())
+                .fold(0.0, |acc, &x| acc + x.ln()) / self.len() as f64)
             .exp()
     }
 
