@@ -143,3 +143,22 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
         bt * h / a
     }
 }
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+#[cfg(test)]
+mod test {
+    use prec;
+
+    #[test]
+    fn test_beta() {
+        assert!(prec::almost_eq(super::beta(1.0, 1.0), 1.0, 1e-15));
+        assert!(prec::almost_eq(super::beta(2.5, 1.0), 0.4, 1e-14));
+        assert!(prec::almost_eq(super::beta(5.0, 1.0), 0.2, 1e-14));
+        assert!(prec::almost_eq(super::beta(1.0, 2.5), 0.4, 1e-14));
+        assert!(prec::almost_eq(super::beta(2.5, 2.5), 0.073631077818510779026, 1e-15));
+        assert!(prec::almost_eq(super::beta(5.0, 2.5), 0.017049617049617049617, 1e-16));
+        assert!(prec::almost_eq(super::beta(1.0, 5.0), 0.2, 1e-14));
+        assert!(prec::almost_eq(super::beta(2.5, 5.0), 0.017049617049617049617, 1e16));
+        assert!(prec::almost_eq(super::beta(5.0, 5.0), 0.00158730158730158730159, 1e-16));
+    }
+}
