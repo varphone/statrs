@@ -350,7 +350,6 @@ mod test {
     use std::f64;
     use std::i64;
     use distribution::*;
-    use prec;
 
     fn try_create(lambda: f64) -> Poisson {
         let n = Poisson::new(lambda);
@@ -388,7 +387,7 @@ mod test {
         where F: Fn(Poisson) -> f64
     {
         let x = get_value(lambda, eval);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]

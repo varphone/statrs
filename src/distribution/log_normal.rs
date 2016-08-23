@@ -298,7 +298,6 @@ impl Continuous<f64, f64> for LogNormal {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(mean: f64, std_dev: f64) -> LogNormal {
         let n = LogNormal::new(mean, std_dev);
@@ -329,7 +328,7 @@ mod test {
         where F: Fn(LogNormal) -> f64
     {
         let x = get_value(mean, std_dev, eval);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]

@@ -353,7 +353,6 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(p: f64, n: i64) -> Binomial {
         let n = Binomial::new(p, n);
@@ -391,7 +390,7 @@ mod test {
         where F: Fn(Binomial) -> f64
     {
         let x = get_value(p, n, eval);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]

@@ -425,7 +425,6 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(shape: f64, rate: f64) -> Gamma {
         let n = Gamma::new(shape, rate);
@@ -462,7 +461,7 @@ mod test {
         where F: Fn(Gamma) -> f64
     {
         let x = get_value(shape, rate, eval);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]

@@ -311,7 +311,6 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(mean: f64, std_dev: f64) -> Normal {
         let n = Normal::new(mean, std_dev);
@@ -343,7 +342,7 @@ mod test {
     {
         let n = try_create(mean, std_dev);
         let x = eval(n);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]

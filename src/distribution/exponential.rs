@@ -299,7 +299,6 @@ impl Continuous<f64, f64> for Exponential {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(rate: f64) -> Exponential {
         let n = Exponential::new(rate);
@@ -335,7 +334,7 @@ mod test {
         where F: Fn(Exponential) -> f64
     {
         let x = get_value(rate, eval);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     fn test_is_nan<F>(rate: f64, eval: F)

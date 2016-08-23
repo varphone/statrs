@@ -332,7 +332,6 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
         let n = Triangular::new(min, max, mode);
@@ -367,7 +366,7 @@ mod test {
 
         let n = try_create(min, max, mode);
         let x = eval(n);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]

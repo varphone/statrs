@@ -268,7 +268,6 @@ impl Continuous<f64, f64> for Uniform {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let n = Uniform::new(min, max);
@@ -302,7 +301,7 @@ mod test {
 
         let n = try_create(min, max);
         let x = eval(n);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]

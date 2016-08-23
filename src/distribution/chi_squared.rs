@@ -336,7 +336,6 @@ impl Continuous<f64, f64> for ChiSquared {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(freedom: f64) -> ChiSquared {
         let n = ChiSquared::new(freedom);
@@ -357,7 +356,7 @@ mod test {
     {
         let n = try_create(freedom);
         let x = eval(n);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]

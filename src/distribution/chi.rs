@@ -318,7 +318,6 @@ impl Continuous<f64, f64> for Chi {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);
@@ -354,7 +353,7 @@ mod test {
         where F: Fn(Chi) -> f64
     {
         let x = get_value(freedom, eval);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     fn test_is_nan<F>(freedom: f64, eval: F)

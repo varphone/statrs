@@ -406,7 +406,6 @@ mod test {
     use std::f64;
     use std::panic;
     use distribution::*;
-    use prec;
 
     fn try_create(location: f64, scale: f64, freedom: f64) -> StudentsT {
         let n = StudentsT::new(location, scale, freedom);
@@ -444,7 +443,7 @@ mod test {
         where F: Fn(StudentsT) -> f64
     {
         let x = get_value(location, scale, freedom, eval);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     fn test_panic<F>(location: f64, scale: f64, freedom: f64, eval: F)

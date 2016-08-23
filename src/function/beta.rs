@@ -147,18 +147,24 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use prec;
+    #[test]
+    fn test_ln_beta() {
+        assert_almost_eq!(super::ln_beta(0.5, 0.5), 1.144729885849400174144, 1e-15);
+    }
 
     #[test]
     fn test_beta() {
-        assert!(prec::almost_eq(super::beta(1.0, 1.0), 1.0, 1e-15));
-        assert!(prec::almost_eq(super::beta(2.5, 1.0), 0.4, 1e-14));
-        assert!(prec::almost_eq(super::beta(5.0, 1.0), 0.2, 1e-14));
-        assert!(prec::almost_eq(super::beta(1.0, 2.5), 0.4, 1e-14));
-        assert!(prec::almost_eq(super::beta(2.5, 2.5), 0.073631077818510779026, 1e-15));
-        assert!(prec::almost_eq(super::beta(5.0, 2.5), 0.017049617049617049617, 1e-16));
-        assert!(prec::almost_eq(super::beta(1.0, 5.0), 0.2, 1e-14));
-        assert!(prec::almost_eq(super::beta(2.5, 5.0), 0.017049617049617049617, 1e16));
-        assert!(prec::almost_eq(super::beta(5.0, 5.0), 0.00158730158730158730159, 1e-16));
+        assert_almost_eq!(super::beta(0.5, 0.5), 3.141592653589793238463, 1e-15);
+        assert_almost_eq!(super::beta(1.0, 0.5), 2.0, 1e-14);
+        assert_almost_eq!(super::beta(2.5, 0.5), 1.17809724509617246442, 1e-15);
+        assert_almost_eq!(super::beta(0.5, 1.0), 2.0, 1e-14);
+        assert_almost_eq!(super::beta(1.0, 1.0), 1.0, 1e-15);
+        assert_almost_eq!(super::beta(2.5, 1.0), 0.4, 1e-14);
+        assert_almost_eq!(super::beta(0.5, 2.5), 1.17809724509617246442, 1e-15);
+        assert_almost_eq!(super::beta(1.0, 2.5), 0.4, 1e-14);
+        assert_almost_eq!(super::beta(2.5, 2.5), 0.073631077818510779026, 1e-15);
+        assert_almost_eq!(super::beta(0.5, 5.0), 0.812698412698412698413, 1e-15);
+        assert_almost_eq!(super::beta(1.0, 5.0), 0.2, 1e-14);
+        assert_almost_eq!(super::beta(2.5, 5.0), 0.017049617049617049617, 1e16);
     }
 }

@@ -29,6 +29,11 @@
 
 extern crate rand;
 
+#[macro_export]
+macro_rules! assert_almost_eq {
+    ($a:expr, $b:expr, $prec:expr) => (assert!($crate::prec::almost_eq($a, $b, $prec)));
+}
+
 pub mod distribution;
 pub mod function;
 pub mod consts;

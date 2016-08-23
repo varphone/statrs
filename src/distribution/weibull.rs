@@ -360,7 +360,6 @@ impl Continuous<f64, f64> for Weibull {
 mod test {
     use std::f64;
     use distribution::*;
-    use prec;
 
     fn try_create(shape: f64, scale: f64) -> Weibull {
         let n = Weibull::new(shape, scale);
@@ -397,7 +396,7 @@ mod test {
         where F: Fn(Weibull) -> f64
     {
         let x = get_value(shape, scale, eval);
-        assert!(prec::almost_eq(expected, x, acc));
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]
