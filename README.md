@@ -10,9 +10,18 @@ Should be stable for both nightly and stable Rust
 
 ## Description
   
-A work-in-progress port of the Math.NET Numerics distributions package to Rust.  
-All unit tests are borrowed from the Math.NET source when possible and filled in  
-when not. 
+Statrs provides a host of statistical utilities for Rust scientific computing.
+Included are a number of common distributions that can be sampled (i.e. Normal, Exponential,
+Student's T, Gamma, Uniform, etc.) plus common statistical functions like the gamma function,
+beta function, and error function.  
+  
+This library is a work-in-progress port of the statistical capabilities
+in the C# Math.NET library. All unit tests in the library borrowed from Math.NET when possible
+and filled-in when not.  
+  
+This library is a work-in-progress and not complete. Planned for future releases are continued implementations
+of distributions (Beta, Dirichlet, etc.) as well as porting over more statistical utilities (population variance,
+quantile functions on slices / iterables)
 
 Please check out the documentation [here](https://boxtown.io/docs/statrs/0.1.0/statrs/)
 
