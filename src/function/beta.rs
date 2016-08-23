@@ -219,6 +219,30 @@ mod test {
 
     #[test]
     #[should_panic]
+    fn test_ln_beta_neg() {
+        super::ln_beta(-1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_beta_neg() {
+        super::beta(-1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_beta_inc_neg() {
+        super::beta_inc(0.5, 0.5, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_beta_inc_over_one() {
+        super::beta_inc(0.5, 0.5, 2.5);
+    }
+
+    #[test]
+    #[should_panic]
     fn test_beta_reg_neg() {
         super::beta_reg(0.5, 0.5, -1.0);
     }
