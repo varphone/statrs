@@ -155,7 +155,7 @@ mod test {
         assert_almost_eq!(super::ln_beta(0.5, 1.0), 0.6931471805599453094172, 1e-14);
         assert_almost_eq!(super::ln_beta(1.0, 1.0), 0.0, 1e-15);
         assert_almost_eq!(super::ln_beta(2.5, 1.0), -0.9162907318741550651835, 1e-14);
-        assert_almost_eq!(super::ln_beta(0.5, 2.5), 0.163900632837673937284, 1e-14);
+        assert_almost_eq!(super::ln_beta(0.5, 2.5), 0.163900632837673937284, 1e-15);
         assert_almost_eq!(super::ln_beta(1.0, 2.5), -0.9162907318741550651835, 1e-14);
         assert_almost_eq!(super::ln_beta(2.5, 2.5), -2.608688089402107300388, 1e-14);
     }
@@ -171,5 +171,39 @@ mod test {
         assert_almost_eq!(super::beta(0.5, 2.5), 1.17809724509617246442, 1e-15);
         assert_almost_eq!(super::beta(1.0, 2.5), 0.4, 1e-14);
         assert_almost_eq!(super::beta(2.5, 2.5), 0.073631077818510779026, 1e-15);
+    }
+
+    #[test]
+    fn test_beta_reg() {
+        assert_almost_eq!(super::beta_reg(0.5, 0.5, 0.5), 0.5, 1e-15);
+        assert_eq!(super::beta_reg(0.5, 0.5, 1.0), 1.0);
+        assert_almost_eq!(super::beta_reg(1.0, 0.5, 0.5), 0.292893218813452475599, 1e-15);
+        assert_eq!(super::beta_reg(1.0, 0.5, 1.0), 1.0);
+        assert_almost_eq!(super::beta_reg(2.5, 0.5, 0.5), 0.07558681842161243795, 1e-16);
+        assert_eq!(super::beta_reg(2.5, 0.5, 1.0), 1.0);
+        assert_almost_eq!(super::beta_reg(0.5, 1.0, 0.5), 0.7071067811865475244, 1e-15);
+        assert_eq!(super::beta_reg(0.5, 1.0, 1.0), 1.0);
+        assert_almost_eq!(super::beta_reg(1.0, 1.0, 0.5), 0.5, 1e-15);
+        assert_eq!(super::beta_reg(1.0, 1.0, 1.0), 1.0);
+        assert_almost_eq!(super::beta_reg(2.5, 1.0, 0.5), 0.1767766952966368811, 1e-15);
+        assert_eq!(super::beta_reg(2.5, 1.0, 1.0), 1.0);
+        assert_eq!(super::beta_reg(0.5, 2.5, 0.5), 0.92441318157838756205);
+        assert_eq!(super::beta_reg(0.5, 2.5, 1.0), 1.0);
+        assert_almost_eq!(super::beta_reg(1.0, 2.5, 0.5), 0.8232233047033631189, 1e-15);
+        assert_eq!(super::beta_reg(1.0, 2.5, 1.0), 1.0);
+        assert_almost_eq!(super::beta_reg(2.5, 2.5, 0.5), 0.5, 1e-15);
+        assert_eq!(super::beta_reg(2.5, 2.5, 1.0), 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_beta_reg_neg() {
+        super::beta_reg(0.5, 0.5, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_beta_reg_over_one() {
+        super::beta_reg(0.5, 0.5, 2.5);
     }
 }
