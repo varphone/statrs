@@ -150,6 +150,14 @@ mod test {
     #[test]
     fn test_ln_beta() {
         assert_almost_eq!(super::ln_beta(0.5, 0.5), 1.144729885849400174144, 1e-15);
+        assert_almost_eq!(super::ln_beta(1.0, 0.5), 0.6931471805599453094172, 1e-14);
+        assert_almost_eq!(super::ln_beta(2.5, 0.5), 0.163900632837673937284, 1e-15);
+        assert_almost_eq!(super::ln_beta(0.5, 1.0), 0.6931471805599453094172, 1e-14);
+        assert_almost_eq!(super::ln_beta(1.0, 1.0), 0.0, 1e-15);
+        assert_almost_eq!(super::ln_beta(2.5, 1.0), -0.9162907318741550651835, 1e-14);
+        assert_almost_eq!(super::ln_beta(0.5, 2.5), 0.163900632837673937284, 1e-14);
+        assert_almost_eq!(super::ln_beta(1.0, 2.5), -0.9162907318741550651835, 1e-14);
+        assert_almost_eq!(super::ln_beta(2.5, 2.5), -2.608688089402107300388, 1e-14);
     }
 
     #[test]
@@ -163,8 +171,5 @@ mod test {
         assert_almost_eq!(super::beta(0.5, 2.5), 1.17809724509617246442, 1e-15);
         assert_almost_eq!(super::beta(1.0, 2.5), 0.4, 1e-14);
         assert_almost_eq!(super::beta(2.5, 2.5), 0.073631077818510779026, 1e-15);
-        assert_almost_eq!(super::beta(0.5, 5.0), 0.812698412698412698413, 1e-15);
-        assert_almost_eq!(super::beta(1.0, 5.0), 0.2, 1e-14);
-        assert_almost_eq!(super::beta(2.5, 5.0), 0.017049617049617049617, 1e16);
     }
 }
