@@ -690,15 +690,15 @@ mod test {
         assert!(super::erf_inv(f64::NAN).is_nan());
         assert_eq!(super::erf_inv(-1.0), f64::NEG_INFINITY);
         assert_eq!(super::erf_inv(0.0), 0.0);
-        assert_eq!(super::erf_inv(1e-15), 8.86226925452758013649e-16);
+        assert_almost_eq!(super::erf_inv(1e-15), 8.86226925452758013649e-16, 1e-30);
         assert_eq!(super::erf_inv(0.1), 0.08885599049425768701574);
-        assert_eq!(super::erf_inv(0.2), 0.1791434546212916764927);
+        assert_almost_eq!(super::erf_inv(0.2), 0.1791434546212916764927, 1e-15);
         assert_eq!(super::erf_inv(0.3), 0.272462714726754355622);
         assert_eq!(super::erf_inv(0.4), 0.3708071585935579290582);
         assert_eq!(super::erf_inv(0.5), 0.4769362762044698733814);
         assert_eq!(super::erf_inv(1.0), f64::INFINITY);
-        assert_eq!(super::erf_inv(f64::INFINITY), 1.0);
-        assert_eq!(super::erf_inv(f64::NEG_INFINITY), -1.0);
+        assert_eq!(super::erf_inv(f64::INFINITY), f64::INFINITY);
+        assert_eq!(super::erf_inv(f64::NEG_INFINITY), f64::NEG_INFINITY);
     }
 
     #[test]
