@@ -1,3 +1,5 @@
+//! Provides special functions related to the [error](https://en.wikipedia.org/wiki/Error_function) function
+
 use std::f64;
 use function::evaluate;
 
