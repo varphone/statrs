@@ -25,7 +25,7 @@ pub fn erf_inv(x: f64) -> f64 {
         f64::INFINITY
     } else if x <= -1.0 {
         f64::NEG_INFINITY
-    } else if x <= 0.0 {
+    } else if x < 0.0 {
         erf_inv_impl(-x, 1.0 + x, -1.0)
     } else {
         erf_inv_impl(x, 1.0 - x, 1.0)
@@ -681,5 +681,37 @@ mod test {
         assert_eq!(super::erfc(80.0), 2.3100265595063985852034904366341042118385080919280966e-2782);
         assert_eq!(super::erfc(f64::INFINITY), 0.0);
         assert_eq!(super::erfc(f64::NEG_INFINITY), 2.0);
+    }
+
+    #[test]
+    fn test_erf_inv() {
+        assert!(super::erf_inv(f64::NAN).is_nan());
+        assert_eq!(super::erf_inv(-1.0), f64::NEG_INFINITY);
+        assert_eq!(super::erf_inv(0.0), 0.0);
+        assert_eq!(super::erf_inv(1e-15), 8.86226925452758013649e-16);
+        assert_eq!(super::erf_inv(0.1), 0.08885599049425768701574);
+        assert_eq!(super::erf_inv(0.2), 0.1791434546212916764927);
+        assert_eq!(super::erf_inv(0.3), 0.272462714726754355622);
+        assert_eq!(super::erf_inv(0.4), 0.3708071585935579290582);
+        assert_eq!(super::erf_inv(0.5), 0.4769362762044698733814);
+        assert_eq!(super::erf_inv(1.0), f64::INFINITY);
+        assert_eq!(super::erf_inv(f64::INFINITY), 1.0);
+        assert_eq!(super::erf_inv(f64::NEG_INFINITY), -1.0);
+    }
+
+    #[test]
+    fn test_erfc_inv() {
+        assert_eq!(super::erfc_inv(0.0), f64::INFINITY);
+        assert_almost_eq!(super::erfc_inv(1e-100), 15.065574702593, 1e-11);
+        assert_almost_eq!(super::erfc_inv(1e-30), 8.1486162231699, 1e-12);
+        assert_almost_eq!(super::erfc_inv(1e-20), 6.6015806223551, 1e-13);
+        assert_almost_eq!(super::erfc_inv(1e-10), 4.5728249585449249378479309946884581365517663258840893, 1e-7);
+        assert_almost_eq!(super::erfc_inv(1e-5), 3.1234132743415708640270717579666062107939039971365252, 1e-11);
+        assert_almost_eq!(super::erfc_inv(0.1), 1.1630871536766741628440954340547000483801487126688552, 1e-14);
+        assert_almost_eq!(super::erfc_inv(0.2), 0.90619380243682330953597079527631536107443494091638384, 1e-15);
+        assert_eq!(super::erfc_inv(0.5), 0.47693627620446987338141835364313055980896974905947083);
+        assert_eq!(super::erfc_inv(1.0), 0.0);
+        assert_eq!(super::erfc_inv(1.5), -0.47693627620446987338141835364313055980896974905947083);
+        assert_eq!(super::erfc_inv(2.0), f64::NEG_INFINITY);
     }
 }
