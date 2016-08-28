@@ -78,4 +78,9 @@ mod test {
         assert!(super::polynomial(2.0, &coeff).is_nan());
         assert!(super::polynomial(-2.0, &coeff).is_nan());
     }
+
+    #[test]
+    fn test_series() {
+        // TODO: needs implemented
+    }
 }
