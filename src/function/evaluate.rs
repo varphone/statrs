@@ -22,29 +22,6 @@ pub fn polynomial(z: f64, coeff: &[f64]) -> f64 {
     }
 }
 
-/// Evaluates a numerically stable
-/// series summation where `next` returns the
-/// next summand in the series
-pub fn series<F>(mut next: F) -> f64
-    where F: FnMut() -> f64
-{
-    let factor = (1 << 16) as f64;
-    let mut comp = 0.0;
-    let mut sum = next();
-
-    loop {
-        let cur = next();
-        let y = cur - comp;
-        let t = sum + y;
-        comp = t - sum - y;
-        sum = t;
-        if sum.abs() >= (factor * cur).abs() {
-            break;
-        }
-    }
-    sum
-}
-
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
@@ -66,6 +43,10 @@ mod test {
         assert_eq!(super::polynomial(2.0, &coeff), 3.0);
         assert_eq!(super::polynomial(-2.0, &coeff), 11.0);
 
+        let large_coeff = [-1.35e3, 2.5e2, 8.0, -4.0, 1e2, 3.0];
+        assert_eq!(super::polynomial(5.0, &large_coeff), 71475.0);
+        assert_eq!(super::polynomial(-5.0, &large_coeff), 51225.0);
+
         coeff = [f64::INFINITY, -2.0, 3.0];
         assert_eq!(super::polynomial(2.0, &coeff), f64::INFINITY);
         assert_eq!(super::polynomial(-2.0, &coeff), f64::INFINITY);
@@ -77,10 +58,5 @@ mod test {
         coeff = [f64::NAN, -2.0, 3.0];
         assert!(super::polynomial(2.0, &coeff).is_nan());
         assert!(super::polynomial(-2.0, &coeff).is_nan());
-    }
-
-    #[test]
-    fn test_series() {
-        // TODO: needs implemented
     }
 }

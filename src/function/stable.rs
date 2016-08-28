@@ -1,4 +1,4 @@
-use function::evaluate;
+use function::internal;
 
 /// Calculates a numerically stable `exp(x) - 1`
 pub fn exp_minus_one(pow: f64) -> f64 {
@@ -8,7 +8,7 @@ pub fn exp_minus_one(pow: f64) -> f64 {
     } else {
         let mut k = 0;
         let mut term = 1.0;
-        evaluate::series(|| {
+        internal::series(|| {
             k += 1;
             term *= pow;
             term /= k as f64;
