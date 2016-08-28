@@ -1,3 +1,6 @@
+//! the `internal` module contains package-private functionality
+//! for the `function` module
+
 /// Evaluates a numerically stable
 /// series summation where `next` returns the
 /// next summand in the series
