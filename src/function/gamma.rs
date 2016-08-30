@@ -98,10 +98,18 @@ pub fn gamma_li(a: f64, x: f64) -> f64 {
 /// where `a` is the argument for the gamma function and
 /// `x` is the lower integral limit.
 ///
+/// # Remarks
+///
+/// Returns `f64::NAN` if either argument is `f64::NAN`
+///
 /// # Panics
 ///
 /// if `a` or `x` are less than `0.0`
 pub fn gamma_ur(a: f64, x: f64) -> f64 {
+    if a.is_nan() || x.is_nan() {
+        return f64::NAN;
+    }
+
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
     let big_inv = 2.22044604925031308085e-16;
