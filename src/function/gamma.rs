@@ -161,11 +161,18 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
 /// `P(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for real a > 0, x > 0`
 /// where `a` is the argument for the gamma function and `x` is the upper integral limit.
 ///
+/// # Remarks
+///
+/// Returns `f64::NAN` if either argument is `f64::NAN`
 ///
 /// # Panics
 ///
 /// if `a` or `x` are less than 0.0
 pub fn gamma_lr(a: f64, x: f64) -> f64 {
+    if a.is_nan() || x.is_nan() {
+        return f64::NAN;
+    }
+
     assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
     assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
 
@@ -385,5 +392,38 @@ mod test{
         assert_almost_eq!(super::ln_gamma(10.1), 13.02752673863323795851370097886835481188051062306253294740504, 1e-14);
         assert_almost_eq!(super::ln_gamma(150.0 + 1.0e-12), 600.0094705553324354062157737572509902987070089159051628001813, 1e-12);
         assert_almost_eq!(super::ln_gamma(1.001e+7), 1.51342135323817913130119829455205139905331697084416059779e+8, 1e-13);
+    }
+
+    #[test]
+    fn test_gamma_lr() {
+        assert!(super::gamma_lr(f64::NAN, f64::NAN).is_nan());
+        assert_almost_eq!(super::gamma_lr(0.1, 1.0), 0.97587265627367222115949155252812057714751052498477013, 1e-14);
+        assert_eq!(super::gamma_lr(0.1, 2.0), 0.99432617602018847196075251078067514034772764693462125);
+        assert_eq!(super::gamma_lr(0.1, 8.0), 0.99999507519205198048686442150578226823401842046310854);
+        assert_almost_eq!(super::gamma_lr(1.5, 1.0), 0.42759329552912016600095238564127189392715996802703368, 1e-13);
+        assert_almost_eq!(super::gamma_lr(1.5, 2.0), 0.73853587005088937779717792402407879809718939080920993, 1e-15);
+        assert_eq!(super::gamma_lr(1.5, 8.0), 0.99886601571021467734329986257903021041757398191304284);
+        assert_almost_eq!(super::gamma_lr(2.5, 1.0), 0.15085496391539036377410688601371365034788861473418704, 1e-13);
+        assert_almost_eq!(super::gamma_lr(2.5, 2.0), 0.45058404864721976739416885516693969548484517509263197, 1e-14);
+        assert_almost_eq!(super::gamma_lr(2.5, 8.0), 0.99315592607757956900093935107222761316136944145439676, 1e-15);
+        assert_almost_eq!(super::gamma_lr(5.5, 1.0), 0.0015041182825838038421585211353488839717739161316985392, 1e-15);
+        assert_almost_eq!(super::gamma_lr(5.5, 2.0), 0.030082976121226050615171484772387355162056796585883967, 1e-14);
+        assert_almost_eq!(super::gamma_lr(5.5, 8.0), 0.85886911973294184646060071855669224657735916933487681, 1e-14);
+        assert_almost_eq!(super::gamma_lr(100.0, 0.5), 0.0, 1e-188);
+        assert_almost_eq!(super::gamma_lr(100.0, 1.5), 0.0, 1e-141);
+        assert_almost_eq!(super::gamma_lr(100.0, 90.0), 0.1582209891864301681049696996709105316998233457433473, 1e-13);
+        assert_almost_eq!(super::gamma_lr(100.0, 100.0), 0.5132987982791486648573142565640291634709251499279450, 1e-13);
+        assert_almost_eq!(super::gamma_lr(100.0, 110.0), 0.8417213299399129061982996209829688531933500308658222, 1e-13);
+        assert_almost_eq!(super::gamma_lr(100.0, 200.0), 1.0, 1e-14);
+        assert_eq!(super::gamma_lr(500.0, 0.5), 0.0);
+        assert_eq!(super::gamma_lr(500.0, 1.5), 0.0);
+        assert_almost_eq!(super::gamma_lr(500.0, 200.0), 0.0, 1e-70);
+        assert_almost_eq!(super::gamma_lr(500.0, 450.0), 0.0107172380912897415573958770655204965434869949241480, 1e-14);
+        assert_almost_eq!(super::gamma_lr(500.0, 500.0), 0.5059471461707603580470479574412058032802735425634263, 1e-13);
+        assert_almost_eq!(super::gamma_lr(500.0, 550.0), 0.9853855918737048059548470006900844665580616318702748, 1e-14);
+        assert_almost_eq!(super::gamma_lr(500.0, 700.0), 1.0, 1e-15);
+        assert_eq!(super::gamma_lr(1000.0, 10000.0), 1.0);
+        assert_eq!(super::gamma_lr(1e+50, 1e+48), 0.0);
+        assert_eq!(super::gamma_lr(1e+50, 1e+52), 1.0);
     }
 }
