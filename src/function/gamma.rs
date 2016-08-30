@@ -443,4 +443,38 @@ mod test{
         assert_almost_eq!(super::gamma_li(5.5, 2.0), 1.5746265342113649473739798668921124454837064926448459, 1e-15);
         assert_almost_eq!(super::gamma_li(5.5, 8.0), 44.955595480196465884619737757794960132425035578313584, 1e-12);
     }
+
+    // TODO: precision testing could be more accurate, borrowed wholesale from Math.NET
+    #[test]
+    fn test_gamma_ur() {
+        assert!(super::gamma_ur(f64::NAN, f64::NAN).is_nan());
+        assert_almost_eq!(super::gamma_ur(0.1, 1.0), 0.0241273437263277773829694356333550393309597428392044, 1e-13);
+        assert_almost_eq!(super::gamma_ur(0.1, 2.0), 0.0056738239798115280392474892193248596522723530653781, 1e-13);
+        assert_almost_eq!(super::gamma_ur(0.1, 8.0), 0.0000049248079480195131355784942177317659815795368919702, 1e-13);
+        assert_almost_eq!(super::gamma_ur(1.5, 1.0), 0.57240670447087983399904761435872810607284003197297, 1e-13);
+        assert_almost_eq!(super::gamma_ur(1.5, 2.0), 0.26146412994911062220282207597592120190281060919079, 1e-13);
+        assert_almost_eq!(super::gamma_ur(1.5, 8.0), 0.0011339842897853226567001374209697895824260180869567, 1e-13);
+        assert_almost_eq!(super::gamma_ur(2.5, 1.0), 0.84914503608460963622589311398628634965211138526581, 1e-13);
+        assert_almost_eq!(super::gamma_ur(2.5, 2.0), 0.54941595135278023260583114483306030451515482490737, 1e-13);
+        assert_almost_eq!(super::gamma_ur(2.5, 8.0), 0.0068440739224204309990606489277723868386305585456026, 1e-13);
+        assert_almost_eq!(super::gamma_ur(5.5, 1.0), 0.9984958817174161961578414788646511160282260838683, 1e-13);
+        assert_almost_eq!(super::gamma_ur(5.5, 2.0), 0.96991702387877394938482851522761264483794320341412, 1e-13);
+        assert_almost_eq!(super::gamma_ur(5.5, 8.0), 0.14113088026705815353939928144330775342264083066512, 1e-13);
+        assert_almost_eq!(super::gamma_ur(100.0, 0.5), 1.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(100.0, 1.5), 1.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(100.0, 90.0), 0.8417790108135698318950303003290894683001766542566526, 1e-12);
+        assert_almost_eq!(super::gamma_ur(100.0, 100.0), 0.4867012017208513351426857434359708365290748500720549, 1e-12);
+        assert_almost_eq!(super::gamma_ur(100.0, 110.0), 0.1582786700600870938017003790170311468066499691341777, 1e-12);
+        assert_almost_eq!(super::gamma_ur(100.0, 200.0), 0.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(500.0, 0.5), 1.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(500.0, 1.5), 1.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(500.0, 200.0), 1.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(500.0, 450.0), 0.9892827619087102584426041229344795034565130050758519, 1e-12);
+        assert_almost_eq!(super::gamma_ur(500.0, 500.0), 0.4940528538292396419529520425587941967197264574365736, 1e-12);
+        assert_almost_eq!(super::gamma_ur(500.0, 550.0), 0.0146144081262951940451529993099155334419383681297251, 1e-12);
+        assert_almost_eq!(super::gamma_ur(500.0, 700.0), 0.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(1000.0, 10000.0), 0.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(1e+50, 1e+48), 1.0, 1e-14);
+        assert_almost_eq!(super::gamma_ur(1e+50, 1e+52), 0.0, 1e-14);
+    }
 }
