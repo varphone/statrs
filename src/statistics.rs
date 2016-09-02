@@ -6,15 +6,22 @@ pub trait Statistics {
     ///
     /// # Remarks
     ///
-    /// Returns `f64::NAN` if data is empty of an entry is `f64::NAN`
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
     fn mean(&self) -> f64;
 
     /// Evaluates the geometric mean of the data
     ///
     /// # Remarks
     ///
-    /// Returns `f64::NAN` if data is empty of an entry is `f64::NAN`
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
     fn geometric_mean(&self) -> f64;
+
+    /// Evaluates the harmonic mean of the data
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    fn harmonic_mean(&self) -> f64;
 
     /// Evaluates the population variance from a full population.
     ///
@@ -46,9 +53,15 @@ impl Statistics for [f64] {
             return f64::NAN;
         }
 
-        (self.iter()
-                .fold(0.0, |acc, &x| acc + x.ln()) / self.len() as f64)
-            .exp()
+        (self.iter().fold(0.0, |acc, &x| acc + x.ln()) / self.len() as f64).exp()
+    }
+
+    fn harmonic_mean(&self) -> f64 {
+        if self.len() == 0 {
+            return f64::NAN;
+        }
+
+        self.len() as f64 / self.iter().fold(0.0, |acc, &x| acc + 1.0 / x)
     }
 
     fn population_variance(&self) -> f64 {
