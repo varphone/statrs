@@ -307,35 +307,6 @@ pub fn digamma(x: f64) -> f64 {
     result
 }
 
-/// Computes the inverse Digamma function
-///
-/// # Remarks
-///
-/// This is the inverse of the logarithm of the gamma function. This function
-/// only returns solutions that are positive. The implementation is based on
-/// the bisection method
-pub fn inv_digamma(p: f64) -> f64 {
-    if p.is_nan() {
-        f64::NAN
-    } else if p == f64::NEG_INFINITY {
-        0.0
-    } else if p == f64::INFINITY {
-        f64::INFINITY
-    } else {
-        let mut x = p.exp();
-        let d = 1.0;
-        while d > 1e-15 {
-            let v = p - digamma(x);
-            if v.is_sign_positive() {
-                x += d
-            } else if v != 0.0 {
-                x += -d
-            }
-        }
-        x
-    }
-}
-
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test{
@@ -503,6 +474,7 @@ mod test{
         assert_almost_eq!(super::gamma_ui(5.5, 8.0), 7.3871823043570542965292707346232335470650967978006, 1e-13);
     }
 
+    // TODO: precision testing could be more accurate
     #[test]
     fn test_digamma() {
         assert!(super::digamma(f64::NAN).is_nan());
