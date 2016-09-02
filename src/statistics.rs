@@ -2,6 +2,34 @@ use std::f64;
 use error::StatsError;
 
 pub trait Statistics {
+    /// Returns the minimum value in the data
+    ///
+    /// # Rermarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    fn min(&self) -> f64;
+
+    /// Returns the maximum value in the data
+    ///
+    /// # Rermarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    fn max(&self) -> f64;
+
+    /// Returns the minimum absolute value in the data
+    ///
+    /// # Rermarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    fn abs_min(&self) -> f64;
+
+    /// Returns the maximum absolute value in the data
+    ///
+    /// # Rermarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    fn abs_max(&self) -> f64;
+
     /// Evaluates the sample mean, an estimate of the population
     /// mean.
     ///
@@ -74,9 +102,74 @@ pub trait Statistics {
     ///
     /// If the two sample containers do not contain the same number of elements
     fn covariance(&self, other: &Self) -> f64;
+
+    /// Evaluates the population covariance between the two provider populations
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N` is used as a normalizer and would thus be
+    /// biased if applied to a subset
+    ///
+    /// Returns `f64::NAN` if data is empty or any entry is `f64::NAN`
+    ///
+    /// # Panics
+    ///
+    /// If the two sample containers do not contain the same number of elements
+    fn population_covariance(&self, other: &Self) -> f64;
+
+    /// Estimates the quadratic mean (Root Mean Square) of the data
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty or any entry is `f64::NAN`
+    fn quadratic_mean(&self) -> f64;
+
+    /// Returns the order statistic `(order 1..N)` from the data
+    ///
+    /// # Remarks
+    ///
+    /// No sorting is assumed. Order must be one-based (between `1` and `N` inclusive)
+    /// Returns `f64::NAN` if order is outside the viable range or data is empty.
+    fn order_statistic(&mut self, order: usize) -> f64;
 }
 
 impl Statistics for [f64] {
+    fn min(&self) -> f64 {
+        if self.len() == 0 {
+            return f64::NAN;
+        }
+
+        self.iter().fold(f64::INFINITY, |acc, &x| if x < acc || x.is_nan() { x } else { acc })
+    }
+
+    fn max(&self) -> f64 {
+        if self.len() == 0 {
+            return f64::NAN;
+        }
+
+        self.iter().fold(f64::NEG_INFINITY, |acc, &x| if x > acc || x.is_nan() { x } else { acc })
+    }
+
+    fn abs_min(&self) -> f64 {
+        if self.len() == 0 {
+            return f64::NAN;
+        }
+
+        self.iter()
+            .map(|x| x.abs())
+            .fold(f64::INFINITY, |acc, x| if x < acc || x.is_nan() { x } else { acc })
+    }
+
+    fn abs_max(&self) -> f64 {
+        if self.len() == 0 {
+            return f64::NAN;
+        }
+
+        self.iter()
+            .map(|x| x.abs())
+            .fold(f64::NEG_INFINITY, |acc, x| if x > acc || x.is_nan() { x } else { acc })
+    }
+
     fn mean(&self) -> f64 {
         if self.len() == 0 {
             return f64::NAN;
@@ -84,7 +177,7 @@ impl Statistics for [f64] {
 
         let mut m = 0.0;
         self.iter()
-            .fold(0.0, |acc, x| {
+            .fold(0.0, |acc, &x| {
                 m += 1.0;
                 acc + (x - acc) / m
             })
@@ -95,7 +188,7 @@ impl Statistics for [f64] {
             return f64::NAN;
         }
 
-        (self.iter().fold(0.0, |acc, x| acc + x.ln()) / self.len() as f64).exp()
+        (self.iter().fold(0.0, |acc, &x| acc + x.ln()) / self.len() as f64).exp()
     }
 
     fn harmonic_mean(&self) -> f64 {
@@ -103,7 +196,7 @@ impl Statistics for [f64] {
             return f64::NAN;
         }
 
-        self.len() as f64 / self.iter().fold(0.0, |acc, x| acc + 1.0 / x)
+        self.len() as f64 / self.iter().fold(0.0, |acc, &x| acc + 1.0 / x)
     }
 
     fn variance(&self) -> f64 {
@@ -161,5 +254,120 @@ impl Statistics for [f64] {
         self.iter()
             .zip(other.iter())
             .fold(0.0, |acc, x| acc + (x.0 - mean1) * (x.1 - mean2)) / (n1 - 1) as f64
+    }
+
+    fn population_covariance(&self, other: &[f64]) -> f64 {
+        let n1 = self.len();
+        let n2 = other.len();
+        assert!(n1 == n2, format!("{}", StatsError::VectorsSameLength));
+        if n1 == 0 {
+            return f64::NAN;
+        }
+
+        let mean1 = self.mean();
+        let mean2 = other.mean();
+        self.iter()
+            .zip(other.iter())
+            .fold(0.0, |acc, x| acc + (x.0 - mean1) * (x.1 - mean2)) / n1 as f64
+    }
+
+    fn quadratic_mean(&self) -> f64 {
+        if self.len() == 0 {
+            return f64::NAN;
+        }
+
+        let mut m = 0.0;
+        self.iter()
+            .fold(0.0, |acc, &x| {
+                m += 1.0;
+                acc + (x * x - acc) / m
+            })
+    }
+
+    /// Returns the order statistic `(order 1..N)` from the data
+    ///
+    /// # Remarks
+    ///
+    /// No sorting is assumed. Order must be one-based (between `1` and `N` inclusive).
+    /// Returns `f64::NAN` if order is outside the viable range or data is empty.
+    ///
+    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    fn order_statistic(&mut self, order: usize) -> f64 {
+        let n = self.len();
+        match order {
+            1 => self.min(),
+            _ if order == n => self.max(),
+            _ if order < 1 || order > n => f64::NAN,
+            _ => select_inplace(self, order - 1)
+        }
+    }
+}
+
+// Selection algorithm from Numerical Recipes
+// See: https://en.wikipedia.org/wiki/Selection_algorithm
+fn select_inplace(arr: &mut [f64], rank: usize) -> f64 {
+    if rank == 0 {
+        return arr.min();
+    }
+    if rank > arr.len() - 1 {
+        return arr.max();
+    }
+
+    unsafe {
+        let mut low = 0;
+        let mut high = arr.len() - 1;
+        loop {
+            if high <= low + 1 {
+                if high == low + 1 && *arr.get_unchecked(high) < *arr.get_unchecked(low) {
+                    arr.swap(low, high)
+                }
+                return *arr.get_unchecked(rank);
+            }
+
+            let middle = (low + high) >> 1;
+            arr.swap(middle, low + 1);
+
+            if *arr.get_unchecked(low) > *arr.get_unchecked(high) {
+                arr.swap(low, high);
+            }
+            if *arr.get_unchecked(low + 1) > *arr.get_unchecked(high) {
+                arr.swap(low + 1, high);
+            }
+            if *arr.get_unchecked(low) > *arr.get_unchecked(low + 1) {
+                arr.swap(low, low + 1);
+            }
+
+            let mut begin = low + 1;
+            let mut end = high;
+            let pivot = *arr.get_unchecked(begin);
+            loop {
+                loop {
+                    begin += 1;
+                    if *arr.get_unchecked(begin) < pivot {
+                        break;
+                    }
+                }
+                loop {
+                    end -= 1;
+                    if *arr.get_unchecked(end) > pivot {
+                        break;
+                    }
+                }
+                if end < begin {
+                    break;
+                }
+                arr.swap(begin, end);
+            }
+
+            arr[low + 1] = *arr.get_unchecked(end);
+            arr[end] = pivot;
+
+            if end >= rank {
+                high = end - 1;
+            }
+            if end <= rank {
+                low = begin;
+            }
+        }
     }
 }
