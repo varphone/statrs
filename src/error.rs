@@ -27,6 +27,8 @@ pub enum StatsError {
     ArgLt(&'static str, f64),
     /// An argument must have been less than or equal to a value but wasn't
     ArgLte(&'static str, f64),
+    /// Vectors of the same length were expected
+    VectorsSameLength,
 }
 
 impl Error for StatsError {
@@ -61,6 +63,7 @@ impl fmt::Display for StatsError {
             StatsError::ArgLte(s, val) => {
                 write!(f, "Argument {} must be less than or equal to {}", s, val)
             }
+            StatsError::VectorsSameLength => write!(f, "Expected vectors of same length"),
         }
     }
 }
