@@ -147,6 +147,14 @@ pub trait Statistics {
     /// No sorting is assumed. Tau must be between `0` and `1` inclusive.
     /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
     fn quantile(&mut self, tau: f64) -> f64;
+
+    fn percentile(&mut self, p: usize) -> f64;
+
+    fn lower_quartile(&mut self) -> f64;
+
+    fn upper_quartile(&mut self) -> f64;
+
+    fn interquartile_range(&mut self) -> f64;
 }
 
 impl Statistics for [f64] {
@@ -361,6 +369,22 @@ impl Statistics for [f64] {
         let a = select_inplace(self, (hf as usize).saturating_sub(1));
         let b = select_inplace(self, hf as usize);
         a + (h - hf as f64) * (b - a)
+    }
+
+    fn percentile(&mut self, p: usize) -> f64 {
+        self.quantile(p as f64 / 100.0)
+    }
+
+    fn lower_quartile(&mut self) -> f64 {
+        self.quantile(0.25)
+    }
+
+    fn upper_quartile(&mut self) -> f64 {
+        self.quantile(0.75)
+    }
+
+    fn interquartile_range(&mut self) -> f64 {
+        self.upper_quartile() - self.lower_quartile()
     }
 }
 
