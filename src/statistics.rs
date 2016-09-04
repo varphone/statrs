@@ -131,6 +131,22 @@ pub trait Statistics {
     /// No sorting is assumed. Order must be one-based (between `1` and `N` inclusive)
     /// Returns `f64::NAN` if order is outside the viable range or data is empty.
     fn order_statistic(&mut self, order: usize) -> f64;
+
+    /// Returns the median value from the data
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
+    fn median(&mut self) -> f64;
+
+    /// Estimates the tau-th quantile from the data. The tau-th quantile
+    /// is the data value where the cumulative distribution function crosses tau.
+    ///
+    /// # Remarks
+    ///
+    /// No sorting is assumed. Tau must be between `0` and `1` inclusive.
+    /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
+    fn quantile(&mut self, tau: f64) -> f64;
 }
 
 impl Statistics for [f64] {
@@ -300,6 +316,51 @@ impl Statistics for [f64] {
             _ if order < 1 || order > n => f64::NAN,
             _ => select_inplace(self, order - 1)
         }
+    }
+
+    /// Returns the median value from the data
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
+    ///
+    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    fn median(&mut self) -> f64 {
+        let k = self.len() / 2;
+        if self.len() % 2 != 0 {
+            select_inplace(self, k)
+        } else {
+            (select_inplace(self, k.saturating_sub(1)) + select_inplace(self, k)) / 2.0
+        }
+    }
+
+    /// Estimates the tau-th quantile from the data. The tau-th quantile
+    /// is the data value where the cumulative distribution function crosses tau.
+    ///
+    /// # Remarks
+    ///
+    /// No sorting is assumed. Tau must be between `0` and `1` inclusive.
+    /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
+    ///
+    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    fn quantile(&mut self, tau: f64) -> f64 {
+        if tau < 0.0 || tau > 1.0 || self.len() == 0 {
+            return f64::NAN;
+        }
+
+        let h = (self.len() as f64 + 1.0 / 3.0) * tau + 1.0 / 3.0;
+        let hf = h as i64;
+
+        if hf <= 0 || tau == 0.0 {
+            return self.min();
+        }
+        if hf >= self.len() as i64 || tau == 1.0 {
+            return self.max();
+        }
+
+        let a = select_inplace(self, (hf as usize).saturating_sub(1));
+        let b = select_inplace(self, hf as usize);
+        a + (h - hf as f64) * (b - a)
     }
 }
 
