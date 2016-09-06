@@ -191,6 +191,7 @@ pub trait Statistics {
     /// Returns `f64::NAN` if data is empty
     fn interquartile_range(&mut self) -> f64;
 
+    /// Evaluates the rank of each entry of the data. 
     fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64>;
 }
 
@@ -468,6 +469,11 @@ impl Statistics for [f64] {
         self.upper_quartile() - self.lower_quartile()
     }
 
+    /// Evaluates the rank of each entry of the data. 
+    ///
+    /// # Remarks
+    ///
+    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
     fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64> {
         let n = self.len();
         let mut ranks: Vec<f64> = (0..n).map(|_| 0.0).collect();
