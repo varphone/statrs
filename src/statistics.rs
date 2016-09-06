@@ -1,6 +1,20 @@
 use std::f64;
 use error::StatsError;
 
+/// Enumeration of possible tie-breaking strategies
+/// when computing ranks
+#[derive(Debug, Copy, Clone)]
+pub enum RankTieBreaker {
+    /// Replaces ties with their mean
+    Average,
+    /// Replace ties with their minimum
+    Min,
+    /// Replace ties with their maximum
+    Max,
+    /// Permutation with increasing values at each index of ties
+    First,
+}
+
 pub trait Statistics {
     /// Returns the minimum value in the data
     ///
@@ -148,13 +162,36 @@ pub trait Statistics {
     /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
     fn quantile(&mut self, tau: f64) -> f64;
 
+    /// Estimates the p-Percentile value from the data.
+    ///
+    /// # Remarks
+    ///
+    /// Use quantile for non-integer percentiles. `p` must be between `0` and `100` inclusive.
+    /// Returns `f64::NAN` if data is empty or `p` is outside the inclusive range.
     fn percentile(&mut self, p: usize) -> f64;
 
+    /// Estimates the first quartile value from the data.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
     fn lower_quartile(&mut self) -> f64;
 
+    /// Estimates the third quartile value from the data.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
     fn upper_quartile(&mut self) -> f64;
 
+    /// Estimates the inter-quartile range from the data.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
     fn interquartile_range(&mut self) -> f64;
+
+    fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64>;
 }
 
 impl Statistics for [f64] {
@@ -163,7 +200,8 @@ impl Statistics for [f64] {
             return f64::NAN;
         }
 
-        self.iter().fold(f64::INFINITY, |acc, &x| if x < acc || x.is_nan() { x } else { acc })
+        self.iter().fold(f64::INFINITY,
+                         |acc, &x| if x < acc || x.is_nan() { x } else { acc })
     }
 
     fn max(&self) -> f64 {
@@ -171,7 +209,8 @@ impl Statistics for [f64] {
             return f64::NAN;
         }
 
-        self.iter().fold(f64::NEG_INFINITY, |acc, &x| if x > acc || x.is_nan() { x } else { acc })
+        self.iter().fold(f64::NEG_INFINITY,
+                         |acc, &x| if x > acc || x.is_nan() { x } else { acc })
     }
 
     fn abs_min(&self) -> f64 {
@@ -181,7 +220,8 @@ impl Statistics for [f64] {
 
         self.iter()
             .map(|x| x.abs())
-            .fold(f64::INFINITY, |acc, x| if x < acc || x.is_nan() { x } else { acc })
+            .fold(f64::INFINITY,
+                  |acc, x| if x < acc || x.is_nan() { x } else { acc })
     }
 
     fn abs_max(&self) -> f64 {
@@ -191,7 +231,8 @@ impl Statistics for [f64] {
 
         self.iter()
             .map(|x| x.abs())
-            .fold(f64::NEG_INFINITY, |acc, x| if x > acc || x.is_nan() { x } else { acc })
+            .fold(f64::NEG_INFINITY,
+                  |acc, x| if x > acc || x.is_nan() { x } else { acc })
     }
 
     fn mean(&self) -> f64 {
@@ -268,7 +309,7 @@ impl Statistics for [f64] {
     fn covariance(&self, other: &[f64]) -> f64 {
         let n1 = self.len();
         let n2 = other.len();
-        assert!(n1 == n2, format!("{}", StatsError::VectorsSameLength));
+        assert!(n1 == n2, format!("{}", StatsError::ContainersMustBeSameLength));
         if n1 <= 1 {
             return f64::NAN;
         }
@@ -283,7 +324,7 @@ impl Statistics for [f64] {
     fn population_covariance(&self, other: &[f64]) -> f64 {
         let n1 = self.len();
         let n2 = other.len();
-        assert!(n1 == n2, format!("{}", StatsError::VectorsSameLength));
+        assert!(n1 == n2, format!("{}", StatsError::ContainersMustBeSameLength));
         if n1 == 0 {
             return f64::NAN;
         }
@@ -322,7 +363,7 @@ impl Statistics for [f64] {
             1 => self.min(),
             _ if order == n => self.max(),
             _ if order < 1 || order > n => f64::NAN,
-            _ => select_inplace(self, order - 1)
+            _ => select_inplace(self, order - 1),
         }
     }
 
@@ -371,20 +412,112 @@ impl Statistics for [f64] {
         a + (h - hf as f64) * (b - a)
     }
 
+    /// Estimates the p-Percentile value from the data.
+    ///
+    /// # Remarks
+    ///
+    /// Use quantile for non-integer percentiles. `p` must be between `0` and `100` inclusive.
+    /// Returns `f64::NAN` if data is empty or `p` is outside the inclusive range.
+    ///
+    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Statistics;
+    ///
+    /// let data = &mut [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0];
+    /// assert_eq!(data.percentile(0), 1.0);
+    /// assert_eq!(data.percentile(50), 5.0);
+    /// assert_eq!(data.percentile(100), 10.0);
+    /// ```
     fn percentile(&mut self, p: usize) -> f64 {
         self.quantile(p as f64 / 100.0)
     }
 
+    /// Estimates the first quartile value from the data.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
+    ///
+    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
     fn lower_quartile(&mut self) -> f64 {
         self.quantile(0.25)
     }
 
+    /// Estimates the third quartile value from the data.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
+    ///
+    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
     fn upper_quartile(&mut self) -> f64 {
         self.quantile(0.75)
     }
 
+    /// Estimates the inter-quartile range from the data.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
+    ///
+    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
     fn interquartile_range(&mut self) -> f64 {
         self.upper_quartile() - self.lower_quartile()
+    }
+
+    fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64> {
+        let n = self.len();
+        let mut ranks: Vec<f64> = (0..n).map(|_| 0.0).collect();
+        let mut index: Vec<usize> = (0..n).collect();
+
+        match tie_breaker {
+            RankTieBreaker::First => {
+                quick_sort_all(self, &mut *index, 0, n - 1);
+                unsafe {
+                    for i in 0..ranks.len() {
+                        ranks[*index.get_unchecked(i)] = (i + 1) as f64;
+                    }
+                }
+                ranks
+            }
+            _ => {
+                sort(self, &mut *index);
+                let mut prev_idx = 0;
+                unsafe {
+                    for i in 1..n {
+                        if (*self.get_unchecked(i) - *self.get_unchecked(prev_idx)).abs() <= 0.0 {
+                            continue;
+                        }
+                        if i == prev_idx + 1 {
+                            ranks[*index.get_unchecked(prev_idx)] = i as f64;
+                        } else {
+                            handle_rank_ties(&mut *ranks, &*index, prev_idx as isize, i as isize, tie_breaker);
+                        }
+                        prev_idx = i;
+                    }
+                }
+                
+                handle_rank_ties(&mut *ranks, &*index, prev_idx as isize, n as isize, tie_breaker);
+                ranks
+            }
+        }
+    }
+}
+
+fn handle_rank_ties(ranks: &mut [f64], index: &[usize], a: isize, b: isize, tie_breaker: RankTieBreaker) {
+    let rank = match tie_breaker {
+        RankTieBreaker::Average => (b + a - 1) as f64 / 2.0 + 1.0,
+        RankTieBreaker::Min => (a + 1) as f64,
+        RankTieBreaker::Max => b as f64,
+        RankTieBreaker::First => unreachable!()
+    };
+    unsafe {
+        for i in a..b {
+            ranks[*index.get_unchecked(i as usize)] = rank
+        }
     }
 }
 
@@ -452,6 +585,208 @@ fn select_inplace(arr: &mut [f64], rank: usize) -> f64 {
             }
             if end <= rank {
                 low = begin;
+            }
+        }
+    }
+}
+
+// sorts a primary slice and re-orders the secondary slice automatically. Uses insertion sort on small
+// containers and quick sorts for larger ones
+fn sort(primary: &mut [f64], secondary: &mut [usize]) {
+    assert!(primary.len() == secondary.len(), format!("{}", StatsError::ContainersMustBeSameLength));
+
+    let n = primary.len();
+    if n <= 1 {
+        return;
+    }
+    if n == 2 {
+        unsafe {
+            if *primary.get_unchecked(0) > *primary.get_unchecked(1) {
+                primary.swap(0, 1);
+                secondary.swap(0, 1);
+            }
+            return;
+        }
+    }
+
+    // insertion sort for really short containers
+    if n <= 10 {
+        unsafe {
+            for i in 1..10 {
+                let key = *primary.get_unchecked(i);
+                let item = *secondary.get_unchecked(i);
+                let mut j = i as isize - 1;
+                while j >= 0 && *primary.get_unchecked(j as usize) > key {
+                    primary[j as usize + 1] = *primary.get_unchecked(j as usize);
+                    secondary[j as usize + 1] = *secondary.get_unchecked(j as usize);
+                    j -= 1;
+                }
+                primary[j as usize + 1] = key;
+                secondary[j as usize + 1] = item;
+            }
+            return;
+        }
+    }
+
+    quick_sort(primary, secondary, 0, n - 1);
+}
+
+// quick sorts a primary slice and re-orders the secondary slice automatically
+fn quick_sort(primary: &mut [f64], secondary: &mut [usize], left: usize, right: usize) {
+    assert!(primary.len() == secondary.len(), format!("{}", StatsError::ContainersMustBeSameLength));
+
+    // shadow left and right for mutability in loop
+    let mut left = left;
+    let mut right = right;
+
+    unsafe {
+        loop {
+            // Pivoting
+            let mut a  = left;
+            let mut b = right;
+            let p = a + ((b - a) >> 1);
+
+            if *primary.get_unchecked(a) > *primary.get_unchecked(p) {
+                primary.swap(a, p);
+                secondary.swap(a, p);
+            }
+            if *primary.get_unchecked(a) > *primary.get_unchecked(b) {
+                primary.swap(a, b);
+                secondary.swap(a, b);
+            }
+            if *primary.get_unchecked(p) > *primary.get_unchecked(b) {
+                primary.swap(p, b);
+                secondary.swap(p, b);
+            }
+
+            let pivot = *primary.get_unchecked(p);
+
+            // Hoare partitioning
+            loop {
+                while *primary.get_unchecked(a) < pivot {
+                    a += 1;
+                }
+                while pivot < *primary.get_unchecked(b) {
+                    b -= 1;
+                }
+                if a > b {
+                    break;
+                }
+                if a < b {
+                    primary.swap(a, b);
+                    secondary.swap(a, b);
+                }
+
+                a += 1;
+                b -= 1;
+
+                if a > b {
+                    break;
+                }
+            }
+
+            // In order to limit recursion depth to log(n), sort the shorter
+            // partition recursively and the longer partition iteratively
+            if (b - left) <= (right - a) {
+                if left < b {
+                    quick_sort(primary, secondary, left, b);
+                }
+                left = a;
+            } else {
+                if a < right {
+                    quick_sort(primary, secondary, a, right);
+                }
+                right = b;
+            }
+
+            if left >= right {
+                break;
+            }
+        }
+    }
+}
+
+// quick sorts a primary slice and re-orders the secondary slice automatically.
+// Sorts secondarily by the secondary slice on primary key duplicates
+fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, right: usize) {
+    assert!(primary.len() == secondary.len(), format!("{}", StatsError::ContainersMustBeSameLength));
+
+    // shadow left and right for mutability in loop
+    let mut left = left;
+    let mut right = right;
+
+    unsafe {
+        loop {
+            // Pivoting
+            let mut a = left;
+            let mut b = right;
+            let p = a + ((b - a) >> 1);
+
+            if *primary.get_unchecked(a) > *primary.get_unchecked(p) ||
+               *primary.get_unchecked(a) == *primary.get_unchecked(p) &&
+               *secondary.get_unchecked(a) > *secondary.get_unchecked(p) {
+
+                primary.swap(a, p);
+                secondary.swap(a, p);
+            }
+            if *primary.get_unchecked(a) > *primary.get_unchecked(b) ||
+               *primary.get_unchecked(a) == *primary.get_unchecked(b) &&
+               *secondary.get_unchecked(a) > *secondary.get_unchecked(b) {
+
+                primary.swap(a, b);
+                secondary.swap(a, b);
+            }
+            if *primary.get_unchecked(p) > *primary.get_unchecked(b) ||
+               *primary.get_unchecked(p) == *primary.get_unchecked(b) &&
+               *secondary.get_unchecked(p) > *secondary.get_unchecked(b) {
+
+                primary.swap(p, b);
+                secondary.swap(p, b);
+            }
+
+            let pivot1 = *primary.get_unchecked(p);
+            let pivot2 = *secondary.get_unchecked(p);
+
+            // Hoare partitioning
+            loop {
+                while *primary.get_unchecked(a) < pivot1 || *primary.get_unchecked(a) == pivot1 && *secondary.get_unchecked(a) < pivot2 {
+                    a += 1;
+                }
+                while pivot1 < *primary.get_unchecked(b) || pivot1 == *primary.get_unchecked(b) && pivot2 < *secondary.get_unchecked(b) {
+                    b -= 1;
+                }
+                if a > b {
+                    break;
+                }
+                if a < b {
+                    primary.swap(a, b);
+                    secondary.swap(a, b);
+                }
+
+                a += 1;
+                b -= 1;
+
+                if a > b {
+                    break;
+                }
+            }
+
+            // In order to limit recursion depth to log(n), sort the shorter
+            // partition recursively and the longer partition iteratively
+            if (b - left) <= (right - a) {
+                if left < b {
+                    quick_sort_all(primary, secondary, left, b);
+                }
+                left = a;
+            } else {
+                if a < right {
+                    quick_sort_all(primary, secondary, a, right);
+                }
+                right = b;
+            }
+
+            if left >= right {
+                break;
             }
         }
     }
