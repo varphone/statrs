@@ -63,7 +63,9 @@ impl fmt::Display for StatsError {
             StatsError::ArgLte(s, val) => {
                 write!(f, "Argument {} must be less than or equal to {}", s, val)
             }
-            StatsError::ContainersMustBeSameLength => write!(f, "Expected containers of same length"),
+            StatsError::ContainersMustBeSameLength => {
+                write!(f, "Expected containers of same length")
+            }
         }
     }
 }

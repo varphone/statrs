@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader};
 use std::str;
 
 /// Loads a test data file into a vector of `f64`'s.
-/// Path is relative to /data. 
+/// Path is relative to /data.
 ///
 /// # Panics
 ///
@@ -14,7 +14,7 @@ use std::str;
 pub fn load_data(path: &str) -> Vec<f64> {
     // note: the copious use of unwrap is because this is a test helper and
     // if reading the data file fails, we want to panic immediately
-    
+
     let path_prefix = "./data/".to_string();
     let true_path = path_prefix + path.trim().trim_left_matches('/');
 

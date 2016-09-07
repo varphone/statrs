@@ -191,7 +191,7 @@ pub trait Statistics {
     /// Returns `f64::NAN` if data is empty
     fn interquartile_range(&mut self) -> f64;
 
-    /// Evaluates the rank of each entry of the data. 
+    /// Evaluates the rank of each entry of the data.
     fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64>;
 }
 
@@ -310,7 +310,8 @@ impl Statistics for [f64] {
     fn covariance(&self, other: &[f64]) -> f64 {
         let n1 = self.len();
         let n2 = other.len();
-        assert!(n1 == n2, format!("{}", StatsError::ContainersMustBeSameLength));
+        assert!(n1 == n2,
+                format!("{}", StatsError::ContainersMustBeSameLength));
         if n1 <= 1 {
             return f64::NAN;
         }
@@ -325,7 +326,8 @@ impl Statistics for [f64] {
     fn population_covariance(&self, other: &[f64]) -> f64 {
         let n1 = self.len();
         let n2 = other.len();
-        assert!(n1 == n2, format!("{}", StatsError::ContainersMustBeSameLength));
+        assert!(n1 == n2,
+                format!("{}", StatsError::ContainersMustBeSameLength));
         if n1 == 0 {
             return f64::NAN;
         }
@@ -469,7 +471,7 @@ impl Statistics for [f64] {
         self.upper_quartile() - self.lower_quartile()
     }
 
-    /// Evaluates the rank of each entry of the data. 
+    /// Evaluates the rank of each entry of the data.
     ///
     /// # Remarks
     ///
@@ -500,25 +502,38 @@ impl Statistics for [f64] {
                         if i == prev_idx + 1 {
                             ranks[*index.get_unchecked(prev_idx)] = i as f64;
                         } else {
-                            handle_rank_ties(&mut *ranks, &*index, prev_idx as isize, i as isize, tie_breaker);
+                            handle_rank_ties(&mut *ranks,
+                                             &*index,
+                                             prev_idx as isize,
+                                             i as isize,
+                                             tie_breaker);
                         }
                         prev_idx = i;
                     }
                 }
-                
-                handle_rank_ties(&mut *ranks, &*index, prev_idx as isize, n as isize, tie_breaker);
+
+                handle_rank_ties(&mut *ranks,
+                                 &*index,
+                                 prev_idx as isize,
+                                 n as isize,
+                                 tie_breaker);
                 ranks
             }
         }
     }
 }
 
-fn handle_rank_ties(ranks: &mut [f64], index: &[usize], a: isize, b: isize, tie_breaker: RankTieBreaker) {
+fn handle_rank_ties(ranks: &mut [f64],
+                    index: &[usize],
+                    a: isize,
+                    b: isize,
+                    tie_breaker: RankTieBreaker) {
+
     let rank = match tie_breaker {
         RankTieBreaker::Average => (b + a - 1) as f64 / 2.0 + 1.0,
         RankTieBreaker::Min => (a + 1) as f64,
         RankTieBreaker::Max => b as f64,
-        RankTieBreaker::First => unreachable!()
+        RankTieBreaker::First => unreachable!(),
     };
     unsafe {
         for i in a..b {
@@ -599,7 +614,8 @@ fn select_inplace(arr: &mut [f64], rank: usize) -> f64 {
 // sorts a primary slice and re-orders the secondary slice automatically. Uses insertion sort on small
 // containers and quick sorts for larger ones
 fn sort(primary: &mut [f64], secondary: &mut [usize]) {
-    assert!(primary.len() == secondary.len(), format!("{}", StatsError::ContainersMustBeSameLength));
+    assert!(primary.len() == secondary.len(),
+            format!("{}", StatsError::ContainersMustBeSameLength));
 
     let n = primary.len();
     if n <= 1 {
@@ -639,7 +655,8 @@ fn sort(primary: &mut [f64], secondary: &mut [usize]) {
 
 // quick sorts a primary slice and re-orders the secondary slice automatically
 fn quick_sort(primary: &mut [f64], secondary: &mut [usize], left: usize, right: usize) {
-    assert!(primary.len() == secondary.len(), format!("{}", StatsError::ContainersMustBeSameLength));
+    assert!(primary.len() == secondary.len(),
+            format!("{}", StatsError::ContainersMustBeSameLength));
 
     // shadow left and right for mutability in loop
     let mut left = left;
@@ -648,7 +665,7 @@ fn quick_sort(primary: &mut [f64], secondary: &mut [usize], left: usize, right: 
     unsafe {
         loop {
             // Pivoting
-            let mut a  = left;
+            let mut a = left;
             let mut b = right;
             let p = a + ((b - a) >> 1);
 
@@ -718,7 +735,8 @@ fn quick_sort(primary: &mut [f64], secondary: &mut [usize], left: usize, right: 
 // quick sorts a primary slice and re-orders the secondary slice automatically.
 // Sorts secondarily by the secondary slice on primary key duplicates
 fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, right: usize) {
-    assert!(primary.len() == secondary.len(), format!("{}", StatsError::ContainersMustBeSameLength));
+    assert!(primary.len() == secondary.len(),
+            format!("{}", StatsError::ContainersMustBeSameLength));
 
     // shadow left and right for mutability in loop
     let mut left = left;
@@ -758,10 +776,12 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
 
             // Hoare partitioning
             loop {
-                while *primary.get_unchecked(a) < pivot1 || *primary.get_unchecked(a) == pivot1 && *secondary.get_unchecked(a) < pivot2 {
+                while *primary.get_unchecked(a) < pivot1 ||
+                      *primary.get_unchecked(a) == pivot1 && *secondary.get_unchecked(a) < pivot2 {
                     a += 1;
                 }
-                while pivot1 < *primary.get_unchecked(b) || pivot1 == *primary.get_unchecked(b) && pivot2 < *secondary.get_unchecked(b) {
+                while pivot1 < *primary.get_unchecked(b) ||
+                      pivot1 == *primary.get_unchecked(b) && pivot2 < *secondary.get_unchecked(b) {
                     b -= 1;
                 }
                 if a > b {
