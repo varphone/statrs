@@ -429,7 +429,7 @@ impl Statistics for [f64] {
     ///
     /// let data = &mut [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0];
     /// assert_eq!(data.percentile(0), 1.0);
-    /// assert_eq!(data.percentile(50), 5.0);
+    /// assert_eq!(data.percentile(50), 5.5);
     /// assert_eq!(data.percentile(100), 10.0);
     /// ```
     fn percentile(&mut self, p: usize) -> f64 {
@@ -476,7 +476,7 @@ impl Statistics for [f64] {
     /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
     fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64> {
         let n = self.len();
-        let mut ranks: Vec<f64> = (0..n).map(|_| 0.0).collect();
+        let mut ranks: Vec<f64> = vec![0.0; n];
         let mut index: Vec<usize> = (0..n).collect();
 
         match tie_breaker {
@@ -567,13 +567,13 @@ fn select_inplace(arr: &mut [f64], rank: usize) -> f64 {
             loop {
                 loop {
                     begin += 1;
-                    if *arr.get_unchecked(begin) < pivot {
+                    if *arr.get_unchecked(begin) >= pivot {
                         break;
                     }
                 }
                 loop {
                     end -= 1;
-                    if *arr.get_unchecked(end) > pivot {
+                    if *arr.get_unchecked(end) <= pivot {
                         break;
                     }
                 }
@@ -618,7 +618,7 @@ fn sort(primary: &mut [f64], secondary: &mut [usize]) {
     // insertion sort for really short containers
     if n <= 10 {
         unsafe {
-            for i in 1..10 {
+            for i in 1..n {
                 let key = *primary.get_unchecked(i);
                 let item = *secondary.get_unchecked(i);
                 let mut j = i as isize - 1;
@@ -692,8 +692,11 @@ fn quick_sort(primary: &mut [f64], secondary: &mut [usize], left: usize, right: 
             }
 
             // In order to limit recursion depth to log(n), sort the shorter
-            // partition recursively and the longer partition iteratively
-            if (b - left) <= (right - a) {
+            // partition recursively and the longer partition iteratively.
+            //
+            // Must cast to isize as it's possible for left > b or a > right/
+            // TODO: make this more robust
+            if (b as isize - left as isize) <= (right as isize - a as isize) {
                 if left < b {
                     quick_sort(primary, secondary, left, b);
                 }
@@ -778,8 +781,11 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
             }
 
             // In order to limit recursion depth to log(n), sort the shorter
-            // partition recursively and the longer partition iteratively
-            if (b - left) <= (right - a) {
+            // partition recursively and the longer partition iteratively.
+            //
+            // Must cast to isize as it's possible for left > b or a > right/
+            // TODO: make this more robust
+            if (b as isize - left as isize) <= (right as isize - a as isize) {
                 if left < b {
                     quick_sort_all(primary, secondary, left, b);
                 }
@@ -795,5 +801,126 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
                 break;
             }
         }
+    }
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+#[cfg(test)]
+mod test {
+    use super::{Statistics, RankTieBreaker};
+    use testing;
+
+    #[test]
+    fn test_mean() {
+        let mut data = testing::load_data("nist/lottery.txt");
+        assert_almost_eq!((*data).mean(), 518.958715596330, 1e-12);
+
+        data = testing::load_data("nist/lew.txt");
+        assert_almost_eq!((*data).mean(), -177.435000000000, 1e-13);
+
+        data = testing::load_data("nist/mavro.txt");
+        assert_almost_eq!((*data).mean(), 2.00185600000000, 1e-15);
+
+        data = testing::load_data("nist/michaelso.txt");
+        assert_almost_eq!((*data).mean(), 299.852400000000, 1e-13);
+
+        data = testing::load_data("nist/numacc1.txt");
+        assert_eq!((*data).mean(), 10000002.0);
+
+        data = testing::load_data("nist/numacc2.txt");
+        assert_almost_eq!((*data).mean(), 1.2, 1e-15);
+
+        data = testing::load_data("nist/numacc3.txt");
+        assert_eq!((*data).mean(), 1000000.2);
+
+        data = testing::load_data("nist/numacc4.txt");
+        assert_almost_eq!((*data).mean(), 10000000.2, 1e-8);
+    }
+
+    #[test]
+    fn test_std_dev() {
+        let mut data = testing::load_data("nist/lottery.txt");
+        assert_almost_eq!((*data).std_dev(), 291.699727470969, 1e-13);
+
+        data = testing::load_data("nist/lew.txt");
+        assert_almost_eq!((*data).std_dev(), 277.332168044316, 1e-12);
+
+        data = testing::load_data("nist/mavro.txt");
+        assert_almost_eq!((*data).std_dev(), 0.000429123454003053, 1e-15);
+
+        data = testing::load_data("nist/michaelso.txt");
+        assert_almost_eq!((*data).std_dev(), 0.0790105478190518, 1e-13);
+
+        data = testing::load_data("nist/numacc1.txt");
+        assert_eq!((*data).std_dev(), 1.0);
+
+        data = testing::load_data("nist/numacc2.txt");
+        assert_almost_eq!((*data).std_dev(), 0.1, 1e-16);
+
+        data = testing::load_data("nist/numacc3.txt");
+        assert_almost_eq!((*data).std_dev(), 0.1, 1e-10);
+
+        data = testing::load_data("nist/numacc4.txt");
+        assert_almost_eq!((*data).std_dev(), 0.1, 1e-9);
+    }
+
+    #[test]
+    fn test_min_max_short() {
+        let data = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0];
+        assert_eq!(data.min(), -3.0);
+        assert_eq!(data.max(), 10.0);
+    }
+
+    #[test]
+    fn test_order_statistic_short() {
+        let mut data = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 1.0, 6.0];
+        assert!(data.order_statistic(0).is_nan());
+        assert_eq!(data.order_statistic(1), -3.0);
+        assert_eq!(data.order_statistic(2), -1.0);
+        assert_eq!(data.order_statistic(3), -0.5);
+        assert_eq!(data.order_statistic(7), 5.0);
+        assert_eq!(data.order_statistic(8), 6.0);
+        assert_eq!(data.order_statistic(9), 10.0);
+        assert!(data.order_statistic(10).is_nan());
+    }
+
+    #[test]
+    fn test_quantile_short() {
+        let mut data = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0, 6.0];
+        assert_eq!(data.quantile(0.0), -3.0);
+        assert_eq!(data.quantile(1.0), 10.0);
+        assert_almost_eq!(data.quantile(0.5), 3.0 / 5.0, 1e-15);
+        assert_almost_eq!(data.quantile(0.2), -4.0 / 5.0, 1e-15);
+        assert_eq!(data.quantile(0.7), 137.0 / 30.0);
+        assert_eq!(data.quantile(0.01), -3.0);
+        assert_eq!(data.quantile(0.99), 10.0);
+        assert_almost_eq!(data.quantile(0.52), 287.0 / 375.0, 1e-15);
+        assert_almost_eq!(data.quantile(0.325), -37.0 / 240.0, 1e-15);
+    }
+
+    // TODO: need coverage for case where data.length > 10 to cover quick sort
+    #[test]
+    fn test_ranks() {
+        let mut sorted_distinct = [1.0, 2.0, 4.0, 7.0, 8.0, 9.0, 10.0, 12.0];
+        let mut sorted_ties = [1.0, 2.0, 2.0, 7.0, 9.0, 9.0, 10.0, 12.0];
+        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Average), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks(RankTieBreaker::Average), [1.0, 2.5, 2.5, 4.0, 5.5, 5.5, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Min), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks(RankTieBreaker::Min), [1.0, 2.0, 2.0, 4.0, 5.0, 5.0, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Max), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks(RankTieBreaker::Max), [1.0, 3.0, 3.0, 4.0, 6.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+
+        let mut distinct = [1.0, 8.0, 12.0, 7.0, 2.0, 9.0, 10.0, 4.0];
+        let mut ties = [1.0, 9.0, 12.0, 7.0, 2.0, 9.0, 10.0, 2.0];
+        assert_eq!(distinct.clone().ranks(RankTieBreaker::Average), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks(RankTieBreaker::Average), [1.0, 5.5, 8.0, 4.0, 2.5, 5.5, 7.0, 2.5]);
+        assert_eq!(distinct.clone().ranks(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 5.0, 7.0, 2.0]);
+        assert_eq!(distinct.clone().ranks(RankTieBreaker::Max), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks(RankTieBreaker::Max), [1.0, 6.0, 8.0, 4.0, 3.0, 6.0, 7.0, 3.0]);
+        assert_eq!(distinct.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
     }
 }

@@ -46,6 +46,7 @@ pub mod prec;
 mod result;
 mod statistics;
 mod error;
+mod testing;
 
 pub use result::Result;
 pub use statistics::Statistics;
