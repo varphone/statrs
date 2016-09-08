@@ -42,9 +42,9 @@ pub mod distribution;
 pub mod function;
 pub mod consts;
 pub mod prec;
+pub mod statistics;
 
 mod result;
-mod statistics;
 mod error;
 mod testing;
 

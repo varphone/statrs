@@ -1,199 +1,6 @@
 use std::f64;
 use error::StatsError;
-
-/// Enumeration of possible tie-breaking strategies
-/// when computing ranks
-#[derive(Debug, Copy, Clone)]
-pub enum RankTieBreaker {
-    /// Replaces ties with their mean
-    Average,
-    /// Replace ties with their minimum
-    Min,
-    /// Replace ties with their maximum
-    Max,
-    /// Permutation with increasing values at each index of ties
-    First,
-}
-
-pub trait Statistics {
-    /// Returns the minimum value in the data
-    ///
-    /// # Rermarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn min(&self) -> f64;
-
-    /// Returns the maximum value in the data
-    ///
-    /// # Rermarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn max(&self) -> f64;
-
-    /// Returns the minimum absolute value in the data
-    ///
-    /// # Rermarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn abs_min(&self) -> f64;
-
-    /// Returns the maximum absolute value in the data
-    ///
-    /// # Rermarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn abs_max(&self) -> f64;
-
-    /// Evaluates the sample mean, an estimate of the population
-    /// mean.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn mean(&self) -> f64;
-
-    /// Evaluates the geometric mean of the data
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn geometric_mean(&self) -> f64;
-
-    /// Evaluates the harmonic mean of the data
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn harmonic_mean(&self) -> f64;
-
-    /// Estimates the unbiased population variance from the provided samples
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-    ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-    fn variance(&self) -> f64;
-
-    /// Evaluates the population variance from a full population.
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N` is used as a normalizer and would thus
-    /// be biased if applied to a subset
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn population_variance(&self) -> f64;
-
-    /// Estimates the unbiased population standard deviation from the provided samples
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-    ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-    fn std_dev(&self) -> f64;
-
-    /// Evaluates the population standard deviation from a full population.
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N` is used as a normalizer and would thus
-    /// be biased if applied to a subset
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    fn population_std_dev(&self) -> f64;
-
-    /// Estimates the unbiased population covariance between the two provided samples
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-    ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-    ///
-    /// # Panics
-    ///
-    /// If the two sample containers do not contain the same number of elements
-    fn covariance(&self, other: &Self) -> f64;
-
-    /// Evaluates the population covariance between the two provider populations
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N` is used as a normalizer and would thus be
-    /// biased if applied to a subset
-    ///
-    /// Returns `f64::NAN` if data is empty or any entry is `f64::NAN`
-    ///
-    /// # Panics
-    ///
-    /// If the two sample containers do not contain the same number of elements
-    fn population_covariance(&self, other: &Self) -> f64;
-
-    /// Estimates the quadratic mean (Root Mean Square) of the data
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty or any entry is `f64::NAN`
-    fn quadratic_mean(&self) -> f64;
-
-    /// Returns the order statistic `(order 1..N)` from the data
-    ///
-    /// # Remarks
-    ///
-    /// No sorting is assumed. Order must be one-based (between `1` and `N` inclusive)
-    /// Returns `f64::NAN` if order is outside the viable range or data is empty.
-    fn order_statistic(&mut self, order: usize) -> f64;
-
-    /// Returns the median value from the data
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    fn median(&mut self) -> f64;
-
-    /// Estimates the tau-th quantile from the data. The tau-th quantile
-    /// is the data value where the cumulative distribution function crosses tau.
-    ///
-    /// # Remarks
-    ///
-    /// No sorting is assumed. Tau must be between `0` and `1` inclusive.
-    /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
-    fn quantile(&mut self, tau: f64) -> f64;
-
-    /// Estimates the p-Percentile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Use quantile for non-integer percentiles. `p` must be between `0` and `100` inclusive.
-    /// Returns `f64::NAN` if data is empty or `p` is outside the inclusive range.
-    fn percentile(&mut self, p: usize) -> f64;
-
-    /// Estimates the first quartile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    fn lower_quartile(&mut self) -> f64;
-
-    /// Estimates the third quartile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    fn upper_quartile(&mut self) -> f64;
-
-    /// Estimates the inter-quartile range from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    fn interquartile_range(&mut self) -> f64;
-
-    /// Evaluates the rank of each entry of the data.
-    fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64>;
-}
+use super::*;
 
 impl Statistics for [f64] {
     fn min(&self) -> f64 {
@@ -827,7 +634,8 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use super::{Statistics, RankTieBreaker};
+    use std::f64;
+    use statistics::*;
     use testing;
 
     #[test]
@@ -932,8 +740,8 @@ mod test {
         assert_eq!(sorted_distinct.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
         assert_eq!(sorted_ties.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
 
-        let mut distinct = [1.0, 8.0, 12.0, 7.0, 2.0, 9.0, 10.0, 4.0];
-        let mut ties = [1.0, 9.0, 12.0, 7.0, 2.0, 9.0, 10.0, 2.0];
+        let distinct = [1.0, 8.0, 12.0, 7.0, 2.0, 9.0, 10.0, 4.0];
+        let ties = [1.0, 9.0, 12.0, 7.0, 2.0, 9.0, 10.0, 2.0];
         assert_eq!(distinct.clone().ranks(RankTieBreaker::Average), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
         assert_eq!(ties.clone().ranks(RankTieBreaker::Average), [1.0, 5.5, 8.0, 4.0, 2.5, 5.5, 7.0, 2.5]);
         assert_eq!(distinct.clone().ranks(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
@@ -942,5 +750,103 @@ mod test {
         assert_eq!(ties.clone().ranks(RankTieBreaker::Max), [1.0, 6.0, 8.0, 4.0, 3.0, 6.0, 7.0, 3.0]);
         assert_eq!(distinct.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
         assert_eq!(ties.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+    }
+
+    #[test]
+    fn test_median_short() {
+        let mut even = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0, 6.0];
+        assert_eq!(even.median(), 0.6);
+
+        let mut odd = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0];
+        assert_eq!(odd.median(), 0.2);
+    }
+
+    #[test]
+    fn test_median_long_constant_seq() {
+        let mut even = vec![2.0; 100000];
+        assert_eq!(2.0, even.median());
+
+        let mut odd = vec![2.0; 100001];
+        assert_eq!(2.0, odd.median());
+    }
+
+    #[test]
+    fn test_mean_variance_stability() {
+        // TODO: Implement tests. Depends on Mersenne Twister RNG implementation.
+        // Currently hesistant to bring extra dependency just for test
+    }
+
+    #[test]
+    fn test_covariance_consistent_with_variance() {
+        let mut data = testing::load_data("nist/lottery.txt");
+        assert_almost_eq!(data.variance(), data.covariance(&*data), 1e-10);
+
+        data = testing::load_data("nist/lew.txt");
+        assert_almost_eq!(data.variance(), data.covariance(&*data), 1e-10);
+
+        data = testing::load_data("nist/mavro.txt");
+        assert_almost_eq!(data.variance(), data.covariance(&*data), 1e-10);
+
+        data = testing::load_data("nist/michaelso.txt");
+        assert_almost_eq!(data.variance(), data.covariance(&*data), 1e-10);
+
+        data = testing::load_data("nist/numacc1.txt");
+        assert_almost_eq!(data.variance(), data.covariance(&*data), 1e-10);
+    }
+
+    #[test]
+    fn test_pop_covar_consistent_with_pop_var() {
+        let mut data = testing::load_data("nist/lottery.txt");
+        assert_almost_eq!(data.population_variance(), data.population_covariance(&*data), 1e-10);
+
+        data = testing::load_data("nist/lew.txt");
+        assert_almost_eq!(data.population_variance(), data.population_covariance(&*data), 1e-10);
+
+        data = testing::load_data("nist/mavro.txt");
+        assert_almost_eq!(data.population_variance(), data.population_covariance(&*data), 1e-10);
+
+        data = testing::load_data("nist/michaelso.txt");
+        assert_almost_eq!(data.population_variance(), data.population_covariance(&*data), 1e-10);
+
+        data = testing::load_data("nist/numacc1.txt");
+        assert_almost_eq!(data.population_variance(), data.population_covariance(&*data), 1e-10);
+    }
+
+    #[test]
+    fn test_covariance_is_symmetric() {
+        let data_a = &testing::load_data("nist/lottery.txt")[0..200];
+        let data_b = &testing::load_data("nist/lew.txt")[0..200];
+        assert_eq!(data_a.covariance(data_b), data_b.covariance(data_a));
+        assert_eq!(data_a.population_covariance(data_b), data_b.population_covariance(data_a));
+    }
+
+    #[test]
+    fn test_empty_data_returns_nan() {
+        let data = [0.0; 0];
+        assert!(data.min().is_nan());
+        assert!(data.max().is_nan());
+        assert!(data.mean().is_nan());
+        assert!(data.quadratic_mean().is_nan());
+        assert!(data.variance().is_nan());
+        assert!(data.population_variance().is_nan());
+    }
+
+    // TODO: test codeplex issue 5667 (Math.NET)
+
+    // TODO: test github issue 136 (Math.NET)
+
+    #[test]
+    fn test_median_robust_on_infinities() {
+        let mut data3 = [2.0, f64::NEG_INFINITY, f64::INFINITY];
+        assert_eq!(data3.median(), 2.0);
+
+        data3 = [f64::NEG_INFINITY, 2.0, f64::INFINITY];
+        assert_eq!(data3.median(), 2.0);
+
+        data3 = [f64::NEG_INFINITY, f64::INFINITY, 2.0];
+        assert_eq!(data3.median(), 2.0);
+
+        let mut data4 = [f64::NEG_INFINITY, 2.0, 3.0, f64::INFINITY];
+        assert_eq!(data4.median(), 2.5);
     }
 }
