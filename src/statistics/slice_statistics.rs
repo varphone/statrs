@@ -157,6 +157,7 @@ impl Statistics for [f64] {
                 m += 1.0;
                 acc + (x * x - acc) / m
             })
+            .sqrt()
     }
 
     /// Returns the order statistic `(order 1..N)` from the data
@@ -634,7 +635,8 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use std::f64;
+    use std::f64::{self, consts};
+    use generate;
     use statistics::*;
     use testing;
 
@@ -848,5 +850,21 @@ mod test {
 
         let mut data4 = [f64::NEG_INFINITY, 2.0, 3.0, f64::INFINITY];
         assert_eq!(data4.median(), 2.5);
+    }
+
+    #[test]
+    fn test_large_samples() {
+        let shorter = generate::periodic(4*4096, 4.0, 1.0);
+        let longer = generate::periodic(4*32768, 4.0, 1.0);
+        assert_almost_eq!(shorter.mean(), 0.375, 1e-14);
+        assert_almost_eq!(longer.mean(), 0.375, 1e-14);
+        assert_almost_eq!(shorter.quadratic_mean(), (0.21875f64).sqrt(), 1e-14);
+        assert_almost_eq!(longer.quadratic_mean(), (0.21875f64).sqrt(), 1e-14);
+    }
+
+    #[test]
+    fn test_quadratic_mean_of_sinusoidal() {
+        let data = generate::sinusoidal(128, 64.0, 16.0, 2.0);
+        assert_almost_eq!(data.quadratic_mean(), 2.0 / consts::SQRT_2, 1e-15);
     }
 }
