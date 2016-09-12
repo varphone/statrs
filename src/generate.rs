@@ -6,7 +6,14 @@ pub fn periodic(length: usize, sampling_rate: f64, frequency: f64) -> Vec<f64> {
     periodic_custom(length, sampling_rate, frequency, 1.0, 0.0, 0)
 }
 
-pub fn periodic_custom(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64, phase: f64, delay: i64) -> Vec<f64> {
+pub fn periodic_custom(length: usize,
+                       sampling_rate: f64,
+                       frequency: f64,
+                       amplitude: f64,
+                       phase: f64,
+                       delay: i64)
+                       -> Vec<f64> {
+
     let step = frequency / sampling_rate * amplitude;
     let mut phase = (phase - delay as f64 * step).modulus(amplitude);
     let mut data = vec![0.0; length];
@@ -29,7 +36,15 @@ pub fn sinusoidal(length: usize, sampling_rate: f64, frequency: f64, amplitude: 
     sinusoidal_custom(length, sampling_rate, frequency, amplitude, 0.0, 0.0, 0)
 }
 
-pub fn sinusoidal_custom(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64, mean: f64, phase: f64, delay: i64) -> Vec<f64> {
+pub fn sinusoidal_custom(length: usize,
+                         sampling_rate: f64,
+                         frequency: f64,
+                         amplitude: f64,
+                         mean: f64,
+                         phase: f64,
+                         delay: i64)
+                         -> Vec<f64> {
+
     let pi2 = consts::PI * 2.0;
     let step = frequency / sampling_rate * pi2;
     let phase = (phase - delay as f64 * step) % pi2;
