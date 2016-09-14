@@ -209,7 +209,7 @@ pub trait Statistics {
     ///
     /// z = [1.0, 2.0, 3.0];
     /// // test value from online calculator, could be more accurate
-    /// assert_eq!(z.harmonic_mean(), 1.63636, 1e-5);
+    /// assert_almost_eq!(z.harmonic_mean(), 1.63636, 1e-5);
     /// # }
     /// ```
     fn harmonic_mean(&self) -> f64;
