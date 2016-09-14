@@ -1,5 +1,7 @@
 //! Provides number theory utility functions
 
+/// Provides a trait for the canonical modulus operation
+/// since % is technically the remainder operation
 pub trait Modulus {
     fn modulus(self, divisor: Self) -> Self;
 }
