@@ -61,7 +61,9 @@ impl Statistics for [f64] {
             return f64::NAN;
         }
 
-        (self.iter().fold(0.0, |acc, &x| acc + x.ln()) / self.len() as f64).exp()
+        (self.iter().fold(0.0, |acc, &x| if x < 0.0 { f64::NAN } else { acc + x.ln() }) /
+         self.len() as f64)
+            .exp()
     }
 
     fn harmonic_mean(&self) -> f64 {
@@ -69,7 +71,7 @@ impl Statistics for [f64] {
             return f64::NAN;
         }
 
-        self.len() as f64 / self.iter().fold(0.0, |acc, &x| acc + 1.0 / x)
+        self.len() as f64 / self.iter().fold(0.0, |acc, &x| if x < 0.0 { f64::NAN } else { acc + 1.0 / x })
     }
 
     fn variance(&self) -> f64 {
@@ -81,8 +83,9 @@ impl Statistics for [f64] {
             let mut var = 0.0;
             let mut t = *self.get_unchecked(0);
             for i in 1..self.len() {
-                t += *self.get_unchecked(i);
-                let diff = (i as f64 + 1.0) * *self.get_unchecked(i) - t;
+                let x = *self.get_unchecked(i);
+                t += x;
+                let diff = (i as f64 + 1.0) * x - t;
                 var += (diff * diff) / ((i + 1) * i) as f64;
             }
             var / (self.len() - 1) as f64
@@ -98,8 +101,9 @@ impl Statistics for [f64] {
             let mut var = 0.0;
             let mut t = *self.get_unchecked(0);
             for i in 1..self.len() {
-                t += *self.get_unchecked(i);
-                let diff = (i as f64 + 1.0) * *self.get_unchecked(i) - t;
+                let x = *self.get_unchecked(i);
+                t += x;
+                let diff = (i as f64 + 1.0) * x - t;
                 var += (diff * diff) / ((i + 1) * i) as f64
             }
             var / self.len() as f64

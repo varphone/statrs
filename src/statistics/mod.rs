@@ -1,6 +1,6 @@
 //! Provides statistical computation utilities for data sets
 
-pub mod slice_statistics;
+mod slice_statistics;
 
 /// Enumeration of possible tie-breaking strategies
 /// when computing ranks
@@ -16,19 +16,53 @@ pub enum RankTieBreaker {
     First,
 }
 
+/// The statistics trait provides a host of statistical utilities for analzying
+/// data sets
 pub trait Statistics {
     /// Returns the minimum value in the data
     ///
     /// # Rermarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let x = [];
+    /// assert!(x.min().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.min().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.min(), -2.0);
+    /// ```
     fn min(&self) -> f64;
 
     /// Returns the maximum value in the data
     ///
-    /// # Rermarks
+    /// # Remarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let x = [];
+    /// assert!(x.max().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.max().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.max(), 3.0);
+    /// ```
     fn max(&self) -> f64;
 
     /// Returns the minimum absolute value in the data
@@ -36,6 +70,22 @@ pub trait Statistics {
     /// # Rermarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let x = [];
+    /// assert!(x.abs_min().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.abs_min().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.abs_min(), 0.0);
+    /// ```
     fn abs_min(&self) -> f64;
 
     /// Returns the maximum absolute value in the data
@@ -43,6 +93,22 @@ pub trait Statistics {
     /// # Rermarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let x = [];
+    /// assert!(x.abs_max().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.abs_max().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0, -8.0];
+    /// assert_eq!(z.abs_max(), 8.0);
+    /// ```
     fn abs_max(&self) -> f64;
 
     /// Evaluates the sample mean, an estimate of the population
@@ -51,20 +117,101 @@ pub trait Statistics {
     /// # Remarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// # fn main() {
+    /// let x = [];
+    /// assert!(x.mean().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.mean().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_almost_eq!(z.mean(), 1.0 / 3.0, 1e-15);
+    /// # }
+    /// ```
     fn mean(&self) -> f64;
 
     /// Evaluates the geometric mean of the data
     ///
     /// # Remarks
     ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`.
+    /// Returns `f64::NAN` if an entry is less than `0`. Returns `0`
+    /// if no entry is less than `0` but there are entries equal to `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// # fn main() {
+    /// let x = [];
+    /// assert!(x.geometric_mean().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.geometric_mean().is_nan());
+    ///
+    /// let mut z = [0.0, 3.0, -2.0];
+    /// assert!(z.geometric_mean().is_nan());
+    ///
+    /// z = [0.0, 3.0, 2.0];
+    /// assert_eq!(z.geometric_mean(), 0.0);
+    ///
+    /// z = [1.0, 2.0, 3.0];
+    /// // test value from online calculator, could be more accurate
+    /// assert_almost_eq!(z.geometric_mean(), 1.81712, 1e-5);
+    /// # }
+    /// ```
     fn geometric_mean(&self) -> f64;
 
     /// Evaluates the harmonic mean of the data
     ///
     /// # Remarks
     ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`, or if any value
+    /// in data is less than `0`. Returns `0` if there are no values less than `0` but
+    /// there exists values equal to `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// # fn main() {
+    /// let x = [];
+    /// assert!(x.harmonic_mean().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.harmonic_mean().is_nan());
+    ///
+    /// let mut z = [0.0, 3.0, -2.0];
+    /// assert!(z.harmonic_mean().is_nan());
+    ///
+    /// z = [0.0, 3.0, 2.0];
+    /// assert_eq!(z.harmonic_mean(), 0.0);
+    ///
+    /// z = [1.0, 2.0, 3.0];
+    /// // test value from online calculator, could be more accurate
+    /// assert_eq!(z.harmonic_mean(), 1.63636, 1e-5);
+    /// # }
+    /// ```
     fn harmonic_mean(&self) -> f64;
 
     /// Estimates the unbiased population variance from the provided samples
@@ -74,6 +221,19 @@ pub trait Statistics {
     /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
     ///
     /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let x = [];
+    /// assert!(x.variance().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, 2.0];
+    /// assert!(y.variance().is_nan());
+    /// ```
     fn variance(&self) -> f64;
 
     /// Evaluates the population variance from a full population.

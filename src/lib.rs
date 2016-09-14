@@ -48,6 +48,8 @@ pub mod statistics;
 
 mod result;
 mod error;
+
+#[cfg(test)]
 mod testing;
 
 pub use result::Result;
