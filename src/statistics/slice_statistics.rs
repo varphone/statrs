@@ -172,6 +172,21 @@ impl Statistics for [f64] {
     /// Returns `f64::NAN` if order is outside the viable range or data is empty.
     ///
     /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let mut x = [];
+    /// assert!(x.order_statistic(1).is_nan());
+    ///
+    /// let mut y = [0.0, 3.0, -2.0];
+    /// assert!(y.order_statistic(0).is_nan());
+    /// assert!(y.order_statistic(4).is_nan());
+    /// assert_eq!(y.order_statistic(2), 0.0);
+    /// assert!(y != [0.0, 3.0, -2.0]);
+    /// ```
     fn order_statistic(&mut self, order: usize) -> f64 {
         let n = self.len();
         match order {
@@ -189,6 +204,19 @@ impl Statistics for [f64] {
     /// Returns `f64::NAN` if data is empty
     ///
     /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let mut x = [];
+    /// assert!(x.median().is_nan());
+    ///
+    /// let mut y = [0.0, 3.0, -2.0];
+    /// assert_eq!(y.median(), 0.0);
+    /// assert!(y != [0.0, 3.0, -2.0]);
+    /// ```
     fn median(&mut self) -> f64 {
         let k = self.len() / 2;
         if self.len() % 2 != 0 {
@@ -207,6 +235,21 @@ impl Statistics for [f64] {
     /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
     ///
     /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let mut x = [];
+    /// assert!(x.quantile(0.5).is_nan());
+    ///
+    /// let mut y = [0.0, 3.0, -2.0];
+    /// assert!(y.quantile(-1.0).is_nan());
+    /// assert!(y.quantile(2.0).is_nan());
+    /// assert_eq!(y.quantile(0.5), 0.0);
+    /// assert!(y != [0.0, 3.0, -2.0]);
+    /// ```
     fn quantile(&mut self, tau: f64) -> f64 {
         if tau < 0.0 || tau > 1.0 || self.len() == 0 {
             return f64::NAN;
@@ -241,10 +284,15 @@ impl Statistics for [f64] {
     /// ```
     /// use statrs::Statistics;
     ///
-    /// let data = &mut [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0];
-    /// assert_eq!(data.percentile(0), 1.0);
-    /// assert_eq!(data.percentile(50), 5.5);
-    /// assert_eq!(data.percentile(100), 10.0);
+    /// let mut x = [];
+    /// assert!(x.percentile(0).is_nan());
+    ///
+    /// let mut y = [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0];
+    /// assert_eq!(y.percentile(0), 1.0);
+    /// assert_eq!(y.percentile(50), 5.5);
+    /// assert_eq!(y.percentile(100), 10.0);
+    /// assert!(y.percentile(105).is_nan());
+    /// assert!(y != [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0]);
     /// ```
     fn percentile(&mut self, p: usize) -> f64 {
         self.quantile(p as f64 / 100.0)
@@ -257,6 +305,24 @@ impl Statistics for [f64] {
     /// Returns `f64::NAN` if data is empty
     ///
     /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use statrs::statistics::Statistics;
+    ///
+    /// # fn main() {
+    /// let mut x = [];
+    /// assert!(x.lower_quartile().is_nan());
+    ///
+    /// let mut y = [2.0, 1.0, 3.0, 4.0];
+    /// assert_almost_eq!(y.lower_quartile(), 1.416666666666666, 1e-15);
+    /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
+    /// # }
+    /// ```
     fn lower_quartile(&mut self) -> f64 {
         self.quantile(0.25)
     }
@@ -268,6 +334,24 @@ impl Statistics for [f64] {
     /// Returns `f64::NAN` if data is empty
     ///
     /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use statrs::statistics::Statistics;
+    ///
+    /// # fn main() {
+    /// let mut x = [];
+    /// assert!(x.lower_quartile().is_nan());
+    ///
+    /// let mut y = [2.0, 1.0, 3.0, 4.0];
+    /// assert_almost_eq!(y.upper_quartile(), 3.5833333333333333, 1e-15);
+    /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
+    /// # }
+    /// ```
     fn upper_quartile(&mut self) -> f64 {
         self.quantile(0.75)
     }
