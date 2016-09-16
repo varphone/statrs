@@ -227,6 +227,19 @@ impl Variance<f64, f64> for Beta {
         ((self.shape_a + self.shape_b) * (self.shape_a + self.shape_b) *
          (self.shape_a + self.shape_b + 1.0))
     }
+
+    /// Returns the standard deviation of the beta distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt((α * β) / ((α + β)^2 * (α + β + 1)))
+    /// ```
+    ///
+    /// where `α` is shapeA and `β` is shapeB
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
+    }
 }
 
 impl Entropy<f64> for Beta {
