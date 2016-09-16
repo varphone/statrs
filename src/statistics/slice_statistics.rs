@@ -363,6 +363,24 @@ impl Statistics for [f64] {
     /// Returns `f64::NAN` if data is empty
     ///
     /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use statrs::statistics::Statistics;
+    ///
+    /// # fn main() {
+    /// let mut x = [];
+    /// assert!(x.interquartile_range().is_nan());
+    ///
+    /// let mut y = [2.0, 1.0, 3.0, 4.0];
+    /// assert_almost_eq!(y.interquartile_range(), 2.166666666666667, 1e-15);
+    /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
+    /// # }
+    /// ```
     fn interquartile_range(&mut self) -> f64 {
         self.upper_quartile() - self.lower_quartile()
     }
@@ -372,6 +390,19 @@ impl Statistics for [f64] {
     /// # Remarks
     ///
     /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::{Statistics, RankTieBreaker};
+    ///
+    /// let mut x = [];
+    /// assert_eq!(x.ranks(RankTieBreaker::Average).len(), 0);
+    ///
+    /// let y = [1.0, 3.0, 2.0, 2.0];
+    /// assert_eq!((&mut y.clone()).ranks(RankTieBreaker::Average), [1.0, 4.0, 2.5, 2.5]);
+    /// assert_eq!((&mut y.clone()).ranks(RankTieBreaker::Min), [1.0, 4.0, 2.0, 2.0]);
+    /// ```
     fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64> {
         let n = self.len();
         let mut ranks: Vec<f64> = vec![0.0; n];
