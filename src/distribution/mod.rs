@@ -4,6 +4,7 @@
 use rand::Rng;
 
 pub use self::bernoulli::Bernoulli;
+pub use self::beta::Beta;
 pub use self::binomial::Binomial;
 pub use self::chi::Chi;
 pub use self::chi_squared::ChiSquared;
@@ -19,6 +20,7 @@ pub use self::uniform::Uniform;
 pub use self::weibull::Weibull;
 
 mod bernoulli;
+mod beta;
 mod binomial;
 mod chi;
 mod chi_squared;

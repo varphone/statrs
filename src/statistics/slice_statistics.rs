@@ -71,7 +71,9 @@ impl Statistics for [f64] {
             return f64::NAN;
         }
 
-        self.len() as f64 / self.iter().fold(0.0, |acc, &x| if x < 0.0 { f64::NAN } else { acc + 1.0 / x })
+        self.len() as f64 /
+        self.iter().fold(0.0,
+                         |acc, &x| if x < 0.0 { f64::NAN } else { acc + 1.0 / x })
     }
 
     fn variance(&self) -> f64 {

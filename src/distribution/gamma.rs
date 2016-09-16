@@ -257,7 +257,7 @@ impl Entropy<f64> for Gamma {
     /// ```
     ///
     /// where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
-    /// and `ψ` is digamma
+    /// and `ψ` is the digamma function
     fn entropy(&self) -> f64 {
         if self.rate == f64::INFINITY {
             0.0
