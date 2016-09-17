@@ -438,3 +438,74 @@ impl Continuous<f64, f64> for Beta {
         }
     }
 }
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+#[cfg(test)]
+mod test {
+    use std::f64;
+    use distribution::*;
+
+    fn try_create(shape_a: f64, shape_b: f64) -> Beta {
+        let n = Beta::new(shape_a, shape_b);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+
+    fn create_case(shape_a: f64, shape_b: f64) {
+        let n = try_create(shape_a, shape_b);
+        assert_eq!(n.shape_a(), shape_a);
+        assert_eq!(n.shape_b(), shape_b);
+    }
+
+    fn bad_create_case(shape_a: f64, shape_b: f64) {
+        let n = Beta::new(shape_a, shape_b);
+        assert!(n.is_err());
+    }
+
+    fn get_value<F>(shape_a: f64, shape_b: f64, eval: F) -> f64
+        where F: Fn(Beta) -> f64
+    {
+        let n = try_create(shape_a, shape_b);
+        eval(n)
+    }
+
+    fn test_case<F>(shape_a: f64, shape_b: f64, expected: f64, eval: F)
+        where F: Fn(Beta) -> f64
+    {
+        let x = get_value(shape_a, shape_b, eval);
+        assert_eq!(expected, x);
+    }
+
+    #[test]
+    fn test_create() {
+        create_case(1.0, 1.0);
+        create_case(9.0, 1.0);
+        create_case(5.0, 100.0);
+        create_case(1.0, f64::INFINITY);
+        create_case(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(0.0, 0.0);
+        bad_create_case(0.0, 0.1);
+        bad_create_case(1.0, 0.0);
+        bad_create_case(0.0, f64::INFINITY);
+        bad_create_case(f64::INFINITY, 0.0);
+        bad_create_case(f64::NAN, 1.0);
+        bad_create_case(1.0, f64::NAN);
+        bad_create_case(f64::NAN, f64::NAN);
+        bad_create_case(1.0, -1.0);
+        bad_create_case(-1.0, 1.0);
+        bad_create_case(-1.0, -1.0);
+    }
+
+    #[test]
+    fn test_mean() {
+        test_case(1.0, 1.0, 0.5, |x| x.mean());
+        test_case(9.0, 1.0, 0.9, |x| x.mean());
+        test_case(5.0, 100.0, 0.047619047619047619047616, |x| x.mean());
+        test_case(1.0, f64::INFINITY, 0.0, |x| x.mean());
+        test_case(f64::INFINITY, 1.0, 1.0, |x| x.mean());
+    }
+}
