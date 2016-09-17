@@ -147,15 +147,26 @@ impl Univariate<f64, f64> for Beta {
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0 && x <= 1.0,
                 format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
-        match (self.shape_a, self.shape_b, x) {
-            (_, _, 1.0) => 1.0,
-            (f64::INFINITY, f64::INFINITY, _) if x < 0.5 => 0.0,
-            (f64::INFINITY, f64::INFINITY, _) => 1.0,
-            (f64::INFINITY, _, _) if x < 1.0 => 0.0,
-            (f64::INFINITY, _, _) => 1.0,
-            (_, f64::INFINITY, _) => 0.0,
-            (1.0, 1.0, _) => x,
-            (_, _, _) => beta::beta_reg(self.shape_a, self.shape_b, x), 
+        if x == 1.0 {
+            1.0
+        } else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+            if x < 0.5 {
+                0.0
+            } else {
+                1.0
+            }
+        } else if self.shape_a == f64::INFINITY {
+            if x < 1.0 {
+                0.0
+            } else {
+                1.0
+            }
+        } else if self.shape_b == f64::INFINITY {
+            0.0
+        } else if self.shape_a == 1.0 && self.shape_b == 1.0 {
+            x
+        } else {
+            beta::beta_reg(self.shape_a, self.shape_b, x)
         }
     }
 
@@ -197,11 +208,14 @@ impl Mean<f64, f64> for Beta {
     ///
     /// where `α` is shapeA and `β` is shapeB
     fn mean(&self) -> f64 {
-        match (self.shape_a, self.shape_b) {
-            (f64::INFINITY, f64::INFINITY) => 0.5,
-            (f64::INFINITY, _) => 1.0,
-            (_, f64::INFINITY) => 0.0,
-            (_, _) => self.shape_a / (self.shape_a + self.shape_b),
+        if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+            0.5
+        } else if self.shape_a == f64::INFINITY {
+            1.0
+        } else if self.shape_b == f64::INFINITY {
+            0.0
+        } else {
+            self.shape_a / (self.shape_a + self.shape_b)
         }
     }
 }
@@ -269,14 +283,15 @@ impl Skewness<f64, f64> for Beta {
     ///
     /// where `α` is shapeA and `β` is shapeB
     fn skewness(&self) -> f64 {
-        match (self.shape_a, self.shape_b) {
-            (f64::INFINITY, f64::INFINITY) => 0.0,
-            (f64::INFINITY, _) => -2.0,
-            (_, f64::INFINITY) => 2.0,
-            (_, _) => {
-                2.0 * (self.shape_b - self.shape_a) * (self.shape_a + self.shape_b + 1.0) /
-                ((self.shape_a + self.shape_b + 2.0) * (self.shape_a * self.shape_b).sqrt())
-            }
+        if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+            0.0
+        } else if self.shape_a == f64::INFINITY {
+            -2.0
+        } else if self.shape_b == f64::INFINITY {
+            2.0
+        } else {
+            2.0 * (self.shape_b - self.shape_a) * (self.shape_a + self.shape_b + 1.0) /
+            ((self.shape_a + self.shape_b + 2.0) * (self.shape_a * self.shape_b).sqrt())
         }
     }
 }
@@ -308,11 +323,14 @@ impl Mode<f64, f64> for Beta {
                 format!("{}", StatsError::ArgGt("shape_a", 1.0)));
         assert!(self.shape_b > 1.0,
                 format!("{}", StatsError::ArgGt("shape_b", 1.0)));
-        match (self.shape_a, self.shape_b) {
-            (f64::INFINITY, f64::INFINITY) => 0.5,
-            (f64::INFINITY, _) => 1.0,
-            (_, f64::INFINITY) => 0.0,
-            (_, _) => (self.shape_a - 1.0) / (self.shape_a + self.shape_b - 2.0),
+        if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+            0.5
+        } else if self.shape_a == f64::INFINITY {
+            1.0
+        } else if self.shape_b == f64::INFINITY {
+            0.0
+        } else {
+            (self.shape_a - 1.0) / (self.shape_a + self.shape_b - 2.0)
         }
     }
 }
@@ -336,19 +354,32 @@ impl Continuous<f64, f64> for Beta {
     fn pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0 && x <= 1.0,
                 format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
-        match (self.shape_a, self.shape_b, x) => {
-            (f64::INFINITY, f64::INFINITY, 0.5) => f64::INFINITY,
-            (f64::INFINITY, f64::INFINITY, _) => 0.0,
-            (f64::INFINITY, _, 1.0) => f64::INFINITY,
-            (f64::INFINITY, _, _) => 0.0,
-            (_, f64::INFINITY, 0.0) => f64::INFINITY,
-            (_, f64::INFINITY, _) => 0.0,
-            (1.0, 1.0, _) => 1.0,
-            (_, _, _) if self.shape_a > 80.0 || self.shape_b > 80.0 => self.ln_pdf().exp(),
-            (_, _, _) => {
-                let bb = gamma::gamma(self.shape_a + self.shape_b) / (gamma::gamma(self.shape_a) * gamma::gamma(self.shape_b));
-                bb * x.powf(self.shape_a - 1.0) * (1.0 - x).powf(self.shape_b - 1.0)
+        if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+            if x == 0.5 {
+                f64::INFINITY
+            } else {
+                0.0
             }
+        } else if self.shape_a == f64::INFINITY {
+            if x == 1.0 {
+                f64::INFINITY
+            } else {
+                0.0
+            }
+        } else if self.shape_b == f64::INFINITY {
+            if x == 0.0 {
+                f64::INFINITY
+            } else {
+                0.0
+            }
+        } else if self.shape_a == 1.0 && self.shape_b == 1.0 {
+            1.0
+        } else if self.shape_a > 80.0 || self.shape_b > 80.0 {
+            self.ln_pdf(x).exp()
+        } else {
+            let bb = gamma::gamma(self.shape_a + self.shape_b) /
+                     (gamma::gamma(self.shape_a) * gamma::gamma(self.shape_b));
+            bb * x.powf(self.shape_a - 1.0) * (1.0 - x).powf(self.shape_b - 1.0)
         }
     }
 
@@ -370,28 +401,40 @@ impl Continuous<f64, f64> for Beta {
     fn ln_pdf(&self, x: f64) -> f64 {
         assert!(x >= 0.0 && x <= 1.0,
                 format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
-        match (self.shape_a, self.shape_b, x) => {
-            (f64::INFINITY, f64::INFINITY, 0.5) => f64::INFINITY,
-            (f64::INFINITY, f64::INFINITY, _) => f64::NEG_INFINITY,
-            (f64::INFINITY, _, 1.0) => f64::INFINITY,
-            (f64::INFINITY, _, _) => f64::NEG_INFINITY,
-            (_, f64::INFINITY, 0.0) => f64::INFINITY,
-            (_, f64::INFINITY, _) => f64::NEG_INFINITY,
-            (1.0, 1.0, _) => 0.0,
-            (_, _, _) => {
-                let aa = gamma::ln_gamma(self.shape_a + self.shape_b) - gamma::ln_gamma(self.shape_a) - gamma::ln_gamma(self.shape_b);
-                let bb = match (self.shape_a, x) {
-                    (1.0, 0.0) => 0.0,
-                    (_, 0.0) => f64::NEG_INFINITY,
-                    (_, _) => (self.shape_a - 1.0) * x.ln()
-                };
-                let cc = match (self.shape_b, x) {
-                    (1.0, 1.0) => 0.0,
-                    (_, 1.0) => f64::NEG_INFINITY,
-                    (_, _) => (self.shape_b - 1.0) * (1.0 - x).ln()
-                };
-                aa + bb + cc
+        if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+            if x == 0.5 {
+                f64::INFINITY
+            } else {
+                f64::NEG_INFINITY
             }
+        } else if self.shape_a == f64::INFINITY {
+            if x == 1.0 {
+                f64::INFINITY
+            } else {
+                f64::NEG_INFINITY
+            }
+        } else if self.shape_b == f64::INFINITY {
+            if x == 0.0 {
+                f64::INFINITY
+            } else {
+                f64::NEG_INFINITY
+            }
+        } else if self.shape_a == 1.0 && self.shape_b == 1.0 {
+            0.0
+        } else {
+            let aa = gamma::ln_gamma(self.shape_a + self.shape_b) - gamma::ln_gamma(self.shape_a) -
+                     gamma::ln_gamma(self.shape_b);
+            let bb = match (self.shape_a, x) {
+                (1.0, 0.0) => 0.0,
+                (_, 0.0) => f64::NEG_INFINITY,
+                (_, _) => (self.shape_a - 1.0) * x.ln(),
+            };
+            let cc = match (self.shape_b, x) {
+                (1.0, 1.0) => 0.0,
+                (_, 1.0) => f64::NEG_INFINITY,
+                (_, _) => (self.shape_b - 1.0) * (1.0 - x).ln(),
+            };
+            aa + bb + cc
         }
     }
 }
