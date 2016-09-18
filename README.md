@@ -31,7 +31,7 @@ Add the following to your `Cargo.toml`
 
 ```Rust
 [dependencies]
-statrs = "0.1.0"
+statrs = "0.2.0"
 ```
 
 and this to your crate root
@@ -42,7 +42,7 @@ extern crate statrs;
   
 ## Examples
 
-Statrs v0.1.0 comes with a number of commonly used distributions including Normal, Gamma, Student's T, Exponential, Weibull, etc.
+Statrs v0.2.0 comes with a number of commonly used distributions including Normal, Gamma, Student's T, Exponential, Weibull, etc.
 The common use case is to set up the distributions and sample from them which depends on the `Rand` crate for random number generation
 
 ```Rust
