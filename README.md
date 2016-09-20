@@ -6,7 +6,9 @@
 
 ## Current Version: v0.2.0
 
-Should be stable for both nightly and stable Rust
+Should work for both nightly and stable Rust.
+
+**NOTE:** While I will try to maintain backwards compatibility as much as possible, since this is still a 0.x.x project the API is not considered stable and thus subject to possible breaking changes up until v1.0.0
 
 ## Description
   
