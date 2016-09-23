@@ -40,14 +40,14 @@ pub fn periodic_custom(length: usize,
     let mut data = vec![0.0; length];
     let mut k = 0.0;
 
-    for i in 0..length {
+    for d in &mut data {
         let mut x = phase + k * step;
         if x >= amplitude {
             x %= amplitude;
             phase = x;
             k = 0.0;
         }
-        data[i] = x;
+        *d = x;
         k += 1.0;
     }
     data
@@ -98,10 +98,5 @@ pub fn sinusoidal_custom(length: usize,
     let pi2 = consts::PI * 2.0;
     let step = frequency / sampling_rate * pi2;
     let phase = (phase - delay as f64 * step) % pi2;
-    let mut data = vec![0.0; length];
-
-    for i in 0..length {
-        data[i] = mean + amplitude * (phase + i as f64 * step).sin();
-    }
-    data
+    (0..length).map(|i| mean + amplitude * (phase + i as f64 * step).sin()).collect()
 }

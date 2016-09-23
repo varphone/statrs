@@ -3,10 +3,10 @@ use consts;
 use error::StatsError;
 use prec;
 
-/// Auxiliary variable when evaluating the gamma_ln function
+/// Auxiliary variable when evaluating the `gamma_ln` function
 const GAMMA_R: f64 = 10.900511;
 
-/// Polynomial coefficients for approximating the gamma_ln function
+/// Polynomial coefficients for approximating the `gamma_ln` function
 const GAMMA_DK: &'static [f64] = &[2.48574089138753565546e-5,
                                    1.05142378581721974210,
                                    -3.45687097222016235469,
