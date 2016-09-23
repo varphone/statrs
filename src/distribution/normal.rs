@@ -284,7 +284,7 @@ pub fn ln_pdf_unchecked(x: f64, mean: f64, std_dev: f64) -> f64 {
     (-0.5 * d * d) - consts::LN_SQRT_2PI - std_dev.ln()
 }
 
-/// sample_unchecked draws a sample from a normal distribution using
+/// `sample_unchecked` draws a sample from a normal distribution using
 /// the box-muller algorithm
 pub fn sample_unchecked<R: Rng>(r: &mut R, mean: f64, std_dev: f64) -> f64 {
     let mut tuple = polar_transform(r.next_f64(), r.next_f64());
