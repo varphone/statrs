@@ -132,7 +132,7 @@ impl Univariate<f64, f64> for Triangular {
         } else if a < x && x <= c {
             (x - a) * (x - a) / ((b - a) * (c - a))
         } else if c < x && x < b {
-            return 1.0 - (b - x) * (b - x) / ((b - a) * (b - c));
+            1.0 - (b - x) * (b - x) / ((b - a) * (b - c))
         } else {
             1.0
         }
