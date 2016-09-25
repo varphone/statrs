@@ -4,6 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, gamma};
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Beta](https://en.wikipedia.org/wiki/Beta_distribution) distribution
@@ -189,7 +190,7 @@ impl Univariate<f64, f64> for Beta {
     }
 }
 
-impl Mean<f64, f64> for Beta {
+impl Mean<f64> for Beta {
     /// Returns the mean of the beta distribution
     ///
     /// # Formula
@@ -212,7 +213,7 @@ impl Mean<f64, f64> for Beta {
     }
 }
 
-impl Variance<f64, f64> for Beta {
+impl Variance<f64> for Beta {
     /// Returns the variance of the beta distribution
     ///
     /// # Formula

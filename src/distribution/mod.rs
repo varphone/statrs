@@ -111,54 +111,6 @@ pub trait Univariate<T, K>: Distribution<K> {
     fn max(&self) -> T;
 }
 
-/// The `Mean` trait specifies a distribution that has a closed form
-/// solution for its mean(s)
-pub trait Mean<T, K>: Distribution<K> {
-    /// Returns the mean for a given distribution. May panic depending
-    /// on the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Mean, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.5, n.mean());
-    /// ```
-    fn mean(&self) -> T;
-}
-
-/// The `Variance` trait specifies a distribution that has a closed form solution for
-/// its variance(s). Requires `Mean` since a closed form solution to
-/// variance by definition requires a closed form mean.
-pub trait Variance<T, K>: Mean<T, K> {
-    /// Returns the variance for a given distribution. May panic depending
-    /// on the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Variance, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(1.0 / 12.0, n.variance());
-    /// ```
-    fn variance(&self) -> T;
-
-    /// Returns the standard deviation for a given distribution. May panic depending
-    /// on the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Variance, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev());
-    /// ```
-    fn std_dev(&self) -> T;
-}
-
 /// The `Entropy` trait specifies a distribution with a closed form solution
 /// for its entropy
 pub trait Entropy<T>: Distribution<T> {

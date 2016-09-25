@@ -1,4 +1,4 @@
-//! Provides statistical computation utilities for data sets
+//! Provides traits for statistical computation
 
 mod slice_statistics;
 
@@ -589,3 +589,4 @@ pub trait Statistics {
     /// ```
     fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64>;
 }
+

@@ -5,6 +5,7 @@ use consts;
 use error::StatsError;
 use function::erf;
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
@@ -140,7 +141,7 @@ impl Univariate<f64, f64> for Normal {
     }
 }
 
-impl Mean<f64, f64> for Normal {
+impl Mean<f64> for Normal {
     /// Returns the mean of the normal distribution
     ///
     /// # Remarks
@@ -151,7 +152,7 @@ impl Mean<f64, f64> for Normal {
     }
 }
 
-impl Variance<f64, f64> for Normal {
+impl Variance<f64> for Normal {
     /// Returns the variance of the normal distribution
     ///
     /// # Formula

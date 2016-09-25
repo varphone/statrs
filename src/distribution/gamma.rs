@@ -4,6 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::gamma;
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
@@ -191,7 +192,7 @@ impl Univariate<f64, f64> for Gamma {
     }
 }
 
-impl Mean<f64, f64> for Gamma {
+impl Mean<f64> for Gamma {
     /// Returns the mean of the gamma distribution
     ///
     /// # Remarks
@@ -215,7 +216,7 @@ impl Mean<f64, f64> for Gamma {
     }
 }
 
-impl Variance<f64, f64> for Gamma {
+impl Variance<f64> for Gamma {
     /// Returns the variance of the gamma distribution
     ///
     /// # Formula

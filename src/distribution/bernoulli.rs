@@ -1,6 +1,7 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
@@ -168,7 +169,7 @@ impl Univariate<i64, f64> for Bernoulli {
     }
 }
 
-impl Mean<f64, f64> for Bernoulli {
+impl Mean<f64> for Bernoulli {
     /// Returns the mean of the bernoulli
     /// distribution
     ///
@@ -182,7 +183,7 @@ impl Mean<f64, f64> for Bernoulli {
     }
 }
 
-impl Variance<f64, f64> for Bernoulli {
+impl Variance<f64> for Bernoulli {
     /// Returns the variance of the bernoulli
     /// distribution
     ///

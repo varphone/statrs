@@ -4,6 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, gamma};
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Student's T](https://en.wikipedia.org/wiki/Student%27s_t-distribution) distribution
@@ -200,7 +201,7 @@ impl Univariate<f64, f64> for StudentsT {
     }
 }
 
-impl Mean<f64, f64> for StudentsT {
+impl Mean<f64> for StudentsT {
     /// Returns the mean of the student's t-distribution
     ///
     /// # Panics
@@ -221,7 +222,7 @@ impl Mean<f64, f64> for StudentsT {
     }
 }
 
-impl Variance<f64, f64> for StudentsT {
+impl Variance<f64> for StudentsT {
     /// Returns the variance of the student's t-distribution
     ///
     /// # Panics

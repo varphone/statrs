@@ -3,6 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Continuous Uniform](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) distribution
@@ -127,7 +128,7 @@ impl Univariate<f64, f64> for Uniform {
     }
 }
 
-impl Mean<f64, f64> for Uniform {
+impl Mean<f64> for Uniform {
     /// Returns the mean for the continuous uniform distribution
     ///
     /// # Formula
@@ -140,7 +141,7 @@ impl Mean<f64, f64> for Uniform {
     }
 }
 
-impl Variance<f64, f64> for Uniform {
+impl Variance<f64> for Uniform {
     /// Returns the variance for the continuous uniform distribution
     ///
     /// # Formula

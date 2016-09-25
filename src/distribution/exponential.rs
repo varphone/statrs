@@ -3,6 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
@@ -155,7 +156,7 @@ impl Univariate<f64, f64> for Exponential {
     }
 }
 
-impl Mean<f64, f64> for Exponential {
+impl Mean<f64> for Exponential {
     /// Returns the mean of the exponential distribution
     ///
     /// # Formula
@@ -170,7 +171,7 @@ impl Mean<f64, f64> for Exponential {
     }
 }
 
-impl Variance<f64, f64> for Exponential {
+impl Variance<f64> for Exponential {
     /// Returns the variance of the exponential distribution
     ///
     /// # Formula

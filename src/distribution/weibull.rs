@@ -5,6 +5,7 @@ use consts;
 use error::StatsError;
 use function::{gamma, stable};
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Weibull](https://en.wikipedia.org/wiki/Weibull_distribution)
@@ -178,7 +179,7 @@ impl Univariate<f64, f64> for Weibull {
     }
 }
 
-impl Mean<f64, f64> for Weibull {
+impl Mean<f64> for Weibull {
     /// Returns the mean of the weibull distribution
     ///
     /// # Formula
@@ -194,7 +195,7 @@ impl Mean<f64, f64> for Weibull {
     }
 }
 
-impl Variance<f64, f64> for Weibull {
+impl Variance<f64> for Weibull {
     /// Returns the variance of the weibull distribution
     ///
     /// # Formula

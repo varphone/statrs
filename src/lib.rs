@@ -55,3 +55,54 @@ mod testing;
 pub use result::Result;
 pub use statistics::Statistics;
 pub use error::StatsError;
+
+/// The `Mean` trait specifies am object with a closed form
+/// solution for its mean(s)
+pub trait Mean<T> {
+    /// Returns the mean. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Mean;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.5, n.mean());
+    /// ```
+    fn mean(&self) -> T;
+}
+
+/// The `Variance` trait specifies an object that has a closed form solution for
+/// its variance(s). Requires `Mean` since a closed form solution to
+/// variance by definition requires a closed form mean.
+pub trait Variance<T> : Mean<T> {
+    /// Returns the variance. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Variance;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(1.0 / 12.0, n.variance());
+    /// ```
+    fn variance(&self) -> T;
+
+    /// Returns the standard deviation. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Variance;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev());
+    /// ```
+    fn std_dev(&self) -> T;
+}

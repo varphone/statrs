@@ -3,6 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Discrete Uniform](https://en.wikipedia.org/wiki/Discrete_uniform_distribution)
@@ -143,7 +144,7 @@ impl Univariate<i64, f64> for DiscreteUniform {
     }
 }
 
-impl Mean<f64, f64> for DiscreteUniform {
+impl Mean<f64> for DiscreteUniform {
     /// Returns the mean of the discrete uniform distribution
     ///
     /// # Formula
@@ -156,7 +157,7 @@ impl Mean<f64, f64> for DiscreteUniform {
     }
 }
 
-impl Variance<f64, f64> for DiscreteUniform {
+impl Variance<f64> for DiscreteUniform {
     /// Returns the variance of the discrete uniform distribution
     ///
     /// # Formula

@@ -2,6 +2,7 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
@@ -186,7 +187,7 @@ impl Univariate<f64, f64> for ChiSquared {
     }
 }
 
-impl Mean<f64, f64> for ChiSquared {
+impl Mean<f64> for ChiSquared {
     /// Returns the mean of the chi-squared distribution
     ///
     /// # Formula
@@ -201,7 +202,7 @@ impl Mean<f64, f64> for ChiSquared {
     }
 }
 
-impl Variance<f64, f64> for ChiSquared {
+impl Variance<f64> for ChiSquared {
     /// Returns the variance of the chi-squared distribution
     ///
     /// # Formula

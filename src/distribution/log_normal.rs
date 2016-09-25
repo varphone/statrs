@@ -5,6 +5,7 @@ use consts;
 use error::StatsError;
 use function::erf;
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution)
@@ -146,7 +147,7 @@ impl Univariate<f64, f64> for LogNormal {
     }
 }
 
-impl Mean<f64, f64> for LogNormal {
+impl Mean<f64> for LogNormal {
     /// Returns the mean of the log-normal distribution
     ///
     /// # Formula
@@ -161,7 +162,7 @@ impl Mean<f64, f64> for LogNormal {
     }
 }
 
-impl Variance<f64, f64> for LogNormal {
+impl Variance<f64> for LogNormal {
     /// Returns the variance of the log-normal distribution
     ///
     /// # Formula

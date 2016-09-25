@@ -5,6 +5,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{factorial, gamma};
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Poisson](https://en.wikipedia.org/wiki/Poisson_distribution)
@@ -156,7 +157,7 @@ impl Univariate<i64, f64> for Poisson {
     }
 }
 
-impl Mean<f64, f64> for Poisson {
+impl Mean<f64> for Poisson {
     /// Returns the mean of the poisson distribution
     ///
     /// # Formula
@@ -171,7 +172,7 @@ impl Mean<f64, f64> for Poisson {
     }
 }
 
-impl Variance<f64, f64> for Poisson {
+impl Variance<f64> for Poisson {
     /// Returns the variance of the poisson distribution
     ///
     /// # Formula

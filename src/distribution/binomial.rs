@@ -4,6 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, factorial};
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
@@ -184,7 +185,7 @@ impl Univariate<i64, f64> for Binomial {
     }
 }
 
-impl Mean<f64, f64> for Binomial {
+impl Mean<f64> for Binomial {
     /// Returns the mean of the binomial distribution
     ///
     /// # Formula
@@ -197,7 +198,7 @@ impl Mean<f64, f64> for Binomial {
     }
 }
 
-impl Variance<f64, f64> for Binomial {
+impl Variance<f64> for Binomial {
     /// Returns the variance of the binomial distribution
     ///
     /// # Formula
@@ -353,6 +354,7 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(p: f64, n: i64) -> Binomial {
         let n = Binomial::new(p, n);

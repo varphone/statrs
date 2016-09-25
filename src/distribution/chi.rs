@@ -4,6 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::gamma;
 use result::Result;
+use {Mean, Variance};
 use super::*;
 
 /// Implements the [Chi](https://en.wikipedia.org/wiki/Chi_distribution)
@@ -162,7 +163,7 @@ impl Univariate<f64, f64> for Chi {
     }
 }
 
-impl Mean<f64, f64> for Chi {
+impl Mean<f64> for Chi {
     /// Returns the mean of the chi distribution
     ///
     /// # Formula
@@ -178,7 +179,7 @@ impl Mean<f64, f64> for Chi {
     }
 }
 
-impl Variance<f64, f64> for Chi {
+impl Variance<f64> for Chi {
     /// Returns the variance of the chi distribution
     ///
     /// # Formula
