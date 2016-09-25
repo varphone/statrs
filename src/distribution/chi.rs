@@ -13,7 +13,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Chi, Mean, Continuous};
+/// use statrs::distribution::{Chi, Continuous};
+/// use statrs::Mean;
 /// use statrs::prec;
 ///
 /// let n = Chi::new(2.0).unwrap();
@@ -319,6 +320,7 @@ impl Continuous<f64, f64> for Chi {
 mod test {
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);

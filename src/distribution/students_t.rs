@@ -12,7 +12,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{StudentsT, Mean, Continuous};
+/// use statrs::distribution::{StudentsT, Continuous};
+/// use statrs::Mean;
 /// use statrs::prec;
 ///
 /// let n = StudentsT::new(0.0, 1.0, 2.0).unwrap();
@@ -407,6 +408,7 @@ mod test {
     use std::f64;
     use std::panic;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(location: f64, scale: f64, freedom: f64) -> StudentsT {
         let n = StudentsT::new(location, scale, freedom);

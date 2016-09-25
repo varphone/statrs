@@ -14,7 +14,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Weibull, Mean, Continuous};
+/// use statrs::distribution::{Weibull, Continuous};
+/// use statrs::Mean;
 /// use statrs::prec;
 ///
 /// let n = Weibull::new(10.0, 1.0).unwrap();
@@ -361,6 +362,7 @@ impl Continuous<f64, f64> for Weibull {
 mod test {
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(shape: f64, scale: f64) -> Weibull {
         let n = Weibull::new(shape, scale);

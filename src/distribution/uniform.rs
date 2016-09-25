@@ -11,7 +11,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Uniform, Mean, Continuous};
+/// use statrs::distribution::{Uniform, Continuous};
+/// use statrs::Mean;
 ///
 /// let n = Uniform::new(0.0, 1.0).unwrap();
 /// assert_eq!(n.mean(), 0.5);
@@ -269,6 +270,7 @@ impl Continuous<f64, f64> for Uniform {
 mod test {
     use std::f64;
     use distribution::*;
+    use Variance;
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let n = Uniform::new(min, max);

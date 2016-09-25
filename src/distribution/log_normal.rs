@@ -14,7 +14,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{LogNormal, Mean, Continuous};
+/// use statrs::distribution::{LogNormal, Continuous};
+/// use statrs::Mean;
 /// use statrs::prec;
 ///
 /// let n = LogNormal::new(0.0, 1.0).unwrap();
@@ -299,6 +300,7 @@ impl Continuous<f64, f64> for LogNormal {
 mod test {
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(mean: f64, std_dev: f64) -> LogNormal {
         let n = LogNormal::new(mean, std_dev);

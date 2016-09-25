@@ -12,7 +12,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Gamma, Mean, Continuous};
+/// use statrs::distribution::{Gamma, Continuous};
+/// use statrs::Mean;
 /// use statrs::prec;
 ///
 /// let n = Gamma::new(3.0, 1.0).unwrap();
@@ -426,6 +427,7 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
 mod test {
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(shape: f64, rate: f64) -> Gamma {
         let n = Gamma::new(shape, rate);

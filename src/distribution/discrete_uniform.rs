@@ -12,7 +12,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{DiscreteUniform, Mean, Discrete};
+/// use statrs::distribution::{DiscreteUniform, Discrete};
+/// use statrs::Mean;
 ///
 /// let n = DiscreteUniform::new(0, 5).unwrap();
 /// assert_eq!(n.mean(), 2.5);
@@ -289,6 +290,7 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(min: i64, max: i64) -> DiscreteUniform {
         let n = DiscreteUniform::new(min, max);

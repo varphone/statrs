@@ -12,7 +12,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{ChiSquared, Mean, Continuous};
+/// use statrs::distribution::{ChiSquared, Continuous};
+/// use statrs::Mean;
 /// use statrs::prec;
 ///
 /// let n = ChiSquared::new(3.0).unwrap();

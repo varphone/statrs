@@ -13,7 +13,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Exponential, Mean, Continuous};
+/// use statrs::distribution::{Exponential, Continuous};
+/// use statrs::Mean;
 ///
 /// let n = Exponential::new(1.0).unwrap();
 /// assert_eq!(n.mean(), 1.0);
@@ -300,6 +301,7 @@ impl Continuous<f64, f64> for Exponential {
 mod test {
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(rate: f64) -> Exponential {
         let n = Exponential::new(rate);

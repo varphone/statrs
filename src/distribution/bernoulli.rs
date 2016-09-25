@@ -11,7 +11,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Bernoulli, Mean, Discrete};
+/// use statrs::distribution::{Bernoulli, Discrete};
+/// use statrs::Mean;
 ///
 /// let n = Bernoulli::new(0.5).unwrap();
 /// assert_eq!(n.mean(), 0.5);

@@ -14,7 +14,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Normal, Mean, Continuous};
+/// use statrs::distribution::{Normal, Continuous};
+/// use statrs::Mean;
 ///
 /// let n = Normal::new(0.0, 1.0).unwrap();
 /// assert_eq!(n.mean(), 0.0);
@@ -312,6 +313,7 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 mod test {
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(mean: f64, std_dev: f64) -> Normal {
         let n = Normal::new(mean, std_dev);

@@ -14,7 +14,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Poisson, Mean, Discrete};
+/// use statrs::distribution::{Poisson, Discrete};
+/// use statrs::Mean;
 /// use statrs::prec;
 ///
 /// let n = Poisson::new(1.0).unwrap();
@@ -351,6 +352,7 @@ mod test {
     use std::f64;
     use std::i64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(lambda: f64) -> Poisson {
         let n = Poisson::new(lambda);

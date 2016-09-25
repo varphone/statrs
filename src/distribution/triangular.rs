@@ -11,7 +11,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Triangular, Mean, Continuous};
+/// use statrs::distribution::{Triangular, Continuous};
+/// use statrs::Mean;
 ///
 /// let n = Triangular::new(0.0, 5.0, 2.5).unwrap();
 /// assert_eq!(n.mean(), 7.5 / 3.0);
@@ -333,6 +334,7 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
 mod test {
     use std::f64;
     use distribution::*;
+    use Variance;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
         let n = Triangular::new(min, max, mode);

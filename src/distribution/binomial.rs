@@ -13,7 +13,8 @@ use super::*;
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Binomial, Mean, Discrete};
+/// use statrs::distribution::{Binomial, Discrete};
+/// use statrs::Mean;
 ///
 /// let n = Binomial::new(0.5, 5).unwrap();
 /// assert_eq!(n.mean(), 2.5);

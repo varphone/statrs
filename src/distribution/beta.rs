@@ -458,6 +458,7 @@ impl Continuous<f64, f64> for Beta {
 mod test {
     use std::f64;
     use distribution::*;
+    use {Mean, Variance};
 
     fn try_create(shape_a: f64, shape_b: f64) -> Beta {
         let n = Beta::new(shape_a, shape_b);
