@@ -111,35 +111,6 @@ pub trait Statistics {
     /// ```
     fn abs_max(&self) -> f64;
 
-    /// Evaluates the sample mean, an estimate of the population
-    /// mean.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #[macro_use]
-    /// extern crate statrs;
-    ///
-    /// use std::f64;
-    /// use statrs::statistics::Statistics;
-    ///
-    /// # fn main() {
-    /// let x = [];
-    /// assert!(x.mean().is_nan());
-    ///
-    /// let y = [0.0, f64::NAN, 3.0, -2.0];
-    /// assert!(y.mean().is_nan());
-    ///
-    /// let z = [0.0, 3.0, -2.0];
-    /// assert_almost_eq!(z.mean(), 1.0 / 3.0, 1e-15);
-    /// # }
-    /// ```
-    fn mean(&self) -> f64;
-
     /// Evaluates the geometric mean of the data
     ///
     /// # Remarks
@@ -214,31 +185,6 @@ pub trait Statistics {
     /// ```
     fn harmonic_mean(&self) -> f64;
 
-    /// Estimates the unbiased population variance from the provided samples
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-    ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::f64;
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let x = [];
-    /// assert!(x.variance().is_nan());
-    ///
-    /// let y = [0.0, f64::NAN, 3.0, -2.0];
-    /// assert!(y.variance().is_nan());
-    ///
-    /// let z = [0.0, 3.0, -2.0];
-    /// assert_eq!(z.variance(), 19.0 / 3.0);
-    /// ```
-    fn variance(&self) -> f64;
-
     /// Evaluates the population variance from a full population.
     ///
     /// # Remarks
@@ -264,31 +210,6 @@ pub trait Statistics {
     /// assert_eq!(z.population_variance(), 38.0 / 9.0);
     /// ```
     fn population_variance(&self) -> f64;
-
-    /// Estimates the unbiased population standard deviation from the provided samples
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-    ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::f64;
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let x = [];
-    /// assert!(x.std_dev().is_nan());
-    ///
-    /// let y = [0.0, f64::NAN, 3.0, -2.0];
-    /// assert!(y.std_dev().is_nan());
-    ///
-    /// let z = [0.0, 3.0, -2.0];
-    /// assert_eq!(z.std_dev(), (19f64 / 3.0).sqrt());
-    /// ```
-    fn std_dev(&self) -> f64;
 
     /// Evaluates the population standard deviation from a full population.
     ///
