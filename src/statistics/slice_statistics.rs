@@ -132,30 +132,49 @@ impl Statistics for [f64] {
             .sqrt()
     }
 
-    /// Returns the order statistic `(order 1..N)` from the data
-    ///
-    /// # Remarks
-    ///
-    /// No sorting is assumed. Order must be one-based (between `1` and `N` inclusive).
-    /// Returns `f64::NAN` if order is outside the viable range or data is empty.
-    ///
-    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let mut x = [];
-    /// assert!(x.order_statistic(1).is_nan());
-    ///
-    /// let mut y = [0.0, 3.0, -2.0];
-    /// assert!(y.order_statistic(0).is_nan());
-    /// assert!(y.order_statistic(4).is_nan());
-    /// assert_eq!(y.order_statistic(2), 0.0);
-    /// assert!(y != [0.0, 3.0, -2.0]);
-    /// ```
-    fn order_statistic(&mut self, order: usize) -> f64 {
+    fn order_statistic(&self, order: usize) -> f64 {
+        let mut copy = self.to_vec();
+        copy.order_statistic_inplace(order)
+    }
+
+    fn median(&self) -> f64 {
+        let mut copy = self.to_vec();
+        copy.median_inplace()
+    }
+
+    fn quantile(&self, tau: f64) -> f64 {
+        let mut copy = self.to_vec();
+        copy.quantile_inplace(tau)
+    }
+
+    fn percentile(&self, p: usize) -> f64 {
+        let mut copy = self.to_vec();
+        copy.percentile_inplace(p)
+    }
+
+    fn lower_quartile(&self) -> f64 {
+        let mut copy = self.to_vec();
+        copy.lower_quartile_inplace()
+    }
+
+    fn upper_quartile(&self) -> f64 {
+        let mut copy = self.to_vec();
+        copy.upper_quartile_inplace()
+    }
+
+    fn interquartile_range(&self) -> f64 {
+        let mut copy = self.to_vec();
+        copy.interquartile_range_inplace()
+    }
+
+    fn ranks(&self, tie_breaker: RankTieBreaker) -> Vec<f64> {
+        let mut copy = self.to_vec();
+        copy.ranks_inplace(tie_breaker)
+    }
+}
+
+impl InplaceStatistics for [f64] {
+    fn order_statistic_inplace(&mut self, order: usize) -> f64 {
         let n = self.len();
         match order {
             1 => self.min(),
@@ -165,27 +184,7 @@ impl Statistics for [f64] {
         }
     }
 
-    /// Returns the median value from the data
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    ///
-    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let mut x = [];
-    /// assert!(x.median().is_nan());
-    ///
-    /// let mut y = [0.0, 3.0, -2.0];
-    /// assert_eq!(y.median(), 0.0);
-    /// assert!(y != [0.0, 3.0, -2.0]);
-    /// ```
-    fn median(&mut self) -> f64 {
+    fn median_inplace(&mut self) -> f64 {
         let k = self.len() / 2;
         if self.len() % 2 != 0 {
             select_inplace(self, k)
@@ -194,31 +193,7 @@ impl Statistics for [f64] {
         }
     }
 
-    /// Estimates the tau-th quantile from the data. The tau-th quantile
-    /// is the data value where the cumulative distribution function crosses tau.
-    ///
-    /// # Remarks
-    ///
-    /// No sorting is assumed. Tau must be between `0` and `1` inclusive.
-    /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
-    ///
-    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let mut x = [];
-    /// assert!(x.quantile(0.5).is_nan());
-    ///
-    /// let mut y = [0.0, 3.0, -2.0];
-    /// assert!(y.quantile(-1.0).is_nan());
-    /// assert!(y.quantile(2.0).is_nan());
-    /// assert_eq!(y.quantile(0.5), 0.0);
-    /// assert!(y != [0.0, 3.0, -2.0]);
-    /// ```
-    fn quantile(&mut self, tau: f64) -> f64 {
+    fn quantile_inplace(&mut self, tau: f64) -> f64 {
         if tau < 0.0 || tau > 1.0 || self.len() == 0 {
             return f64::NAN;
         }
@@ -238,140 +213,23 @@ impl Statistics for [f64] {
         a + (h - hf as f64) * (b - a)
     }
 
-    /// Estimates the p-Percentile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Use quantile for non-integer percentiles. `p` must be between `0` and `100` inclusive.
-    /// Returns `f64::NAN` if data is empty or `p` is outside the inclusive range.
-    ///
-    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::Statistics;
-    ///
-    /// let mut x = [];
-    /// assert!(x.percentile(0).is_nan());
-    ///
-    /// let mut y = [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0];
-    /// assert_eq!(y.percentile(0), 1.0);
-    /// assert_eq!(y.percentile(50), 5.5);
-    /// assert_eq!(y.percentile(100), 10.0);
-    /// assert!(y.percentile(105).is_nan());
-    /// assert!(y != [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0]);
-    /// ```
-    fn percentile(&mut self, p: usize) -> f64 {
-        self.quantile(p as f64 / 100.0)
+    fn percentile_inplace(&mut self, p: usize) -> f64 {
+        self.quantile_inplace(p as f64 / 100.0)
     }
 
-    /// Estimates the first quartile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    ///
-    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #[macro_use]
-    /// extern crate statrs;
-    ///
-    /// use statrs::statistics::Statistics;
-    ///
-    /// # fn main() {
-    /// let mut x = [];
-    /// assert!(x.lower_quartile().is_nan());
-    ///
-    /// let mut y = [2.0, 1.0, 3.0, 4.0];
-    /// assert_almost_eq!(y.lower_quartile(), 1.416666666666666, 1e-15);
-    /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
-    /// # }
-    /// ```
-    fn lower_quartile(&mut self) -> f64 {
-        self.quantile(0.25)
+    fn lower_quartile_inplace(&mut self) -> f64 {
+        self.quantile_inplace(0.25)
     }
 
-    /// Estimates the third quartile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    ///
-    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #[macro_use]
-    /// extern crate statrs;
-    ///
-    /// use statrs::statistics::Statistics;
-    ///
-    /// # fn main() {
-    /// let mut x = [];
-    /// assert!(x.lower_quartile().is_nan());
-    ///
-    /// let mut y = [2.0, 1.0, 3.0, 4.0];
-    /// assert_almost_eq!(y.upper_quartile(), 3.5833333333333333, 1e-15);
-    /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
-    /// # }
-    /// ```
-    fn upper_quartile(&mut self) -> f64 {
-        self.quantile(0.75)
+    fn upper_quartile_inplace(&mut self) -> f64 {
+        self.quantile_inplace(0.75)
     }
 
-    /// Estimates the inter-quartile range from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    ///
-    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #[macro_use]
-    /// extern crate statrs;
-    ///
-    /// use statrs::statistics::Statistics;
-    ///
-    /// # fn main() {
-    /// let mut x = [];
-    /// assert!(x.interquartile_range().is_nan());
-    ///
-    /// let mut y = [2.0, 1.0, 3.0, 4.0];
-    /// assert_almost_eq!(y.interquartile_range(), 2.166666666666667, 1e-15);
-    /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
-    /// # }
-    /// ```
-    fn interquartile_range(&mut self) -> f64 {
-        self.upper_quartile() - self.lower_quartile()
+    fn interquartile_range_inplace(&mut self) -> f64 {
+        self.upper_quartile_inplace() - self.lower_quartile_inplace()
     }
 
-    /// Evaluates the rank of each entry of the data.
-    ///
-    /// # Remarks
-    ///
-    /// **NOTE:** This method works inplace for arrays and may cause the array to be reordered
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::{Statistics, RankTieBreaker};
-    ///
-    /// let mut x = [];
-    /// assert_eq!(x.ranks(RankTieBreaker::Average).len(), 0);
-    ///
-    /// let y = [1.0, 3.0, 2.0, 2.0];
-    /// assert_eq!((&mut y.clone()).ranks(RankTieBreaker::Average), [1.0, 4.0, 2.5, 2.5]);
-    /// assert_eq!((&mut y.clone()).ranks(RankTieBreaker::Min), [1.0, 4.0, 2.0, 2.0]);
-    /// ```
-    fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64> {
+    fn ranks_inplace(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64> {
         let n = self.len();
         let mut ranks: Vec<f64> = vec![0.0; n];
         let mut index: Vec<usize> = (0..n).collect();

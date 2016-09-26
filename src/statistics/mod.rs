@@ -341,16 +341,15 @@ pub trait Statistics {
     /// ```
     /// use statrs::statistics::Statistics;
     ///
-    /// let mut x = [];
+    /// let x = [];
     /// assert!(x.order_statistic(1).is_nan());
     ///
-    /// let mut y = [0.0, 3.0, -2.0];
+    /// let y = [0.0, 3.0, -2.0];
     /// assert!(y.order_statistic(0).is_nan());
     /// assert!(y.order_statistic(4).is_nan());
     /// assert_eq!(y.order_statistic(2), 0.0);
-    /// assert!(y != [0.0, 3.0, -2.0]);
     /// ```
-    fn order_statistic(&mut self, order: usize) -> f64;
+    fn order_statistic(&self, order: usize) -> f64;
 
     /// Returns the median value from the data
     ///
