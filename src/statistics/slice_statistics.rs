@@ -770,6 +770,15 @@ mod test {
         assert_eq!(data.order_statistic(8), 6.0);
         assert_eq!(data.order_statistic(9), 10.0);
         assert!(data.order_statistic(10).is_nan());
+
+        assert!(data.order_statistic_inplace(0).is_nan());
+        assert_eq!(data.order_statistic_inplace(1), -3.0);
+        assert_eq!(data.order_statistic_inplace(2), -1.0);
+        assert_eq!(data.order_statistic_inplace(3), -0.5);
+        assert_eq!(data.order_statistic_inplace(7), 5.0);
+        assert_eq!(data.order_statistic_inplace(8), 6.0);
+        assert_eq!(data.order_statistic_inplace(9), 10.0);
+        assert!(data.order_statistic_inplace(10).is_nan());
     }
 
     #[test]
@@ -784,6 +793,16 @@ mod test {
         assert_eq!(data.quantile(0.99), 10.0);
         assert_almost_eq!(data.quantile(0.52), 287.0 / 375.0, 1e-15);
         assert_almost_eq!(data.quantile(0.325), -37.0 / 240.0, 1e-15);
+
+        assert_eq!(data.quantile_inplace(0.0), -3.0);
+        assert_eq!(data.quantile_inplace(1.0), 10.0);
+        assert_almost_eq!(data.quantile_inplace(0.5), 3.0 / 5.0, 1e-15);
+        assert_almost_eq!(data.quantile_inplace(0.2), -4.0 / 5.0, 1e-15);
+        assert_eq!(data.quantile_inplace(0.7), 137.0 / 30.0);
+        assert_eq!(data.quantile_inplace(0.01), -3.0);
+        assert_eq!(data.quantile_inplace(0.99), 10.0);
+        assert_almost_eq!(data.quantile_inplace(0.52), 287.0 / 375.0, 1e-15);
+        assert_almost_eq!(data.quantile_inplace(0.325), -37.0 / 240.0, 1e-15);
     }
 
     // TODO: need coverage for case where data.length > 10 to cover quick sort
@@ -800,6 +819,15 @@ mod test {
         assert_eq!(sorted_distinct.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
         assert_eq!(sorted_ties.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
 
+         assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Average), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::Average), [1.0, 2.5, 2.5, 4.0, 5.5, 5.5, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Min), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::Min), [1.0, 2.0, 2.0, 4.0, 5.0, 5.0, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Max), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::Max), [1.0, 3.0, 3.0, 4.0, 6.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+
         let distinct = [1.0, 8.0, 12.0, 7.0, 2.0, 9.0, 10.0, 4.0];
         let ties = [1.0, 9.0, 12.0, 7.0, 2.0, 9.0, 10.0, 2.0];
         assert_eq!(distinct.clone().ranks(RankTieBreaker::Average), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
@@ -810,24 +838,37 @@ mod test {
         assert_eq!(ties.clone().ranks(RankTieBreaker::Max), [1.0, 6.0, 8.0, 4.0, 3.0, 6.0, 7.0, 3.0]);
         assert_eq!(distinct.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
         assert_eq!(ties.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+
+        assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::Average), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::Average), [1.0, 5.5, 8.0, 4.0, 2.5, 5.5, 7.0, 2.5]);
+        assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 5.0, 7.0, 2.0]);
+        assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::Max), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::Max), [1.0, 6.0, 8.0, 4.0, 3.0, 6.0, 7.0, 3.0]);
+        assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
     }
 
     #[test]
     fn test_median_short() {
         let mut even = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0, 6.0];
         assert_eq!(even.median(), 0.6);
+        assert_eq!(even.median_inplace(), 0.6);
 
         let mut odd = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0];
         assert_eq!(odd.median(), 0.2);
+        assert_eq!(odd.median_inplace(), 0.2);
     }
 
     #[test]
     fn test_median_long_constant_seq() {
         let mut even = vec![2.0; 100000];
         assert_eq!(2.0, even.median());
+        assert_eq!(2.0, even.median_inplace());
 
         let mut odd = vec![2.0; 100001];
         assert_eq!(2.0, odd.median());
+        assert_eq!(2.0, odd.median_inplace());
     }
 
     #[test]
@@ -899,15 +940,19 @@ mod test {
     fn test_median_robust_on_infinities() {
         let mut data3 = [2.0, f64::NEG_INFINITY, f64::INFINITY];
         assert_eq!(data3.median(), 2.0);
+        assert_eq!(data3.median_inplace(), 2.0);
 
         data3 = [f64::NEG_INFINITY, 2.0, f64::INFINITY];
         assert_eq!(data3.median(), 2.0);
+        assert_eq!(data3.median_inplace(), 2.0);
 
         data3 = [f64::NEG_INFINITY, f64::INFINITY, 2.0];
         assert_eq!(data3.median(), 2.0);
+        assert_eq!(data3.median_inplace(), 2.0);
 
         let mut data4 = [f64::NEG_INFINITY, 2.0, 3.0, f64::INFINITY];
         assert_eq!(data4.median(), 2.5);
+        assert_eq!(data4.median_inplace(), 2.5);
     }
 
     #[test]
