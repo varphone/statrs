@@ -53,7 +53,6 @@ mod error;
 mod testing;
 
 pub use result::Result;
-pub use statistics::Statistics;
 pub use error::StatsError;
 
 /// The `Mean` trait specifies am object with a closed form
