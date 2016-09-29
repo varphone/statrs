@@ -19,52 +19,6 @@ pub enum RankTieBreaker {
 /// The `Statistics` trait provides a host of statistical utilities for analzying
 /// data sets
 pub trait Statistics {
-    /// Returns the minimum value in the data
-    ///
-    /// # Rermarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::f64;
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let x = [];
-    /// assert!(x.min().is_nan());
-    ///
-    /// let y = [0.0, f64::NAN, 3.0, -2.0];
-    /// assert!(y.min().is_nan());
-    ///
-    /// let z = [0.0, 3.0, -2.0];
-    /// assert_eq!(z.min(), -2.0);
-    /// ```
-    fn min(&self) -> f64;
-
-    /// Returns the maximum value in the data
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::f64;
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let x = [];
-    /// assert!(x.max().is_nan());
-    ///
-    /// let y = [0.0, f64::NAN, 3.0, -2.0];
-    /// assert!(y.max().is_nan());
-    ///
-    /// let z = [0.0, 3.0, -2.0];
-    /// assert_eq!(z.max(), 3.0);
-    /// ```
-    fn max(&self) -> f64;
-
     /// Returns the minimum absolute value in the data
     ///
     /// # Rermarks

@@ -1,27 +1,9 @@
 use std::f64;
 use error::StatsError;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 impl Statistics for [f64] {
-    fn min(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        self.iter().fold(f64::INFINITY,
-                         |acc, &x| if x < acc || x.is_nan() { x } else { acc })
-    }
-
-    fn max(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        self.iter().fold(f64::NEG_INFINITY,
-                         |acc, &x| if x > acc || x.is_nan() { x } else { acc })
-    }
-
     fn abs_min(&self) -> f64 {
         if self.len() == 0 {
             return f64::NAN;
@@ -273,6 +255,70 @@ impl InplaceStatistics for [f64] {
                 ranks
             }
         }
+    }
+}
+
+impl Min<f64> for [f64] {
+    /// Returns the minimum value in the data
+    ///
+    /// # Rermarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::Min;
+    ///
+    /// let x = [];
+    /// assert!(x.min().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.min().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.min(), -2.0);
+    /// ```
+    fn min(&self) -> f64 {
+        if self.len() == 0 {
+            return f64::NAN;
+        }
+
+        self.iter().fold(f64::INFINITY,
+                         |acc, &x| if x < acc || x.is_nan() { x } else { acc })
+    }
+}
+
+impl Max<f64> for [f64] {
+    /// Returns the maximum value in the data
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::Max;
+    ///
+    /// let x = [];
+    /// assert!(x.max().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.max().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.max(), 3.0);
+    /// ```
+    fn max(&self) -> f64 {
+        if self.len() == 0 {
+            return f64::NAN;
+        }
+
+        self.iter().fold(f64::NEG_INFINITY,
+                         |acc, &x| if x > acc || x.is_nan() { x } else { acc })
     }
 }
 
@@ -694,7 +740,7 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
 mod test {
     use std::f64::{self, consts};
     use generate;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
     use statistics::*;
     use testing;
 
