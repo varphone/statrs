@@ -55,7 +55,7 @@ mod testing;
 pub use result::Result;
 pub use error::StatsError;
 
-/// The `Mean` trait specifies am object with a closed form
+/// The `Mean` trait specifies than an object has a closed form
 /// solution for its mean(s)
 pub trait Mean<T> {
     /// Returns the mean. May panic depending
@@ -73,7 +73,7 @@ pub trait Mean<T> {
     fn mean(&self) -> T;
 }
 
-/// The `Variance` trait specifies an object that has a closed form solution for
+/// The `Variance` trait specifies that an object has a closed form solution for
 /// its variance(s). Requires `Mean` since a closed form solution to
 /// variance by definition requires a closed form mean.
 pub trait Variance<T>: Mean<T> {
