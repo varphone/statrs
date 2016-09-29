@@ -689,4 +689,3 @@ pub trait InplaceStatistics {
     /// ```
     fn ranks_inplace(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64>;
 }
-

@@ -151,17 +151,9 @@ impl Univariate<f64, f64> for Beta {
         if x == 1.0 {
             1.0
         } else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
-            if x < 0.5 {
-                0.0
-            } else {
-                1.0
-            }
+            if x < 0.5 { 0.0 } else { 1.0 }
         } else if self.shape_a == f64::INFINITY {
-            if x < 1.0 {
-                0.0
-            } else {
-                1.0
-            }
+            if x < 1.0 { 0.0 } else { 1.0 }
         } else if self.shape_b == f64::INFINITY {
             1.0
         } else if self.shape_a == 1.0 && self.shape_b == 1.0 {
@@ -366,23 +358,11 @@ impl Continuous<f64, f64> for Beta {
         assert!(x >= 0.0 && x <= 1.0,
                 format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
         if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
-            if x == 0.5 {
-                f64::INFINITY
-            } else {
-                0.0
-            }
+            if x == 0.5 { f64::INFINITY } else { 0.0 }
         } else if self.shape_a == f64::INFINITY {
-            if x == 1.0 {
-                f64::INFINITY
-            } else {
-                0.0
-            }
+            if x == 1.0 { f64::INFINITY } else { 0.0 }
         } else if self.shape_b == f64::INFINITY {
-            if x == 0.0 {
-                f64::INFINITY
-            } else {
-                0.0
-            }
+            if x == 0.0 { f64::INFINITY } else { 0.0 }
         } else if self.shape_a == 1.0 && self.shape_b == 1.0 {
             1.0
         } else if self.shape_a > 80.0 || self.shape_b > 80.0 {

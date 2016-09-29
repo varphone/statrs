@@ -359,7 +359,7 @@ impl Variance<f64> for [f64] {
             var / (self.len() - 1) as f64
         }
     }
-    
+
     /// Estimates the unbiased population standard deviation from the provided samples
     ///
     /// # Remarks

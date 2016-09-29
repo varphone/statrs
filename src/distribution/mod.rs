@@ -2,6 +2,7 @@
 //! concrete implementations for a variety of distributions.
 
 use rand::Rng;
+use {Min, Max};
 
 pub use self::bernoulli::Bernoulli;
 pub use self::beta::Beta;
@@ -67,7 +68,7 @@ pub trait Distribution<T> {
 /// The `Univariate` trait is used to specify an interface for univariate
 /// distributions e.g. distributions that have a closed form cumulative distribution
 /// function
-pub trait Univariate<T, K>: Distribution<K> {
+pub trait Univariate<T, K>: Distribution<K> + Min<T> + Max<T> {
     /// Returns the cumulative distribution function calculated
     /// at `x` for a given distribution. May panic depending
     /// on the implementor.
@@ -81,34 +82,6 @@ pub trait Univariate<T, K>: Distribution<K> {
     /// assert_eq!(0.5, n.cdf(0.5));
     /// ```
     fn cdf(&self, x: K) -> K;
-
-    /// Returns the minimum value in the domain of a given distribution
-    /// representable by a double-precision float. May panic depending on
-    /// the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Univariate, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.0, n.min());
-    /// ```
-    fn min(&self) -> T;
-
-    /// Returns the maximum value in the domain of a given distribution
-    /// representable by a double-precision float. May panic depending on
-    /// the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Univariate, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(1.0, n.max());
-    /// ```
-    fn max(&self) -> T;
 }
 
 /// The `Entropy` trait specifies a distribution with a closed form solution

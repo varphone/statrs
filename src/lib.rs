@@ -76,7 +76,7 @@ pub trait Mean<T> {
 /// The `Variance` trait specifies an object that has a closed form solution for
 /// its variance(s). Requires `Mean` since a closed form solution to
 /// variance by definition requires a closed form mean.
-pub trait Variance<T> : Mean<T> {
+pub trait Variance<T>: Mean<T> {
     /// Returns the variance. May panic depending
     /// on the implementor.
     ///
@@ -104,4 +104,38 @@ pub trait Variance<T> : Mean<T> {
     /// assert_eq!((1f64 / 12f64).sqrt(), n.std_dev());
     /// ```
     fn std_dev(&self) -> T;
+}
+
+/// The `Min` trait specifies than an object has a minimum value
+pub trait Min<T> {
+    /// Returns the minimum value in the domain of a given distribution
+    /// representable by a double-precision float. May panic depending on
+    /// the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{Univariate, Uniform};
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.0, n.min());
+    /// ```
+    fn min(&self) -> T;
+}
+
+/// The `Max` trait specifies that an object has a maximum value
+pub trait Max<T> {
+    /// Returns the maximum value in the domain of a given distribution
+    /// representable by a double-precision float. May panic depending on
+    /// the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{Univariate, Uniform};
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(1.0, n.max());
+    /// ```
+    fn max(&self) -> T;
 }
