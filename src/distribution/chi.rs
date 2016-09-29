@@ -4,7 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::gamma;
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Chi](https://en.wikipedia.org/wiki/Chi_distribution)
@@ -138,7 +138,9 @@ impl Univariate<f64, f64> for Chi {
             gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0)
         }
     }
+}
 
+impl Min<f64> for Chi {
     /// Returns the minimum value in the domain of the chi distribution
     /// representable by a double precision float
     ///
@@ -150,7 +152,9 @@ impl Univariate<f64, f64> for Chi {
     fn min(&self) -> f64 {
         0.0
     }
+}
 
+impl Max<f64> for Chi {
     /// Returns the maximum value in the domain of the chi distribution
     /// representable by a double precision float
     ///
@@ -320,7 +324,7 @@ impl Continuous<f64, f64> for Chi {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);

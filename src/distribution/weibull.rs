@@ -5,7 +5,7 @@ use consts;
 use error::StatsError;
 use function::{gamma, stable};
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Weibull](https://en.wikipedia.org/wiki/Weibull_distribution)
@@ -154,7 +154,9 @@ impl Univariate<f64, f64> for Weibull {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         -stable::exp_minus_one(-x.powf(self.shape) * self.scale_pow_shape_inv)
     }
+}
 
+impl Min<f64> for Weibull {
     /// Returns the minimum value in the domain of the weibull
     /// distribution representable by a double precision float
     ///
@@ -166,7 +168,9 @@ impl Univariate<f64, f64> for Weibull {
     fn min(&self) -> f64 {
         0.0
     }
+}
 
+impl Max<f64> for Weibull {
     /// Returns the maximum value in the domain of the weibull
     /// distribution representable by a double precision float
     ///
@@ -362,7 +366,7 @@ impl Continuous<f64, f64> for Weibull {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(shape: f64, scale: f64) -> Weibull {
         let n = Weibull::new(shape, scale);

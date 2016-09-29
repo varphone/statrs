@@ -5,7 +5,7 @@ use consts;
 use error::StatsError;
 use function::erf;
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution)
@@ -122,7 +122,9 @@ impl Univariate<f64, f64> for LogNormal {
         assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
     }
+}
 
+impl Min<f64> for LogNormal {
     /// Returns the minimum value in the domain of the log-normal
     /// distribution representable by a double precision float
     ///
@@ -134,7 +136,9 @@ impl Univariate<f64, f64> for LogNormal {
     fn min(&self) -> f64 {
         0.0
     }
+}
 
+impl Max<f64> for LogNormal {
     /// Returns the maximum value in the domain of the log-normal
     /// distribution representable by a double precision float
     ///
@@ -300,7 +304,7 @@ impl Continuous<f64, f64> for LogNormal {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(mean: f64, std_dev: f64) -> LogNormal {
         let n = LogNormal::new(mean, std_dev);

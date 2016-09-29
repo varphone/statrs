@@ -4,7 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, gamma};
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Beta](https://en.wikipedia.org/wiki/Beta_distribution) distribution
@@ -162,7 +162,9 @@ impl Univariate<f64, f64> for Beta {
             beta::beta_reg(self.shape_a, self.shape_b, x)
         }
     }
+}
 
+impl Min<f64> for Beta {
     /// Returns the minimum value in the domain of the
     /// beta distribution representable by a double precision
     /// float
@@ -175,7 +177,9 @@ impl Univariate<f64, f64> for Beta {
     fn min(&self) -> f64 {
         0.0
     }
+}
 
+impl Max<f64> for Beta {
     /// Returns the maximum value in the domain of the
     /// beta distribution representable by a double precision
     /// float
@@ -438,7 +442,7 @@ impl Continuous<f64, f64> for Beta {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(shape_a: f64, shape_b: f64) -> Beta {
         let n = Beta::new(shape_a, shape_b);

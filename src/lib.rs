@@ -115,7 +115,8 @@ pub trait Min<T> {
     /// # Examples
     ///
     /// ```
-    /// use statrs::distribution::{Univariate, Uniform};
+    /// use statrs::Min;
+    /// use statrs::distribution::Uniform;
     ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(0.0, n.min());
@@ -132,7 +133,8 @@ pub trait Max<T> {
     /// # Examples
     ///
     /// ```
-    /// use statrs::distribution::{Univariate, Uniform};
+    /// use statrs::Max;
+    /// use statrs::distribution::Uniform;
     ///
     /// let n = Uniform::new(0.0, 1.0).unwrap();
     /// assert_eq!(1.0, n.max());

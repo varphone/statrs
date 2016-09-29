@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Continuous Uniform](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) distribution
@@ -119,11 +119,15 @@ impl Univariate<f64, f64> for Uniform {
         }
         (x - self.min) / (self.max - self.min)
     }
+}
 
+impl Min<f64> for Uniform {
     fn min(&self) -> f64 {
         self.min
     }
+}
 
+impl Max<f64> for Uniform {
     fn max(&self) -> f64 {
         self.max
     }
@@ -270,7 +274,7 @@ impl Continuous<f64, f64> for Uniform {
 mod test {
     use std::f64;
     use distribution::*;
-    use Variance;
+    use {Min, Max, Variance};
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let n = Uniform::new(min, max);

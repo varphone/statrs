@@ -4,7 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::gamma;
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
@@ -165,7 +165,9 @@ impl Univariate<f64, f64> for Gamma {
             gamma::gamma_lr(self.shape, x * self.rate)
         }
     }
+}
 
+impl Min<f64> for Gamma {
     /// Returns the minimum value in the domain of the
     /// gamma distribution representable by a double precision
     /// float
@@ -178,7 +180,9 @@ impl Univariate<f64, f64> for Gamma {
     fn min(&self) -> f64 {
         0.0
     }
+}
 
+impl Max<f64> for Gamma {
     /// Returns the maximum value in the domain of the
     /// gamma distribution representable by a double precision
     /// float
@@ -427,7 +431,7 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(shape: f64, rate: f64) -> Gamma {
         let n = Gamma::new(shape, rate);

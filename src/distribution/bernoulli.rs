@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
@@ -142,7 +142,9 @@ impl Univariate<i64, f64> for Bernoulli {
     fn cdf(&self, x: f64) -> f64 {
         self.b.cdf(x)
     }
+}
 
+impl Min<i64> for Bernoulli {
     /// Returns the minimum value in the domain of the
     /// bernoulli distribution representable by a 64-
     /// bit integer
@@ -155,7 +157,9 @@ impl Univariate<i64, f64> for Bernoulli {
     fn min(&self) -> i64 {
         0
     }
+}
 
+impl Max<i64> for Bernoulli {
     /// Returns the maximum value in the domain of the
     /// bernoulli distribution representable by a 64-
     /// bit integer

@@ -5,7 +5,7 @@ use consts;
 use error::StatsError;
 use function::erf;
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
@@ -116,7 +116,9 @@ impl Univariate<f64, f64> for Normal {
     fn cdf(&self, x: f64) -> f64 {
         cdf_unchecked(x, self.mean, self.std_dev)
     }
+}
 
+impl Min<f64> for Normal {
     /// Returns the minimum value in the domain of the
     /// normal distribution representable by a double precision float
     ///
@@ -128,7 +130,9 @@ impl Univariate<f64, f64> for Normal {
     fn min(&self) -> f64 {
         f64::NEG_INFINITY
     }
+}
 
+impl Max<f64> for Normal {
     /// Returns the maximum value in the domain of the
     /// normal distribution representable by a double precision float
     ///
@@ -313,7 +317,7 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(mean: f64, std_dev: f64) -> Normal {
         let n = Normal::new(mean, std_dev);

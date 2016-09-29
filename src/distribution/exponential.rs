@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
@@ -131,7 +131,9 @@ impl Univariate<f64, f64> for Exponential {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         1.0 - (-self.rate * x).exp()
     }
+}
 
+impl Min<f64> for Exponential {
     /// Returns the minimum value in the domain of the exponential
     /// distribution representable by a double precision float
     ///
@@ -143,7 +145,9 @@ impl Univariate<f64, f64> for Exponential {
     fn min(&self) -> f64 {
         0.0
     }
+}
 
+impl Max<f64> for Exponential {
     /// Returns the maximum value in the domain of the exponential
     /// distribution representable by a double precision float
     ///
@@ -301,7 +305,7 @@ impl Continuous<f64, f64> for Exponential {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(rate: f64) -> Exponential {
         let n = Exponential::new(rate);

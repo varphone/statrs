@@ -4,7 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, gamma};
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Student's T](https://en.wikipedia.org/wiki/Student%27s_t-distribution) distribution
@@ -176,7 +176,9 @@ impl Univariate<f64, f64> for StudentsT {
             if x <= self.location { ib } else { 1.0 - ib }
         }
     }
+}
 
+impl Min<f64> for StudentsT {
     /// Returns the minimum value in the domain of the student's t-distribution
     /// representable by a double precision float
     ///
@@ -188,7 +190,9 @@ impl Univariate<f64, f64> for StudentsT {
     fn min(&self) -> f64 {
         f64::NEG_INFINITY
     }
+}
 
+impl Max<f64> for StudentsT {
     /// Returns the maximum value in the domain of the student's t-distribution
     /// representable by a double precision float
     ///
@@ -408,7 +412,7 @@ mod test {
     use std::f64;
     use std::panic;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(location: f64, scale: f64, freedom: f64) -> StudentsT {
         let n = StudentsT::new(location, scale, freedom);

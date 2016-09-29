@@ -5,7 +5,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{factorial, gamma};
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Poisson](https://en.wikipedia.org/wiki/Poisson_distribution)
@@ -132,7 +132,9 @@ impl Univariate<i64, f64> for Poisson {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         1.0 - gamma::gamma_lr(x + 1.0, self.lambda)
     }
+}
 
+impl Min<i64> for Poisson {
     /// Returns the minimum value in the domain of the poisson distribution
     /// representable by a 64-bit integer
     ///
@@ -144,7 +146,9 @@ impl Univariate<i64, f64> for Poisson {
     fn min(&self) -> i64 {
         0
     }
+}
 
+impl Max<i64> for Poisson {
     /// Returns the maximum value in the domain of the poisson distribution
     /// representable by a 64-bit integer
     ///
@@ -352,7 +356,7 @@ mod test {
     use std::f64;
     use std::i64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(lambda: f64) -> Poisson {
         let n = Poisson::new(lambda);

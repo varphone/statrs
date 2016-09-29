@@ -2,7 +2,7 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
@@ -160,7 +160,9 @@ impl Univariate<f64, f64> for ChiSquared {
     fn cdf(&self, x: f64) -> f64 {
         self.g.cdf(x)
     }
+}
 
+impl Min<f64> for ChiSquared {
     /// Returns the minimum value in the domain of the
     /// chi-squared distribution representable by a double precision
     /// float
@@ -173,7 +175,9 @@ impl Univariate<f64, f64> for ChiSquared {
     fn min(&self) -> f64 {
         0.0
     }
+}
 
+impl Max<f64> for ChiSquared {
     /// Returns the maximum value in the domain of the
     /// chi-squared distribution representable by a double precision
     /// float

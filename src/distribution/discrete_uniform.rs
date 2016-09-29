@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Discrete Uniform](https://en.wikipedia.org/wiki/Discrete_uniform_distribution)
@@ -123,7 +123,9 @@ impl Univariate<i64, f64> for DiscreteUniform {
         let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
         if ans > 1.0 { 1.0 } else { ans }
     }
+}
 
+impl Min<i64> for DiscreteUniform {
     /// Returns the minimum value in the domain of the discrete uniform
     /// distribution
     ///
@@ -133,7 +135,9 @@ impl Univariate<i64, f64> for DiscreteUniform {
     fn min(&self) -> i64 {
         self.min
     }
+}
 
+impl Max<i64> for DiscreteUniform {
     /// Returns the maximum value in the domain of the discrete uniform
     /// distribution
     ///
@@ -290,7 +294,7 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(min: i64, max: i64) -> DiscreteUniform {
         let n = DiscreteUniform::new(min, max);

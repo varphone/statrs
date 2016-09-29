@@ -4,7 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use function::{beta, factorial};
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
@@ -158,7 +158,9 @@ impl Univariate<i64, f64> for Binomial {
             beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p)
         }
     }
+}
 
+impl Min<i64> for Binomial {
     /// Returns the minimum value in the domain of the
     /// binomial distribution representable by a 64-bit
     /// integer
@@ -171,7 +173,9 @@ impl Univariate<i64, f64> for Binomial {
     fn min(&self) -> i64 {
         0
     }
+}
 
+impl Max<i64> for Binomial {
     /// Returns the maximum value in the domain of the
     /// binomial distribution representable by a 64-bit
     /// integer
@@ -355,7 +359,7 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use distribution::*;
-    use {Mean, Variance};
+    use {Min, Max, Mean, Variance};
 
     fn try_create(p: f64, n: i64) -> Binomial {
         let n = Binomial::new(p, n);

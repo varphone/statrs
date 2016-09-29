@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use error::StatsError;
 use result::Result;
-use {Mean, Variance};
+use {Min, Max, Mean, Variance};
 use super::*;
 
 /// Implements the [Triangular](https://en.wikipedia.org/wiki/Triangular_distribution) distribution
@@ -138,7 +138,9 @@ impl Univariate<f64, f64> for Triangular {
             1.0
         }
     }
+}
 
+impl Min<f64> for Triangular {
     /// Returns the minimum value in the domain of the
     /// triangular distribution representable by a double precision float
     ///
@@ -148,7 +150,9 @@ impl Univariate<f64, f64> for Triangular {
     fn min(&self) -> f64 {
         self.min
     }
+}
 
+impl Max<f64> for Triangular {
     /// Returns the maximum value in the domain of the
     /// triangular distribution representable by a double precision float
     ///
@@ -334,7 +338,7 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
 mod test {
     use std::f64;
     use distribution::*;
-    use Variance;
+    use {Min, Max, Variance};
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
         let n = Triangular::new(min, max, mode);
