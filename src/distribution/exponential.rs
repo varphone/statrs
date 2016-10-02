@@ -1,9 +1,7 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use error::StatsError;
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
@@ -305,7 +303,7 @@ impl Continuous<f64, f64> for Exponential {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Min, Max, Mean, Variance};
+    use super::super::super::*;
 
     fn try_create(rate: f64) -> Exponential {
         let n = Exponential::new(rate);

@@ -1,7 +1,6 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)

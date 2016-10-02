@@ -2,10 +2,8 @@ use std::f64;
 use std::i64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use error::StatsError;
 use function::{factorial, gamma};
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Poisson](https://en.wikipedia.org/wiki/Poisson_distribution)
@@ -356,7 +354,7 @@ mod test {
     use std::f64;
     use std::i64;
     use distribution::*;
-    use {Min, Max, Mean, Variance};
+    use super::super::super::*;
 
     fn try_create(lambda: f64) -> Poisson {
         let n = Poisson::new(lambda);

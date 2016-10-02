@@ -1,11 +1,8 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use consts;
-use error::StatsError;
 use function::erf;
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
@@ -317,7 +314,7 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Min, Max, Mean, Variance};
+    use super::super::super::*;
 
     fn try_create(mean: f64, std_dev: f64) -> Normal {
         let n = Normal::new(mean, std_dev);

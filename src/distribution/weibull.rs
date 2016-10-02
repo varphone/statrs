@@ -1,11 +1,8 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use consts;
-use error::StatsError;
 use function::{gamma, stable};
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Weibull](https://en.wikipedia.org/wiki/Weibull_distribution)
@@ -366,7 +363,7 @@ impl Continuous<f64, f64> for Weibull {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Min, Max, Mean, Variance};
+    use super::super::super::*;
 
     fn try_create(shape: f64, scale: f64) -> Weibull {
         let n = Weibull::new(shape, scale);

@@ -1,9 +1,7 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use error::StatsError;
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Discrete Uniform](https://en.wikipedia.org/wiki/Discrete_uniform_distribution)
@@ -294,7 +292,7 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use distribution::*;
-    use {Min, Max, Mean, Variance};
+    use super::super::super::*;
 
     fn try_create(min: i64, max: i64) -> DiscreteUniform {
         let n = DiscreteUniform::new(min, max);

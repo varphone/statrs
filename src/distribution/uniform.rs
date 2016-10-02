@@ -1,9 +1,7 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use error::StatsError;
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Continuous Uniform](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) distribution
@@ -274,7 +272,7 @@ impl Continuous<f64, f64> for Uniform {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Min, Max, Variance};
+    use super::super::super::*;
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let n = Uniform::new(min, max);

@@ -1,10 +1,8 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use error::StatsError;
 use function::{beta, gamma};
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Beta](https://en.wikipedia.org/wiki/Beta_distribution) distribution
@@ -442,7 +440,7 @@ impl Continuous<f64, f64> for Beta {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Min, Max, Mean, Variance};
+    use super::super::super::*;
 
     fn try_create(shape_a: f64, shape_b: f64) -> Beta {
         let n = Beta::new(shape_a, shape_b);

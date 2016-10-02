@@ -1,8 +1,7 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
@@ -342,6 +341,7 @@ impl Continuous<f64, f64> for ChiSquared {
 mod test {
     use std::f64;
     use distribution::*;
+    use Median;
 
     fn try_create(freedom: f64) -> ChiSquared {
         let n = ChiSquared::new(freedom);

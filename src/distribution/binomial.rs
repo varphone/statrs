@@ -1,10 +1,8 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use error::StatsError;
 use function::{beta, factorial};
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
@@ -359,7 +357,7 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use distribution::*;
-    use {Min, Max, Mean, Variance};
+    use super::super::super::*;
 
     fn try_create(p: f64, n: i64) -> Binomial {
         let n = Binomial::new(p, n);

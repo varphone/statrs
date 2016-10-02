@@ -106,6 +106,24 @@ pub trait Variance<T>: Mean<T> {
     fn std_dev(&self) -> T;
 }
 
+/// The `Median` trait specifies than an object has a closed form solution
+/// for its median
+pub trait Median<T> {
+    /// Returns the median. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Median;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.5, n.median());
+    /// ```
+    fn median(&self) -> T;
+}
+
 /// The `Min` trait specifies than an object has a minimum value
 pub trait Min<T> {
     /// Returns the minimum value in the domain of a given distribution

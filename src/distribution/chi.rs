@@ -1,10 +1,8 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use error::StatsError;
 use function::gamma;
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Chi](https://en.wikipedia.org/wiki/Chi_distribution)
@@ -324,7 +322,7 @@ impl Continuous<f64, f64> for Chi {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Min, Max, Mean, Variance};
+    use super::super::super::*;
 
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);

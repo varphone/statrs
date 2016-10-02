@@ -1,9 +1,7 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use error::StatsError;
-use result::Result;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 /// Implements the [Triangular](https://en.wikipedia.org/wiki/Triangular_distribution) distribution
@@ -338,7 +336,7 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
 mod test {
     use std::f64;
     use distribution::*;
-    use {Min, Max, Variance};
+    use super::super::super::*;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
         let n = Triangular::new(min, max, mode);

@@ -118,23 +118,6 @@ pub trait Skewness<T, K>: Distribution<K> {
     fn skewness(&self) -> T;
 }
 
-/// The `Median` trait specifies a distribution with a closed form solution
-/// for its median
-pub trait Median<T>: Distribution<T> {
-    /// Returns the median for a given distribution. May panic depending
-    /// on the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Median, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.5, n.median());
-    /// ```
-    fn median(&self) -> T;
-}
-
 /// The `Mode` trait specififies a distribution with a closed form solution
 /// for its mode(s)
 pub trait Mode<T, K>: Distribution<K> {
