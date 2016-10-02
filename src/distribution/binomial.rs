@@ -272,7 +272,7 @@ impl Median<f64> for Binomial {
     }
 }
 
-impl Mode<i64, f64> for Binomial {
+impl Mode<i64> for Binomial {
     /// Returns the mode for the binomial distribution
     ///
     /// # Formula

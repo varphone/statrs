@@ -280,7 +280,7 @@ impl Median<f64> for Weibull {
     }
 }
 
-impl Mode<f64, f64> for Weibull {
+impl Mode<f64> for Weibull {
     /// Returns the median of the weibull distribution
     ///
     /// # Formula

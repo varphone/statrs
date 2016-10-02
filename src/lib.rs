@@ -124,6 +124,24 @@ pub trait Median<T> {
     fn median(&self) -> T;
 }
 
+/// The `Mode` trait specififies than an object has a closed form solution
+/// for its mode(s)
+pub trait Mode<T> {
+    /// Returns the mode. May panic depending on
+    /// the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Mode;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.5, n.mode());
+    /// ```
+    fn mode(&self) -> T;
+}
+
 /// The `Min` trait specifies than an object has a minimum value
 pub trait Min<T> {
     /// Returns the minimum value in the domain of a given distribution

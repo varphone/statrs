@@ -118,23 +118,6 @@ pub trait Skewness<T, K>: Distribution<K> {
     fn skewness(&self) -> T;
 }
 
-/// The `Mode` trait specififies a distribution with a closed form solution
-/// for its mode(s)
-pub trait Mode<T, K>: Distribution<K> {
-    /// Returns the mode for a given distribution. May panic depending on
-    /// the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Mode, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.5, n.mode());
-    /// ```
-    fn mode(&self) -> T;
-}
-
 /// The `Continuous` trait extends the `Distribution`
 /// trait and provides an interface for interacting with continuous
 /// statistical distributions

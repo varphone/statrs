@@ -239,7 +239,7 @@ impl Median<f64> for LogNormal {
     }
 }
 
-impl Mode<f64, f64> for LogNormal {
+impl Mode<f64> for LogNormal {
     /// Returns the mode of the log-normal distribution
     ///
     /// # Formula

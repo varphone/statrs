@@ -285,7 +285,7 @@ impl Median<f64> for ChiSquared {
     }
 }
 
-impl Mode<f64, f64> for ChiSquared {
+impl Mode<f64> for ChiSquared {
     /// Returns the mode of the chi-squared distribution
     ///
     /// # Formula

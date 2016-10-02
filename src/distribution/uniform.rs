@@ -207,7 +207,7 @@ impl Median<f64> for Uniform {
     }
 }
 
-impl Mode<f64, f64> for Uniform {
+impl Mode<f64> for Uniform {
     /// Returns the mode for the continuous uniform distribution
     ///
     /// # Remarks

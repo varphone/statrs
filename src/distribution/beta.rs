@@ -301,7 +301,7 @@ impl Skewness<f64, f64> for Beta {
     }
 }
 
-impl Mode<f64, f64> for Beta {
+impl Mode<f64> for Beta {
     /// Returns the mode of the Beta distribution.
     ///
     /// # Remarks

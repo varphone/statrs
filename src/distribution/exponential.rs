@@ -245,7 +245,7 @@ impl Median<f64> for Exponential {
     }
 }
 
-impl Mode<f64, f64> for Exponential {
+impl Mode<f64> for Exponential {
     /// Returns the mode of the exponential distribution
     ///
     /// # Formula

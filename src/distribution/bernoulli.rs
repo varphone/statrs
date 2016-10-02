@@ -259,7 +259,7 @@ impl Median<f64> for Bernoulli {
     }
 }
 
-impl Mode<i64, f64> for Bernoulli {
+impl Mode<i64> for Bernoulli {
     /// Returns the mode of the bernoulli distribution
     ///
     /// # Formula

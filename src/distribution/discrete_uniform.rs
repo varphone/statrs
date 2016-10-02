@@ -225,7 +225,7 @@ impl Median<f64> for DiscreteUniform {
     }
 }
 
-impl Mode<i64, f64> for DiscreteUniform {
+impl Mode<i64> for DiscreteUniform {
     /// Returns the mode for the discrete uniform distribution
     ///
     /// # Remarks

@@ -287,7 +287,7 @@ impl Skewness<f64, f64> for Gamma {
     }
 }
 
-impl Mode<f64, f64> for Gamma {
+impl Mode<f64> for Gamma {
     /// Returns the mode for the gamma distribution
     ///
     /// # Remarks

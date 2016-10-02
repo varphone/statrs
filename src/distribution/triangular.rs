@@ -258,7 +258,7 @@ impl Median<f64> for Triangular {
     }
 }
 
-impl Mode<f64, f64> for Triangular {
+impl Mode<f64> for Triangular {
     /// Returns the mode of the triangular distribution
     ///
     /// # Formula

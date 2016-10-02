@@ -222,7 +222,7 @@ impl Median<f64> for Normal {
     }
 }
 
-impl Mode<f64, f64> for Normal {
+impl Mode<f64> for Normal {
     /// Returns the mode of the normal distribution
     ///
     /// # Formula

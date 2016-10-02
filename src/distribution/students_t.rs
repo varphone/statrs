@@ -341,7 +341,7 @@ impl Median<f64> for StudentsT {
     }
 }
 
-impl Mode<f64, f64> for StudentsT {
+impl Mode<f64> for StudentsT {
     /// Returns the mode of the student's t-distribution
     ///
     /// # Formula

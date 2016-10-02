@@ -246,7 +246,7 @@ impl Skewness<f64, f64> for Chi {
     }
 }
 
-impl Mode<f64, f64> for Chi {
+impl Mode<f64> for Chi {
     /// Returns the mode for the chi distribution
     ///
     /// # Panics

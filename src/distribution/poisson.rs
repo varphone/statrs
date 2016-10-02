@@ -250,7 +250,7 @@ impl Median<f64> for Poisson {
     }
 }
 
-impl Mode<i64, f64> for Poisson {
+impl Mode<i64> for Poisson {
     /// Returns the mode of the poisson distribution
     ///
     /// # Formula
