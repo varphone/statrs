@@ -84,40 +84,6 @@ pub trait Univariate<T, K>: Distribution<K> + Min<T> + Max<T> {
     fn cdf(&self, x: K) -> K;
 }
 
-/// The `Entropy` trait specifies a distribution with a closed form solution
-/// for its entropy
-pub trait Entropy<T>: Distribution<T> {
-    /// Returns the entropy for a given distribution. May panic depending
-    /// on the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Entropy, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.0, n.entropy());
-    /// ```
-    fn entropy(&self) -> T;
-}
-
-/// The `Skewness` trait specifies a distributions with a closed form solution
-/// for its skewness(s)
-pub trait Skewness<T, K>: Distribution<K> {
-    /// Returns the skewness for a given distribution. May panic depending
-    /// on the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::distribution::{Skewness, Uniform};
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.0, n.skewness());
-    /// ```
-    fn skewness(&self) -> T;
-}
-
 /// The `Continuous` trait extends the `Distribution`
 /// trait and provides an interface for interacting with continuous
 /// statistical distributions

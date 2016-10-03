@@ -220,7 +220,7 @@ impl Entropy<f64> for Poisson {
     }
 }
 
-impl Skewness<f64, f64> for Poisson {
+impl Skewness<f64> for Poisson {
     /// Returns the skewness of the poisson distribution
     ///
     /// # Formula

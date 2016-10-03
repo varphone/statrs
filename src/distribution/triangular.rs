@@ -215,7 +215,7 @@ impl Entropy<f64> for Triangular {
     }
 }
 
-impl Skewness<f64, f64> for Triangular {
+impl Skewness<f64> for Triangular {
     /// Returns the skewness of the triangular distribution
     ///
     /// # Formula

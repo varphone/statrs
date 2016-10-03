@@ -243,7 +243,7 @@ impl Entropy<f64> for Weibull {
     }
 }
 
-impl Skewness<f64, f64> for Weibull {
+impl Skewness<f64> for Weibull {
     /// Returns the skewness of the weibull distribution
     ///
     /// # Formula

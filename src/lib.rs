@@ -55,6 +55,42 @@ mod testing;
 pub use result::Result;
 pub use error::StatsError;
 
+/// The `Min` trait specifies than an object has a minimum value
+pub trait Min<T> {
+    /// Returns the minimum value in the domain of a given distribution
+    /// representable by a double-precision float. May panic depending on
+    /// the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Min;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.0, n.min());
+    /// ```
+    fn min(&self) -> T;
+}
+
+/// The `Max` trait specifies that an object has a maximum value
+pub trait Max<T> {
+    /// Returns the maximum value in the domain of a given distribution
+    /// representable by a double-precision float. May panic depending on
+    /// the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Max;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(1.0, n.max());
+    /// ```
+    fn max(&self) -> T;
+}
+
 /// The `Mean` trait specifies than an object has a closed form
 /// solution for its mean(s)
 pub trait Mean<T> {
@@ -106,6 +142,41 @@ pub trait Variance<T>: Mean<T> {
     fn std_dev(&self) -> T;
 }
 
+/// The `Entropy` trait specifies an object that has a closed form solution
+/// for its entropy
+pub trait Entropy<T> {
+    /// Returns the entropy. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Entropy;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.0, n.entropy());
+    /// ```
+    fn entropy(&self) -> T;
+}
+/// The `Skewness` trait specifies ab object that has a closed form solution
+/// for its skewness(s)
+pub trait Skewness<T> {
+    /// Returns the skewness. May panic depending
+    /// on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Skewness;
+    /// use statrs::distribution::Uniform;
+    ///
+    /// let n = Uniform::new(0.0, 1.0).unwrap();
+    /// assert_eq!(0.0, n.skewness());
+    /// ```
+    fn skewness(&self) -> T;
+}
+
 /// The `Median` trait specifies than an object has a closed form solution
 /// for its median
 pub trait Median<T> {
@@ -140,40 +211,4 @@ pub trait Mode<T> {
     /// assert_eq!(0.5, n.mode());
     /// ```
     fn mode(&self) -> T;
-}
-
-/// The `Min` trait specifies than an object has a minimum value
-pub trait Min<T> {
-    /// Returns the minimum value in the domain of a given distribution
-    /// representable by a double-precision float. May panic depending on
-    /// the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::Min;
-    /// use statrs::distribution::Uniform;
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(0.0, n.min());
-    /// ```
-    fn min(&self) -> T;
-}
-
-/// The `Max` trait specifies that an object has a maximum value
-pub trait Max<T> {
-    /// Returns the maximum value in the domain of a given distribution
-    /// representable by a double-precision float. May panic depending on
-    /// the implementor.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::Max;
-    /// use statrs::distribution::Uniform;
-    ///
-    /// let n = Uniform::new(0.0, 1.0).unwrap();
-    /// assert_eq!(1.0, n.max());
-    /// ```
-    fn max(&self) -> T;
 }

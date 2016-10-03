@@ -199,7 +199,7 @@ impl Entropy<f64> for DiscreteUniform {
     }
 }
 
-impl Skewness<f64, f64> for DiscreteUniform {
+impl Skewness<f64> for DiscreteUniform {
     /// Returns the skewness of the discrete uniform distribution
     ///
     /// # Formula

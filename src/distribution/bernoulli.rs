@@ -228,7 +228,7 @@ impl Entropy<f64> for Bernoulli {
     }
 }
 
-impl Skewness<f64, f64> for Bernoulli {
+impl Skewness<f64> for Bernoulli {
     /// Returns the skewness of the bernoulli
     /// distribution
     ///

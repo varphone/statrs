@@ -194,7 +194,7 @@ impl Entropy<f64> for Normal {
     }
 }
 
-impl Skewness<f64, f64> for Normal {
+impl Skewness<f64> for Normal {
     /// Returns the skewness of the normal distribution
     ///
     /// # Formula

@@ -246,7 +246,7 @@ impl Entropy<f64> for Binomial {
     }
 }
 
-impl Skewness<f64, f64> for Binomial {
+impl Skewness<f64> for Binomial {
     /// Returns the skewness of the binomial distribution
     ///
     /// # Formula

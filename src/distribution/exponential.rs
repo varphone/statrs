@@ -217,7 +217,7 @@ impl Entropy<f64> for Exponential {
     }
 }
 
-impl Skewness<f64, f64> for Exponential {
+impl Skewness<f64> for Exponential {
     /// Returns the skewness of the exponential distribution
     ///
     /// # Formula

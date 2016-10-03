@@ -230,7 +230,7 @@ impl Entropy<f64> for Chi {
     }
 }
 
-impl Skewness<f64, f64> for Chi {
+impl Skewness<f64> for Chi {
     /// Returns the skewness of the chi distribution
     ///
     /// # Formula

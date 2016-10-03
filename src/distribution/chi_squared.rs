@@ -250,7 +250,7 @@ impl Entropy<f64> for ChiSquared {
     }
 }
 
-impl Skewness<f64, f64> for ChiSquared {
+impl Skewness<f64> for ChiSquared {
     /// Returns the skewness of the chi-squared distribution
     ///
     /// # Formula

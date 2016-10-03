@@ -277,7 +277,7 @@ impl Entropy<f64> for Beta {
     }
 }
 
-impl Skewness<f64, f64> for Beta {
+impl Skewness<f64> for Beta {
     /// Returns the skewness of the Beta distribution
     ///
     /// # Formula

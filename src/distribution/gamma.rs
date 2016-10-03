@@ -272,7 +272,7 @@ impl Entropy<f64> for Gamma {
     }
 }
 
-impl Skewness<f64, f64> for Gamma {
+impl Skewness<f64> for Gamma {
     /// Returns the skewness of the gamma distribution
     ///
     /// # Formula

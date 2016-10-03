@@ -208,7 +208,7 @@ impl Entropy<f64> for LogNormal {
     }
 }
 
-impl Skewness<f64, f64> for LogNormal {
+impl Skewness<f64> for LogNormal {
     /// Returns the skewness of the log-normal distribution
     ///
     /// # Formula

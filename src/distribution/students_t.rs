@@ -307,7 +307,7 @@ impl Entropy<f64> for StudentsT {
     }
 }
 
-impl Skewness<f64, f64> for StudentsT {
+impl Skewness<f64> for StudentsT {
     /// Returns the skewness of the student's t-distribution
     ///
     /// # Panics

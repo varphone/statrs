@@ -181,7 +181,7 @@ impl Entropy<f64> for Uniform {
     }
 }
 
-impl Skewness<f64, f64> for Uniform {
+impl Skewness<f64> for Uniform {
     /// Returns the skewness for the continuous uniform distribution
     ///
     /// # Formula
