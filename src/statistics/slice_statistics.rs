@@ -1,6 +1,5 @@
 use std::f64;
-use error::StatsError;
-use {Min, Max, Mean, Variance};
+use super::super::*;
 use super::*;
 
 impl Statistics for [f64] {
@@ -117,11 +116,6 @@ impl Statistics for [f64] {
     fn order_statistic(&self, order: usize) -> f64 {
         let mut copy = self.to_vec();
         copy.order_statistic_inplace(order)
-    }
-
-    fn median(&self) -> f64 {
-        let mut copy = self.to_vec();
-        copy.median_inplace()
     }
 
     fn quantile(&self, tau: f64) -> f64 {
@@ -434,6 +428,29 @@ impl Variance<f64> for [f64] {
     }
 }
 
+impl Median<f64> for [f64] {
+    /// Returns the median value from the data
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::Median;
+    ///
+    /// let x = [];
+    /// assert!(x.median().is_nan());
+    ///
+    /// let y = [0.0, 3.0, -2.0];
+    /// assert_eq!(y.median(), 0.0);
+    fn median(&self) -> f64 {
+        let mut copy = self.to_vec();
+        copy.median_inplace()
+    }
+}
+
 fn handle_rank_ties(ranks: &mut [f64],
                     index: &[usize],
                     a: isize,
@@ -738,11 +755,10 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use std::f64::{self, consts};
-    use generate;
-    use {Min, Max, Mean, Variance};
+    use std::f64;
     use statistics::*;
     use testing;
+    use super::super::super::*;
 
     #[test]
     fn test_mean() {
@@ -1014,6 +1030,6 @@ mod test {
     #[test]
     fn test_quadratic_mean_of_sinusoidal() {
         let data = generate::sinusoidal(128, 64.0, 16.0, 2.0);
-        assert_almost_eq!(data.quadratic_mean(), 2.0 / consts::SQRT_2, 1e-15);
+        assert_almost_eq!(data.quadratic_mean(), 2.0 / f64::consts::SQRT_2, 1e-15);
     }
 }

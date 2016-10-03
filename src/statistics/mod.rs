@@ -305,24 +305,6 @@ pub trait Statistics {
     /// ```
     fn order_statistic(&self, order: usize) -> f64;
 
-    /// Returns the median value from the data
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let x = [];
-    /// assert!(x.median().is_nan());
-    ///
-    /// let y = [0.0, 3.0, -2.0];
-    /// assert_eq!(y.median(), 0.0);
-    fn median(&self) -> f64;
-
     /// Estimates the tau-th quantile from the data. The tau-th quantile
     /// is the data value where the cumulative distribution function crosses tau.
     ///
