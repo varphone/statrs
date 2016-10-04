@@ -2,17 +2,23 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::{beta, gamma};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Beta](https://en.wikipedia.org/wiki/Beta_distribution) distribution
 ///
 /// # Examples
 ///
 /// ```
-/// use statrs::distribution::{Beta};
+/// use statrs::distribution::{Beta, Continuous};
+/// use statrs::statistics::Mean;
+/// use statrs::prec;
 ///
-/// let n = Beta::new(2.0, 2.0);
+/// let n = Beta::new(2.0, 2.0).unwrap();
+/// assert_eq!(n.mean(), 0.5);
+/// assert!(prec::almost_eq(n.pdf(0.5), 1.5, 1e-14));
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Beta {
@@ -439,8 +445,8 @@ impl Continuous<f64, f64> for Beta {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, Beta};
 
     fn try_create(shape_a: f64, shape_b: f64) -> Beta {
         let n = Beta::new(shape_a, shape_b);

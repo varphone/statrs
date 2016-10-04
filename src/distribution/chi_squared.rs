@@ -1,8 +1,9 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution, Gamma};
+use result::Result;
 
 /// Implements the [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
 /// distribution which is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
@@ -12,7 +13,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{ChiSquared, Continuous};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 /// use statrs::prec;
 ///
 /// let n = ChiSquared::new(3.0).unwrap();
@@ -340,8 +341,8 @@ impl Continuous<f64, f64> for ChiSquared {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::*;
-    use Median;
+    use statistics::Median;
+    use distribution::ChiSquared;
 
     fn try_create(freedom: f64) -> ChiSquared {
         let n = ChiSquared::new(freedom);

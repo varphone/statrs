@@ -1,8 +1,10 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
 /// distribution and is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
@@ -12,7 +14,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Exponential, Continuous};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 ///
 /// let n = Exponential::new(1.0).unwrap();
 /// assert_eq!(n.mean(), 1.0);
@@ -302,8 +304,8 @@ impl Continuous<f64, f64> for Exponential {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, Exponential};
 
     fn try_create(rate: f64) -> Exponential {
         let n = Exponential::new(rate);

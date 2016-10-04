@@ -1,8 +1,10 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Discrete, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Discrete Uniform](https://en.wikipedia.org/wiki/Discrete_uniform_distribution)
 /// distribution
@@ -11,7 +13,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{DiscreteUniform, Discrete};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 ///
 /// let n = DiscreteUniform::new(0, 5).unwrap();
 /// assert_eq!(n.mean(), 2.5);
@@ -291,8 +293,8 @@ mod test {
     use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Discrete, DiscreteUniform};
 
     fn try_create(min: i64, max: i64) -> DiscreteUniform {
         let n = DiscreteUniform::new(min, max);

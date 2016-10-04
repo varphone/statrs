@@ -1,8 +1,10 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Triangular](https://en.wikipedia.org/wiki/Triangular_distribution) distribution
 ///
@@ -10,7 +12,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Triangular, Continuous};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 ///
 /// let n = Triangular::new(0.0, 5.0, 2.5).unwrap();
 /// assert_eq!(n.mean(), 7.5 / 3.0);
@@ -335,8 +337,8 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, Triangular};
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
         let n = Triangular::new(min, max, mode);

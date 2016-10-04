@@ -2,8 +2,11 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::erf;
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution};
+use result::Result;
+use error::StatsError;
+use consts;
 
 /// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
 /// distribution
@@ -12,7 +15,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Normal, Continuous};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 ///
 /// let n = Normal::new(0.0, 1.0).unwrap();
 /// assert_eq!(n.mean(), 0.0);
@@ -313,8 +316,8 @@ fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, Normal};
 
     fn try_create(mean: f64, std_dev: f64) -> Normal {
         let n = Normal::new(mean, std_dev);

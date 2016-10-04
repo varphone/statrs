@@ -2,8 +2,10 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::{beta, factorial};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Discrete, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
 /// distribution
@@ -12,7 +14,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Binomial, Discrete};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 ///
 /// let n = Binomial::new(0.5, 5).unwrap();
 /// assert_eq!(n.mean(), 2.5);
@@ -356,8 +358,8 @@ mod test {
     use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Discrete, Binomial};
 
     fn try_create(p: f64, n: i64) -> Binomial {
         let n = Binomial::new(p, n);

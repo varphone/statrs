@@ -2,8 +2,10 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::{beta, gamma};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Student's T](https://en.wikipedia.org/wiki/Student%27s_t-distribution) distribution
 ///
@@ -11,7 +13,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{StudentsT, Continuous};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 /// use statrs::prec;
 ///
 /// let n = StudentsT::new(0.0, 1.0, 2.0).unwrap();
@@ -409,8 +411,8 @@ impl Continuous<f64, f64> for StudentsT {
 mod test {
     use std::f64;
     use std::panic;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, StudentsT};
 
     fn try_create(location: f64, scale: f64, freedom: f64) -> StudentsT {
         let n = StudentsT::new(location, scale, freedom);

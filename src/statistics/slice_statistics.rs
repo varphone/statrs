@@ -1,6 +1,6 @@
 use std::f64;
-use super::super::*;
-use super::*;
+use error::StatsError;
+use statistics::*;
 
 impl Statistics for [f64] {
     fn abs_min(&self) -> f64 {
@@ -263,7 +263,7 @@ impl Min<f64> for [f64] {
     ///
     /// ```
     /// use std::f64;
-    /// use statrs::Min;
+    /// use statrs::statistics::Min;
     ///
     /// let x = [];
     /// assert!(x.min().is_nan());
@@ -295,7 +295,7 @@ impl Max<f64> for [f64] {
     ///
     /// ```
     /// use std::f64;
-    /// use statrs::Max;
+    /// use statrs::statistics::Max;
     ///
     /// let x = [];
     /// assert!(x.max().is_nan());
@@ -331,7 +331,7 @@ impl Mean<f64> for [f64] {
     /// extern crate statrs;
     ///
     /// use std::f64;
-    /// use statrs::Mean;
+    /// use statrs::statistics::Mean;
     ///
     /// # fn main() {
     /// let x = [];
@@ -371,7 +371,7 @@ impl Variance<f64> for [f64] {
     ///
     /// ```
     /// use std::f64;
-    /// use statrs::Variance;
+    /// use statrs::statistics::Variance;
     ///
     /// let x = [];
     /// assert!(x.variance().is_nan());
@@ -412,7 +412,7 @@ impl Variance<f64> for [f64] {
     ///
     /// ```
     /// use std::f64;
-    /// use statrs::Variance;
+    /// use statrs::statistics::Variance;
     ///
     /// let x = [];
     /// assert!(x.std_dev().is_nan());
@@ -438,7 +438,7 @@ impl Median<f64> for [f64] {
     /// # Examples
     ///
     /// ```
-    /// use statrs::Median;
+    /// use statrs::statistics::Median;
     ///
     /// let x = [];
     /// assert!(x.median().is_nan());
@@ -755,10 +755,10 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use std::f64;
+    use std::f64::{self, consts};
+    use generate;
     use statistics::*;
     use testing;
-    use super::super::super::*;
 
     #[test]
     fn test_mean() {
@@ -1030,6 +1030,6 @@ mod test {
     #[test]
     fn test_quadratic_mean_of_sinusoidal() {
         let data = generate::sinusoidal(128, 64.0, 16.0, 2.0);
-        assert_almost_eq!(data.quadratic_mean(), 2.0 / f64::consts::SQRT_2, 1e-15);
+        assert_almost_eq!(data.quadratic_mean(), 2.0 / consts::SQRT_2, 1e-15);
     }
 }

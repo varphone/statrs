@@ -2,8 +2,10 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::gamma;
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Chi](https://en.wikipedia.org/wiki/Chi_distribution)
 /// distribution
@@ -12,7 +14,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Chi, Continuous};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 /// use statrs::prec;
 ///
 /// let n = Chi::new(2.0).unwrap();
@@ -321,8 +323,8 @@ impl Continuous<f64, f64> for Chi {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, Chi};
 
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);

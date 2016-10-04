@@ -1,8 +1,10 @@
 use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Continuous Uniform](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) distribution
 ///
@@ -10,7 +12,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Uniform, Continuous};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 ///
 /// let n = Uniform::new(0.0, 1.0).unwrap();
 /// assert_eq!(n.mean(), 0.5);
@@ -271,8 +273,8 @@ impl Continuous<f64, f64> for Uniform {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, Uniform};
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let n = Uniform::new(min, max);

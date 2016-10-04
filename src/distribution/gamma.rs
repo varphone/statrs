@@ -2,8 +2,10 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::gamma;
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Continuous, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
 ///
@@ -11,7 +13,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Gamma, Continuous};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 /// use statrs::prec;
 ///
 /// let n = Gamma::new(3.0, 1.0).unwrap();
@@ -428,8 +430,8 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, Gamma};
 
     fn try_create(shape: f64, rate: f64) -> Gamma {
         let n = Gamma::new(shape, rate);

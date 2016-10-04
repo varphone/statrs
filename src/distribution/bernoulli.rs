@@ -1,7 +1,8 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Discrete, Distribution, Binomial};
+use result::Result;
 
 /// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
 /// distribution which is a special case of the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
@@ -11,7 +12,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Bernoulli, Discrete};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 ///
 /// let n = Bernoulli::new(0.5).unwrap();
 /// assert_eq!(n.mean(), 0.5);

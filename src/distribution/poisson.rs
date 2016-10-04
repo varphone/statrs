@@ -3,8 +3,10 @@ use std::i64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::{factorial, gamma};
-use super::super::*;
-use super::*;
+use statistics::*;
+use distribution::{Univariate, Discrete, Distribution};
+use result::Result;
+use error::StatsError;
 
 /// Implements the [Poisson](https://en.wikipedia.org/wiki/Poisson_distribution)
 /// distribution
@@ -13,7 +15,7 @@ use super::*;
 ///
 /// ```
 /// use statrs::distribution::{Poisson, Discrete};
-/// use statrs::Mean;
+/// use statrs::statistics::Mean;
 /// use statrs::prec;
 ///
 /// let n = Poisson::new(1.0).unwrap();
@@ -353,8 +355,8 @@ mod test {
     use std::fmt::Debug;
     use std::f64;
     use std::i64;
-    use distribution::*;
-    use super::super::super::*;
+    use statistics::*;
+    use distribution::{Univariate, Discrete, Poisson};
 
     fn try_create(lambda: f64) -> Poisson {
         let n = Poisson::new(lambda);

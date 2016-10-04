@@ -2,7 +2,7 @@
 //! concrete implementations for a variety of distributions.
 
 use rand::Rng;
-use {Min, Max};
+use statistics::{Min, Max};
 
 pub use self::bernoulli::Bernoulli;
 pub use self::beta::Beta;
