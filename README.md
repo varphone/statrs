@@ -59,7 +59,8 @@ print!("{}", n.Sample::<StdRng>(&mut r);
 Statrs also comes with a number of useful utility traits for more detailed introspection of distributions
 
 ```Rust
-use statrs::distribution::{Exponential, Mean, Variance, Entropy, Skewness, Univariate, Continuous};
+use statrs::distribution::{Exponential, Univariate, Continuous};
+use statrs::statistics::{Mean, Variance, Entropy, Skewness};
 
 let n = Exponential::new(1.0).unwrap();
 assert_eq!(n.mean(), 1.0);
