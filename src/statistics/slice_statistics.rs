@@ -67,7 +67,7 @@ impl Statistics for [f64] {
         self.population_variance().sqrt()
     }
 
-    fn covariance(&self, other: &[f64]) -> f64 {
+    fn covariance(&self, other: &Self) -> f64 {
         let n1 = self.len();
         let n2 = other.len();
         assert!(n1 == n2,
@@ -83,7 +83,7 @@ impl Statistics for [f64] {
             .fold(0.0, |acc, x| acc + (x.0 - mean1) * (x.1 - mean2)) / (n1 - 1) as f64
     }
 
-    fn population_covariance(&self, other: &[f64]) -> f64 {
+    fn population_covariance(&self, other: &Self) -> f64 {
         let n1 = self.len();
         let n2 = other.len();
         assert!(n1 == n2,
