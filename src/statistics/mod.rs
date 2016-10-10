@@ -8,3 +8,4 @@ mod traits;
 mod statistics;
 mod inplace_statistics;
 mod slice_statistics;
+mod stream_statistics;
