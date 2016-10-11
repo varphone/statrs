@@ -2,7 +2,7 @@ use std::f64;
 
 /// The `IterStatistics` trait provides the same host of statistical
 /// utilities as the `Statistics` traited ported for use with iterators 
-pub trait IterStatistics : Iterator<Item=f64>
+pub trait IterStatistics<T> : Iterator<Item=T>
 {
     /// Returns the minimum absolute value in the data
     ///
@@ -25,6 +25,10 @@ pub trait IterStatistics : Iterator<Item=f64>
     /// let z: Vec<f64>  = vec![0.0, 3.0, -2.0];
     /// assert_eq!(z.into_iter().abs_min(), 0.0);
     /// ```
+    fn abs_min(&mut self) -> T;
+}
+
+impl<T: Iterator<Item=f64>> IterStatistics<f64> for T {
     fn abs_min(&mut self) -> f64 {
         let mut min = f64::INFINITY;
         let mut any = false;
@@ -43,5 +47,3 @@ pub trait IterStatistics : Iterator<Item=f64>
         if any { min } else { f64::NAN }
     }
 }
-
-impl<T: Iterator<Item=f64>> IterStatistics for T {}
