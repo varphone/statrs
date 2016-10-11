@@ -17,7 +17,7 @@ pub enum RankTieBreaker {
 pub trait Statistics {
     /// Returns the minimum absolute value in the data
     ///
-    /// # Rermarks
+    /// # Remarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
     ///
@@ -40,7 +40,7 @@ pub trait Statistics {
 
     /// Returns the maximum absolute value in the data
     ///
-    /// # Rermarks
+    /// # Remarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
     ///
