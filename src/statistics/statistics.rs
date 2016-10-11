@@ -14,7 +14,7 @@ pub enum RankTieBreaker {
 
 /// The `Statistics` trait provides a host of statistical utilities for analzying
 /// data sets
-pub trait Statistics {
+pub trait Statistics<T> {
     /// Returns the minimum absolute value in the data
     ///
     /// # Remarks
@@ -36,7 +36,7 @@ pub trait Statistics {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.abs_min(), 0.0);
     /// ```
-    fn abs_min(&self) -> f64;
+    fn abs_min(&self) -> T;
 
     /// Returns the maximum absolute value in the data
     ///
@@ -59,7 +59,7 @@ pub trait Statistics {
     /// let z = [0.0, 3.0, -2.0, -8.0];
     /// assert_eq!(z.abs_max(), 8.0);
     /// ```
-    fn abs_max(&self) -> f64;
+    fn abs_max(&self) -> T;
 
     /// Evaluates the geometric mean of the data
     ///
@@ -96,7 +96,7 @@ pub trait Statistics {
     /// assert_almost_eq!(z.geometric_mean(), 1.81712, 1e-5);
     /// # }
     /// ```
-    fn geometric_mean(&self) -> f64;
+    fn geometric_mean(&self) -> T;
 
     /// Evaluates the harmonic mean of the data
     ///
@@ -133,7 +133,7 @@ pub trait Statistics {
     /// assert_almost_eq!(z.harmonic_mean(), 1.63636, 1e-5);
     /// # }
     /// ```
-    fn harmonic_mean(&self) -> f64;
+    fn harmonic_mean(&self) -> T;
 
     /// Evaluates the population variance from a full population.
     ///
@@ -159,7 +159,7 @@ pub trait Statistics {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.population_variance(), 38.0 / 9.0);
     /// ```
-    fn population_variance(&self) -> f64;
+    fn population_variance(&self) -> T;
 
     /// Evaluates the population standard deviation from a full population.
     ///
@@ -185,7 +185,7 @@ pub trait Statistics {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.population_std_dev(), (38f64 / 9.0).sqrt());
     /// ```
-    fn population_std_dev(&self) -> f64;
+    fn population_std_dev(&self) -> T;
 
     /// Estimates the unbiased population covariance between the two provided samples
     ///
@@ -216,7 +216,7 @@ pub trait Statistics {
     /// let z2 = [-5.0, 4.0, 10.0];
     /// assert_eq!(z1.covariance(&z2), -5.5);
     /// ```
-    fn covariance(&self, other: &Self) -> f64;
+    fn covariance(&self, other: &Self) -> T;
 
     /// Evaluates the population covariance between the two provider populations
     ///
@@ -248,7 +248,7 @@ pub trait Statistics {
     /// let z2 = [-5.0, 4.0, 10.0];
     /// assert_eq!(z1.population_covariance(&z2), -11.0 / 3.0);
     /// ```
-    fn population_covariance(&self, other: &Self) -> f64;
+    fn population_covariance(&self, other: &Self) -> T;
 
     /// Estimates the quadratic mean (Root Mean Square) of the data
     ///
@@ -277,7 +277,7 @@ pub trait Statistics {
     /// assert_almost_eq!(z.quadratic_mean(), 2.08167, 1e-5);
     /// # }
     /// ```
-    fn quadratic_mean(&self) -> f64;
+    fn quadratic_mean(&self) -> T;
 
     /// Returns the order statistic `(order 1..N)` from the data
     ///
@@ -299,7 +299,7 @@ pub trait Statistics {
     /// assert!(y.order_statistic(4).is_nan());
     /// assert_eq!(y.order_statistic(2), 0.0);
     /// ```
-    fn order_statistic(&self, order: usize) -> f64;
+    fn order_statistic(&self, order: usize) -> T;
 
     /// Estimates the tau-th quantile from the data. The tau-th quantile
     /// is the data value where the cumulative distribution function crosses tau.
@@ -322,7 +322,7 @@ pub trait Statistics {
     /// assert!(y.quantile(2.0).is_nan());
     /// assert_eq!(y.quantile(0.5), 0.0);
     /// ```
-    fn quantile(&self, tau: f64) -> f64;
+    fn quantile(&self, tau: f64) -> T;
 
     /// Estimates the p-Percentile value from the data.
     ///
@@ -345,7 +345,7 @@ pub trait Statistics {
     /// assert_eq!(y.percentile(100), 10.0);
     /// assert!(y.percentile(105).is_nan());
     /// ```
-    fn percentile(&self, p: usize) -> f64;
+    fn percentile(&self, p: usize) -> T;
 
     /// Estimates the first quartile value from the data.
     ///
@@ -369,7 +369,7 @@ pub trait Statistics {
     /// assert_almost_eq!(y.lower_quartile(), 1.416666666666666, 1e-15);
     /// # }
     /// ```
-    fn lower_quartile(&self) -> f64;
+    fn lower_quartile(&self) -> T;
 
     /// Estimates the third quartile value from the data.
     ///
@@ -393,7 +393,7 @@ pub trait Statistics {
     /// assert_almost_eq!(y.upper_quartile(), 3.5833333333333333, 1e-15);
     /// # }
     /// ```
-    fn upper_quartile(&self) -> f64;
+    fn upper_quartile(&self) -> T;
 
     /// Estimates the inter-quartile range from the data.
     ///
@@ -417,7 +417,7 @@ pub trait Statistics {
     /// assert_almost_eq!(y.interquartile_range(), 2.166666666666667, 1e-15);
     /// # }
     /// ```
-    fn interquartile_range(&self) -> f64;
+    fn interquartile_range(&self) -> T;
 
     /// Evaluates the rank of each entry of the data.
     ///
@@ -433,5 +433,5 @@ pub trait Statistics {
     /// assert_eq!((&y.clone()).ranks(RankTieBreaker::Average), [1.0, 4.0, 2.5, 2.5]);
     /// assert_eq!((&y.clone()).ranks(RankTieBreaker::Min), [1.0, 4.0, 2.0, 2.0]);
     /// ```
-    fn ranks(&self, tie_breaker: RankTieBreaker) -> Vec<f64>;
+    fn ranks(&self, tie_breaker: RankTieBreaker) -> Vec<T>;
 }

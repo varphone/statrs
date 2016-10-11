@@ -2,7 +2,7 @@ use std::f64;
 use error::StatsError;
 use statistics::*;
 
-impl Statistics for [f64] {
+impl Statistics<f64> for [f64] {
     fn abs_min(&self) -> f64 {
         if self.len() == 0 {
             return f64::NAN;
@@ -149,7 +149,7 @@ impl Statistics for [f64] {
     }
 }
 
-impl InplaceStatistics for [f64] {
+impl InplaceStatistics<f64> for [f64] {
     fn order_statistic_inplace(&mut self, order: usize) -> f64 {
         let n = self.len();
         match order {

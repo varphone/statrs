@@ -3,7 +3,7 @@ use super::RankTieBreaker;
 /// The `InplaceStatistics` trait provides in place variations
 /// of statistical utilities with side-effects allowing you to opt
 /// into a little more efficiency at the cost of a mutable borrow
-pub trait InplaceStatistics {
+pub trait InplaceStatistics<T> {
     /// Returns the order statistic `(order 1..N)` from the data
     ///
     /// # Remarks
@@ -25,7 +25,7 @@ pub trait InplaceStatistics {
     /// assert_eq!(y.order_statistic_inplace(2), 0.0);
     /// assert!(y != [0.0, 3.0, -2.0]);
     /// ```
-    fn order_statistic_inplace(&mut self, order: usize) -> f64;
+    fn order_statistic_inplace(&mut self, order: usize) -> T;
 
     /// Returns the median value from the data
     ///
@@ -44,7 +44,7 @@ pub trait InplaceStatistics {
     /// let mut y = [0.0, 3.0, -2.0];
     /// assert_eq!(y.median_inplace(), 0.0);
     /// assert!(y != [0.0, 3.0, -2.0]);
-    fn median_inplace(&mut self) -> f64;
+    fn median_inplace(&mut self) -> T;
 
     /// Estimates the tau-th quantile from the data. The tau-th quantile
     /// is the data value where the cumulative distribution function crosses tau.
@@ -68,7 +68,7 @@ pub trait InplaceStatistics {
     /// assert_eq!(y.quantile_inplace(0.5), 0.0);
     /// assert!(y != [0.0, 3.0, -2.0]);
     /// ```
-    fn quantile_inplace(&mut self, tau: f64) -> f64;
+    fn quantile_inplace(&mut self, tau: f64) -> T;
 
     /// Estimates the p-Percentile value from the data.
     ///
@@ -92,7 +92,7 @@ pub trait InplaceStatistics {
     /// assert!(y.percentile_inplace(105).is_nan());
     /// assert!(y != [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0]);
     /// ```
-    fn percentile_inplace(&mut self, p: usize) -> f64;
+    fn percentile_inplace(&mut self, p: usize) -> T;
 
     /// Estimates the first quartile value from the data.
     ///
@@ -117,7 +117,7 @@ pub trait InplaceStatistics {
     /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
     /// # }
     /// ```
-    fn lower_quartile_inplace(&mut self) -> f64;
+    fn lower_quartile_inplace(&mut self) -> T;
 
     /// Estimates the third quartile value from the data.
     ///
@@ -142,7 +142,7 @@ pub trait InplaceStatistics {
     /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
     /// # }
     /// ```
-    fn upper_quartile_inplace(&mut self) -> f64;
+    fn upper_quartile_inplace(&mut self) -> T;
 
     /// Estimates the inter-quartile range from the data.
     ///
@@ -167,7 +167,7 @@ pub trait InplaceStatistics {
     /// assert!(y != [2.0, 1.0, 3.0, 4.0]);
     /// # }
     /// ```
-    fn interquartile_range_inplace(&mut self) -> f64;
+    fn interquartile_range_inplace(&mut self) -> T;
 
     /// Evaluates the rank of each entry of the data.
     ///
@@ -183,5 +183,5 @@ pub trait InplaceStatistics {
     /// assert_eq!((&mut y.clone()).ranks_inplace(RankTieBreaker::Average), [1.0, 4.0, 2.5, 2.5]);
     /// assert_eq!((&mut y.clone()).ranks_inplace(RankTieBreaker::Min), [1.0, 4.0, 2.0, 2.0]);
     /// ```
-    fn ranks_inplace(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64>;
+    fn ranks_inplace(&mut self, tie_breaker: RankTieBreaker) -> Vec<T>;
 }
