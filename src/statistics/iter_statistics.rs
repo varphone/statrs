@@ -44,4 +44,4 @@ pub trait IterStatistics : Iterator<Item=f64>
     }
 }
 
-impl IterStatistics for Iterator<Item=f64> { }
+impl<T: Iterator<Item=f64>> IterStatistics for T {}
