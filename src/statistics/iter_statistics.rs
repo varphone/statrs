@@ -51,7 +51,7 @@ pub trait IterStatistics<I, T> : Iterator<Item=I> {
     fn abs_max(&mut self) -> T;
 }
 
-impl<'a, T: Iterator<&'a f64>> IterStatistics<&'a f64, f64> for T 
+impl<'a, T: Iterator<Item=&'a f64>> IterStatistics<&'a f64, f64> for T 
 {
     fn abs_min(&mut self) -> f64 {
         match self.next() {
@@ -76,7 +76,7 @@ impl<'a, T: Iterator<&'a f64>> IterStatistics<&'a f64, f64> for T
     }
 }
 
-impl<'a, T: Iterator<f64>> IterStatistics<f64, f64> for T {
+impl<'a, T: Iterator<Item=f64>> IterStatistics<f64, f64> for T {
     fn abs_min(&mut self) -> f64 {
         match self.next() {
             None => f64::NAN,
