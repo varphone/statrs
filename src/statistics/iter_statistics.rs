@@ -119,8 +119,8 @@ impl<T> IterStatistics<f64> for T
         let mut count = 0.0;
         let mut sum = 0.0;
         for x in self {
-            sum += x.borrow().ln();
             count += 1.0;
+            sum += x.borrow().ln();
         }
         if count > 0.0 { (sum / count).exp() } else { f64::NAN }
     }

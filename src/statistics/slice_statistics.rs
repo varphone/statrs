@@ -104,13 +104,13 @@ impl Statistics<f64> for [f64] {
             return f64::NAN;
         }
 
-        let mut m = 0.0;
-        self.iter()
-            .fold(0.0, |acc, &x| {
-                m += 1.0;
-                acc + (x * x - acc) / m
-            })
-            .sqrt()
+        let mut count = 0.0;
+        let mut mean = 0.0;
+        for x in self.iter() {
+            count += 1.0;
+            mean += (x * x - mean) / count;
+        }
+        if count > 0.0 { mean.sqrt() } else { f64::NAN }
     }
 
     fn order_statistic(&self, order: usize) -> f64 {
@@ -349,12 +349,13 @@ impl Mean<f64> for [f64] {
             return f64::NAN;
         }
 
-        let mut m = 0.0;
-        self.iter()
-            .fold(0.0, |acc, &x| {
-                m += 1.0;
-                acc + (x - acc) / m
-            })
+        let mut count = 0.0;
+        let mut mean = 0.0;
+        for x in self.iter() {
+            count += 1.0;
+            mean += (x - mean) / count;
+        }
+        if count > 0.0 { mean } else { f64::NAN }
     }
 }
 
