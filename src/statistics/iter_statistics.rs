@@ -20,10 +20,10 @@ pub trait IterStatistics<T> {
     /// let x: Vec<f64> = vec![];
     /// assert!(x.iter().abs_min().is_nan());
     ///
-    /// let y = vec![0.0, f64::NAN, 3.0, -2.0];
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
     /// assert!(y.iter().abs_min().is_nan());
     ///
-    /// let z = vec![0.0, 3.0, -2.0];
+    /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.iter().abs_min(), 0.0);
     /// ```
     fn abs_min(&mut self) -> T;
@@ -43,13 +43,50 @@ pub trait IterStatistics<T> {
     /// let x: Vec<f64> = vec![];
     /// assert!(x.iter().abs_max().is_nan());
     ///
-    /// let y = vec![0.0, f64::NAN, 3.0, -2.0];
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
     /// assert!(y.iter().abs_max().is_nan());
     ///
-    /// let z = vec![0.0, 3.0, -2.0, -8.0];
+    /// let z = [0.0, 3.0, -2.0, -8.0];
     /// assert_eq!(z.iter().abs_max(), 8.0);
     /// ```
     fn abs_max(&mut self) -> T;
+
+    /// Evaluates the geometric mean of the data
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`.
+    /// Returns `f64::NAN` if an entry is less than `0`. Returns `0`
+    /// if no entry is less than `0` but there are entries equal to `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use std::f64;
+    /// use statrs::statistics::IterStatistics;
+    ///
+    /// # fn main() {
+    /// let x: Vec<f64> = vec![];
+    /// assert!(x.iter().geometric_mean().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.iter().geometric_mean().is_nan());
+    ///
+    /// let mut z = [0.0, 3.0, -2.0];
+    /// assert!(z.iter().geometric_mean().is_nan());
+    ///
+    /// z = [0.0, 3.0, 2.0];
+    /// assert_eq!(z.iter().geometric_mean(), 0.0);
+    ///
+    /// z = [1.0, 2.0, 3.0];
+    /// // test value from online calculator, could be more accurate
+    /// assert_almost_eq!(z.iter().geometric_mean(), 1.81712, 1e-5);
+    /// # }
+    /// ```
+    fn geometric_mean(&mut self) -> T;
 }
 
 impl<T> IterStatistics<f64> for T
@@ -76,5 +113,15 @@ impl<T> IterStatistics<f64> for T
                           |acc, x| if x > acc || x.is_nan() { x } else { acc })
             }
         }
+    }
+
+    fn geometric_mean(&mut self) -> f64 {
+        let mut count = 0.0;
+        let mut sum = 0.0;
+        for x in self {
+            sum += x.borrow().ln();
+            count += 1.0;
+        }
+        if count > 0.0 { (sum / count).exp() } else { f64::NAN }
     }
 }
