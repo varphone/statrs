@@ -934,6 +934,7 @@ mod test {
         assert_eq!(2.0, odd.median_inplace());
     }
 
+    #[ignore]
     #[test]
     fn test_mean_variance_stability() {
         // TODO: Implement tests. Depends on Mersenne Twister RNG implementation.
