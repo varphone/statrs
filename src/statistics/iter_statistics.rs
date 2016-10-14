@@ -26,7 +26,7 @@ pub trait IterStatistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.iter().abs_min(), 0.0);
     /// ```
-    fn abs_min(&mut self) -> T;
+    fn abs_min(mut self) -> T;
 
     /// Returns the maximum absolute value in the data
     ///
@@ -49,7 +49,7 @@ pub trait IterStatistics<T> {
     /// let z = [0.0, 3.0, -2.0, -8.0];
     /// assert_eq!(z.iter().abs_max(), 8.0);
     /// ```
-    fn abs_max(&mut self) -> T;
+    fn abs_max(mut self) -> T;
 
     /// Evaluates the geometric mean of the data
     ///
@@ -86,14 +86,14 @@ pub trait IterStatistics<T> {
     /// assert_almost_eq!(z.iter().geometric_mean(), 1.81712, 1e-5);
     /// # }
     /// ```
-    fn geometric_mean(&mut self) -> T;
+    fn geometric_mean(mut self) -> T;
 }
 
 impl<T> IterStatistics<f64> for T
     where T: Iterator,
           T::Item: Borrow<f64>
 {
-    fn abs_min(&mut self) -> f64 {
+    fn abs_min(mut self) -> f64 {
         match self.next() {
             None => f64::NAN,
             Some(x) => {
@@ -104,7 +104,7 @@ impl<T> IterStatistics<f64> for T
         }
     }
 
-    fn abs_max(&mut self) -> f64 {
+    fn abs_max(mut self) -> f64 {
         match self.next() {
             None => f64::NAN,
             Some(x) => {
@@ -115,13 +115,17 @@ impl<T> IterStatistics<f64> for T
         }
     }
 
-    fn geometric_mean(&mut self) -> f64 {
+    fn geometric_mean(self) -> f64 {
         let mut count = 0.0;
         let mut sum = 0.0;
         for x in self {
             count += 1.0;
             sum += x.borrow().ln();
         }
-        if count > 0.0 { (sum / count).exp() } else { f64::NAN }
+        if count > 0.0 {
+            (sum / count).exp()
+        } else {
+            f64::NAN
+        }
     }
 }
