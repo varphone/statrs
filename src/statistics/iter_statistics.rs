@@ -3,7 +3,12 @@ use std::borrow::Borrow;
 
 /// The `IterStatistics` trait provides the same host of statistical
 /// utilities as the `Statistics` traited ported for use with iterators
-/// which requires a mutable borrow
+/// which requires a mutable borrow.
+///
+/// # Remarks
+///
+/// `min` and `max` are not implemented for this trait since the `Iterator`
+/// trait already defines a `min` and ` max`
 pub trait IterStatistics<T> {
     /// Returns the minimum absolute value in the data
     ///
