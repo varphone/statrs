@@ -1,5 +1,6 @@
 use std::f64;
 use std::borrow::Borrow;
+use error::StatsError;
 
 /// The `IterStatistics` trait provides the same host of statistical
 /// utilities as the `Statistics` traited ported for use with iterators
@@ -31,7 +32,7 @@ pub trait IterStatistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.iter().abs_min(), 0.0);
     /// ```
-    fn abs_min(mut self) -> T;
+    fn abs_min(self) -> T;
 
     /// Returns the maximum absolute value in the data
     ///
@@ -54,7 +55,7 @@ pub trait IterStatistics<T> {
     /// let z = [0.0, 3.0, -2.0, -8.0];
     /// assert_eq!(z.iter().abs_max(), 8.0);
     /// ```
-    fn abs_max(mut self) -> T;
+    fn abs_max(self) -> T;
 
     /// Evaluates the sample mean, an estimate of the population
     /// mean.
@@ -83,7 +84,7 @@ pub trait IterStatistics<T> {
     /// assert_almost_eq!(z.iter().mean(), 1.0 / 3.0, 1e-15);
     /// # }
     /// ```
-    fn mean(mut self) -> T;
+    fn mean(self) -> T;
 
     /// Evaluates the geometric mean of the data
     ///
@@ -120,7 +121,7 @@ pub trait IterStatistics<T> {
     /// assert_almost_eq!(z.iter().geometric_mean(), 1.81712, 1e-5);
     /// # }
     /// ```
-    fn geometric_mean(mut self) -> T;
+    fn geometric_mean(self) -> T;
 
     /// Evaluates the harmonic mean of the data
     ///
@@ -182,7 +183,7 @@ pub trait IterStatistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.iter().variance(), 19.0 / 3.0);
     /// ```
-    fn variance(mut self) -> T;
+    fn variance(self) -> T;
 
     /// Estimates the unbiased population standard deviation from the provided samples
     ///
@@ -233,7 +234,7 @@ pub trait IterStatistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.iter().population_variance(), 38.0 / 9.0);
     /// ```
-    fn population_variance(mut self) -> T;
+    fn population_variance(self) -> T;
 
     /// Evaluates the population standard deviation from a full population.
     ///
@@ -260,6 +261,79 @@ pub trait IterStatistics<T> {
     /// assert_eq!(z.iter().population_std_dev(), (38f64 / 9.0).sqrt());
     /// ```
     fn population_std_dev(self) -> T;
+
+    /// Estimates the unbiased population covariance between the two provided samples
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    ///
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    ///
+    /// # Panics
+    ///
+    /// If the two sample iterators do not contain the same number of elements
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use std::f64;
+    /// use statrs::statistics::IterStatistics;
+    ///
+    /// # fn main() {
+    /// let x = [];
+    /// assert!(x.iter().covariance([].iter()).is_nan());
+    ///
+    /// let y1 = [0.0, f64::NAN, 3.0, -2.0];
+    /// let y2 = [-5.0, 4.0, 10.0, f64::NAN];
+    /// assert!(y1.iter().covariance(y2.iter()).is_nan());
+    ///
+    /// let z1 = [0.0, 3.0, -2.0];
+    /// let z2 = [-5.0, 4.0, 10.0];
+    /// assert_almost_eq!(z1.iter().covariance(z2.iter()), -5.5, 1e-14);
+    /// # }
+    /// ```
+    fn covariance(self, other: Self) -> T;
+
+    /// Evaluates the population covariance between the two provider populations
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N` is used as a normalizer and would thus be
+    /// biased if applied to a subset
+    ///
+    /// Returns `f64::NAN` if data is empty or any entry is `f64::NAN`
+    ///
+    /// # Panics
+    ///
+    /// If the two sample iterators do not contain the same number of elements
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use std::f64;
+    /// use statrs::statistics::IterStatistics;
+    ///
+    /// # fn main() {
+    /// let x = [];
+    /// assert!(x.iter().population_covariance([].iter()).is_nan());
+    ///
+    /// let y1 = [0.0, f64::NAN, 3.0, -2.0];
+    /// let y2 = [-5.0, 4.0, 10.0, f64::NAN];
+    /// assert!(y1.iter().population_covariance(y2.iter()).is_nan());
+    ///
+    /// let z1 = [0.0, 3.0, -2.0];
+    /// let z2 = [-5.0, 4.0, 10.0];
+    /// assert_almost_eq!(z1.iter().population_covariance(z2.iter()), -11.0 / 3.0, 1e-15);
+    /// # }
+    /// ```
+    fn population_covariance(self, other: Self) -> T;
 }
 
 impl<T> IterStatistics<f64> for T
@@ -369,6 +443,59 @@ impl<T> IterStatistics<f64> for T
 
     fn population_std_dev(self) -> f64 {
         self.population_variance().sqrt()
+    }
+
+    fn covariance(self, mut other: Self) -> f64 {
+        let mut n = 0.0;
+        let mut mean1 = 0.0;
+        let mut mean2 = 0.0;
+        let mut comoment = 0.0;
+
+        for x in self {
+            let borrow = *x.borrow();
+            let borrow2 = match other.next() {
+                None => panic!(format!("{}", StatsError::ContainersMustBeSameLength)),
+                Some(x) => *x.borrow(),
+            };
+            let old_mean2 = mean2;
+            n += 1.0;
+            mean1 += (borrow - mean1) / n;
+            mean2 += (borrow2 - mean2) / n;
+            comoment += (borrow - mean1) * (borrow2 - old_mean2);
+        }
+        if other.next().is_some() {
+            panic!(format!("{}", StatsError::ContainersMustBeSameLength));
+        }
+
+        if n > 1.0 {
+            comoment / (n - 1.0)
+        } else {
+            f64::NAN
+        }
+    }
+
+    fn population_covariance(self, mut other: Self) -> f64 {
+        let mut n = 0.0;
+        let mut mean1 = 0.0;
+        let mut mean2 = 0.0;
+        let mut comoment = 0.0;
+
+        for x in self {
+            let borrow = *x.borrow();
+            let borrow2 = match other.next() {
+                None => panic!(format!("{}", StatsError::ContainersMustBeSameLength)),
+                Some(x) => *x.borrow(),
+            };
+            let old_mean2 = mean2;
+            n += 1.0;
+            mean1 += (borrow - mean1) / n;
+            mean2 += (borrow2 - mean2) / n;
+            comoment += (borrow - mean1) * (borrow2 - old_mean2);
+        }
+        if other.next().is_some() {
+            panic!(format!("{}", StatsError::ContainersMustBeSameLength));
+        }
+        if n > 0.0 { comoment / n } else { f64::NAN }
     }
 }
 
