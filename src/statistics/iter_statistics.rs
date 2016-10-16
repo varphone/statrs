@@ -158,6 +158,31 @@ pub trait IterStatistics<T> {
     /// # }
     /// ```
     fn harmonic_mean(self) -> T;
+
+    /// Estimates the unbiased population variance from the provided samples
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    ///
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::IterStatistics;
+    ///
+    /// let x = [];
+    /// assert!(x.iter().variance().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.iter().variance().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.iter().variance(), 19.0 / 3.0);
+    /// ```
+    fn variance(mut self) -> f64;
 }
 
 impl<T> IterStatistics<f64> for T
@@ -187,42 +212,60 @@ impl<T> IterStatistics<f64> for T
     }
 
     fn mean(self) -> f64 {
-        let mut count = 0.0;
+        let mut i = 0.0;
         let mut mean = 0.0;
         for x in self {
-            count += 1.0;
-            mean += (x.borrow() - mean) / count;
+            i += 1.0;
+            mean += (x.borrow() - mean) / i;
         }
-        if count > 0.0 { mean } else { f64::NAN }
+        if i > 0.0 { mean } else { f64::NAN }
     }
 
     fn geometric_mean(self) -> f64 {
-        let mut count = 0.0;
+        let mut i = 0.0;
         let mut sum = 0.0;
         for x in self {
-            count += 1.0;
+            i += 1.0;
             sum += x.borrow().ln();
         }
-        if count > 0.0 {
-            (sum / count).exp()
-        } else {
-            f64::NAN
-        }
+        if i > 0.0 { (sum / i).exp() } else { f64::NAN }
     }
 
     fn harmonic_mean(self) -> f64 {
-        let mut count = 0.0;
+        let mut i = 0.0;
         let mut sum = 0.0;
         for x in self {
-            count += 1.0;
+            i += 1.0;
 
-            let val = *x.borrow();
-            if val < 0f64 {
+            let borrow = *x.borrow();
+            if borrow < 0f64 {
                 return f64::NAN;
             }
-            sum += 1.0 / val;
+            sum += 1.0 / borrow;
         }
-        if count > 0.0 { count / sum } else { f64::NAN }
+        if i > 0.0 { i / sum } else { f64::NAN }
+    }
+
+    fn variance(mut self) -> f64 {
+        let mut sum = match self.next() {
+            None => return f64::NAN,
+            Some(x) => *x.borrow(),
+        };
+        let mut i = 1.0;
+        let mut variance = 0.0;
+
+        for x in self {
+            i += 1.0;
+            let borrow = *x.borrow();
+            sum += borrow;
+            let diff = i * borrow - sum;
+            variance += diff * diff / (i * (i - 1.0))
+        }
+        if i > 1.0 {
+            variance / (i - 1.0)
+        } else {
+            f64::NAN
+        }
     }
 }
 
