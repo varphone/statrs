@@ -183,6 +183,31 @@ pub trait IterStatistics<T> {
     /// assert_eq!(z.iter().variance(), 19.0 / 3.0);
     /// ```
     fn variance(mut self) -> f64;
+
+    /// Estimates the unbiased population standard deviation from the provided samples
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    ///
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::IterStatistics;
+    ///
+    /// let x = [];
+    /// assert!(x.iter().std_dev().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.iter().std_dev().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.iter().std_dev(), (19f64 / 3.0).sqrt());
+    /// ```
+    fn std_dev(self) -> f64;
 }
 
 impl<T> IterStatistics<f64> for T
@@ -266,6 +291,10 @@ impl<T> IterStatistics<f64> for T
         } else {
             f64::NAN
         }
+    }
+
+    fn std_dev(self) -> f64 {
+        self.variance().sqrt()
     }
 }
 
