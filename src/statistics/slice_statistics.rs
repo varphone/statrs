@@ -50,17 +50,7 @@ impl Statistics<f64> for [f64] {
             return f64::NAN;
         }
 
-        unsafe {
-            let mut var = 0.0;
-            let mut t = *self.get_unchecked(0);
-            for i in 1..self.len() {
-                let x = *self.get_unchecked(i);
-                t += x;
-                let diff = (i as f64 + 1.0) * x - t;
-                var += (diff * diff) / ((i + 1) * i) as f64
-            }
-            var / self.len() as f64
-        }
+        self.iter().population_variance()
     }
 
     fn population_std_dev(&self) -> f64 {

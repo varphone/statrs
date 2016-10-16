@@ -182,7 +182,7 @@ pub trait IterStatistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.iter().variance(), 19.0 / 3.0);
     /// ```
-    fn variance(mut self) -> f64;
+    fn variance(mut self) -> T;
 
     /// Estimates the unbiased population standard deviation from the provided samples
     ///
@@ -207,7 +207,59 @@ pub trait IterStatistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.iter().std_dev(), (19f64 / 3.0).sqrt());
     /// ```
-    fn std_dev(self) -> f64;
+    fn std_dev(self) -> T;
+
+    /// Evaluates the population variance from a full population.
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N` is used as a normalizer and would thus
+    /// be biased if applied to a subset
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::IterStatistics;
+    ///
+    /// let x = [];
+    /// assert!(x.iter().population_variance().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.iter().population_variance().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.iter().population_variance(), 38.0 / 9.0);
+    /// ```
+    fn population_variance(mut self) -> T;
+
+    /// Evaluates the population standard deviation from a full population.
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N` is used as a normalizer and would thus
+    /// be biased if applied to a subset
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::IterStatistics;
+    ///
+    /// let x = [];
+    /// assert!(x.iter().population_std_dev().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.iter().population_std_dev().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.iter().population_std_dev(), (38f64 / 9.0).sqrt());
+    /// ```
+    fn population_std_dev(self) -> T;
 }
 
 impl<T> IterStatistics<f64> for T
@@ -284,7 +336,7 @@ impl<T> IterStatistics<f64> for T
             let borrow = *x.borrow();
             sum += borrow;
             let diff = i * borrow - sum;
-            variance += diff * diff / (i * (i - 1.0))
+            variance += diff * diff / (i * (i - 1.0));
         }
         if i > 1.0 {
             variance / (i - 1.0)
@@ -295,6 +347,28 @@ impl<T> IterStatistics<f64> for T
 
     fn std_dev(self) -> f64 {
         self.variance().sqrt()
+    }
+
+    fn population_variance(mut self) -> f64 {
+        let mut sum = match self.next() {
+            None => return f64::NAN,
+            Some(x) => *x.borrow(),
+        };
+        let mut i = 1.0;
+        let mut variance = 0.0;
+
+        for x in self {
+            i += 1.0;
+            let borrow = *x.borrow();
+            sum += borrow;
+            let diff = i * borrow - sum;
+            variance += diff * diff / (i * (i - 1.0));
+        }
+        variance / i
+    }
+
+    fn population_std_dev(self) -> f64 {
+        self.population_variance().sqrt()
     }
 }
 
