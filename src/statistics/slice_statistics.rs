@@ -2,143 +2,6 @@ use std::f64;
 use error::StatsError;
 use statistics::*;
 
-impl Statistics<f64> for [f64] {
-    fn abs_min(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        self.iter()
-            .map(|x| x.abs())
-            .fold(f64::INFINITY,
-                  |acc, x| if x < acc || x.is_nan() { x } else { acc })
-    }
-
-    fn abs_max(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        self.iter()
-            .map(|x| x.abs())
-            .fold(f64::NEG_INFINITY,
-                  |acc, x| if x > acc || x.is_nan() { x } else { acc })
-    }
-
-    fn geometric_mean(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        (self.iter().fold(0.0, |acc, &x| if x < 0.0 { f64::NAN } else { acc + x.ln() }) /
-         self.len() as f64)
-            .exp()
-    }
-
-    fn harmonic_mean(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        self.len() as f64 /
-        self.iter().fold(0.0,
-                         |acc, &x| if x < 0.0 { f64::NAN } else { acc + 1.0 / x })
-    }
-
-    fn population_variance(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        self.iter().population_variance()
-    }
-
-    fn population_std_dev(&self) -> f64 {
-        self.population_variance().sqrt()
-    }
-
-    fn covariance(&self, other: &Self) -> f64 {
-        let n1 = self.len();
-        let n2 = other.len();
-        assert!(n1 == n2,
-                format!("{}", StatsError::ContainersMustBeSameLength));
-        if n1 <= 1 {
-            return f64::NAN;
-        }
-
-        let mean1 = self.mean();
-        let mean2 = other.mean();
-        self.iter()
-            .zip(other.iter())
-            .fold(0.0, |acc, x| acc + (x.0 - mean1) * (x.1 - mean2)) / (n1 - 1) as f64
-    }
-
-    fn population_covariance(&self, other: &Self) -> f64 {
-        let n1 = self.len();
-        let n2 = other.len();
-        assert!(n1 == n2,
-                format!("{}", StatsError::ContainersMustBeSameLength));
-        if n1 == 0 {
-            return f64::NAN;
-        }
-
-        let mean1 = self.mean();
-        let mean2 = other.mean();
-        self.iter()
-            .zip(other.iter())
-            .fold(0.0, |acc, x| acc + (x.0 - mean1) * (x.1 - mean2)) / n1 as f64
-    }
-
-    fn quadratic_mean(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        let mut count = 0.0;
-        let mut mean = 0.0;
-        for x in self.iter() {
-            count += 1.0;
-            mean += (x * x - mean) / count;
-        }
-        if count > 0.0 { mean.sqrt() } else { f64::NAN }
-    }
-
-    fn order_statistic(&self, order: usize) -> f64 {
-        let mut copy = self.to_vec();
-        copy.order_statistic_inplace(order)
-    }
-
-    fn quantile(&self, tau: f64) -> f64 {
-        let mut copy = self.to_vec();
-        copy.quantile_inplace(tau)
-    }
-
-    fn percentile(&self, p: usize) -> f64 {
-        let mut copy = self.to_vec();
-        copy.percentile_inplace(p)
-    }
-
-    fn lower_quartile(&self) -> f64 {
-        let mut copy = self.to_vec();
-        copy.lower_quartile_inplace()
-    }
-
-    fn upper_quartile(&self) -> f64 {
-        let mut copy = self.to_vec();
-        copy.upper_quartile_inplace()
-    }
-
-    fn interquartile_range(&self) -> f64 {
-        let mut copy = self.to_vec();
-        copy.interquartile_range_inplace()
-    }
-
-    fn ranks(&self, tie_breaker: RankTieBreaker) -> Vec<f64> {
-        let mut copy = self.to_vec();
-        copy.ranks_inplace(tie_breaker)
-    }
-}
-
 impl InplaceStatistics<f64> for [f64] {
     fn order_statistic_inplace(&mut self, order: usize) -> f64 {
         let n = self.len();
@@ -306,108 +169,108 @@ impl Max<f64> for [f64] {
     }
 }
 
-impl Mean<f64> for [f64] {
-    /// Evaluates the sample mean, an estimate of the population
-    /// mean.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #[macro_use]
-    /// extern crate statrs;
-    ///
-    /// use std::f64;
-    /// use statrs::statistics::Mean;
-    ///
-    /// # fn main() {
-    /// let x = [];
-    /// assert!(x.mean().is_nan());
-    ///
-    /// let y = [0.0, f64::NAN, 3.0, -2.0];
-    /// assert!(y.mean().is_nan());
-    ///
-    /// let z = [0.0, 3.0, -2.0];
-    /// assert_almost_eq!(z.mean(), 1.0 / 3.0, 1e-15);
-    /// # }
-    /// ```
-    fn mean(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
+// impl Mean<f64> for [f64] {
+//     /// Evaluates the sample mean, an estimate of the population
+//     /// mean.
+//     ///
+//     /// # Remarks
+//     ///
+//     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+//     ///
+//     /// # Examples
+//     ///
+//     /// ```
+//     /// #[macro_use]
+//     /// extern crate statrs;
+//     ///
+//     /// use std::f64;
+//     /// use statrs::statistics::Mean;
+//     ///
+//     /// # fn main() {
+//     /// let x = [];
+//     /// assert!(x.mean().is_nan());
+//     ///
+//     /// let y = [0.0, f64::NAN, 3.0, -2.0];
+//     /// assert!(y.mean().is_nan());
+//     ///
+//     /// let z = [0.0, 3.0, -2.0];
+//     /// assert_almost_eq!(z.mean(), 1.0 / 3.0, 1e-15);
+//     /// # }
+//     /// ```
+//     fn mean(&self) -> f64 {
+//         if self.len() == 0 {
+//             return f64::NAN;
+//         }
 
-        let mut count = 0.0;
-        let mut mean = 0.0;
-        for x in self.iter() {
-            count += 1.0;
-            mean += (x - mean) / count;
-        }
-        if count > 0.0 { mean } else { f64::NAN }
-    }
-}
+//         let mut count = 0.0;
+//         let mut mean = 0.0;
+//         for x in self.iter() {
+//             count += 1.0;
+//             mean += (x - mean) / count;
+//         }
+//         if count > 0.0 { mean } else { f64::NAN }
+//     }
+// }
 
-impl Variance<f64> for [f64] {
-    /// Estimates the unbiased population variance from the provided samples
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-    ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::f64;
-    /// use statrs::statistics::Variance;
-    ///
-    /// let x = [];
-    /// assert!(x.variance().is_nan());
-    ///
-    /// let y = [0.0, f64::NAN, 3.0, -2.0];
-    /// assert!(y.variance().is_nan());
-    ///
-    /// let z = [0.0, 3.0, -2.0];
-    /// assert_eq!(z.variance(), 19.0 / 3.0);
-    /// ```
-    fn variance(&self) -> f64 {
-        if self.len() <= 1 {
-            return f64::NAN;
-        }
+// impl Variance<f64> for [f64] {
+//     /// Estimates the unbiased population variance from the provided samples
+//     ///
+//     /// # Remarks
+//     ///
+//     /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+//     ///
+//     /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+//     ///
+//     /// # Examples
+//     ///
+//     /// ```
+//     /// use std::f64;
+//     /// use statrs::statistics::Variance;
+//     ///
+//     /// let x = [];
+//     /// assert!(x.variance().is_nan());
+//     ///
+//     /// let y = [0.0, f64::NAN, 3.0, -2.0];
+//     /// assert!(y.variance().is_nan());
+//     ///
+//     /// let z = [0.0, 3.0, -2.0];
+//     /// assert_eq!(z.variance(), 19.0 / 3.0);
+//     /// ```
+//     fn variance(&self) -> f64 {
+//         if self.len() <= 1 {
+//             return f64::NAN;
+//         }
 
-        self.iter().variance()
-    }
+//         self.iter().variance()
+//     }
 
-    /// Estimates the unbiased population standard deviation from the provided samples
-    ///
-    /// # Remarks
-    ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-    ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::f64;
-    /// use statrs::statistics::Variance;
-    ///
-    /// let x = [];
-    /// assert!(x.std_dev().is_nan());
-    ///
-    /// let y = [0.0, f64::NAN, 3.0, -2.0];
-    /// assert!(y.std_dev().is_nan());
-    ///
-    /// let z = [0.0, 3.0, -2.0];
-    /// assert_eq!(z.std_dev(), (19f64 / 3.0).sqrt());
-    /// ```
-    fn std_dev(&self) -> f64 {
-        self.variance().sqrt()
-    }
-}
+//     /// Estimates the unbiased population standard deviation from the provided samples
+//     ///
+//     /// # Remarks
+//     ///
+//     /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+//     ///
+//     /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+//     ///
+//     /// # Examples
+//     ///
+//     /// ```
+//     /// use std::f64;
+//     /// use statrs::statistics::Variance;
+//     ///
+//     /// let x = [];
+//     /// assert!(x.std_dev().is_nan());
+//     ///
+//     /// let y = [0.0, f64::NAN, 3.0, -2.0];
+//     /// assert!(y.std_dev().is_nan());
+//     ///
+//     /// let z = [0.0, 3.0, -2.0];
+//     /// assert_eq!(z.std_dev(), (19f64 / 3.0).sqrt());
+//     /// ```
+//     fn std_dev(&self) -> f64 {
+//         self.variance().sqrt()
+//     }
+// }
 
 impl Median<f64> for [f64] {
     /// Returns the median value from the data

@@ -36,7 +36,7 @@ pub trait Statistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.abs_min(), 0.0);
     /// ```
-    fn abs_min(&self) -> T;
+    fn abs_min(self) -> T;
 
     /// Returns the maximum absolute value in the data
     ///
@@ -59,7 +59,7 @@ pub trait Statistics<T> {
     /// let z = [0.0, 3.0, -2.0, -8.0];
     /// assert_eq!(z.abs_max(), 8.0);
     /// ```
-    fn abs_max(&self) -> T;
+    fn abs_max(self) -> T;
 
     /// Evaluates the geometric mean of the data
     ///
@@ -96,7 +96,7 @@ pub trait Statistics<T> {
     /// assert_almost_eq!(z.geometric_mean(), 1.81712, 1e-5);
     /// # }
     /// ```
-    fn geometric_mean(&self) -> T;
+    fn geometric_mean(self) -> T;
 
     /// Evaluates the harmonic mean of the data
     ///
@@ -133,7 +133,7 @@ pub trait Statistics<T> {
     /// assert_almost_eq!(z.harmonic_mean(), 1.63636, 1e-5);
     /// # }
     /// ```
-    fn harmonic_mean(&self) -> T;
+    fn harmonic_mean(self) -> T;
 
     /// Evaluates the population variance from a full population.
     ///
@@ -159,7 +159,7 @@ pub trait Statistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.population_variance(), 38.0 / 9.0);
     /// ```
-    fn population_variance(&self) -> T;
+    fn population_variance(self) -> T;
 
     /// Evaluates the population standard deviation from a full population.
     ///
@@ -185,7 +185,7 @@ pub trait Statistics<T> {
     /// let z = [0.0, 3.0, -2.0];
     /// assert_eq!(z.population_std_dev(), (38f64 / 9.0).sqrt());
     /// ```
-    fn population_std_dev(&self) -> T;
+    fn population_std_dev(self) -> T;
 
     /// Estimates the unbiased population covariance between the two provided samples
     ///
@@ -216,7 +216,7 @@ pub trait Statistics<T> {
     /// let z2 = [-5.0, 4.0, 10.0];
     /// assert_eq!(z1.covariance(&z2), -5.5);
     /// ```
-    fn covariance(&self, other: &Self) -> T;
+    fn covariance(self, other: Self) -> T;
 
     /// Evaluates the population covariance between the two provider populations
     ///
@@ -248,7 +248,7 @@ pub trait Statistics<T> {
     /// let z2 = [-5.0, 4.0, 10.0];
     /// assert_eq!(z1.population_covariance(&z2), -11.0 / 3.0);
     /// ```
-    fn population_covariance(&self, other: &Self) -> T;
+    fn population_covariance(self, other: Self) -> T;
 
     /// Estimates the quadratic mean (Root Mean Square) of the data
     ///
@@ -277,161 +277,5 @@ pub trait Statistics<T> {
     /// assert_almost_eq!(z.quadratic_mean(), 2.08167, 1e-5);
     /// # }
     /// ```
-    fn quadratic_mean(&self) -> T;
-
-    /// Returns the order statistic `(order 1..N)` from the data
-    ///
-    /// # Remarks
-    ///
-    /// No sorting is assumed. Order must be one-based (between `1` and `N` inclusive)
-    /// Returns `f64::NAN` if order is outside the viable range or data is empty.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let x = [];
-    /// assert!(x.order_statistic(1).is_nan());
-    ///
-    /// let y = [0.0, 3.0, -2.0];
-    /// assert!(y.order_statistic(0).is_nan());
-    /// assert!(y.order_statistic(4).is_nan());
-    /// assert_eq!(y.order_statistic(2), 0.0);
-    /// ```
-    fn order_statistic(&self, order: usize) -> T;
-
-    /// Estimates the tau-th quantile from the data. The tau-th quantile
-    /// is the data value where the cumulative distribution function crosses tau.
-    ///
-    /// # Remarks
-    ///
-    /// No sorting is assumed. Tau must be between `0` and `1` inclusive.
-    /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let x = [];
-    /// assert!(x.quantile(0.5).is_nan());
-    ///
-    /// let y = [0.0, 3.0, -2.0];
-    /// assert!(y.quantile(-1.0).is_nan());
-    /// assert!(y.quantile(2.0).is_nan());
-    /// assert_eq!(y.quantile(0.5), 0.0);
-    /// ```
-    fn quantile(&self, tau: f64) -> T;
-
-    /// Estimates the p-Percentile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Use quantile for non-integer percentiles. `p` must be between `0` and `100` inclusive.
-    /// Returns `f64::NAN` if data is empty or `p` is outside the inclusive range.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::Statistics;
-    ///
-    /// let x = [];
-    /// assert!(x.percentile(0).is_nan());
-    ///
-    /// let y = [1.0, 5.0, 3.0, 4.0, 10.0, 9.0, 6.0, 7.0, 8.0, 2.0];
-    /// assert_eq!(y.percentile(0), 1.0);
-    /// assert_eq!(y.percentile(50), 5.5);
-    /// assert_eq!(y.percentile(100), 10.0);
-    /// assert!(y.percentile(105).is_nan());
-    /// ```
-    fn percentile(&self, p: usize) -> T;
-
-    /// Estimates the first quartile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #[macro_use]
-    /// extern crate statrs;
-    ///
-    /// use statrs::statistics::Statistics;
-    ///
-    /// # fn main() {
-    /// let x = [];
-    /// assert!(x.lower_quartile().is_nan());
-    ///
-    /// let y = [2.0, 1.0, 3.0, 4.0];
-    /// assert_almost_eq!(y.lower_quartile(), 1.416666666666666, 1e-15);
-    /// # }
-    /// ```
-    fn lower_quartile(&self) -> T;
-
-    /// Estimates the third quartile value from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #[macro_use]
-    /// extern crate statrs;
-    ///
-    /// use statrs::statistics::Statistics;
-    ///
-    /// # fn main() {
-    /// let x = [];
-    /// assert!(x.lower_quartile().is_nan());
-    ///
-    /// let y = [2.0, 1.0, 3.0, 4.0];
-    /// assert_almost_eq!(y.upper_quartile(), 3.5833333333333333, 1e-15);
-    /// # }
-    /// ```
-    fn upper_quartile(&self) -> T;
-
-    /// Estimates the inter-quartile range from the data.
-    ///
-    /// # Remarks
-    ///
-    /// Returns `f64::NAN` if data is empty
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// #[macro_use]
-    /// extern crate statrs;
-    ///
-    /// use statrs::statistics::Statistics;
-    ///
-    /// # fn main() {
-    /// let x = [];
-    /// assert!(x.interquartile_range().is_nan());
-    ///
-    /// let y = [2.0, 1.0, 3.0, 4.0];
-    /// assert_almost_eq!(y.interquartile_range(), 2.166666666666667, 1e-15);
-    /// # }
-    /// ```
-    fn interquartile_range(&self) -> T;
-
-    /// Evaluates the rank of each entry of the data.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use statrs::statistics::{Statistics, RankTieBreaker};
-    ///
-    /// let x = [];
-    /// assert_eq!(x.ranks(RankTieBreaker::Average).len(), 0);
-    ///
-    /// let y = [1.0, 3.0, 2.0, 2.0];
-    /// assert_eq!((&y.clone()).ranks(RankTieBreaker::Average), [1.0, 4.0, 2.5, 2.5]);
-    /// assert_eq!((&y.clone()).ranks(RankTieBreaker::Min), [1.0, 4.0, 2.0, 2.0]);
-    /// ```
-    fn ranks(&self, tie_breaker: RankTieBreaker) -> Vec<T>;
+    fn quadratic_mean(self) -> T;
 }
