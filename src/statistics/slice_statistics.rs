@@ -2,8 +2,8 @@ use std::f64;
 use error::StatsError;
 use statistics::*;
 
-impl InplaceStatistics<f64> for [f64] {
-    fn order_statistic_inplace(&mut self, order: usize) -> f64 {
+impl OrderStatistics<f64> for [f64] {
+    fn order_statistic(&mut self, order: usize) -> f64 {
         let n = self.len();
         match order {
             1 => self.min(),
@@ -13,7 +13,7 @@ impl InplaceStatistics<f64> for [f64] {
         }
     }
 
-    fn median_inplace(&mut self) -> f64 {
+    fn median(&mut self) -> f64 {
         let k = self.len() / 2;
         if self.len() % 2 != 0 {
             select_inplace(self, k)
@@ -22,7 +22,7 @@ impl InplaceStatistics<f64> for [f64] {
         }
     }
 
-    fn quantile_inplace(&mut self, tau: f64) -> f64 {
+    fn quantile(&mut self, tau: f64) -> f64 {
         if tau < 0.0 || tau > 1.0 || self.len() == 0 {
             return f64::NAN;
         }
@@ -42,23 +42,23 @@ impl InplaceStatistics<f64> for [f64] {
         a + (h - hf as f64) * (b - a)
     }
 
-    fn percentile_inplace(&mut self, p: usize) -> f64 {
-        self.quantile_inplace(p as f64 / 100.0)
+    fn percentile(&mut self, p: usize) -> f64 {
+        self.quantile(p as f64 / 100.0)
     }
 
-    fn lower_quartile_inplace(&mut self) -> f64 {
-        self.quantile_inplace(0.25)
+    fn lower_quartile(&mut self) -> f64 {
+        self.quantile(0.25)
     }
 
-    fn upper_quartile_inplace(&mut self) -> f64 {
-        self.quantile_inplace(0.75)
+    fn upper_quartile(&mut self) -> f64 {
+        self.quantile(0.75)
     }
 
-    fn interquartile_range_inplace(&mut self) -> f64 {
-        self.upper_quartile_inplace() - self.lower_quartile_inplace()
+    fn interquartile_range(&mut self) -> f64 {
+        self.upper_quartile() - self.lower_quartile()
     }
 
-    fn ranks_inplace(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64> {
+    fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<f64> {
         let n = self.len();
         let mut ranks: Vec<f64> = vec![0.0; n];
         let mut index: Vec<usize> = (0..n).collect();
@@ -267,7 +267,7 @@ impl Median<f64> for [f64] {
     /// assert_eq!(y.median(), 0.0);
     fn median(&self) -> f64 {
         let mut copy = self.to_vec();
-        copy.median_inplace()
+        OrderStatistics::median(&mut *copy)
     }
 }
 
@@ -581,28 +581,28 @@ mod test {
     #[test]
     fn test_order_statistic_short() {
         let mut data = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 1.0, 6.0];
-        assert!(data.order_statistic_inplace(0).is_nan());
-        assert_eq!(data.order_statistic_inplace(1), -3.0);
-        assert_eq!(data.order_statistic_inplace(2), -1.0);
-        assert_eq!(data.order_statistic_inplace(3), -0.5);
-        assert_eq!(data.order_statistic_inplace(7), 5.0);
-        assert_eq!(data.order_statistic_inplace(8), 6.0);
-        assert_eq!(data.order_statistic_inplace(9), 10.0);
-        assert!(data.order_statistic_inplace(10).is_nan());
+        assert!(data.order_statistic(0).is_nan());
+        assert_eq!(data.order_statistic(1), -3.0);
+        assert_eq!(data.order_statistic(2), -1.0);
+        assert_eq!(data.order_statistic(3), -0.5);
+        assert_eq!(data.order_statistic(7), 5.0);
+        assert_eq!(data.order_statistic(8), 6.0);
+        assert_eq!(data.order_statistic(9), 10.0);
+        assert!(data.order_statistic(10).is_nan());
     }
 
     #[test]
     fn test_quantile_short() {
         let mut data = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0, 6.0];
-        assert_eq!(data.quantile_inplace(0.0), -3.0);
-        assert_eq!(data.quantile_inplace(1.0), 10.0);
-        assert_almost_eq!(data.quantile_inplace(0.5), 3.0 / 5.0, 1e-15);
-        assert_almost_eq!(data.quantile_inplace(0.2), -4.0 / 5.0, 1e-15);
-        assert_eq!(data.quantile_inplace(0.7), 137.0 / 30.0);
-        assert_eq!(data.quantile_inplace(0.01), -3.0);
-        assert_eq!(data.quantile_inplace(0.99), 10.0);
-        assert_almost_eq!(data.quantile_inplace(0.52), 287.0 / 375.0, 1e-15);
-        assert_almost_eq!(data.quantile_inplace(0.325), -37.0 / 240.0, 1e-15);
+        assert_eq!(data.quantile(0.0), -3.0);
+        assert_eq!(data.quantile(1.0), 10.0);
+        assert_almost_eq!(data.quantile(0.5), 3.0 / 5.0, 1e-15);
+        assert_almost_eq!(data.quantile(0.2), -4.0 / 5.0, 1e-15);
+        assert_eq!(data.quantile(0.7), 137.0 / 30.0);
+        assert_eq!(data.quantile(0.01), -3.0);
+        assert_eq!(data.quantile(0.99), 10.0);
+        assert_almost_eq!(data.quantile(0.52), 287.0 / 375.0, 1e-15);
+        assert_almost_eq!(data.quantile(0.325), -37.0 / 240.0, 1e-15);
     }
 
     // TODO: need coverage for case where data.length > 10 to cover quick sort
@@ -610,43 +610,43 @@ mod test {
     fn test_ranks() {
         let mut sorted_distinct = [1.0, 2.0, 4.0, 7.0, 8.0, 9.0, 10.0, 12.0];
         let mut sorted_ties = [1.0, 2.0, 2.0, 7.0, 9.0, 9.0, 10.0, 12.0];
-        assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Average), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::Average), [1.0, 2.5, 2.5, 4.0, 5.5, 5.5, 7.0, 8.0]);
-        assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Min), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::Min), [1.0, 2.0, 2.0, 4.0, 5.0, 5.0, 7.0, 8.0]);
-        assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Max), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::Max), [1.0, 3.0, 3.0, 4.0, 6.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Average), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks(RankTieBreaker::Average), [1.0, 2.5, 2.5, 4.0, 5.5, 5.5, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Min), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks(RankTieBreaker::Min), [1.0, 2.0, 2.0, 4.0, 5.0, 5.0, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Max), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks(RankTieBreaker::Max), [1.0, 3.0, 3.0, 4.0, 6.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_ties.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
 
         let distinct = [1.0, 8.0, 12.0, 7.0, 2.0, 9.0, 10.0, 4.0];
         let ties = [1.0, 9.0, 12.0, 7.0, 2.0, 9.0, 10.0, 2.0];
-        assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::Average), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-        assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::Average), [1.0, 5.5, 8.0, 4.0, 2.5, 5.5, 7.0, 2.5]);
-        assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-        assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 5.0, 7.0, 2.0]);
-        assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::Max), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-        assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::Max), [1.0, 6.0, 8.0, 4.0, 3.0, 6.0, 7.0, 3.0]);
-        assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-        assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(distinct.clone().ranks(RankTieBreaker::Average), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks(RankTieBreaker::Average), [1.0, 5.5, 8.0, 4.0, 2.5, 5.5, 7.0, 2.5]);
+        assert_eq!(distinct.clone().ranks(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 5.0, 7.0, 2.0]);
+        assert_eq!(distinct.clone().ranks(RankTieBreaker::Max), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks(RankTieBreaker::Max), [1.0, 6.0, 8.0, 4.0, 3.0, 6.0, 7.0, 3.0]);
+        assert_eq!(distinct.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
+        assert_eq!(ties.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
     }
 
     #[test]
     fn test_median_short() {
-        let mut even = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0, 6.0];
-        assert_eq!(even.median_inplace(), 0.6);
+        let even = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0, 6.0];
+        assert_eq!(even.median(), 0.6);
 
-        let mut odd = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0];
-        assert_eq!(odd.median_inplace(), 0.2);
+        let odd = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0];
+        assert_eq!(odd.median(), 0.2);
     }
 
     #[test]
     fn test_median_long_constant_seq() {
-        let mut even = vec![2.0; 100000];
-        assert_eq!(2.0, even.median_inplace());
+        let even = vec![2.0; 100000];
+        assert_eq!(2.0, even.median());
 
-        let mut odd = vec![2.0; 100001];
-        assert_eq!(2.0, odd.median_inplace());
+        let odd = vec![2.0; 100001];
+        assert_eq!(2.0, odd.median());
     }
 
     // TODO: test codeplex issue 5667 (Math.NET)
@@ -655,18 +655,18 @@ mod test {
     fn test_median_robust_on_infinities() {
         let mut data3 = [2.0, f64::NEG_INFINITY, f64::INFINITY];
         assert_eq!(data3.median(), 2.0);
-        assert_eq!(data3.median_inplace(), 2.0);
+        assert_eq!(data3.median(), 2.0);
 
         data3 = [f64::NEG_INFINITY, 2.0, f64::INFINITY];
         assert_eq!(data3.median(), 2.0);
-        assert_eq!(data3.median_inplace(), 2.0);
+        assert_eq!(data3.median(), 2.0);
 
         data3 = [f64::NEG_INFINITY, f64::INFINITY, 2.0];
         assert_eq!(data3.median(), 2.0);
-        assert_eq!(data3.median_inplace(), 2.0);
+        assert_eq!(data3.median(), 2.0);
 
-        let mut data4 = [f64::NEG_INFINITY, 2.0, 3.0, f64::INFINITY];
+        let data4 = [f64::NEG_INFINITY, 2.0, 3.0, f64::INFINITY];
         assert_eq!(data4.median(), 2.5);
-        assert_eq!(data4.median_inplace(), 2.5);
+        assert_eq!(data4.median(), 2.5);
     }
 }
