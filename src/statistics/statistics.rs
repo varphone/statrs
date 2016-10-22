@@ -15,6 +15,52 @@ pub enum RankTieBreaker {
 /// The `Statistics` trait provides a host of statistical utilities for analzying
 /// data sets
 pub trait Statistics<T> {
+    /// Returns the minimum value in the data
+    ///
+    /// # Rermarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Statistics;
+    ///
+    /// let x = [];
+    /// assert!(x.min().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.min().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.min(), -2.0);
+    /// ```
+    fn min(self) -> T;
+
+    /// Returns the maximum value in the data
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Max;
+    ///
+    /// let x = [];
+    /// assert!(x.max().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.max().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.max(), 3.0);
+    /// ```
+    fn max(self) -> T;
+
     /// Returns the minimum absolute value in the data
     ///
     /// # Remarks
@@ -60,6 +106,35 @@ pub trait Statistics<T> {
     /// assert_eq!(z.abs_max(), 8.0);
     /// ```
     fn abs_max(self) -> T;
+
+    /// Evaluates the sample mean, an estimate of the population
+    /// mean.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use std::f64;
+    /// use statrs::statistics::Mean;
+    ///
+    /// # fn main() {
+    /// let x = [];
+    /// assert!(x.mean().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.mean().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_almost_eq!(z.mean(), 1.0 / 3.0, 1e-15);
+    /// # }
+    /// ```
+    fn mean(self) -> T;
 
     /// Evaluates the geometric mean of the data
     ///
@@ -135,6 +210,56 @@ pub trait Statistics<T> {
     /// ```
     fn harmonic_mean(self) -> T;
 
+    /// Estimates the unbiased population variance from the provided samples
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    ///
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Variance;
+    ///
+    /// let x = [];
+    /// assert!(x.variance().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.variance().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.variance(), 19.0 / 3.0);
+    /// ```
+    fn variance(self) -> T;
+
+    /// Estimates the unbiased population standard deviation from the provided samples
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    ///
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Variance;
+    ///
+    /// let x = [];
+    /// assert!(x.std_dev().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.std_dev().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.std_dev(), (19f64 / 3.0).sqrt());
+    /// ```
+    fn std_dev(self) -> T;
+
     /// Evaluates the population variance from a full population.
     ///
     /// # Remarks
@@ -202,9 +327,13 @@ pub trait Statistics<T> {
     /// # Examples
     ///
     /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
     /// use std::f64;
     /// use statrs::statistics::Statistics;
     ///
+    /// # fn main() {
     /// let x = [];
     /// assert!(x.covariance(&[]).is_nan());
     ///
@@ -214,7 +343,8 @@ pub trait Statistics<T> {
     ///
     /// let z1 = [0.0, 3.0, -2.0];
     /// let z2 = [-5.0, 4.0, 10.0];
-    /// assert_eq!(z1.covariance(&z2), -5.5);
+    /// assert_almost_eq!(z1.covariance(&z2), -5.5, 1e-14);
+    /// # }
     /// ```
     fn covariance(self, other: Self) -> T;
 
@@ -234,9 +364,13 @@ pub trait Statistics<T> {
     /// # Examples
     ///
     /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
     /// use std::f64;
     /// use statrs::statistics::Statistics;
     ///
+    /// # fn main() {
     /// let x = [];
     /// assert!(x.population_covariance(&[]).is_nan());
     ///
@@ -246,7 +380,8 @@ pub trait Statistics<T> {
     ///
     /// let z1 = [0.0, 3.0, -2.0];
     /// let z2 = [-5.0, 4.0, 10.0];
-    /// assert_eq!(z1.population_covariance(&z2), -11.0 / 3.0);
+    /// assert_almost_eq!(z1.population_covariance(&z2), -11.0 / 3.0, 1e-14);
+    /// # }
     /// ```
     fn population_covariance(self, other: Self) -> T;
 

@@ -108,7 +108,7 @@ impl InplaceStatistics<f64> for [f64] {
 impl Min<f64> for [f64] {
     /// Returns the minimum value in the data
     ///
-    /// # Rermarks
+    /// # Remarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
     ///
@@ -128,12 +128,7 @@ impl Min<f64> for [f64] {
     /// assert_eq!(z.min(), -2.0);
     /// ```
     fn min(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        self.iter().fold(f64::INFINITY,
-                         |acc, &x| if x < acc || x.is_nan() { x } else { acc })
+        Statistics::min(self)
     }
 }
 
@@ -160,117 +155,98 @@ impl Max<f64> for [f64] {
     /// assert_eq!(z.max(), 3.0);
     /// ```
     fn max(&self) -> f64 {
-        if self.len() == 0 {
-            return f64::NAN;
-        }
-
-        self.iter().fold(f64::NEG_INFINITY,
-                         |acc, &x| if x > acc || x.is_nan() { x } else { acc })
+        Statistics::max(self)
     }
 }
 
-// impl Mean<f64> for [f64] {
-//     /// Evaluates the sample mean, an estimate of the population
-//     /// mean.
-//     ///
-//     /// # Remarks
-//     ///
-//     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// #[macro_use]
-//     /// extern crate statrs;
-//     ///
-//     /// use std::f64;
-//     /// use statrs::statistics::Mean;
-//     ///
-//     /// # fn main() {
-//     /// let x = [];
-//     /// assert!(x.mean().is_nan());
-//     ///
-//     /// let y = [0.0, f64::NAN, 3.0, -2.0];
-//     /// assert!(y.mean().is_nan());
-//     ///
-//     /// let z = [0.0, 3.0, -2.0];
-//     /// assert_almost_eq!(z.mean(), 1.0 / 3.0, 1e-15);
-//     /// # }
-//     /// ```
-//     fn mean(&self) -> f64 {
-//         if self.len() == 0 {
-//             return f64::NAN;
-//         }
+impl Mean<f64> for [f64] {
+    /// Evaluates the sample mean, an estimate of the population
+    /// mean.
+    ///
+    /// # Remarks
+    ///
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use std::f64;
+    /// use statrs::statistics::Mean;
+    ///
+    /// # fn main() {
+    /// let x = [];
+    /// assert!(x.mean().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.mean().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_almost_eq!(z.mean(), 1.0 / 3.0, 1e-15);
+    /// # }
+    /// ```
+    fn mean(&self) -> f64 {
+        Statistics::mean(self)
+    }
+}
 
-//         let mut count = 0.0;
-//         let mut mean = 0.0;
-//         for x in self.iter() {
-//             count += 1.0;
-//             mean += (x - mean) / count;
-//         }
-//         if count > 0.0 { mean } else { f64::NAN }
-//     }
-// }
+impl Variance<f64> for [f64] {
+    /// Estimates the unbiased population variance from the provided samples
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    ///
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Variance;
+    ///
+    /// let x = [];
+    /// assert!(x.variance().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.variance().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.variance(), 19.0 / 3.0);
+    /// ```
+    fn variance(&self) -> f64 {
+        Statistics::variance(self)
+    }
 
-// impl Variance<f64> for [f64] {
-//     /// Estimates the unbiased population variance from the provided samples
-//     ///
-//     /// # Remarks
-//     ///
-//     /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-//     ///
-//     /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// use std::f64;
-//     /// use statrs::statistics::Variance;
-//     ///
-//     /// let x = [];
-//     /// assert!(x.variance().is_nan());
-//     ///
-//     /// let y = [0.0, f64::NAN, 3.0, -2.0];
-//     /// assert!(y.variance().is_nan());
-//     ///
-//     /// let z = [0.0, 3.0, -2.0];
-//     /// assert_eq!(z.variance(), 19.0 / 3.0);
-//     /// ```
-//     fn variance(&self) -> f64 {
-//         if self.len() <= 1 {
-//             return f64::NAN;
-//         }
-
-//         self.iter().variance()
-//     }
-
-//     /// Estimates the unbiased population standard deviation from the provided samples
-//     ///
-//     /// # Remarks
-//     ///
-//     /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
-//     ///
-//     /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
-//     ///
-//     /// # Examples
-//     ///
-//     /// ```
-//     /// use std::f64;
-//     /// use statrs::statistics::Variance;
-//     ///
-//     /// let x = [];
-//     /// assert!(x.std_dev().is_nan());
-//     ///
-//     /// let y = [0.0, f64::NAN, 3.0, -2.0];
-//     /// assert!(y.std_dev().is_nan());
-//     ///
-//     /// let z = [0.0, 3.0, -2.0];
-//     /// assert_eq!(z.std_dev(), (19f64 / 3.0).sqrt());
-//     /// ```
-//     fn std_dev(&self) -> f64 {
-//         self.variance().sqrt()
-//     }
-// }
+    /// Estimates the unbiased population standard deviation from the provided samples
+    ///
+    /// # Remarks
+    ///
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    ///
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::f64;
+    /// use statrs::statistics::Variance;
+    ///
+    /// let x = [];
+    /// assert!(x.std_dev().is_nan());
+    ///
+    /// let y = [0.0, f64::NAN, 3.0, -2.0];
+    /// assert!(y.std_dev().is_nan());
+    ///
+    /// let z = [0.0, 3.0, -2.0];
+    /// assert_eq!(z.std_dev(), (19f64 / 3.0).sqrt());
+    /// ```
+    fn std_dev(&self) -> f64 {
+        Statistics::std_dev(self)
+    }
+}
 
 impl Median<f64> for [f64] {
     /// Returns the median value from the data
@@ -599,84 +575,12 @@ fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, rig
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use std::f64::{self, consts};
-    use generate;
+    use std::f64;
     use statistics::*;
-    use testing;
-
-    #[test]
-    fn test_mean() {
-        let mut data = testing::load_data("nist/lottery.txt");
-        assert_almost_eq!((&data).mean(), 518.958715596330, 1e-12);
-
-        data = testing::load_data("nist/lew.txt");
-        assert_almost_eq!((&data).mean(), -177.435000000000, 1e-13);
-
-        data = testing::load_data("nist/mavro.txt");
-        assert_almost_eq!((&data).mean(), 2.00185600000000, 1e-15);
-
-        data = testing::load_data("nist/michaelso.txt");
-        assert_almost_eq!((&data).mean(), 299.852400000000, 1e-13);
-
-        data = testing::load_data("nist/numacc1.txt");
-        assert_eq!((&data).mean(), 10000002.0);
-
-        data = testing::load_data("nist/numacc2.txt");
-        assert_almost_eq!((&data).mean(), 1.2, 1e-15);
-
-        data = testing::load_data("nist/numacc3.txt");
-        assert_eq!((&data).mean(), 1000000.2);
-
-        data = testing::load_data("nist/numacc4.txt");
-        assert_almost_eq!((&data).mean(), 10000000.2, 1e-8);
-    }
-
-    #[test]
-    fn test_std_dev() {
-        let mut data = testing::load_data("nist/lottery.txt");
-        assert_almost_eq!((&data).std_dev(), 291.699727470969, 1e-13);
-
-        data = testing::load_data("nist/lew.txt");
-        assert_almost_eq!((&data).std_dev(), 277.332168044316, 1e-12);
-
-        data = testing::load_data("nist/mavro.txt");
-        assert_almost_eq!((&data).std_dev(), 0.000429123454003053, 1e-15);
-
-        data = testing::load_data("nist/michaelso.txt");
-        assert_almost_eq!((&data).std_dev(), 0.0790105478190518, 1e-13);
-
-        data = testing::load_data("nist/numacc1.txt");
-        assert_eq!((&data).std_dev(), 1.0);
-
-        data = testing::load_data("nist/numacc2.txt");
-        assert_almost_eq!((&data).std_dev(), 0.1, 1e-16);
-
-        data = testing::load_data("nist/numacc3.txt");
-        assert_almost_eq!((&data).std_dev(), 0.1, 1e-10);
-
-        data = testing::load_data("nist/numacc4.txt");
-        assert_almost_eq!((&data).std_dev(), 0.1, 1e-9);
-    }
-
-    #[test]
-    fn test_min_max_short() {
-        let data = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0];
-        assert_eq!(data.min(), -3.0);
-        assert_eq!(data.max(), 10.0);
-    }
 
     #[test]
     fn test_order_statistic_short() {
         let mut data = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 1.0, 6.0];
-        assert!(data.order_statistic(0).is_nan());
-        assert_eq!(data.order_statistic(1), -3.0);
-        assert_eq!(data.order_statistic(2), -1.0);
-        assert_eq!(data.order_statistic(3), -0.5);
-        assert_eq!(data.order_statistic(7), 5.0);
-        assert_eq!(data.order_statistic(8), 6.0);
-        assert_eq!(data.order_statistic(9), 10.0);
-        assert!(data.order_statistic(10).is_nan());
-
         assert!(data.order_statistic_inplace(0).is_nan());
         assert_eq!(data.order_statistic_inplace(1), -3.0);
         assert_eq!(data.order_statistic_inplace(2), -1.0);
@@ -690,16 +594,6 @@ mod test {
     #[test]
     fn test_quantile_short() {
         let mut data = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0, 6.0];
-        assert_eq!(data.quantile(0.0), -3.0);
-        assert_eq!(data.quantile(1.0), 10.0);
-        assert_almost_eq!(data.quantile(0.5), 3.0 / 5.0, 1e-15);
-        assert_almost_eq!(data.quantile(0.2), -4.0 / 5.0, 1e-15);
-        assert_eq!(data.quantile(0.7), 137.0 / 30.0);
-        assert_eq!(data.quantile(0.01), -3.0);
-        assert_eq!(data.quantile(0.99), 10.0);
-        assert_almost_eq!(data.quantile(0.52), 287.0 / 375.0, 1e-15);
-        assert_almost_eq!(data.quantile(0.325), -37.0 / 240.0, 1e-15);
-
         assert_eq!(data.quantile_inplace(0.0), -3.0);
         assert_eq!(data.quantile_inplace(1.0), 10.0);
         assert_almost_eq!(data.quantile_inplace(0.5), 3.0 / 5.0, 1e-15);
@@ -716,16 +610,7 @@ mod test {
     fn test_ranks() {
         let mut sorted_distinct = [1.0, 2.0, 4.0, 7.0, 8.0, 9.0, 10.0, 12.0];
         let mut sorted_ties = [1.0, 2.0, 2.0, 7.0, 9.0, 9.0, 10.0, 12.0];
-        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Average), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_ties.ranks(RankTieBreaker::Average), [1.0, 2.5, 2.5, 4.0, 5.5, 5.5, 7.0, 8.0]);
-        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Min), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_ties.ranks(RankTieBreaker::Min), [1.0, 2.0, 2.0, 4.0, 5.0, 5.0, 7.0, 8.0]);
-        assert_eq!(sorted_distinct.ranks(RankTieBreaker::Max), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_ties.ranks(RankTieBreaker::Max), [1.0, 3.0, 3.0, 4.0, 6.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_distinct.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-        assert_eq!(sorted_ties.ranks(RankTieBreaker::First), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
-
-         assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Average), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
+        assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Average), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
         assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::Average), [1.0, 2.5, 2.5, 4.0, 5.5, 5.5, 7.0, 8.0]);
         assert_eq!(sorted_distinct.ranks_inplace(RankTieBreaker::Min), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
         assert_eq!(sorted_ties.ranks_inplace(RankTieBreaker::Min), [1.0, 2.0, 2.0, 4.0, 5.0, 5.0, 7.0, 8.0]);
@@ -736,15 +621,6 @@ mod test {
 
         let distinct = [1.0, 8.0, 12.0, 7.0, 2.0, 9.0, 10.0, 4.0];
         let ties = [1.0, 9.0, 12.0, 7.0, 2.0, 9.0, 10.0, 2.0];
-        assert_eq!(distinct.clone().ranks(RankTieBreaker::Average), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-        assert_eq!(ties.clone().ranks(RankTieBreaker::Average), [1.0, 5.5, 8.0, 4.0, 2.5, 5.5, 7.0, 2.5]);
-        assert_eq!(distinct.clone().ranks(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-        assert_eq!(ties.clone().ranks(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 5.0, 7.0, 2.0]);
-        assert_eq!(distinct.clone().ranks(RankTieBreaker::Max), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-        assert_eq!(ties.clone().ranks(RankTieBreaker::Max), [1.0, 6.0, 8.0, 4.0, 3.0, 6.0, 7.0, 3.0]);
-        assert_eq!(distinct.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-        assert_eq!(ties.clone().ranks(RankTieBreaker::First), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
-
         assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::Average), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
         assert_eq!(ties.clone().ranks_inplace(RankTieBreaker::Average), [1.0, 5.5, 8.0, 4.0, 2.5, 5.5, 7.0, 2.5]);
         assert_eq!(distinct.clone().ranks_inplace(RankTieBreaker::Min), [1.0, 5.0, 8.0, 4.0, 2.0, 6.0, 7.0, 3.0]);
@@ -758,90 +634,22 @@ mod test {
     #[test]
     fn test_median_short() {
         let mut even = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0, 6.0];
-        assert_eq!(even.median(), 0.6);
         assert_eq!(even.median_inplace(), 0.6);
 
         let mut odd = [-1.0, 5.0, 0.0, -3.0, 10.0, -0.5, 4.0, 0.2, 1.0];
-        assert_eq!(odd.median(), 0.2);
         assert_eq!(odd.median_inplace(), 0.2);
     }
 
     #[test]
     fn test_median_long_constant_seq() {
         let mut even = vec![2.0; 100000];
-        assert_eq!(2.0, even.median());
         assert_eq!(2.0, even.median_inplace());
 
         let mut odd = vec![2.0; 100001];
-        assert_eq!(2.0, odd.median());
         assert_eq!(2.0, odd.median_inplace());
     }
 
-    #[ignore]
-    #[test]
-    fn test_mean_variance_stability() {
-        // TODO: Implement tests. Depends on Mersenne Twister RNG implementation.
-        // Currently hesistant to bring extra dependency just for test
-    }
-
-    #[test]
-    fn test_covariance_consistent_with_variance() {
-        let mut data = testing::load_data("nist/lottery.txt");
-        assert_almost_eq!(data.variance(), data.covariance(&data), 1e-10);
-
-        data = testing::load_data("nist/lew.txt");
-        assert_almost_eq!(data.variance(), data.covariance(&data), 1e-10);
-
-        data = testing::load_data("nist/mavro.txt");
-        assert_almost_eq!(data.variance(), data.covariance(&data), 1e-10);
-
-        data = testing::load_data("nist/michaelso.txt");
-        assert_almost_eq!(data.variance(), data.covariance(&data), 1e-10);
-
-        data = testing::load_data("nist/numacc1.txt");
-        assert_almost_eq!(data.variance(), data.covariance(&data), 1e-10);
-    }
-
-    #[test]
-    fn test_pop_covar_consistent_with_pop_var() {
-        let mut data = testing::load_data("nist/lottery.txt");
-        assert_almost_eq!(data.population_variance(), data.population_covariance(&data), 1e-10);
-
-        data = testing::load_data("nist/lew.txt");
-        assert_almost_eq!(data.population_variance(), data.population_covariance(&data), 1e-10);
-
-        data = testing::load_data("nist/mavro.txt");
-        assert_almost_eq!(data.population_variance(), data.population_covariance(&data), 1e-10);
-
-        data = testing::load_data("nist/michaelso.txt");
-        assert_almost_eq!(data.population_variance(), data.population_covariance(&data), 1e-10);
-
-        data = testing::load_data("nist/numacc1.txt");
-        assert_almost_eq!(data.population_variance(), data.population_covariance(&data), 1e-10);
-    }
-
-    #[test]
-    fn test_covariance_is_symmetric() {
-        let data_a = &testing::load_data("nist/lottery.txt")[0..200];
-        let data_b = &testing::load_data("nist/lew.txt")[0..200];
-        assert_eq!(data_a.covariance(data_b), data_b.covariance(data_a));
-        assert_eq!(data_a.population_covariance(data_b), data_b.population_covariance(data_a));
-    }
-
-    #[test]
-    fn test_empty_data_returns_nan() {
-        let data = [0.0; 0];
-        assert!(data.min().is_nan());
-        assert!(data.max().is_nan());
-        assert!(data.mean().is_nan());
-        assert!(data.quadratic_mean().is_nan());
-        assert!(data.variance().is_nan());
-        assert!(data.population_variance().is_nan());
-    }
-
     // TODO: test codeplex issue 5667 (Math.NET)
-
-    // TODO: test github issue 136 (Math.NET)
 
     #[test]
     fn test_median_robust_on_infinities() {
@@ -860,21 +668,5 @@ mod test {
         let mut data4 = [f64::NEG_INFINITY, 2.0, 3.0, f64::INFINITY];
         assert_eq!(data4.median(), 2.5);
         assert_eq!(data4.median_inplace(), 2.5);
-    }
-
-    #[test]
-    fn test_large_samples() {
-        let shorter = generate::periodic(4*4096, 4.0, 1.0);
-        let longer = generate::periodic(4*32768, 4.0, 1.0);
-        assert_almost_eq!(shorter.mean(), 0.375, 1e-14);
-        assert_almost_eq!(longer.mean(), 0.375, 1e-14);
-        assert_almost_eq!(shorter.quadratic_mean(), (0.21875f64).sqrt(), 1e-14);
-        assert_almost_eq!(longer.quadratic_mean(), (0.21875f64).sqrt(), 1e-14);
-    }
-
-    #[test]
-    fn test_quadratic_mean_of_sinusoidal() {
-        let data = generate::sinusoidal(128, 64.0, 16.0, 2.0);
-        assert_almost_eq!(data.quadratic_mean(), 2.0 / consts::SQRT_2, 1e-15);
     }
 }
