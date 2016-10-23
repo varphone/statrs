@@ -307,6 +307,35 @@ pub fn digamma(x: f64) -> f64 {
     result
 }
 
+pub fn inv_digamma(x: f64) -> f64 {
+    if x.is_nan() {
+        return f64::NAN;
+    }
+    if x == f64::NEG_INFINITY {
+        return 0.0;
+    }
+    if x == f64::INFINITY {
+        return f64::INFINITY;
+    }
+    let mut y = x.exp();
+    let mut i = 1.0;
+    while i > 1e-15 {
+        y += i * signum(x - digamma(y));
+        i /= 2.0;
+    }
+    y
+}
+
+// modified signum that returns 0.0 if x == 0.0. Used
+// by inv_digamma, may consider extracting into a public
+// method
+fn signum(x: f64) -> f64 {
+    match x {
+        0.0 => 0.0,
+        _ => x.signum(),
+    }
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test{
@@ -494,5 +523,25 @@ mod test{
         assert_almost_eq!(super::digamma(5.0), 1.5061176684318004727268212432509309022911739973934097, 1e-14);
         assert_almost_eq!(super::digamma(5.5), 1.6110931485817511237336268416044190359814435699427405, 1e-14);
         assert_almost_eq!(super::digamma(10.1), 2.2622143570941481235561593642219403924532310597356171, 1e-14);
+    }
+
+    #[test]
+    fn test_inv_digamma() {
+        assert!(super::inv_digamma(f64::NAN).is_nan());
+        assert_eq!(super::inv_digamma(f64::NEG_INFINITY), 0.0);
+        assert_almost_eq!(super::inv_digamma(-10.423754940411076232100295314502760886768558023951363), 0.1, 1e-15);
+        assert_almost_eq!(super::inv_digamma(-0.57721566490153286060651209008240243104215933593992359), 1.0, 1e-14);
+        assert_almost_eq!(super::inv_digamma(0.036489973978576520559023667001244432806840395339565888), 1.5, 1e-14);
+        assert_almost_eq!(super::inv_digamma(0.10067337642740238636795561404029690452798358068944001), consts::PI / 2.0, 1e-14);
+        assert_almost_eq!(super::inv_digamma(0.42278433509846713939348790991759756895784066406007641), 2.0, 1e-14);
+        assert_almost_eq!(super::inv_digamma(0.70315664064524318722569033366791109947350706200623255), 2.5, 1e-14);
+        assert_almost_eq!(super::inv_digamma(0.92278433509846713939348790991759756895784066406007641), 3.0, 1e-14);
+        assert_almost_eq!(super::inv_digamma(0.97721330794200673329206948640618234364083460999432603), consts::PI, 1e-14);
+        assert_almost_eq!(super::inv_digamma(1.1031566406452431872256903336679110994735070620062326), 3.5, 1e-14);
+        assert_almost_eq!(super::inv_digamma(1.2561176684318004727268212432509309022911739973934097), 4.0, 1e-14);
+        assert_almost_eq!(super::inv_digamma(1.3888709263595289015114046193821968137592213477205183), 4.5, 1e-14);
+        assert_almost_eq!(super::inv_digamma(1.5061176684318004727268212432509309022911739973934097), 5.0, 1e-14);
+        assert_almost_eq!(super::inv_digamma(1.6110931485817511237336268416044190359814435699427405), 5.5, 1e-14);
+        assert_almost_eq!(super::inv_digamma(2.2622143570941481235561593642219403924532310597356171), 10.1, 1e-13);
     }
 }
