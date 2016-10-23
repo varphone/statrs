@@ -4,7 +4,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.md)
 [![Crates.io](https://img.shields.io/crates/v/statrs.svg?maxAge=2592000)](https://crates.io/crates/statrs)  
 
-## Current Version: v0.2.0
+## Current Version: v0.3.0
 
 Should work for both nightly and stable Rust.
 
