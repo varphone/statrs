@@ -263,7 +263,7 @@ pub fn gamma_lr(a: f64, x: f64) -> f64 {
 }
 
 /// Computes the Digamma function which is defined as the derivative of
-/// the gamma function. The implementation is based on
+/// the log of the gamma function. The implementation is based on
 /// "Algorithm AS 103", Jose Bernardo, Applied Statistics, Volume 25, Number 3
 /// 1976, pages 315 - 317
 pub fn digamma(x: f64) -> f64 {
