@@ -2,7 +2,7 @@ v0.3.0
 - Moved methods `min` and `max` out of trait `Univariate` into their own respective traits `Min` and `Max`
 - Traits `Min`, `Max`, `Mean`, `Variance`, `Entropy`, `Skewness`, `Median`, and `Mode` moved from `distribution` module to `statistics` module
 - `Mean`, `Variance`, `Entropy`, `Skewness`, `Median`, and `Mode` no longer depend on `Distribution` trait
-- `Mean`, `Variance`, `Skewness`, and `Mode` are now generic over only one type, the return type due to not depending on `Distribution` anymore
+- `Mean`, `Variance`, `Skewness`, and `Mode` are now generic over only one type, the return type, due to not depending on `Distribution` anymore
 - `order_statistic`, `median`, `quantile`, `percentile`, `lower_quartile`, `upper_quartile`, `interquartile_range`, and `ranks` methods removed
     from `Statistics` trait. 
 - `min`, `max`, `mean`, `variance`, and `std_dev` methods added to `Statistics` trait
