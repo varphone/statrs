@@ -8,7 +8,7 @@ v0.3.0
 - `min`, `max`, `mean`, `variance`, and `std_dev` methods added to `Statistics` trait
 - `Statistics` trait now implemented for all types implementing `IntoIterator` where `Item` implements `Borrow<f64>`. Slice now implicitly implements
     `Statistics` through this new implementation.
-- Slice still implements `Min`, `Max, `Mean`, and `Variance` but now through the `Statistics` implementation rather than its own implementation
+- Slice still implements `Min`, `Max`, `Mean`, and `Variance` but now through the `Statistics` implementation rather than its own implementation
 - `InplaceStatistics` renamed to `OrderStatistics`, all methods in `InplaceStatistics` have `_inplace` trimmed from method name.
 - Inverse DiGamma function implemented with signature `gamma::inv_digamma(x: f64) -> f64`
 
