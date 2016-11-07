@@ -33,7 +33,7 @@ Add the following to your `Cargo.toml`
 
 ```Rust
 [dependencies]
-statrs = "0.2.0"
+statrs = "0.3.0"
 ```
 
 and this to your crate root
