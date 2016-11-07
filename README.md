@@ -25,7 +25,7 @@ This library is a work-in-progress and not complete. Planned for future releases
 of distributions (Beta, Dirichlet, etc.) as well as porting over more statistical utilities (population variance,
 quantile functions on slices / iterables)
 
-Please check out the documentation [here](https://boxtown.io/docs/statrs/0.2.0/statrs/)
+Please check out the documentation [here](https://boxtown.io/docs/statrs/0.3.0/statrs/)
 
 ## Usage
 
