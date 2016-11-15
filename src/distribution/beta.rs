@@ -423,19 +423,16 @@ impl Continuous<f64, f64> for Beta {
         } else {
             let aa = gamma::ln_gamma(self.shape_a + self.shape_b) - gamma::ln_gamma(self.shape_a) -
                      gamma::ln_gamma(self.shape_b);
-            println!("{:?}", aa);
             let bb = match (self.shape_a, x) {
                 (1.0, 0.0) => 0.0,
                 (_, 0.0) => f64::NEG_INFINITY,
                 (_, _) => (self.shape_a - 1.0) * x.ln(),
             };
-            println!("{:?}", bb);
             let cc = match (self.shape_b, x) {
                 (1.0, 1.0) => 0.0,
                 (_, 1.0) => f64::NEG_INFINITY,
                 (_, _) => (self.shape_b - 1.0) * (1.0 - x).ln(),
             };
-            println!("{:?}", cc);
             aa + bb + cc
         }
     }

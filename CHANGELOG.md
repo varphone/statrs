@@ -1,3 +1,6 @@
+v0.3.1
+- Removed print statements from `ln_pdf` method in `Beta` distribution
+
 v0.3.0
 - Moved methods `min` and `max` out of trait `Univariate` into their own respective traits `Min` and `Max`
 - Traits `Min`, `Max`, `Mean`, `Variance`, `Entropy`, `Skewness`, `Median`, and `Mode` moved from `distribution` module to `statistics` module
