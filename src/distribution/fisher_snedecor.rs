@@ -1,3 +1,7 @@
+use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
+use distribution::Distribution;
+use result::Result;
 use error::StatsError;
 
 /// Implements the [Fisher-Snedecor](https://en.wikipedia.org/wiki/F-distribution) distribution
@@ -36,12 +40,12 @@ impl FisherSnedecor {
     /// assert!(result.is_err());
     /// ```
     pub fn new(freedom_1: f64, freedom_2: f64) -> Result<FisherSnedecor> {
-        if shape_a.is_nan() || shape_b.is_nan() {
+        if freedom_1.is_nan() || freedom_2.is_nan() {
             Err(StatsError::BadParams)
         } else if freedom_1 <= 0.0 || freedom_2 <= 0.0 {
             Err(StatsError::BadParams)
         } else {
-            OK(FisherSnedecor {
+            Ok(FisherSnedecor {
                 freedom_1: freedom_1,
                 freedom_2: freedom_2,
             })
@@ -78,3 +82,46 @@ impl FisherSnedecor {
         self.freedom_2
     }
 }
+
+impl Sample<f64> for FisherSnedecor {
+    /// Generate a random sample from a fisher-snedecor distribution
+    /// using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details.
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for FisherSnedecor {
+    /// Generate a random independent sample from a fisher-snedecor distribution
+    /// using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details.
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl Distribution<f64> for FisherSnedecor {
+    /// Generate a random sample from a fisher-snedecor distribution using
+    /// `r` as the source of randomness.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{FisherSnedecor, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = FisherSnedecor::new(2.0, 2.0).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));
+    /// # }
+    /// ```
+    fn sample<R: Rng>(&self, r: &mut R) -> f64 {
+        (super::gamma::sample_unchecked(r, self.freedom_1 / 2.0, 0.5) * self.freedom_2) /
+        (super::gamma::sample_unchecked(r, self.freedom_2 / 2.0, 0.5) * self.freedom_1)
+    }
+}
+ 
