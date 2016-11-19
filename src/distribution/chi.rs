@@ -171,6 +171,10 @@ impl Max<f64> for Chi {
 impl Mean<f64> for Chi {
     /// Returns the mean of the chi distribution
     ///
+    /// # Remarks
+    ///
+    /// Returns `NaN` if `freedom` is `INF`
+    ///
     /// # Formula
     ///
     /// ```ignore
@@ -187,6 +191,10 @@ impl Mean<f64> for Chi {
 impl Variance<f64> for Chi {
     /// Returns the variance of the chi distribution
     ///
+    /// # Remarks
+    ///
+    /// Returns `NaN` if `freedom` is `INF`
+    ///
     /// # Formula
     ///
     /// ```ignore
@@ -200,6 +208,10 @@ impl Variance<f64> for Chi {
     }
 
     /// Returns the standard deviation of the chi distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `NaN` if `freedom` is `INF`
     ///
     /// # Formula
     ///
@@ -216,6 +228,10 @@ impl Variance<f64> for Chi {
 
 impl Entropy<f64> for Chi {
     /// Returns the entropy of the chi distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `NaN` if `freedom` is `INF`
     ///
     /// # Formula
     ///
@@ -234,6 +250,10 @@ impl Entropy<f64> for Chi {
 
 impl Skewness<f64> for Chi {
     /// Returns the skewness of the chi distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `NaN` if `freedom` is `INF`
     ///
     /// # Formula
     ///

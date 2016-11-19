@@ -1,3 +1,6 @@
+v0.3.2
+- Implemented the `FisherSnedecor` (F) distribution
+
 v0.3.1
 - Removed print statements from `ln_pdf` method in `Beta` distribution
 
