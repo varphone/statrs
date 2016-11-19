@@ -22,8 +22,7 @@ in the C# Math.NET library. All unit tests in the library borrowed from Math.NET
 and filled-in when not.  
   
 This library is a work-in-progress and not complete. Planned for future releases are continued implementations
-of distributions (Beta, Dirichlet, etc.) as well as porting over more statistical utilities (population variance,
-quantile functions on slices / iterables)
+of distributions as well as porting over more statistical utilities
 
 Please check out the documentation [here](https://boxtown.io/docs/statrs/0.3.0/statrs/)
 
