@@ -128,6 +128,7 @@ impl Univariate<f64, f64> for Cauchy {
     /// ```ignore
     /// (1 / π) * arctan((x - x_0) / γ) + 0.5
     /// ```
+    ///
     /// where `x_0` is the location and `γ` is the scale
     fn cdf(&self, x: f64) -> f64 {
         (1.0 / f64::consts::PI) * ((x - self.location) / self.scale).atan() + 0.5
@@ -159,5 +160,84 @@ impl Max<f64> for Cauchy {
     /// ```
     fn max(&self) -> f64 {
         f64::INFINITY
+    }
+}
+
+impl Entropy<f64> for Cauchy {
+    /// Returns the entropy of the cauchy distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(γ) + ln(4π)
+    /// ```
+    ///
+    /// where `γ` is the scale
+    fn entropy(&self) -> f64 {
+        (4.0 * f64::consts::PI * self.scale).ln()
+    }
+}
+
+impl Median<f64> for Cauchy {
+    /// Returns the median of the cauchy distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// x_0
+    /// ```
+    ///
+    /// where `x_0` is the location
+    fn median(&self) -> f64 {
+        self.location
+    }
+}
+
+impl Mode<f64> for Cauchy {
+    /// Returns the mode of the cauchy distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// x_0
+    /// ```
+    ///
+    /// where `x_0` is the location
+    fn mode(&self) -> f64 {
+        self.location
+    }
+}
+
+impl Continuous<f64, f64> for Exponential {
+    /// Calculates the probability density function for the cauchy
+    /// distribution at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 / (πγ * (1 + ((x - x_0) / γ)^2))
+    /// ```
+    ///
+    /// where `x_0` is the location and `γ` is the scale
+    fn pdf(&self, x: f64) -> f64 {
+        1.0 /
+        (f64::consts::PI * self.scale *
+         (1.0 + ((x - self.location) / self.scale) * ((x - self.location) / self.scale)))
+    }
+
+    /// Calculates the log probability density function for the cauchy
+    /// distribution at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(1 / (πγ * (1 + ((x - x_0) / γ)^2)))
+    /// ```
+    ///
+    /// where `x_0` is the location and `γ` is the scale
+    fn ln_pdf(&self, x: f64) -> f64 {
+        -(f64::consts::PI * self.scale *
+          (1.0 + ((x - self.location) / self.scale) * ((x - self.location) / self.scale)))
+            .ln()
     }
 }
