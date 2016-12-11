@@ -1,3 +1,6 @@
+v0.4.0
+- Implemented the `exponential::integral` special function
+
 v0.3.2
 - Implemented the `FisherSnedecor` (F) distribution
 
