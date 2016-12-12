@@ -12,6 +12,12 @@ use error::StatsError;
 /// # Examples
 ///
 /// ```
+/// use statrs::distribution::{Cauchy, Continuous};
+/// use statrs::statistics::Mode;
+///
+/// let n = Cauchy::new(0.0, 1.0).unwrap();
+/// assert_eq!(n.mode(), 0.0);
+/// assert_eq!(n.pdf(1.0), 0.1591549430918953357689);
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Cauchy {
@@ -25,7 +31,7 @@ impl Cauchy {
     ///
     /// # Errors
     ///
-    /// Returns an error if location is `NaN` or `rate <= 0.0`
+    /// Returns an error if location or scale are `NaN` or `scale <= 0.0`
     ///
     /// # Examples
     ///
@@ -39,7 +45,7 @@ impl Cauchy {
     /// assert!(result.is_err());
     /// ```
     pub fn new(location: f64, scale: f64) -> Result<Cauchy> {
-        if location.is_nan() || scale <= 0.0 {
+        if location.is_nan() || scale.is_nan() || scale <= 0.0 {
             Err(StatsError::BadParams)
         } else {
             Ok(Cauchy {
@@ -110,7 +116,7 @@ impl Distribution<f64> for Cauchy {
     ///
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
-    /// let n = Cauchy.new(0.0, 1.0).unwrap();
+    /// let n = Cauchy::new(0.0, 1.0).unwrap();
     /// print!("{}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
@@ -208,7 +214,7 @@ impl Mode<f64> for Cauchy {
     }
 }
 
-impl Continuous<f64, f64> for Exponential {
+impl Continuous<f64, f64> for Cauchy {
     /// Calculates the probability density function for the cauchy
     /// distribution at `x`
     ///
@@ -239,5 +245,88 @@ impl Continuous<f64, f64> for Exponential {
         -(f64::consts::PI * self.scale *
           (1.0 + ((x - self.location) / self.scale) * ((x - self.location) / self.scale)))
             .ln()
+    }
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+#[cfg(test)]
+mod test {
+    use std::f64;
+    use statistics::*;
+    use distribution::{Univariate, Continuous, Cauchy};
+
+    fn try_create(location: f64, scale: f64) -> Cauchy {
+        let n = Cauchy::new(location, scale);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+
+    fn create_case(location: f64, scale: f64) {
+        let n = try_create(location, scale);
+        assert_eq!(location, n.location());
+        assert_eq!(scale, n.scale());
+    }
+
+    fn bad_create_case(location: f64, scale: f64) {
+        let n = Cauchy::new(location, scale);
+        assert!(n.is_err());
+    }
+
+    fn test_case<F>(location: f64, scale: f64, expected: f64, eval: F)
+        where F: Fn(Cauchy) -> f64
+    {
+        let n = try_create(location, scale);
+        let x = eval(n);
+        assert_eq!(expected, x);
+    }
+
+    #[test]
+    fn test_create() {
+        create_case(0.0, 0.1);
+        create_case(0.0, 1.0);
+        create_case(0.0, 10.0);
+        create_case(10.0, 11.0);
+        create_case(-5.0, 100.0);
+        create_case(0.0, f64::INFINITY);
+    }
+
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(f64::NAN, 1.0);
+        bad_create_case(1.0, f64::NAN);
+        bad_create_case(f64::NAN, f64::NAN);
+        bad_create_case(1.0, 0.0);
+    }
+
+    #[test]
+    fn test_entropy() {
+        test_case(0.0, 2.0, 3.224171427529236102395, |x| x.entropy());
+        test_case(0.1, 4.0, 3.917318608089181411812, |x| x.entropy());
+        test_case(1.0, 10.0, 4.833609339963336476996, |x| x.entropy());
+        test_case(10.0, 11.0, 4.92891951976766133704, |x| x.entropy());
+    }
+
+    #[test]
+    fn test_mode() {
+        test_case(0.0, 2.0, 0.0, |x| x.mode());
+        test_case(0.1, 4.0, 0.1, |x| x.mode());
+        test_case(1.0, 10.0, 1.0, |x| x.mode());
+        test_case(10.0, 11.0, 10.0, |x| x.mode());
+        test_case(0.0, f64::INFINITY, 0.0, |x| x.mode());
+    }
+
+    #[test]
+    fn test_median() {
+        test_case(0.0, 2.0, 0.0, |x| x.median());
+        test_case(0.1, 4.0, 0.1, |x| x.median());
+        test_case(1.0, 10.0, 1.0, |x| x.median());
+        test_case(10.0, 11.0, 10.0, |x| x.median());
+        test_case(0.0, f64::INFINITY, 0.0, |x| x.median());
+    }
+
+    #[test]
+    fn test_min_max() {
+        test_case(0.0, 1.0, f64::NEG_INFINITY, |x| x.min());
+        test_case(0.0, 1.0, f64::INFINITY, |x| x.max());
     }
 }
