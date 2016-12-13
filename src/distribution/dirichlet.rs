@@ -1,5 +1,6 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
+use function::gamma;
 use statistics::*;
 use distribution::{Continuous, Distribution};
 use result::Result;
@@ -66,6 +67,10 @@ impl Dirichlet {
     pub fn alpha(&self) -> &[f64] {
         &self.alpha
     }
+
+    fn alpha_sum(&self) -> f64 {
+        self.alpha.iter().fold(0.0, |acc, x| acc + x)
+    }
 }
 
 impl Sample<Vec<f64>> for Dirichlet {
@@ -116,5 +121,72 @@ impl Distribution<Vec<f64>> for Dirichlet {
             samples[i] /= sum
         }
         samples
+    }
+}
+
+impl Mean<Vec<f64>> for Dirichlet {
+    /// Returns the means of the dirichlet distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// α_i / α_0
+    /// ```
+    ///
+    /// for the `i`th element where `α_i` is the `i`th concentration parameter
+    /// and `α_0` is the sum of all concentration parameters
+    fn mean(&self) -> Vec<f64> {
+        let sum = self.alpha_sum();
+        self.alpha.iter().map(|x| x / sum).collect()
+    }
+}
+
+impl Variance<Vec<f64>> for Dirichlet {
+    /// Returns the variances of the dirichlet distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (α_i * (α_0 - α_i)) / (α_0^2 * (α_0 + 1))
+    /// ```
+    ///
+    /// for the `i`th element where `α_i` is the `i`th concentration parameter
+    /// and `α_0` is the sum of all concentration parameters
+    fn variance(&self) -> Vec<f64> {
+        let sum = self.alpha_sum();
+        self.alpha.iter().map(|x| x * (sum - x) / (sum * sum * (sum + 1.0))).collect()
+    }
+
+    /// Returns the variances of the dirichlet distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt((α_i * (α_0 - α_i)) / (α_0^2 * (α_0 + 1)))
+    /// ```
+    ///
+    /// for the `i`th element where `α_i` is the `i`th concentration parameter
+    /// and `α_0` is the sum of all concentration parameters
+    fn std_dev(&self) -> Vec<f64> {
+        self.variance().iter().map(|x| x.sqrt()).collect()
+    }
+}
+
+impl Entropy<f64> for Dirichlet {
+    /// Returns the entropy of the dirichlet distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln(B(α_0)) - (K - α_0)ψ(α_0) - sum((α_i - 1)ψ(α_i))
+    /// ```
+    ///
+    /// where `B` is the Beta function, `α_0` is the sum of all concentration parameters,
+    /// `K` is the number of concentration parameters, `ψ` is the digamma function, `α_i`
+    /// is the `i`th concentration parameter, and `sum` runs from `1` to `K`
+    fn entropy(&self) -> f64 {
+        let sum = self.alpha_sum();
+        let num = self.alpha.iter().fold(0.0, |acc, &x| acc + (x - 1.0) * gamma::digamma(x));
+        gamma::ln_gamma(sum) + (sum - self.alpha.len() as f64) * gamma::digamma(sum) - num
     }
 }
