@@ -1,3 +1,7 @@
+use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
+use statistics::*;
+use distribution::{Continuous, Distribution};
 use result::Result;
 use error::StatsError;
 
@@ -61,5 +65,56 @@ impl Dirichlet {
     /// ```
     pub fn alpha(&self) -> &[f64] {
         &self.alpha
+    }
+}
+
+impl Sample<Vec<f64>> for Dirichlet {
+    /// Generate random samples from a dirichlet
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
+    fn sample<R: Rng>(&mut self, r: &mut R) -> Vec<f64> {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<Vec<f64>> for Dirichlet {
+    /// Generate random independent samples from a dirichlet
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> Vec<f64> {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl Distribution<Vec<f64>> for Dirichlet {
+    /// Generate random samples from the dirichlet distribution
+    /// using `r` as the source of randomness
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Dirichlet, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Dirichlet::new(&[1.0, 2.0, 3.0]).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));
+    /// # }
+    /// ```
+    fn sample<R: Rng>(&self, r: &mut R) -> Vec<f64> {
+        let n = self.alpha.len();
+        let mut samples = vec![0.0; n];
+        let mut sum = 0.0;
+        for i in 0..n {
+            samples[i] = super::gamma::sample_unchecked(r, self.alpha[i], 1.0);
+            sum += samples[i];
+        }
+        for i in 0..n {
+            samples[i] /= sum
+        }
+        samples
     }
 }
