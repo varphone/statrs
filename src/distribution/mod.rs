@@ -99,7 +99,7 @@ pub trait Univariate<T, K>: Distribution<K> + Min<T> + Max<T> {
 /// All methods provided by the `Continuous` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
 /// depending on the implementing distribution.
-pub trait Continuous<T, K>: Distribution<K> {
+pub trait Continuous<T, K> {
     /// Returns the probability density function calculated at `x` for a given distribution.
     /// May panic depending on the implementor.
     ///
@@ -136,7 +136,7 @@ pub trait Continuous<T, K>: Distribution<K> {
 /// All methods provided by the `Discrete` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
 /// depending on the implementing distribution.
-pub trait Discrete<T, K>: Distribution<K> {
+pub trait Discrete<T, K> {
     /// Returns the probability mass function calculated at `x` for a given distribution.
     /// May panic depending on the implementor.
     ///

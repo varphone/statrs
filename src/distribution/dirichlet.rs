@@ -5,6 +5,7 @@ use statistics::*;
 use distribution::{Continuous, Distribution};
 use result::Result;
 use error::StatsError;
+use prec;
 
 /// Implements the [Dirichlet](https://en.wikipedia.org/wiki/Dirichlet_distribution)
 /// distribution
@@ -178,15 +179,102 @@ impl Entropy<f64> for Dirichlet {
     /// # Formula
     ///
     /// ```ignore
-    /// ln(B(α_0)) - (K - α_0)ψ(α_0) - sum((α_i - 1)ψ(α_i))
+    /// ln(B(α)) - (K - α_0)ψ(α_0) - ∑((α_i - 1)ψ(α_i))
     /// ```
     ///
-    /// where `B` is the Beta function, `α_0` is the sum of all concentration parameters,
+    /// where
+    ///
+    /// ```ignore
+    /// B(α) = ∏(Γ(α_i)) / Γ(∑(α_i))
+    /// ```
+    ///
+    /// `α_0` is the sum of all concentration parameters,
     /// `K` is the number of concentration parameters, `ψ` is the digamma function, `α_i`
-    /// is the `i`th concentration parameter, and `sum` runs from `1` to `K`
+    /// is the `i`th concentration parameter, and `∑` is the sum from `1` to `K`
     fn entropy(&self) -> f64 {
         let sum = self.alpha_sum();
         let num = self.alpha.iter().fold(0.0, |acc, &x| acc + (x - 1.0) * gamma::digamma(x));
         gamma::ln_gamma(sum) + (sum - self.alpha.len() as f64) * gamma::digamma(sum) - num
+    }
+}
+
+impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
+    /// Calculates the probabiliy density function for the dirichlet distribution
+    /// with given `x`'s corresponding to the concentration parameters for this
+    /// distribution
+    ///
+    /// # Panics
+    ///
+    /// If any element in `x` is not in `(0, 1)` or if `x` is not the same length
+    /// as the vector of concentration parameters for this distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 / B(α)) * ∏(x_i^(α_i - 1))
+    /// ```
+    ///
+    /// where
+    ///
+    /// ```ignore
+    /// B(α) = ∏(Γ(α_i)) / Γ(∑(α_i))
+    /// ```
+    ///
+    /// `α` is the vector of concentration parameters, `α_i` is the `i`th
+    /// concentration parameter, `x_i` is the `i`th argument corresponding to
+    /// the `i`th concentration parameter, `Γ` is the gamma function,
+    /// `∏` is the product from `1` to `K`, `∑` is the sum from `1` to `K`,
+    /// and `K` is the number of concentration parameters
+    fn pdf(&self, x: &[f64]) -> f64 {
+        self.ln_pdf(x).exp()
+    }
+
+    /// Calculates the log probabiliy density function for the dirichlet distribution
+    /// with given `x`'s corresponding to the concentration parameters for this
+    /// distribution
+    ///
+    /// # Panics
+    ///
+    /// If any element in `x` is not in `(0, 1)` or if `x` is not the same length
+    /// as the vector of concentration parameters for this distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((1 / B(α)) * ∏(x_i^(α_i - 1)))
+    /// ```
+    ///
+    /// where
+    ///
+    /// ```ignore
+    /// B(α) = ∏(Γ(α_i)) / Γ(∑(α_i))
+    /// ```
+    ///
+    /// `α` is the vector of concentration parameters, `α_i` is the `i`th
+    /// concentration parameter, `x_i` is the `i`th argument corresponding to
+    /// the `i`th concentration parameter, `Γ` is the gamma function,
+    /// `∏` is the product from `1` to `K`, `∑` is the sum from `1` to `K`,
+    /// and `K` is the number of concentration parameters
+    fn ln_pdf(&self, x: &[f64]) -> f64 {
+        assert!(self.alpha.len() == x.len(),
+                format!("{}", StatsError::ContainersMustBeSameLength));
+
+        let (term, sum_xi, sum_alpha) = x.iter()
+            .enumerate()
+            .map(|pair| (pair.1, self.alpha[pair.0]))
+            .fold((0.0, 0.0, 0.0), |acc, pair| {
+                assert!(*pair.0 > 0.0 && *pair.0 < 1.0,
+                        format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0)));
+
+                (acc.0 + (pair.1 - 1.0) * pair.0.ln() - gamma::ln_gamma(pair.1),
+                 acc.1 + pair.0,
+                 acc.2 + pair.1)
+            });
+
+        if !prec::almost_eq(sum_xi, 1.0, 1e-8) {
+            0.0
+        } else {
+            term + gamma::ln_gamma(sum_alpha)
+        }
     }
 }

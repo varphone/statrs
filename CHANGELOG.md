@@ -1,6 +1,8 @@
 v0.4.0
 - Implemented the `exponential::integral` special function
 - Implemented the `Cauchy` (otherwise known as the `Lorenz`) distribution
+- Implemented the `Dirichlet` distribution
+- `Continuous` and `Discrete` traits no longer dependent on `Distribution` trait
 
 v0.3.2
 - Implemented the `FisherSnedecor` (F) distribution
