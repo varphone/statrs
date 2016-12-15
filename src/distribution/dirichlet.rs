@@ -13,6 +13,12 @@ use prec;
 /// # Examples
 ///
 /// ```
+/// use statrs::distribution::{Dirichlet, Continuous};
+/// use statrs::statistics::Mean;
+///
+/// let n = Dirichlet::new(&[1.0, 2.0, 3.0]).unwrap();
+/// assert_eq!(n.mean(), [1.0 / 6.0, 1.0 / 3.0, 0.5]);
+/// assert_eq!(n.pdf(&[0.5, 0.5, 0.5]), 1.0);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dirichlet {
@@ -26,7 +32,7 @@ impl Dirichlet {
     /// # Errors
     ///
     /// Returns an error if any element `x` in alpha exist
-    /// such that `x < = 0.0` or if the length of alpha is
+    /// such that `x < = 0.0` or `x` is `NaN`, or if the length of alpha is
     /// less than 2
     ///
     /// # Examples
@@ -47,11 +53,34 @@ impl Dirichlet {
             return Err(StatsError::BadParams);
         }
         for x in alpha {
-            if *x <= 0.0 {
+            if *x <= 0.0 || x.is_nan() {
                 return Err(StatsError::BadParams);
             }
         }
         Ok(Dirichlet { alpha: alpha.to_vec() })
+    }
+
+    /// Constructs a new dirichlet distribution with the given
+    /// concenctration parameter (alpha) repeated `n` times
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `alpha < = 0.0` or `alpha` is `NaN`,
+    /// or if `n < 2`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Dirichlet;
+    ///
+    /// let mut result = Dirichlet::new_with_param(1.0, 3);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Dirichlet::new_with_param(0.0, 1);
+    /// assert!(result.is_err());
+    /// ```
+    pub fn new_with_param(alpha: f64, n: usize) -> Result<Dirichlet> {
+        Self::new(&vec![alpha; n])
     }
 
     /// Returns the concentration parameters of
@@ -107,7 +136,7 @@ impl Distribution<Vec<f64>> for Dirichlet {
     /// # fn main() {
     /// let mut r = rand::StdRng::new().unwrap();
     /// let n = Dirichlet::new(&[1.0, 2.0, 3.0]).unwrap();
-    /// print!("{}", n.sample::<StdRng>(&mut r));
+    /// print!("{:?}", n.sample::<StdRng>(&mut r));
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> Vec<f64> {
@@ -276,5 +305,94 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
         } else {
             term + gamma::ln_gamma(sum_alpha)
         }
+    }
+}
+
+#[cfg_attr(rustfmt, rustfmt_skip)]
+#[cfg(test)]
+mod test {
+    use std::f64;
+    use function::gamma;
+    use statistics::*;
+    use distribution::{Continuous, Dirichlet};
+
+    fn try_create(alpha: &[f64]) -> Dirichlet {
+        let n = Dirichlet::new(alpha);
+        assert!(n.is_ok());
+        n.unwrap()
+    }
+
+    fn create_case(alpha: &[f64]) {
+        let n = try_create(alpha);
+        let a2 = n.alpha();
+        for i in 0..alpha.len() {
+            assert_eq!(alpha[i], a2[i]);
+        }
+    }
+
+    fn bad_create_case(alpha: &[f64]) {
+        let n = Dirichlet::new(alpha);
+        assert!(n.is_err());
+    }
+
+    #[test]
+    fn test_create() {
+        create_case(&[1.0, 2.0, 3.0, 4.0, 5.0]);
+        create_case(&[0.001, f64::INFINITY, 3756.0]);
+    }
+
+    #[test]
+    fn test_bad_create() {
+        bad_create_case(&[1.0]);
+        bad_create_case(&[1.0, 2.0, 0.0, 4.0, 5.0]);
+        bad_create_case(&[1.0, f64::NAN, 3.0, 4.0, 5.0]);
+    }
+
+    #[test]
+    fn test_mean() {
+        let n = Dirichlet::new_with_param(0.3, 5).unwrap();
+        let res = n.mean();
+        for x in res {
+            assert_eq!(x, 0.3 / 1.5);
+        }
+    }
+
+    #[test]
+    fn test_variance() {
+        let alpha = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+        let sum = alpha.iter().fold(0.0, |acc, x| acc + x);
+        let n = Dirichlet::new(&alpha).unwrap();
+        let res = n.variance();
+        for i in 1..11 {
+            let f = i as f64;
+            assert_almost_eq!(res[i-1], f * (sum - f) / (sum * sum * (sum + 1.0)), 1e-15);
+        }
+    }
+
+    #[test]
+    fn test_std_dev() {
+        let alpha = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+        let sum = alpha.iter().fold(0.0, |acc, x| acc + x);
+        let n = Dirichlet::new(&alpha).unwrap();
+        let res = n.std_dev();
+        for i in 1..11 {
+            let f = i as f64;
+            assert_almost_eq!(res[i-1], (f * (sum - f) / (sum * sum * (sum + 1.0))).sqrt(), 1e-15);
+        }
+    }
+
+    #[test]
+    fn test_entropy() {
+        let mut alpha = [0.1, 0.3, 0.5, 0.8];
+        let mut n = try_create(&alpha);
+        let mut sum = alpha.iter().fold(0.0, |acc, x| acc + x);
+        let mut num = alpha.iter().fold(0.0, |acc, x| acc + (x - 1.0) * gamma::digamma(*x));
+        assert_eq!(n.entropy(), gamma::ln_gamma(sum) + (sum - 4.0) * gamma::digamma(sum) - num);
+
+        alpha = [0.1, 0.2, 0.3, 0.4];
+        n = try_create(&alpha);
+        sum = alpha.iter().fold(0.0, |acc, x| acc + x);
+        num = alpha.iter().fold(0.0, |acc, x| acc + (x - 1.0) * gamma::digamma(*x));
+        assert_eq!(n.entropy(), gamma::ln_gamma(sum) + (sum - 4.0) * gamma::digamma(sum) - num);
     }
 }
