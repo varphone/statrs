@@ -208,18 +208,18 @@ impl Entropy<f64> for Dirichlet {
     /// # Formula
     ///
     /// ```ignore
-    /// ln(B(α)) - (K - α_0)ψ(α_0) - ∑((α_i - 1)ψ(α_i))
+    /// ln(B(α)) - (K - α_0)ψ(α_0) - Σ((α_i - 1)ψ(α_i))
     /// ```
     ///
     /// where
     ///
     /// ```ignore
-    /// B(α) = ∏(Γ(α_i)) / Γ(∑(α_i))
+    /// B(α) = Π(Γ(α_i)) / Γ(Σ(α_i))
     /// ```
     ///
     /// `α_0` is the sum of all concentration parameters,
     /// `K` is the number of concentration parameters, `ψ` is the digamma function, `α_i`
-    /// is the `i`th concentration parameter, and `∑` is the sum from `1` to `K`
+    /// is the `i`th concentration parameter, and `Σ` is the sum from `1` to `K`
     fn entropy(&self) -> f64 {
         let sum = self.alpha_sum();
         let num = self.alpha.iter().fold(0.0, |acc, &x| acc + (x - 1.0) * gamma::digamma(x));
@@ -241,19 +241,19 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
     /// # Formula
     ///
     /// ```ignore
-    /// (1 / B(α)) * ∏(x_i^(α_i - 1))
+    /// (1 / B(α)) * Π(x_i^(α_i - 1))
     /// ```
     ///
     /// where
     ///
     /// ```ignore
-    /// B(α) = ∏(Γ(α_i)) / Γ(∑(α_i))
+    /// B(α) = Π(Γ(α_i)) / Γ(Σ(α_i))
     /// ```
     ///
     /// `α` is the vector of concentration parameters, `α_i` is the `i`th
     /// concentration parameter, `x_i` is the `i`th argument corresponding to
     /// the `i`th concentration parameter, `Γ` is the gamma function,
-    /// `∏` is the product from `1` to `K`, `∑` is the sum from `1` to `K`,
+    /// `Π` is the product from `1` to `K`, `Σ` is the sum from `1` to `K`,
     /// and `K` is the number of concentration parameters
     fn pdf(&self, x: &[f64]) -> f64 {
         self.ln_pdf(x).exp()
@@ -272,19 +272,19 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
     /// # Formula
     ///
     /// ```ignore
-    /// ln((1 / B(α)) * ∏(x_i^(α_i - 1)))
+    /// ln((1 / B(α)) * Π(x_i^(α_i - 1)))
     /// ```
     ///
     /// where
     ///
     /// ```ignore
-    /// B(α) = ∏(Γ(α_i)) / Γ(∑(α_i))
+    /// B(α) = Π(Γ(α_i)) / Γ(Σ(α_i))
     /// ```
     ///
     /// `α` is the vector of concentration parameters, `α_i` is the `i`th
     /// concentration parameter, `x_i` is the `i`th argument corresponding to
     /// the `i`th concentration parameter, `Γ` is the gamma function,
-    /// `∏` is the product from `1` to `K`, `∑` is the sum from `1` to `K`,
+    /// `Π` is the product from `1` to `K`, `Σ` is the sum from `1` to `K`,
     /// and `K` is the number of concentration parameters
     fn ln_pdf(&self, x: &[f64]) -> f64 {
         assert!(self.alpha.len() == x.len(),
