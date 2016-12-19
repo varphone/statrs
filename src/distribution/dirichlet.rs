@@ -18,7 +18,7 @@ use prec;
 ///
 /// let n = Dirichlet::new(&[1.0, 2.0, 3.0]).unwrap();
 /// assert_eq!(n.mean(), [1.0 / 6.0, 1.0 / 3.0, 0.5]);
-/// assert_eq!(n.pdf(&[0.5, 0.5, 0.5]), 1.0);
+/// assert_eq!(n.pdf(&[0.33333, 0.33333, 0.33333]), 2.222155556222205);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dirichlet {
@@ -234,8 +234,9 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
     ///
     /// # Panics
     ///
-    /// If any element in `x` is not in `(0, 1)` or if `x` is not the same length
-    /// as the vector of concentration parameters for this distribution
+    /// If any element in `x` is not in `(0, 1)`, the elements in `x` do not sum to
+    /// `1` with a tolerance of `1e-4`,  or if `x` is not the same length as the vector of
+    /// concentration parameters for this distribution
     ///
     /// # Formula
     ///
@@ -264,8 +265,9 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
     ///
     /// # Panics
     ///
-    /// If any element in `x` is not in `(0, 1)` or if `x` is not the same length
-    /// as the vector of concentration parameters for this distribution
+    /// If any element in `x` is not in `(0, 1)`, the elements in `x` do not sum to
+    /// `1` with a tolerance of `1e-4`,  or if `x` is not the same length as the vector of
+    /// concentration parameters for this distribution
     ///
     /// # Formula
     ///
@@ -300,11 +302,9 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
                  acc.2 + pair.1)
             });
 
-        if !prec::almost_eq(sum_xi, 1.0, 1e-8) {
-            0.0
-        } else {
-            term + gamma::ln_gamma(sum_alpha)
-        }
+        assert!(prec::almost_eq(sum_xi, 1.0, 1e-4),
+                format!("{}", StatsError::ContainerExpectedSum("x", 1.0)));
+        term + gamma::ln_gamma(sum_alpha)
     }
 }
 
@@ -384,7 +384,7 @@ mod test {
     #[test]
     fn test_entropy() {
         let mut alpha = [0.1, 0.3, 0.5, 0.8];
-        let mut n = try_create(&alpha);
+        let mut n = try_create(&[0.1, 0.3, 0.5, 0.8]);
         let mut sum = alpha.iter().fold(0.0, |acc, x| acc + x);
         let mut num = alpha.iter().fold(0.0, |acc, x| acc + (x - 1.0) * gamma::digamma(*x));
         assert_eq!(n.entropy(), gamma::ln_gamma(sum) + (sum - 4.0) * gamma::digamma(sum) - num);
@@ -394,5 +394,19 @@ mod test {
         sum = alpha.iter().fold(0.0, |acc, x| acc + x);
         num = alpha.iter().fold(0.0, |acc, x| acc + (x - 1.0) * gamma::digamma(*x));
         assert_eq!(n.entropy(), gamma::ln_gamma(sum) + (sum - 4.0) * gamma::digamma(sum) - num);
+    }
+
+    #[test]
+    fn test_pdf() {
+        let n = try_create(&[0.1, 0.3, 0.5, 0.8]);
+        assert_almost_eq!(n.pdf(&[0.01, 0.03, 0.5, 0.46]), 18.77225681167061, 1e-12);
+        assert_almost_eq!(n.pdf(&[0.1,0.2,0.3,0.4]), 0.8314656481199253, 1e-14);
+    }
+
+    #[test]
+    fn test_ln_pdf() {
+        let n = try_create(&[0.1, 0.3, 0.5, 0.8]);
+        assert_almost_eq!(n.ln_pdf(&[0.01, 0.03, 0.5, 0.46]), 18.77225681167061f64.ln(), 1e-12);
+        assert_almost_eq!(n.ln_pdf(&[0.1,0.2,0.3,0.4]), 0.8314656481199253f64.ln(), 1e-14);
     }
 }
