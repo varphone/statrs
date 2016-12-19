@@ -27,8 +27,12 @@ pub enum StatsError {
     ArgLt(&'static str, f64),
     /// An argument must have been less than or equal to a value but wasn't
     ArgLte(&'static str, f64),
-    /// Vectors of the same length were expected
+    /// Containers of the same length were expected
     ContainersMustBeSameLength,
+    /// Computation failed to converge,
+    ComputationFailedToConverge,
+    /// Elements in a container were expected to sum to a value but didn't
+    ContainerExpectedSum(&'static str, f64),
 }
 
 impl Error for StatsError {
@@ -65,6 +69,10 @@ impl fmt::Display for StatsError {
             }
             StatsError::ContainersMustBeSameLength => {
                 write!(f, "Expected containers of same length")
+            }
+            StatsError::ComputationFailedToConverge => write!(f, "Computation failed to converge"),
+            StatsError::ContainerExpectedSum(s, sum) => {
+                write!(f, "Elements in container {} expected to sum to {}", s, sum)
             }
         }
     }

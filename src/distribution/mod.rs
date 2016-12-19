@@ -7,8 +7,10 @@ use statistics::{Min, Max};
 pub use self::bernoulli::Bernoulli;
 pub use self::beta::Beta;
 pub use self::binomial::Binomial;
+pub use self::cauchy::Cauchy;
 pub use self::chi::Chi;
 pub use self::chi_squared::ChiSquared;
+pub use self::dirichlet::Dirichlet;
 pub use self::discrete_uniform::DiscreteUniform;
 pub use self::exponential::Exponential;
 pub use self::fisher_snedecor::FisherSnedecor;
@@ -24,8 +26,10 @@ pub use self::weibull::Weibull;
 mod bernoulli;
 mod beta;
 mod binomial;
+mod cauchy;
 mod chi;
 mod chi_squared;
+mod dirichlet;
 mod discrete_uniform;
 mod exponential;
 mod fisher_snedecor;
@@ -95,7 +99,7 @@ pub trait Univariate<T, K>: Distribution<K> + Min<T> + Max<T> {
 /// All methods provided by the `Continuous` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
 /// depending on the implementing distribution.
-pub trait Continuous<T, K>: Distribution<K> {
+pub trait Continuous<T, K> {
     /// Returns the probability density function calculated at `x` for a given distribution.
     /// May panic depending on the implementor.
     ///
@@ -132,7 +136,7 @@ pub trait Continuous<T, K>: Distribution<K> {
 /// All methods provided by the `Discrete` trait are unchecked, meaning
 /// they can panic if in an invalid state or encountering invalid input
 /// depending on the implementing distribution.
-pub trait Discrete<T, K>: Distribution<K> {
+pub trait Discrete<T, K> {
     /// Returns the probability mass function calculated at `x` for a given distribution.
     /// May panic depending on the implementor.
     ///
