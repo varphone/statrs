@@ -1,5 +1,6 @@
 use std::f64;
 use std::sync::{Once, ONCE_INIT};
+use error::StatsError;
 use function::gamma;
 
 /// The maximum factorial representable
@@ -64,6 +65,19 @@ pub fn ln_binomial(n: u64, k: u64) -> f64 {
     } else {
         ln_factorial(n) - ln_factorial(k) - ln_factorial(n - k)
     }
+}
+
+/// Computes the multinomial coefficient: `n choose n1, n2, n3, ...`
+///
+/// # Panics
+///
+/// If the elements in `ni` do not sum to `n`
+pub fn multinomial(n: u64, ni: &[u64]) -> f64 {
+    let (sum, ret) = ni.iter().fold((0, ln_factorial(n)),
+                                    |acc, &x| (acc.0 + x, acc.1 - ln_factorial(x)));
+    assert!(sum == n,
+            format!("{}", StatsError::ContainerExpectedSumVar("ni", "n")));
+    (0.5 + ret.exp()).floor()
 }
 
 // Initialization for pre-computed cache of 171 factorial
