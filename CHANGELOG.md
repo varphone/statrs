@@ -1,4 +1,6 @@
 v0.5.0
+ - Implemented the `logistic::logistic` special function
+ - Implemented the `logistic::logit` special function
 
 v0.4.0
 - Implemented the `exponential::integral` special function
