@@ -148,4 +148,12 @@ mod test {
         assert_eq!(super::ln_binomial(0, 1), 0f64.ln());
         assert_eq!(super::ln_binomial(5, 7), 0f64.ln());
     }
+
+    #[test]
+    fn test_multinomial() {
+        assert_eq!(1.0, super::multinomial(1, &[1, 0]));
+        assert_eq!(10.0, super::multinomial(5, &[3, 2]));
+        assert_eq!(10.0, super::multinomial(5, &[2, 3]));
+        assert_eq!(35.0, super::multinomial(7, &[3, 4]));
+    }
 }
