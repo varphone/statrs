@@ -1,4 +1,4 @@
-//! Provides special functions related to the [beta](https://en.wikipedia.org/wiki/Beta_function)
+//! Provides the [beta](https://en.wikipedia.org/wiki/Beta_function) and related
 //! function
 
 use std::f64;

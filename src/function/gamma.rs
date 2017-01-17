@@ -1,3 +1,6 @@
+//! Provides the [gamma](https://en.wikipedia.org/wiki/Gamma_function) and
+//! related functions
+
 use std::f64;
 use consts;
 use error::StatsError;
