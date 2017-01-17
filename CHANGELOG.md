@@ -1,3 +1,5 @@
+v0.5.0
+
 v0.4.0
 - Implemented the `exponential::integral` special function
 - Implemented the `Cauchy` (otherwise known as the `Lorenz`) distribution
