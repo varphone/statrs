@@ -72,7 +72,7 @@ impl InverseGamma {
     /// ```
     /// use statrs::distribution::InverseGamma;
     ///
-    /// let n = InverseGamma::new(3.0, 1.0);
+    /// let n = InverseGamma::new(3.0, 1.0).unwrap();
     /// assert_eq!(n.rate(), 1.0);
     /// ```
     pub fn rate(&self) -> f64 {
