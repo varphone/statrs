@@ -43,7 +43,7 @@ impl Gamma {
     /// let mut result = Gamma::new(3.0, 1.0);
     /// assert!(result.is_ok());
     ///
-    /// let result = Gamma::new(0.0, 0.0);
+    /// result = Gamma::new(0.0, 0.0);
     /// assert!(result.is_err());
     /// ```
     pub fn new(shape: f64, rate: f64) -> Result<Gamma> {

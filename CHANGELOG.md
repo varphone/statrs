@@ -4,6 +4,7 @@ v0.5.0
  - Implemented the `factorial::multinomial` special function
  - Implemented the `harmonic::harmonic` special function
  - Implemented the `harmonic::gen_harmonic` special function
+ - Implemented the `InverseGamma` distribution
 
 v0.4.0
 - Implemented the `exponential::integral` special function
