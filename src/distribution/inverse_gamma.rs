@@ -1,5 +1,7 @@
+use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
+use function::gamma;
 use statistics::*;
 use distribution::{Univariate, Continuous, Distribution};
 use result::Result;
@@ -121,6 +123,54 @@ impl Distribution<f64> for InverseGamma {
     }
 }
 
+impl Univariate<f64, f64> for InverseGamma {
+    /// Calculates the cumulative distribution function for the inverse gamma
+    /// distribution at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// Γ(α, β / x) / Γ(α)
+    /// ```
+    ///
+    /// where the numerator is the upper incomplete gamma function,
+    /// the denominator is the gamma function, `α` is the shape,
+    /// and `β` is the rate
+    fn cdf(&self, x: f64) -> f64 {
+        gamma::gamma_ur(self.shape, self.rate / x)
+    }
+}
+
+impl Min<f64> for InverseGamma {
+    /// Returns the minimum value in the domain of the
+    /// inverse gamma distribution representable by a double precision
+    /// float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
+    fn min(&self) -> f64 {
+        0.0
+    }
+}
+
+impl Max<f64> for InverseGamma {
+    /// Returns the maximum value in the domain of the
+    /// inverse gamma distribution representable by a double precision
+    /// float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
+    fn max(&self) -> f64 {
+        f64::INFINITY
+    }
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
@@ -145,6 +195,34 @@ mod test {
         assert!(n.is_err());
     }
 
+    fn get_value<F>(shape: f64, rate: f64, eval: F) -> f64
+        where F: Fn(InverseGamma) -> f64
+    {
+        let n = try_create(shape, rate);
+        eval(n)
+    }
+
+    fn test_case<F>(shape: f64, rate: f64, expected: f64, eval: F)
+        where F: Fn(InverseGamma) -> f64
+    {
+        let x = get_value(shape, rate, eval);
+        assert_eq!(expected, x);
+    }
+
+    fn test_almost<F>(shape: f64, rate: f64, expected: f64, acc: f64, eval: F)
+        where F: Fn(InverseGamma) -> f64
+    {
+        let x = get_value(shape, rate, eval);
+        assert_almost_eq!(expected, x, acc);
+    }
+
+    fn test_is_nan<F>(shape: f64, rate: f64, eval: F)
+        where F: Fn(InverseGamma) -> f64
+    {
+        let x = get_value(shape, rate, eval);
+        assert!(x.is_nan());
+    }
+
     #[test]
     fn test_create() {
         create_case(0.1, 0.1);
@@ -163,5 +241,24 @@ mod test {
         bad_create_case(1.0, -100.0);
         bad_create_case(1.0, f64::NEG_INFINITY);
         bad_create_case(1.0, f64::NAN);
+    }
+
+    #[test]
+    fn test_cdf() {
+        test_almost(0.1, 0.1, 0.1862151961946054271994, 1e-14, |x| x.cdf(1.2));
+        test_almost(0.1, 1.0, 0.05859755410986647796141, 1e-14, |x| x.cdf(2.0));
+        test_case(0.1, f64::INFINITY, 0.0, |x| x.cdf(1.1));
+        test_case(1.0, 0.1, 0.9355069850316177377304, |x| x.cdf(1.5));
+        test_almost(1.0, 1.0, 0.4345982085070782231613, 1e-14, |x| x.cdf(1.2));
+        test_case(1.0, f64::INFINITY, 0.0, |x| x.cdf(1.5));
+        test_is_nan(f64::INFINITY, 0.1, |x| x.cdf(5.0));
+        test_is_nan(f64::INFINITY, 1.0, |x| x.cdf(2.5));
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.cdf(1.0));
+    }
+
+    #[test]
+    fn test_min_max() {
+        test_case(1.0, 1.0, 0.0, |x| x.min());
+        test_case(1.0, 1.0, f64::INFINITY, |x| x.max());
     }
 }
