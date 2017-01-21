@@ -230,6 +230,113 @@ impl Variance<f64> for InverseGamma {
     }
 }
 
+impl Entropy<f64> for InverseGamma {
+    /// Returns the entropy of the inverse gamma distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// α + ln(β * Γ(α)) - (1 + α) * ψ(α)
+    /// ```
+    ///
+    /// where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
+    /// and `ψ` is the digamma function
+    fn entropy(&self) -> f64 {
+        self.shape + self.rate.ln() + gamma::ln_gamma(self.shape) -
+        (1.0 + self.shape) * gamma::digamma(self.shape)
+    }
+}
+
+impl Skewness<f64> for InverseGamma {
+    /// Returns the skewness of the inverse gamma distribution
+    ///
+    /// # Panics
+    ///
+    /// If `shape <= 3`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 4 * sqrt(α - 2) / (α - 3)
+    /// ```
+    ///
+    /// where `α` is the shape
+    fn skewness(&self) -> f64 {
+        assert!(self.shape > 3.0,
+                format!("{}", StatsError::ArgGt("shape", 3.0)));
+        4.0 * (self.shape - 2.0).sqrt() / (self.shape - 3.0)
+    }
+}
+
+impl Mode<f64> for InverseGamma {
+    /// Returns the mode of the inverse gamma distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// β / (α + 1)
+    /// ```
+    ///
+    /// /// where `α` is the shape and `β` is the rate
+    fn mode(&self) -> f64 {
+        self.rate / (self.shape + 1.0)
+    }
+}
+
+impl Continuous<f64, f64> for InverseGamma {
+    /// Calculates the probability density function for the
+    /// inverse gamma distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `NAN` if `rate` is `INF`, returns `0.0`
+    /// if `shape` is `INF`, returns `NAN` if both are `INF`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (β^α / Γ(α)) * x^(-α - 1) * e^(-β / x)
+    /// ```
+    ///
+    /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
+    fn pdf(&self, x: f64) -> f64 {
+        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        if self.shape == 1.0 {
+            self.rate / (x * x) * (-self.rate / x).exp()
+        } else {
+            self.rate.powf(self.shape) * x.powf(-self.shape - 1.0) * (-self.rate / x).exp() /
+            gamma::gamma(self.shape)
+        }
+    }
+
+    /// Calculates the probability density function for the
+    /// inverse gamma distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `NAN` if `rate` is `INF`, returns `-INF`
+    /// if `shape` is `INF`, returns `NAN` if both are `INF`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((β^α / Γ(α)) * x^(-α - 1) * e^(-β / x))
+    /// ```
+    ///
+    /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
+    fn ln_pdf(&self, x: f64) -> f64 {
+        self.pdf(x).ln()
+    }
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
@@ -364,5 +471,59 @@ mod test {
     #[should_panic]
     fn test_std_dev_panics() {
         get_value(0.1, 0.1, |x| x.std_dev());
+    }
+
+    #[test]
+    fn test_entropy() {
+        test_almost(0.1, 0.1, 11.51625799319234475054, 1e-14, |x| x.entropy());
+        test_almost(1.0, 1.0, 2.154431329803065721213, 1e-14, |x| x.entropy());
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.entropy());
+    }
+
+    #[test]
+    fn test_skewness() {
+        test_almost(3.1, 0.1, 41.95235392680606187966, 1e-13, |x| x.skewness());
+        test_almost(3.1, 1.0, 41.95235392680606187966, 1e-13, |x| x.skewness());
+        test_case(5.0, 0.1, 3.464101615137754587055, |x| x.skewness());
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.skewness());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_skewness_panics() {
+        get_value(0.1, 0.1, |x| x.skewness());
+    }
+
+    #[test]
+    fn test_mode() {
+        test_case(0.1, 0.1, 0.09090909090909090909091, |x| x.mode());
+        test_case(1.0, 1.0, 0.5, |x| x.mode());
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.mode());
+    }
+
+    #[test]
+    fn test_pdf() {
+        test_almost(0.1, 0.1, 0.0628591853882328004197, 1e-15, |x| x.pdf(1.2));
+        test_almost(0.1, 1.0, 0.0297426109178248997426, 1e-15, |x| x.pdf(2.0));
+        test_is_nan(0.1 ,f64::INFINITY, |x| x.pdf(1.1));
+        test_case(1.0, 0.1, 0.04157808822362745501024, |x| x.pdf(1.5));
+        test_case(1.0, 1.0, 0.3018043114632487660842, |x| x.pdf(1.2));
+        test_is_nan(1.0, f64::INFINITY, |x| x.pdf(1.5));
+        test_case(f64::INFINITY, 0.1, 0.0, |x| x.pdf(5.0));
+        test_case(f64::INFINITY, 1.0, 0.0, |x| x.pdf(2.5));
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.pdf(1.0));
+    }
+
+    #[test]
+    fn test_ln_pdf() {
+        test_almost(0.1, 0.1, 0.0628591853882328004197f64.ln(), 1e-15, |x| x.ln_pdf(1.2));
+        test_almost(0.1, 1.0, 0.0297426109178248997426f64.ln(), 1e-15, |x| x.ln_pdf(2.0));
+        test_is_nan(0.1 ,f64::INFINITY, |x| x.ln_pdf(1.1));
+        test_case(1.0, 0.1, 0.04157808822362745501024f64.ln(), |x| x.ln_pdf(1.5));
+        test_case(1.0, 1.0, 0.3018043114632487660842f64.ln(), |x| x.ln_pdf(1.2));
+        test_is_nan(1.0, f64::INFINITY, |x| x.ln_pdf(1.5));
+        test_case(f64::INFINITY, 0.1, f64::NEG_INFINITY, |x| x.ln_pdf(5.0));
+        test_case(f64::INFINITY, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(2.5));
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.ln_pdf(1.0));
     }
 }
