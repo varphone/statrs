@@ -171,6 +171,65 @@ impl Max<f64> for InverseGamma {
     }
 }
 
+impl Mean<f64> for InverseGamma {
+    /// Returns the mean of the inverse distribution
+    ///
+    /// # Panics
+    ///
+    /// If `shape <= 1.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// β / (α - 1)
+    /// ```
+    ///
+    /// where `α` is the shape and `β` is the rate
+    fn mean(&self) -> f64 {
+        assert!(self.shape > 1.0,
+                format!("{}", StatsError::ArgGt("shape", 1.0)));
+        self.rate / (self.shape - 1.0)
+    }
+}
+
+impl Variance<f64> for InverseGamma {
+    /// Returns the variance of the inverse gamma distribution
+    ///
+    /// # Panics
+    ///
+    /// If `shape <= 2.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// β^2 / ((α - 1)^2 * (α - 2))
+    /// ```
+    ///
+    /// where `α` is the shape and `β` is the rate
+    fn variance(&self) -> f64 {
+        assert!(self.shape > 2.0,
+                format!("{}", StatsError::ArgGt("shape", 2.0)));
+        self.rate * self.rate / ((self.shape - 1.0) * (self.shape - 1.0) * (self.shape - 2.0))
+    }
+
+    /// Returns the standard deviation of the inverse gamma distribution
+    ///
+    /// # Panics
+    ///
+    /// If `shape <= 2.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(β^2 / ((α - 1)^2 * (α - 2)))
+    /// ```
+    ///
+    /// where `α` is the shape and `β` is the rate
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
+    }
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
@@ -257,8 +316,53 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_cdf_panics() {
+        get_value(0.1, 0.1, |x| x.cdf(-1.0));
+    }
+
+    #[test]
     fn test_min_max() {
         test_case(1.0, 1.0, 0.0, |x| x.min());
         test_case(1.0, 1.0, f64::INFINITY, |x| x.max());
+    }
+
+    #[test]
+    fn test_mean() {
+        test_almost(1.1, 0.1, 1.0, 1e-14, |x| x.mean());
+        test_almost(1.1, 1.0, 10.0, 1e-14, |x| x.mean());
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.mean());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_mean_panics() {
+        get_value(0.1, 0.1, |x| x.mean());
+    }
+
+    #[test]
+    fn test_variance() {
+        test_almost(2.1, 0.1, 0.08264462809917355371901, 1e-15, |x| x.variance());
+        test_almost(2.1, 1.0, 8.264462809917355371901, 1e-13, |x| x.variance());
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.variance());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_variance_panics() {
+        get_value(0.1, 0.1, |x| x.variance());
+    }
+
+    #[test]
+    fn test_std_dev() {
+        test_almost(2.1, 0.1, 0.2874797872880344847272, 1e-15, |x| x.std_dev());
+        test_almost(2.1, 1.0, 2.874797872880344847272, 1e-14, |x| x.std_dev());
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.std_dev());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_std_dev_panics() {
+        get_value(0.1, 0.1, |x| x.std_dev());
     }
 }
