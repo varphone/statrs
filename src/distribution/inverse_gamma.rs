@@ -12,6 +12,13 @@ use error::StatsError;
 /// # Examples
 ///
 /// ```
+/// use statrs::distribution::{InverseGamma, Continuous};
+/// use statrs::statistics::Mean;
+/// use statrs::prec;
+///
+/// let n = InverseGamma::new(1.1, 0.1).unwrap();
+/// assert!(prec::almost_eq(n.mean(), 1.0, 1e-14));
+/// assert_eq!(n.pdf(1.0), 0.07554920138253064);
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct InverseGamma {
