@@ -355,7 +355,6 @@ impl Discrete<i64, f64> for Binomial {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
     use statistics::*;
@@ -368,8 +367,9 @@ mod test {
     }
 
     fn create_case(p: f64, n: i64) {
-        let n = try_create(p, n);
-        assert_eq!(p, n.p());
+        let dist = try_create(p, n);
+        assert_eq!(p, dist.p());
+        assert_eq!(n, dist.n());
     }
 
     fn bad_create_case(p: f64, n: i64) {

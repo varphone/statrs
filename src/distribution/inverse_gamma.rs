@@ -417,31 +417,6 @@ mod test {
     }
 
     #[test]
-    fn test_cdf() {
-        test_almost(0.1, 0.1, 0.1862151961946054271994, 1e-14, |x| x.cdf(1.2));
-        test_almost(0.1, 1.0, 0.05859755410986647796141, 1e-14, |x| x.cdf(2.0));
-        test_case(0.1, f64::INFINITY, 0.0, |x| x.cdf(1.1));
-        test_case(1.0, 0.1, 0.9355069850316177377304, |x| x.cdf(1.5));
-        test_almost(1.0, 1.0, 0.4345982085070782231613, 1e-14, |x| x.cdf(1.2));
-        test_case(1.0, f64::INFINITY, 0.0, |x| x.cdf(1.5));
-        test_is_nan(f64::INFINITY, 0.1, |x| x.cdf(5.0));
-        test_is_nan(f64::INFINITY, 1.0, |x| x.cdf(2.5));
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.cdf(1.0));
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_cdf_panics() {
-        get_value(0.1, 0.1, |x| x.cdf(-1.0));
-    }
-
-    #[test]
-    fn test_min_max() {
-        test_case(1.0, 1.0, 0.0, |x| x.min());
-        test_case(1.0, 1.0, f64::INFINITY, |x| x.max());
-    }
-
-    #[test]
     fn test_mean() {
         test_almost(1.1, 0.1, 1.0, 1e-14, |x| x.mean());
         test_almost(1.1, 1.0, 10.0, 1e-14, |x| x.mean());
@@ -509,6 +484,12 @@ mod test {
     }
 
     #[test]
+    fn test_min_max() {
+        test_case(1.0, 1.0, 0.0, |x| x.min());
+        test_case(1.0, 1.0, f64::INFINITY, |x| x.max());
+    }
+
+    #[test]
     fn test_pdf() {
         test_almost(0.1, 0.1, 0.0628591853882328004197, 1e-15, |x| x.pdf(1.2));
         test_almost(0.1, 1.0, 0.0297426109178248997426, 1e-15, |x| x.pdf(2.0));
@@ -532,5 +513,24 @@ mod test {
         test_case(f64::INFINITY, 0.1, f64::NEG_INFINITY, |x| x.ln_pdf(5.0));
         test_case(f64::INFINITY, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(2.5));
         test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.ln_pdf(1.0));
+    }
+
+    #[test]
+    fn test_cdf() {
+        test_almost(0.1, 0.1, 0.1862151961946054271994, 1e-14, |x| x.cdf(1.2));
+        test_almost(0.1, 1.0, 0.05859755410986647796141, 1e-14, |x| x.cdf(2.0));
+        test_case(0.1, f64::INFINITY, 0.0, |x| x.cdf(1.1));
+        test_case(1.0, 0.1, 0.9355069850316177377304, |x| x.cdf(1.5));
+        test_almost(1.0, 1.0, 0.4345982085070782231613, 1e-14, |x| x.cdf(1.2));
+        test_case(1.0, f64::INFINITY, 0.0, |x| x.cdf(1.5));
+        test_is_nan(f64::INFINITY, 0.1, |x| x.cdf(5.0));
+        test_is_nan(f64::INFINITY, 1.0, |x| x.cdf(2.5));
+        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.cdf(1.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_panics() {
+        get_value(0.1, 0.1, |x| x.cdf(-1.0));
     }
 }

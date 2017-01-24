@@ -351,7 +351,6 @@ fn sample_unchecked<R: Rng>(r: &mut R, lambda: f64) -> f64 {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
     use std::i64;
