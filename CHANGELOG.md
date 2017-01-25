@@ -8,6 +8,8 @@ v0.5.0
  - Implemented the `Geometric` distribution
  - `gamma::gamma_ur` now panics when `x > 0` or `a == f64::NEG_INFINITY`. In addition, it also returns `f64::NAN` when `a == f64::INFINITY` and `0.0` when `x == f64::INFINITY`
  - `Gamma::pdf` and `Gamma::ln_pdf` now return `f64::NAN` if any of `shape`, `rate`, or `x` are `f64::INFINITY`
+ - `Binomial::pdf` and `Binomial::ln_pdf` now panic if `x > n` or `x < 0`
+ - `Bernoulli::pdf` and `Bernoulli::ln_pdf` now panic if `x > 1` or `x < 0`
 
 v0.4.0
 - Implemented the `exponential::integral` special function

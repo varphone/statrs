@@ -20,7 +20,6 @@ use error::StatsError;
 /// assert_eq!(n.mean(), 2.5);
 /// assert_eq!(n.pmf(0), 0.03125);
 /// assert_eq!(n.pmf(3), 0.3125);
-/// assert_eq!(n.pmf(6), 0.0);
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Binomial {
@@ -295,9 +294,9 @@ impl Discrete<i64, f64> for Binomial {
     /// Calculates the probability mass function for the binomial
     /// distribution at `x`
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `0` if `x > n || x < 0`
+    /// If `x > n || x < 0`
     ///
     /// # Formula
     ///
@@ -305,19 +304,17 @@ impl Discrete<i64, f64> for Binomial {
     /// (n choose k) * p^k * (1 - p)^(n - k)
     /// ```
     fn pmf(&self, x: i64) -> f64 {
-        if x > self.n || x < 0 {
-            0.0
-        } else {
-            match self.p {
-                0.0 if x == 0 => 1.0,
-                0.0 => 0.0,
-                1.0 if x == self.n => 1.0,
-                1.0 => 0.0,
-                _ => {
-                    (factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
-                     (self.n - x) as f64 * (1.0 - self.p).ln())
-                        .exp()
-                }
+        assert!(x >= 0 && x <= self.n,
+                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
+        match self.p {
+            0.0 if x == 0 => 1.0,
+            0.0 => 0.0,
+            1.0 if x == self.n => 1.0,
+            1.0 => 0.0,
+            _ => {
+                (factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
+                 (self.n - x) as f64 * (1.0 - self.p).ln())
+                    .exp()
             }
         }
     }
@@ -325,9 +322,9 @@ impl Discrete<i64, f64> for Binomial {
     /// Calculates the log probability mass function for the binomial
     /// distribution at `x`
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `f64::NEG_INFINITY` if `x > n || x < 0`
+    /// If `x > n || x < 0`
     ///
     /// # Formula
     ///
@@ -335,18 +332,16 @@ impl Discrete<i64, f64> for Binomial {
     /// ln((n choose k) * p^k * (1 - p)^(n - k))
     /// ```
     fn ln_pmf(&self, x: i64) -> f64 {
-        if x > self.n || x < 0 {
-            f64::NEG_INFINITY
-        } else {
-            match self.p {
-                0.0 if x == 0 => 0.0,
-                0.0 => f64::NEG_INFINITY,
-                1.0 if x == self.n => 0.0,
-                1.0 => f64::NEG_INFINITY,
-                _ => {
-                    factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
-                    (self.n - x) as f64 * (1.0 - self.p).ln()
-                }
+        assert!(x >= 0 && x <= self.n,
+                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
+        match self.p {
+            0.0 if x == 0 => 0.0,
+            0.0 => f64::NEG_INFINITY,
+            1.0 if x == self.n => 0.0,
+            1.0 => f64::NEG_INFINITY,
+            _ => {
+                factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
+                (self.n - x) as f64 * (1.0 - self.p).ln()
             }
         }
     }

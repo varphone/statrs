@@ -1,4 +1,4 @@
-use std::i64;
+use std::{i64, f64};
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
@@ -12,6 +12,13 @@ use error::StatsError;
 /// # Examples
 ///
 /// ```
+/// use statrs::distribution::{Geometric, Discrete};
+/// use statrs::statistics::Mean;
+///
+/// let n = Geometric::new(0.3).unwrap();
+/// assert_eq!(n.mean(), 1.0 / 0.3);
+/// assert_eq!(n.pmf(1), 0.3);
+/// assert_eq!(n.pmf(2), 0.21);
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Geometric {
@@ -196,6 +203,95 @@ impl Entropy<f64> for Geometric {
     }
 }
 
+impl Skewness<f64> for Geometric {
+    /// Returns the skewness of the geometric distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (2 - p) / sqrt(1 - p)
+    /// ```
+    fn skewness(&self) -> f64 {
+        (2.0 - self.p) / (1.0 - self.p).sqrt()
+    }
+}
+
+impl Mode<i64> for Geometric {
+    /// Returns the mode of the geometric distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1
+    /// ```
+    fn mode(&self) -> i64 {
+        1
+    }
+}
+
+impl Median<f64> for Geometric {
+    /// Returns the median of the geometric distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `1` if `p` is `1`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ceil(-1 / log_2(1 - p))
+    /// ```
+    fn median(&self) -> f64 {
+        if self.p == 1.0 {
+            1.0
+        } else {
+            (-f64::consts::LN_2 / (1.0 - self.p).ln()).ceil()
+        }
+    }
+}
+
+impl Discrete<i64, f64> for Geometric {
+    /// Calculates the probability mass function for the geometric
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 - p)^(x - 1) * p
+    /// ```
+    fn pmf(&self, x: i64) -> f64 {
+        assert!(x > 0, format!("{}", StatsError::ArgGt("x", 0.0)));
+        (1.0 - self.p).powi(x as i32 - 1) * self.p
+    }
+
+    /// Calculates the log probability mass function for the geometric
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((1 - p)^(x - 1) * p)
+    /// ```
+    fn ln_pmf(&self, x: i64) -> f64 {
+        assert!(x > 0, format!("{}", StatsError::ArgGt("x", 0.0)));
+        if self.p == 1.0 && x == 1 {
+            0.0
+        } else if self.p == 1.0 {
+            f64::NEG_INFINITY
+        } else {
+            ((x - 1) as f64 * (1.0 - self.p).ln()) + self.p.ln()
+        }
+    }
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
@@ -289,9 +385,46 @@ mod test {
     }
 
     #[test]
+    fn test_skewness() {
+        test_almost(0.3, 2.031888635868469187947, 1e-15, |x| x.skewness());
+        test_case(1.0, f64::INFINITY, |x| x.skewness());
+    }
+
+    #[test]
+    fn test_median() {
+        test_case(0.0001, 6932.0, |x| x.median());
+        test_case(0.1, 7.0, |x| x.median());
+        test_case(0.3, 2.0, |x| x.median());
+        test_case(0.9, 1.0, |x| x.median());
+        test_case(1.0, 1.0, |x| x.median());
+    }
+
+    #[test]
+    fn test_mode() {
+        test_case(0.3, 1, |x| x.mode());
+        test_case(1.0, 1, |x| x.mode());
+    }
+
+    #[test]
     fn test_min_max() {
         test_case(0.3, 1, |x| x.min());
         test_case(0.3, i64::MAX, |x| x.max());
+    }
+
+    #[test]
+    fn test_pmf() {
+        test_case(0.3, 0.3, |x| x.pmf(1));
+        test_case(0.3, 0.21, |x| x.pmf(2));
+        test_case(1.0, 1.0, |x| x.pmf(1));
+        test_case(1.0, 0.0, |x| x.pmf(2));
+    }
+
+    #[test]
+    fn test_ln_pmf() {
+        test_almost(0.3, -1.203972804325935992623, 1e-15, |x| x.ln_pmf(1));
+        test_almost(0.3, -1.560647748264668371535, 1e-15, |x| x.ln_pmf(2));
+        test_case(1.0, 0.0, |x| x.ln_pmf(1));
+        test_case(1.0, f64::NEG_INFINITY, |x| x.ln_pmf(2));
     }
 
     #[test]
