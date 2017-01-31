@@ -113,6 +113,14 @@ impl Distribution<f64> for Geometric {
 }
 
 impl Univariate<i64, f64> for Geometric {
+    /// Calculates the cumulative distribution function for the geometric
+    /// distribution at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 1 - (1 - p) ^ x
+    /// ```
     fn cdf(&self, x: f64) -> f64 {
         1.0 - (1.0 - self.p).powf(x)
     }
