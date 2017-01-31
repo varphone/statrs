@@ -2,7 +2,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
 use distribution::{Univariate, Discrete, Distribution, Binomial};
-use result::Result;
+use Result;
 
 /// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
 /// distribution which is a special case of the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)

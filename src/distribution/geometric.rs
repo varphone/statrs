@@ -3,8 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
 use distribution::{Univariate, Discrete, Distribution};
-use result::Result;
-use error::StatsError;
+use {Result, StatsError};
 
 /// Implements the [Geometric](https://en.wikipedia.org/wiki/Geometric_distribution)
 /// distribution

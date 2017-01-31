@@ -4,8 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use function::{beta, factorial};
 use statistics::*;
 use distribution::{Univariate, Discrete, Distribution};
-use result::Result;
-use error::StatsError;
+use {Result, StatsError};
 
 /// Implements the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
 /// distribution

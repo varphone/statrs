@@ -5,8 +5,7 @@ use rand::distributions::{Sample, IndependentSample};
 use function::{factorial, gamma};
 use statistics::*;
 use distribution::{Univariate, Discrete, Distribution};
-use result::Result;
-use error::StatsError;
+use {Result, StatsError};
 
 /// Implements the [Poisson](https://en.wikipedia.org/wiki/Poisson_distribution)
 /// distribution

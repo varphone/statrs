@@ -3,8 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
 use distribution::{Univariate, Continuous, Distribution};
-use result::Result;
-use error::StatsError;
+use {Result, StatsError};
 
 /// Implements the [Cauchy](https://en.wikipedia.org/wiki/Cauchy_distribution)
 /// distribution, also known as the Lorentz distribution.

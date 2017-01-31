@@ -46,11 +46,13 @@ pub mod consts;
 pub mod prec;
 pub mod statistics;
 
-mod result;
 mod error;
 
 #[cfg(test)]
 mod testing;
 
-pub use result::Result;
 pub use error::StatsError;
+
+/// Result type for the statrs library package that returns
+/// either a result type `T` or a `StatsError`
+pub type Result<T> = std::result::Result<T, StatsError>;

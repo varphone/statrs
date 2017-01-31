@@ -4,8 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use function::beta;
 use statistics::*;
 use distribution::{Univariate, Continuous, Distribution};
-use result::Result;
-use error::StatsError;
+use {Result, StatsError};
 
 /// Implements the [Fisher-Snedecor](https://en.wikipedia.org/wiki/F-distribution) distribution
 /// also commonly known as the F-distribution

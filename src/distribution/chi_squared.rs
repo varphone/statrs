@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
 use distribution::{Univariate, Continuous, Distribution, Gamma};
-use result::Result;
+use Result;
 
 /// Implements the [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
 /// distribution which is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution

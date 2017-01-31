@@ -4,8 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use function::{beta, gamma};
 use statistics::*;
 use distribution::{Univariate, Continuous, Distribution};
-use result::Result;
-use error::StatsError;
+use {Result, StatsError};
 
 /// Implements the [Student's T](https://en.wikipedia.org/wiki/Student%27s_t-distribution) distribution
 ///

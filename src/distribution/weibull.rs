@@ -4,9 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use function::{gamma, stable};
 use statistics::*;
 use distribution::{Univariate, Continuous, Distribution};
-use result::Result;
-use error::StatsError;
-use consts;
+use {Result, StatsError, consts};
 
 /// Implements the [Weibull](https://en.wikipedia.org/wiki/Weibull_distribution)
 /// distribution

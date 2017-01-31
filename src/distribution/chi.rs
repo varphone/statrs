@@ -4,8 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use function::gamma;
 use statistics::*;
 use distribution::{Univariate, Continuous, Distribution};
-use result::Result;
-use error::StatsError;
+use {Result, StatsError};
 
 /// Implements the [Chi](https://en.wikipedia.org/wiki/Chi_distribution)
 /// distribution
