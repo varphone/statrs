@@ -61,7 +61,7 @@ impl Hypergeometric {
     /// ```
     /// use statrs::distribution::Hypergeometric;
     ///
-    /// let n = Hypergeometric::new(10, 5, 3);
+    /// let n = Hypergeometric::new(10, 5, 3).unwrap();
     /// assert_eq!(n.population(), 10);
     /// ```
     pub fn population(&self) -> u64 {
@@ -76,7 +76,7 @@ impl Hypergeometric {
     /// ```
     /// use statrs::distribution::Hypergeometric;
     ///
-    /// let n = Hypergeometric::new(10, 5, 3);
+    /// let n = Hypergeometric::new(10, 5, 3).unwrap();
     /// assert_eq!(n.successes(), 5);
     /// ```
     pub fn successes(&self) -> u64 {
@@ -91,7 +91,7 @@ impl Hypergeometric {
     /// ```
     /// use statrs::distribution::Hypergeometric;
     ///
-    /// let n = Hypergeometric::new(10, 5, 3);
+    /// let n = Hypergeometric::new(10, 5, 3).unwrap();
     /// assert_eq!(n.draws(), 3);
     /// ```
     pub fn draws(&self) -> u64 {
@@ -175,9 +175,10 @@ impl Univariate<u64, f64> for Hypergeometric {
                 format!("{}", StatsError::ArgGteArg("x", "n + K - N")));
         assert!(x < self.max() as f64,
                 format!("{}", StatsError::ArgLtArg("x", "min(K, n)")));
-        let k = x.floor as u64;
+        let k = x.floor() as u64;
         let ln_denom = factorial::ln_binomial(self.population, self.draws);
-        (0...k).fold(0.0, |acc, i| {
+        (0..k + 1).fold(0.0, |acc, i| {
+            acc +
             (factorial::ln_binomial(self.successes, i) +
              factorial::ln_binomial(self.population - self.successes, self.draws - i) -
              ln_denom)
@@ -219,7 +220,9 @@ impl Max<u64> for Hypergeometric {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use distribution::Hypergeometric;
+    use std::fmt::Debug;
+    use statistics::*;
+    use distribution::{Univariate, Discrete, Hypergeometric};
 
     fn try_create(population: u64, successes: u64, draws: u64) -> Hypergeometric {
         let n = Hypergeometric::new(population, successes, draws);
@@ -239,6 +242,29 @@ mod test {
         assert!(n.is_err());
     }
 
+    fn get_value<T, F>(population: u64, successes: u64, draws: u64, eval: F) -> T
+        where T: PartialEq + Debug,
+              F: Fn(Hypergeometric) -> T
+    {
+        let n = try_create(population, successes, draws);
+        eval(n)
+    }
+
+    fn test_case<T, F>(population: u64, successes: u64, draws: u64, expected: T, eval: F)
+        where T: PartialEq + Debug,
+              F: Fn(Hypergeometric) -> T
+    {
+        let x = get_value(population, successes, draws, eval);
+        assert_eq!(expected, x);
+    }
+
+    fn test_almost<F>(population: u64, successes: u64, draws: u64, expected: f64, acc: f64, eval: F)
+        where F: Fn(Hypergeometric) -> f64
+    {
+        let x = get_value(population, successes, draws, eval);
+        assert_almost_eq!(expected, x, acc);
+    }
+
     #[test]
     fn test_create() {
         create_case(0, 0, 0);
@@ -254,5 +280,48 @@ mod test {
         bad_create_case(2, 3, 2);
         bad_create_case(10, 5, 20);
         bad_create_case(0, 1, 1);
+    }
+
+    #[test]
+    fn test_min() {
+        test_case(0, 0, 0, 0, |x| x.min());
+        test_case(1, 1, 1, 1, |x| x.min());
+        test_case(2, 1, 1, 0, |x| x.min());
+        test_case(2, 2, 2, 2, |x| x.min());
+        test_case(10, 1, 1, 0, |x| x.min());
+        test_case(10, 5, 3, 0, |x| x.min());
+    }
+
+    #[test]
+    fn test_max() {
+        test_case(0, 0, 0, 0, |x| x.max());
+        test_case(1, 1, 1, 1, |x| x.max());
+        test_case(2, 1, 1, 1, |x| x.max());
+        test_case(2, 2, 2, 2, |x| x.max());
+        test_case(10, 1, 1, 1, |x| x.max());
+        test_case(10, 5, 3, 3, |x| x.max());
+    }
+
+    #[test]
+    fn test_cdf() {
+        test_case(2, 1, 1, 0.5, |x| x.cdf(0.3));
+        test_almost(10, 1, 1, 0.9, 1e-14, |x| x.cdf(0.3));
+        test_almost(10, 5, 3, 0.5, 1e-15, |x| x.cdf(1.1));
+        test_almost(10, 5, 3, 11.0 / 12.0, 1e-14, |x| x.cdf(2.0));
+        test_almost(10000, 2, 9800, 199.0 / 499950.0, 1e-14, |x| x.cdf(0.0));
+        test_almost(10000, 2, 9800, 199.0 / 499950.0, 1e-14, |x| x.cdf(0.5));
+        test_almost(10000, 2, 9800, 19799.0 / 499950.0, 1e-12, |x| x.cdf(1.5));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_arg_too_big() {
+        get_value(0, 0, 0, |x| x.cdf(0.5));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_arg_too_small() {
+        get_value(2, 2, 2, |x| x.cdf(0.0));
     }
 }
