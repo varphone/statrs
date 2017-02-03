@@ -358,7 +358,7 @@ impl Discrete<i64, f64> for Hypergeometric {
     /// ```
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
-    fn ln_pmdf(&self, x: i64) -> f64 {
+    fn ln_pmf(&self, x: i64) -> f64 {
         factorial::ln_binomial(self.successes, x as u64) +
         factorial::ln_binomial(self.population - self.successes, self.draws - x as u64) -
         factorial::ln_binomial(self.population, self.draws)
