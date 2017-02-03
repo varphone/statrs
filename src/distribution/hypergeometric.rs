@@ -244,6 +244,49 @@ impl Mean<f64> for Hypergeometric {
     }
 }
 
+impl Variance<f64> for Hypergeometric {
+    /// Returns the variance of the hypergeometric distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `INF` if `N` is `0` or `1`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// n * (K / N) * ((N - K) / N) * ((N - n) / (N - 1))
+    /// ```
+    ///
+    /// where `N` is population, `K` is successes, and `n` is draws
+    fn variance(&self) -> f64 {
+        if self.population == 0 || self.population == 1 {
+            return f64::INFINITY;
+        }
+        let population = self.population as f64;
+        let successes = self.successes as f64;
+        let draws = self.draws as f64;
+        draws * successes * (population - draws) * (population - successes) /
+        (population * population * (population - 1.0))
+    }
+
+    /// Returns the standard deviation of the hypergeometric distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `INF` if `N` is `0` or `1`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(n * (K / N) * ((N - K) / N) * ((N - n) / (N - 1)))
+    /// ```
+    ///
+    /// where `N` is population, `K` is successes, and `n` is draws
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
+    }
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
@@ -318,6 +361,26 @@ mod test {
         test_case(2, 2, 2, 2.0, |x| x.mean());
         test_case(10, 1, 1, 0.1, |x| x.mean());
         test_case(10, 5, 3, 15.0 / 10.0, |x| x.mean());
+    }
+
+    #[test]
+    fn test_variance() {
+        test_case(0, 0, 0, f64::INFINITY, |x| x.variance());
+        test_case(1, 1, 1, f64::INFINITY, |x| x.variance());
+        test_case(2, 1, 1, 0.25, |x| x.variance());
+        test_case(2, 2, 2, 0.0, |x| x.variance());
+        test_case(10, 1, 1, 81.0 / 900.0, |x| x.variance());
+        test_case(10, 5, 3, 525.0 / 900.0, |x| x.variance());
+    }
+
+    #[test]
+    fn test_std_dev() {
+        test_case(0, 0, 0, f64::INFINITY, |x| x.std_dev());
+        test_case(1, 1, 1, f64::INFINITY, |x| x.std_dev());
+        test_case(2, 1, 1, 0.25f64.sqrt(), |x| x.std_dev());
+        test_case(2, 2, 2, 0.0, |x| x.std_dev());
+        test_case(10, 1, 1, (81f64 / 900.0).sqrt(), |x| x.std_dev());
+        test_case(10, 5, 3, (525f64 / 900.0).sqrt(), |x| x.std_dev());
     }
 
     #[test]
