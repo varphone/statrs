@@ -303,6 +303,8 @@ impl Skewness<f64> for Hypergeometric {
     /// ```ignore
     /// ((N - 2K) * (N - 1)^(1 / 2) * (N - 2n)) / ([n * K * (N - K) * (N - n)]^(1 / 2) * (N - 2))
     /// ```
+    ///
+    /// where `N` is population, `K` is successes, and `n` is draws
     fn skewness(&self) -> f64 {
         assert!(self.population > 2,
                 format!("{}", StatsError::ArgGt("population", 2.0)));
@@ -311,6 +313,21 @@ impl Skewness<f64> for Hypergeometric {
         (population - 1.0).sqrt() * (population - 2.0 * draws) * (population - 2.0 * successes) /
         ((draws * successes * (population - successes) * (population - draws)).sqrt() *
          (population - 2.0))
+    }
+}
+
+impl Mode<i64> for Hypergeometric {
+    /// Returns the mode of the hypergeometric distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// floor((n + 1) * (k + 1) / (N + 2))
+    /// ```
+    ///
+    /// where `N` is population, `K` is successes, and `n` is draws
+    fn mode(&self) -> i64 {
+        ((self.draws + 1) * (self.successes + 1) / (self.population + 2)) as i64
     }
 }
 
@@ -433,6 +450,16 @@ mod test {
     #[should_panic]
     fn test_skewness_with_pop_lte_2() {
         get_value(2, 2, 2, |x| x.skewness());
+    }
+
+    #[test]
+    fn test_mode() {
+        test_case(0, 0, 0, 0, |x| x.mode());
+        test_case(1, 1, 1, 1, |x| x.mode());
+        test_case(2, 1, 1, 1, |x| x.mode());
+        test_case(2, 2, 2, 2, |x| x.mode());
+        test_case(10, 1, 1, 0, |x| x.mode());
+        test_case(10, 5, 3, 2, |x| x.mode());
     }
 
     #[test]
