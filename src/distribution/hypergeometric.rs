@@ -98,6 +98,12 @@ impl Hypergeometric {
     pub fn draws(&self) -> u64 {
         self.draws
     }
+
+    /// Returns population, successes, and draws in that order
+    /// as a tuple of doubles
+    fn values_f64(&self) -> (f64, f64, f64) {
+        (self.population as f64, self.successes as f64, self.draws as f64)
+    }
 }
 
 impl Sample<f64> for Hypergeometric {
@@ -225,9 +231,9 @@ impl Max<u64> for Hypergeometric {
 impl Mean<f64> for Hypergeometric {
     /// Returns the mean of the hypergeometric distribution
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `INF` if `N` is `0`
+    /// If `N` is `0`
     ///
     /// # Formula
     ///
@@ -237,9 +243,9 @@ impl Mean<f64> for Hypergeometric {
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
     fn mean(&self) -> f64 {
-        if self.population == 0 {
-            return f64::INFINITY;
-        }
+        assert!(self.population > 0,
+                format!("{}", StatsError::ArgGt("population", 0.0)));
+
         self.successes as f64 * self.draws as f64 / self.population as f64
     }
 }
@@ -247,9 +253,9 @@ impl Mean<f64> for Hypergeometric {
 impl Variance<f64> for Hypergeometric {
     /// Returns the variance of the hypergeometric distribution
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `INF` if `N` is `0` or `1`
+    /// If `N <= 1`
     ///
     /// # Formula
     ///
@@ -259,21 +265,19 @@ impl Variance<f64> for Hypergeometric {
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
     fn variance(&self) -> f64 {
-        if self.population == 0 || self.population == 1 {
-            return f64::INFINITY;
-        }
-        let population = self.population as f64;
-        let successes = self.successes as f64;
-        let draws = self.draws as f64;
+        assert!(self.population > 1,
+                format!("{}", StatsError::ArgGt("population", 1.0)));
+
+        let (population, successes, draws) = self.values_f64();
         draws * successes * (population - draws) * (population - successes) /
         (population * population * (population - 1.0))
     }
 
     /// Returns the standard deviation of the hypergeometric distribution
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `INF` if `N` is `0` or `1`
+    /// If `N <= 1`
     ///
     /// # Formula
     ///
@@ -284,6 +288,29 @@ impl Variance<f64> for Hypergeometric {
     /// where `N` is population, `K` is successes, and `n` is draws
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
+    }
+}
+
+impl Skewness<f64> for Hypergeometric {
+    /// Returns the skewness of the hypergeometric distribution
+    ///
+    /// # Panics
+    ///
+    /// If `N <= 2`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ((N - 2K) * (N - 1)^(1 / 2) * (N - 2n)) / ([n * K * (N - K) * (N - n)]^(1 / 2) * (N - 2))
+    /// ```
+    fn skewness(&self) -> f64 {
+        assert!(self.population > 2,
+                format!("{}", StatsError::ArgGt("population", 2.0)));
+
+        let (population, successes, draws) = self.values_f64();
+        (population - 1.0).sqrt() * (population - 2.0 * draws) * (population - 2.0 * successes) /
+        ((draws * successes * (population - successes) * (population - draws)).sqrt() *
+         (population - 2.0))
     }
 }
 
@@ -355,7 +382,6 @@ mod test {
 
     #[test]
     fn test_mean() {
-        test_case(0, 0, 0, f64::INFINITY, |x| x.mean());
         test_case(1, 1, 1, 1.0, |x| x.mean());
         test_case(2, 1, 1, 0.5, |x| x.mean());
         test_case(2, 2, 2, 2.0, |x| x.mean());
@@ -364,9 +390,13 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_mean_with_population_0() {
+        get_value(0, 0, 0, |x| x.mean());
+    }
+
+    #[test]
     fn test_variance() {
-        test_case(0, 0, 0, f64::INFINITY, |x| x.variance());
-        test_case(1, 1, 1, f64::INFINITY, |x| x.variance());
         test_case(2, 1, 1, 0.25, |x| x.variance());
         test_case(2, 2, 2, 0.0, |x| x.variance());
         test_case(10, 1, 1, 81.0 / 900.0, |x| x.variance());
@@ -374,13 +404,35 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_variance_with_pop_lte_1() {
+        get_value(1, 1, 1, |x| x.variance());
+    }
+
+    #[test]
     fn test_std_dev() {
-        test_case(0, 0, 0, f64::INFINITY, |x| x.std_dev());
-        test_case(1, 1, 1, f64::INFINITY, |x| x.std_dev());
         test_case(2, 1, 1, 0.25f64.sqrt(), |x| x.std_dev());
         test_case(2, 2, 2, 0.0, |x| x.std_dev());
         test_case(10, 1, 1, (81f64 / 900.0).sqrt(), |x| x.std_dev());
         test_case(10, 5, 3, (525f64 / 900.0).sqrt(), |x| x.std_dev());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_std_dev_with_pop_lte_1() {
+        get_value(1, 1, 1, |x| x.std_dev());
+    }
+
+    #[test]
+    fn test_skewness() {
+        test_case(10, 1, 1, 8.0 / 3.0, |x| x.skewness());
+        test_case(10, 5, 3, 0.0, |x| x.skewness());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_skewness_with_pop_lte_2() {
+        get_value(2, 2, 2, |x| x.skewness());
     }
 
     #[test]
