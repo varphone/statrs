@@ -1,4 +1,5 @@
 use std::cmp;
+use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::factorial;
@@ -195,8 +196,10 @@ impl Min<u64> for Hypergeometric {
     /// # Formula
     ///
     /// ```ignore
-    /// 1 -
+    /// max(0, n + K - N)
     /// ```
+    ///
+    /// where `N` is population, `K` is successes, and `n` is draws
     fn min(&self) -> u64 {
         (self.draws + self.successes).saturating_sub(self.population)
     }
@@ -210,16 +213,41 @@ impl Max<u64> for Hypergeometric {
     /// # Formula
     ///
     /// ```ignore
-    /// 2^63 - 1
+    /// min(K, n)
     /// ```
+    ///
+    /// where `K` is successes and `n` is draws
     fn max(&self) -> u64 {
         cmp::min(self.successes, self.draws)
+    }
+}
+
+impl Mean<f64> for Hypergeometric {
+    /// Returns the mean of the hypergeometric distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `INF` if `N` is `0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// K * n / N
+    /// ```
+    ///
+    /// where `N` is population, `K` is successes, and `n` is draws
+    fn mean(&self) -> f64 {
+        if self.population == 0 {
+            return f64::INFINITY;
+        }
+        self.successes as f64 * self.draws as f64 / self.population as f64
     }
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
+    use std::f64;
     use std::fmt::Debug;
     use statistics::*;
     use distribution::{Univariate, Discrete, Hypergeometric};
@@ -280,6 +308,16 @@ mod test {
         bad_create_case(2, 3, 2);
         bad_create_case(10, 5, 20);
         bad_create_case(0, 1, 1);
+    }
+
+    #[test]
+    fn test_mean() {
+        test_case(0, 0, 0, f64::INFINITY, |x| x.mean());
+        test_case(1, 1, 1, 1.0, |x| x.mean());
+        test_case(2, 1, 1, 0.5, |x| x.mean());
+        test_case(2, 2, 2, 2.0, |x| x.mean());
+        test_case(10, 1, 1, 0.1, |x| x.mean());
+        test_case(10, 5, 3, 15.0 / 10.0, |x| x.mean());
     }
 
     #[test]
