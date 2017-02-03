@@ -331,6 +331,40 @@ impl Mode<i64> for Hypergeometric {
     }
 }
 
+impl Discrete<i64, f64> for Hypergeometric {
+    /// Calculates the probability mass function for the hypergeometric
+    /// distribution at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (K choose x) * (N-K choose n-x) / (N choose n)
+    /// ```
+    ///
+    /// where `N` is population, `K` is successes, and `n` is draws
+    fn pmf(&self, x: i64) -> f64 {
+        factorial::binomial(self.successes, x as u64) *
+        factorial::binomial(self.population - self.successes, self.draws - x as u64) /
+        factorial::binomial(self.population, self.draws)
+    }
+
+    /// Calculates the log probability mass function for the hypergeometric
+    /// distribution at `x`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((K choose x) * (N-K choose n-x) / (N choose n))
+    /// ```
+    ///
+    /// where `N` is population, `K` is successes, and `n` is draws
+    fn ln_pmdf(&self, x: i64) -> f64 {
+        factorial::ln_binomial(self.successes, x as u64) +
+        factorial::ln_binomial(self.population - self.successes, self.draws - x as u64) -
+        factorial::ln_binomial(self.population, self.draws)
+    }
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
