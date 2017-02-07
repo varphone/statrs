@@ -175,8 +175,11 @@ impl Univariate<u64, f64> for Hypergeometric {
     /// # Formula
     ///
     /// ```ignore
-    /// TODO
+    /// 1 - ((n choose k+1) * (N-n choose K-k-1)) / (N choose K) * 3_F_2(1, k+1-K, k+1-n; k+2, N+k+2-K-n; 1)
     /// ```
+    ///
+    // where `N` is population, `K` is successes, `n` is draws,
+    /// and `p_F_q` is the [generalized hypergeometric function](https://en.wikipedia.org/wiki/Generalized_hypergeometric_function)
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= self.min() as f64,
                 format!("{}", StatsError::ArgGteArg("x", "n + K - N")));
@@ -514,6 +517,32 @@ mod test {
         test_case(2, 2, 2, 2, |x| x.max());
         test_case(10, 1, 1, 1, |x| x.max());
         test_case(10, 5, 3, 3, |x| x.max());
+    }
+
+    #[test]
+    fn test_pmf() {
+        test_case(0, 0, 0, 1.0, |x| x.pmf(0));
+        test_case(1, 1, 1, 1.0, |x| x.pmf(1));
+        test_case(2, 1, 1, 0.5, |x| x.pmf(0));
+        test_case(2, 1, 1, 0.5, |x| x.pmf(1));
+        test_case(2, 2, 2, 1.0, |x| x.pmf(2));
+        test_case(10, 1, 1, 0.9, |x| x.pmf(0));
+        test_case(10, 1, 1, 0.1, |x| x.pmf(1));
+        test_case(10, 5, 3, 0.41666666666666666667, |x| x.pmf(1));
+        test_case(10, 5, 3, 0.083333333333333333333, |x| x.pmf(3));
+    }
+
+    #[test]
+    fn test_ln_pmf() {
+        test_case(0, 0, 0, 0.0, |x| x.ln_pmf(0));
+        test_case(1, 1, 1, 0.0, |x| x.ln_pmf(1));
+        test_case(2, 1, 1, -0.6931471805599453094172, |x| x.ln_pmf(0));
+        test_case(2, 1, 1, -0.6931471805599453094172, |x| x.ln_pmf(1));
+        test_case(2, 2, 2, 0.0, |x| x.ln_pmf(2));
+        test_almost(10, 1, 1, -0.1053605156578263012275, 1e-14, |x| x.ln_pmf(0));
+        test_almost(10, 1, 1, -2.302585092994045684018, 1e-14, |x| x.ln_pmf(1));
+        test_almost(10, 5, 3, -0.875468737353899935621, 1e-14, |x| x.ln_pmf(1));
+        test_almost(10, 5, 3, -2.484906649788000310234, 1e-14, |x| x.ln_pmf(3));
     }
 
     #[test]
