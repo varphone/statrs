@@ -1,6 +1,4 @@
-use result::Result;
-use error::StatsError;
-use consts;
+use {Result, StatsError, consts};
 
 /// Computes the generalized Exponential Integral function
 /// where `x` is the argument and `n` is the integer power of the

@@ -2,7 +2,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
 use distribution::{Univariate, Discrete, Distribution, Binomial};
-use result::Result;
+use Result;
 
 /// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
 /// distribution which is a special case of the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
@@ -18,7 +18,6 @@ use result::Result;
 /// assert_eq!(n.mean(), 0.5);
 /// assert_eq!(n.pmf(0), 0.5);
 /// assert_eq!(n.pmf(1), 0.5);
-/// assert_eq!(n.pmf(2), 0.0);
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Bernoulli {
@@ -278,15 +277,14 @@ impl Discrete<i64, f64> for Bernoulli {
     /// Calculates the probability mass function for the
     /// bernoulli distribution at `x`.
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `0.0` if `x < 0 || x > 1`
+    /// If `x < 0 || x > 1`
     ///
     /// # Formula
     ///
     /// ```ignore
-    /// if x < 0 || x > 1 { 0.0 }
-    /// else if x == 0 { 1 - p }
+    /// if x == 0 { 1 - p }
     /// else { p }
     /// ```
     fn pmf(&self, x: i64) -> f64 {
@@ -296,14 +294,13 @@ impl Discrete<i64, f64> for Bernoulli {
     /// Calculates the log probability mass function for the
     /// bernoulli distribution at `x`.
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `f64::NEG_INFINITY` if `x < 0 || x > 1`
+    /// If `x < 0 || x > 1`
     ///
     /// # Formula
     ///
     /// ```ignore
-    /// if x < 0 || x > 1 { -INF }
     /// else if x == 0 { ln(1 - p) }
     /// else { ln(p) }
     /// ```

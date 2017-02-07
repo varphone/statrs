@@ -1,3 +1,5 @@
+//! Provides [numerically stable](https://en.wikipedia.org/wiki/Numerical_stability) functions
+
 use std::f64;
 use function::internal;
 

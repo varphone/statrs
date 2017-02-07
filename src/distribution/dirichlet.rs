@@ -3,9 +3,7 @@ use rand::distributions::{Sample, IndependentSample};
 use function::gamma;
 use statistics::*;
 use distribution::{Continuous, Distribution};
-use result::Result;
-use error::StatsError;
-use prec;
+use {Result, StatsError, prec};
 
 /// Implements the [Dirichlet](https://en.wikipedia.org/wiki/Dirichlet_distribution)
 /// distribution

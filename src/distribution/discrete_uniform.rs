@@ -3,8 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
 use distribution::{Univariate, Discrete, Distribution};
-use result::Result;
-use error::StatsError;
+use {Result, StatsError};
 
 /// Implements the [Discrete Uniform](https://en.wikipedia.org/wiki/Discrete_uniform_distribution)
 /// distribution
@@ -290,7 +289,6 @@ impl Discrete<i64, f64> for DiscreteUniform {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use std::cmp::PartialEq;
     use std::fmt::Debug;
     use std::f64;
     use statistics::*;

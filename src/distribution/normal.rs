@@ -4,9 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use function::erf;
 use statistics::*;
 use distribution::{Univariate, Continuous, Distribution};
-use result::Result;
-use error::StatsError;
-use consts;
+use {Result, StatsError, consts};
 
 /// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
 /// distribution
