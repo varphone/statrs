@@ -1,6 +1,6 @@
 # statrs  
   
-[![Build Status](https://travis-ci.org/boxtown/statrs.svg?branch=master)](https://travis-ci.org/boxtown/verto)
+[![Build Status](https://travis-ci.org/boxtown/statrs.svg?branch=master)](https://travis-ci.org/boxtown/statrs)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.md)
 [![Crates.io](https://img.shields.io/crates/v/statrs.svg?maxAge=2592000)](https://crates.io/crates/statrs)  
 
@@ -24,7 +24,7 @@ and filled-in when not.
 This library is a work-in-progress and not complete. Planned for future releases are continued implementations
 of distributions as well as porting over more statistical utilities
 
-Please check out the documentation [here](https://boxtown.io/docs/statrs/0.5.0/statrs/)
+Please check out the documentation [here](https://docs.rs/statrs/0.5.0/statrs/)
 
 ## Usage
 
