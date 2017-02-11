@@ -1,3 +1,6 @@
+v0.5.1
+ - Fixed critical bug in `normal::sample_unchecked` where it was returning `NaN`
+
 v0.5.0
  - Implemented the `logistic::logistic` special function
  - Implemented the `logistic::logit` special function

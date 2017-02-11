@@ -291,22 +291,46 @@ pub fn ln_pdf_unchecked(x: f64, mean: f64, std_dev: f64) -> f64 {
 /// `sample_unchecked` draws a sample from a normal distribution using
 /// the box-muller algorithm
 pub fn sample_unchecked<R: Rng>(r: &mut R, mean: f64, std_dev: f64) -> f64 {
-    let mut tuple = polar_transform(r.next_f64(), r.next_f64());
-    while !tuple.2 {
-        tuple = polar_transform(r.next_f64(), r.next_f64());
+    let mut results = polar_transform(r.next_f64(), r.next_f64());
+    while !results.valid {
+        results = polar_transform(r.next_f64(), r.next_f64());
     }
-    mean + std_dev * tuple.0
+    mean + std_dev * results.value
 }
 
-fn polar_transform(a: f64, b: f64) -> (f64, f64, bool) {
+struct PolarTransformResults {
+    value: f64,
+    valid: bool,
+}
+
+fn polar_transform(a: f64, b: f64) -> PolarTransformResults {
     let v1 = 2.0 * a - 1.0;
     let v2 = 2.0 * b - 1.0;
-    let r = v1 * v2 + v2 * v2;
+    let r = v1 * v1 + v2 * v2;
     if r >= 1.0 || r == 0.0 {
-        (0.0, 0.0, false)
+        PolarTransformResults {
+            value: 0.0,
+            valid: false,
+        }
     } else {
         let fac = (-2.0 * r.ln() / r).sqrt();
-        (v1 * fac, v2 * fac, true)
+        PolarTransformResults {
+            value: v1 * fac,
+            valid: true,
+        }
+    }
+}
+
+#[test]
+fn test_polar_transform() {
+    let mut a = 0.0;
+    let mut b = 0.0;
+    while a < 2.0 {
+        while b < 2.0 {
+            assert!(!polar_transform(a, b).value.is_nan());
+            b += 0.001;
+        }
+        a += 0.001;
     }
 }
 
