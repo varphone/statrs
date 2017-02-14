@@ -71,3 +71,42 @@ assert_eq!(n.pdf(1.0), 0.3678794411714423215955);
 ```
 
 as well as utility functions including `erf`, `gamma`, `ln_gamma`, `beta`, etc
+
+## Contributing
+
+Want to contribute? Check out some of the issues marked [help wanted](https://github.com/boxtown/statrs/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+
+### How to contribute
+
+Clone the repo:
+
+```
+git clone https://github.com/boxtown/starts
+```
+
+Create a feature branch:
+
+```
+git checkout -b <feature_branch> master
+```
+
+After commiting your code:
+
+```
+git push -u origin <feature_branch>
+```
+
+Then submit a PR, preferably referencing the relevant issue.
+
+### Commit messages
+
+Please be explicit and and purposeful with commit messages.
+
+#### Bad
+```
+Modify test code
+```
+#### Good
+```
+test: Update statrs::distribution::Normal test_cdf
+```
