@@ -133,6 +133,8 @@ impl Univariate<f64, f64> for Chi {
         assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         if self.freedom == f64::INFINITY || x == f64::INFINITY {
             1.0
+        } else if x == 0.0 {
+            0.0
         } else {
             gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0)
         }

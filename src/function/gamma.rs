@@ -78,7 +78,7 @@ pub fn gamma(x: f64) -> f64 {
 ///
 /// # Panics
 ///
-/// If `a` is negative infinity or `x < 0.0`
+/// if `a` or `x` are not in `(0, +inf)`
 pub fn gamma_ui(a: f64, x: f64) -> f64 {
     gamma_ur(a, x) * gamma(a)
 }
@@ -91,7 +91,7 @@ pub fn gamma_ui(a: f64, x: f64) -> f64 {
 ///
 /// # Panics
 ///
-/// if `a` or `x` are less than `0.0`
+/// if `a` or `x` are not in `(0, +inf)`
 pub fn gamma_li(a: f64, x: f64) -> f64 {
     gamma_lr(a, x) * gamma(a)
 }
@@ -103,25 +103,19 @@ pub fn gamma_li(a: f64, x: f64) -> f64 {
 ///
 /// # Remarks
 ///
-/// Returns `f64::NAN` if either argument is `f64::NAN` or `a` is
-/// is positive infinity
+/// Returns `f64::NAN` if either argument is `f64::NAN`
 ///
 /// # Panics
 ///
-/// If `a` is negative infinity or `x < 0`
+/// if `a` or `x` are not in `(0, +inf)`
 pub fn gamma_ur(a: f64, x: f64) -> f64 {
     if a.is_nan() || x.is_nan() {
         return f64::NAN;
     }
-    if a == f64::INFINITY {
-        return f64::NAN;
-    }
-    if x == f64::INFINITY {
-        return 0.0;
-    }
-    assert!(a > f64::NEG_INFINITY,
-            format!("{}", StatsError::ArgGt("a", f64::NEG_INFINITY)));
-    assert!(x >= 0.0, format!("{}", StatsError::ArgGte("x", 0.0)));
+    assert!(a > 0.0 && a < f64::INFINITY,
+            format!("{}", StatsError::ArgIntervalExcl("a", 0.0, f64::INFINITY)));
+    assert!(x > 0.0 && x < f64::INFINITY,
+            format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
 
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
@@ -188,14 +182,16 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
 ///
 /// # Panics
 ///
-/// if `a` or `x` are less than 0.0
+/// if `a` or `x` are not in `(0, +inf)`
 pub fn gamma_lr(a: f64, x: f64) -> f64 {
     if a.is_nan() || x.is_nan() {
         return f64::NAN;
     }
 
-    assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
-    assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
+    assert!(a > 0.0 && a < f64::INFINITY,
+            format!("{}", StatsError::ArgIntervalExcl("a", 0.0, f64::INFINITY)));
+    assert!(x > 0.0 && x < f64::INFINITY,
+            format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
 
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
