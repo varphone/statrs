@@ -445,6 +445,30 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_gamma_lr_a_lower_bound() {
+        super::gamma_lr(-1.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_lr_a_upper_bound() {
+        super::gamma_lr(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_lr_x_lower_bound() {
+        super::gamma_lr(1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_lr_x_upper_bound() {
+        super::gamma_lr(1.0, f64::INFINITY);
+    }
+
+    #[test]
     fn test_gamma_li() {
         assert!(super::gamma_li(f64::NAN, f64::NAN).is_nan());
         assert_almost_eq!(super::gamma_li(0.1, 1.0), 9.2839720283798852469443229940217320532607158711056334, 1e-14);
@@ -459,6 +483,30 @@ mod test {
         assert_almost_eq!(super::gamma_li(5.5, 1.0), 0.078729729026968321691794205337720556329618007004848672, 1e-16);
         assert_almost_eq!(super::gamma_li(5.5, 2.0), 1.5746265342113649473739798668921124454837064926448459, 1e-15);
         assert_almost_eq!(super::gamma_li(5.5, 8.0), 44.955595480196465884619737757794960132425035578313584, 1e-12);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_li_a_lower_bound() {
+        super::gamma_li(-1.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_li_a_upper_bound() {
+        super::gamma_li(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_li_x_lower_bound() {
+        super::gamma_li(1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_li_x_upper_bound() {
+        super::gamma_li(1.0, f64::INFINITY);
     }
 
     // TODO: precision testing could be more accurate, borrowed wholesale from Math.NET
@@ -496,6 +544,30 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_gamma_ur_a_lower_bound() {
+        super::gamma_ur(-1.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ur_a_upper_bound() {
+        super::gamma_ur(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ur_x_lower_bound() {
+        super::gamma_ur(1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ur_x_upper_bound() {
+        super::gamma_ur(1.0, f64::INFINITY);
+    }
+
+    #[test]
     fn test_gamma_ui() {
         assert!(super::gamma_ui(f64::NAN, f64::NAN).is_nan());
         assert_almost_eq!(super::gamma_ui(0.1, 1.0), 0.2295356702888460382790772147651768201739736396141314, 1e-14);
@@ -510,6 +582,30 @@ mod test {
         assert_almost_eq!(super::gamma_ui(5.5, 1.0), 52.264048055526551859457214287080473123160514369109, 1e-12);
         assert_almost_eq!(super::gamma_ui(5.5, 2.0), 50.768151250342155233775028625526081234006425883469, 1e-12);
         assert_almost_eq!(super::gamma_ui(5.5, 8.0), 7.3871823043570542965292707346232335470650967978006, 1e-13);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ui_a_lower_bound() {
+        super::gamma_ui(-1.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ui_a_upper_bound() {
+        super::gamma_ui(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ui_x_lower_bound() {
+        super::gamma_ui(1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ui_x_upper_bound() {
+        super::gamma_ui(1.0, f64::INFINITY);
     }
 
     // TODO: precision testing could be more accurate
