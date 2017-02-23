@@ -55,8 +55,8 @@ pub fn beta_inc(a: f64, b: f64, x: f64) -> f64 {
 ///
 /// if `a < 0.0`, `b < 0.0`, `x < 0.0`, or `x > 1.0`
 pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
-    assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
-    assert!(b >= 0.0, format!("{}", StatsError::ArgNotNegative("b")));
+    assert!(a > 0.0, format!("{}", StatsError::ArgMustBePositive("a")));
+    assert!(b > 0.0, format!("{}", StatsError::ArgMustBePositive("b")));
     assert!(x >= 0.0 && x <= 1.0,
             format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
 

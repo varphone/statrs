@@ -1,5 +1,6 @@
 v0.6.0
  - `gamma::gamma_ur`, `gamma::gamma_ui`, `gamma::gamma_lr`, and `gamma::gamma_li` now follow strict gamma function domain, panicking if `a` or `x` are not in `(0, +inf)`
+ - `beta::beta_reg` no longer allows `0.0` for `a` or `b` arguments
  - `InverseGamma` no longer accepts `f64::INFINITY` as valid arguments for `shape` or `rate` as the value is nonsense
 
 v0.5.1
