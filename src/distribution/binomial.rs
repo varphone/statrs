@@ -547,4 +547,16 @@ mod test {
         test_case(1.0, 10, 0.0, |x| x.cdf(1.0));
         test_case(1.0, 10, 1.0, |x| x.cdf(10.0));
     }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_lower_bound() {
+        get_value(0.5, 3, |x| x.cdf(-1.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_upper_bound() {
+        get_value(0.5, 3, |x| x.cdf(5.0));
+    }
 }

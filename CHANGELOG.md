@@ -3,6 +3,8 @@ v0.6.0
  - `beta::beta_reg` no longer allows `0.0` for `a` or `b` arguments
  - `InverseGamma` distribution no longer accepts `f64::INFINITY` as valid arguments for `shape` or `rate` as the value is nonsense
  - `Binomial::cdf` no longer accepts arguments outside the domain of `[0, n]`
+ - `Bernoulli::cdf` no longer accepts arguments outside the domain of `[0, 1]`
+ - `DiscreteUniform::cdf` no longer accepts arguments outside the domain of `[min, max]`
 
 v0.5.1
  - Fixed critical bug in `normal::sample_unchecked` where it was returning `NaN`
