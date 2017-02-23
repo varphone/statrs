@@ -6,6 +6,7 @@ v0.6.0
  - `Bernoulli::cdf` no longer accepts arguments outside the domain of `[0, 1]`
  - `DiscreteUniform::cdf` no longer accepts arguments outside the domain of `[min, max]`
  - `Uniform::cdf` no longer accepts arguments outside the domain of `[min, max]`
+ - `Triangular::cdf` no longer accepts arguments outside the domain of `[min, max]`
 
 v0.5.1
  - Fixed critical bug in `normal::sample_unchecked` where it was returning `NaN`
