@@ -135,9 +135,9 @@ impl Univariate<i64, f64> for Binomial {
     /// Calulcates the cumulative distribution function for the
     /// binomial distribution at `x`
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `0,0` if `x < 0.0` and `1.0` if `x >= n`
+    /// If `x < 0.0` or `x > n`
     ///
     /// # Formula
     ///

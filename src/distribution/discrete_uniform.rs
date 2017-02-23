@@ -100,9 +100,9 @@ impl Univariate<i64, f64> for DiscreteUniform {
     /// Calculates the cumulative distribution function for the
     /// discrete uniform distribution at `x`
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `0.0` if `x < min` and `1.0` if `x >= max`
+    /// If `x < min` or `x > max`
     ///
     /// # Formula
     ///

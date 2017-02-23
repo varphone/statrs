@@ -100,9 +100,9 @@ impl Univariate<f64, f64> for Uniform {
     /// Calculates the cumulative distribution function for the uniform distribution
     /// at `x`
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `0.0` if `x < min` and `1.0` if `x >= max`
+    /// If `x < min` or `x > max`
     ///
     /// # Formula
     ///
@@ -110,13 +110,15 @@ impl Univariate<f64, f64> for Uniform {
     /// (x - min) / (max - min)
     /// ```
     fn cdf(&self, x: f64) -> f64 {
-        if x <= self.min {
-            return 0.0;
+        assert!(x >= self.min && x <= self.max,
+                format!("{}", StatsError::ArgIntervalIncl("x", self.min, self.max)));
+        if x == self.min {
+            0.0
+        } else if x == self.max {
+            1.0
+        } else {
+            (x - self.min) / (self.max - self.min)
         }
-        if x >= self.max {
-            return 1.0;
-        }
-        (x - self.min) / (self.max - self.min)
     }
 }
 
@@ -292,12 +294,18 @@ mod test {
         assert!(n.is_err());
     }
 
+    fn get_value<F>(min: f64, max: f64, eval: F) -> f64
+        where F: Fn(Uniform) -> f64
+    {
+        let n = try_create(min, max);
+        eval(n)
+    }
+
     fn test_case<F>(min: f64, max: f64, expected: f64, eval: F)
         where F: Fn(Uniform) -> f64
     {
 
-        let n = try_create(min, max);
-        let x = eval(n);
+        let x = get_value(min, max, eval);
         assert_eq!(expected, x);
     }
 
@@ -305,8 +313,7 @@ mod test {
         where F: Fn(Uniform) -> f64
     {
 
-        let n = try_create(min, max);
-        let x = eval(n);
+        let x = get_value(min, max, eval);
         assert_almost_eq!(expected, x, acc);
     }
 
@@ -436,25 +443,26 @@ mod test {
 
     #[test]
     fn test_cdf() {
-        test_case(0.0, 0.0, 0.0, |x| x.cdf(-5.0));
         test_case(0.0, 0.0, 0.0, |x| x.cdf(0.0));
-        test_case(0.0, 0.0, 1.0, |x| x.cdf(5.0));
-        test_case(0.0, 0.1, 0.0, |x| x.cdf(-5.0));
         test_case(0.0, 0.1, 0.5, |x| x.cdf(0.05));
-        test_case(0.0, 0.1, 1.0, |x| x.cdf(5.0));
-        test_case(0.0, 1.0, 0.0, |x| x.cdf(-5.0));
         test_case(0.0, 1.0, 0.5, |x| x.cdf(0.5));
-        test_case(0.0, 0.1, 1.0, |x| x.cdf(5.0));
-        test_case(0.0, 10.0, 0.0, |x| x.cdf(-5.0));
         test_case(0.0, 10.0, 0.1, |x| x.cdf(1.0));
         test_case(0.0, 10.0, 0.5, |x| x.cdf(5.0));
-        test_case(0.0, 10.0, 1.0, |x| x.cdf(11.0));
-        test_case(-5.0, 100.0, 0.0, |x| x.cdf(-10.0));
         test_case(-5.0, 100.0, 0.0, |x| x.cdf(-5.0));
         test_case(-5.0, 100.0, 0.04761904761904761904762, |x| x.cdf(0.0));
-        test_case(-5.0, 100.0, 1.0, |x| x.cdf(101.0));
-        test_case(0.0, f64::INFINITY, 0.0, |x| x.cdf(-5.0));
         test_case(0.0, f64::INFINITY, 0.0, |x| x.cdf(10.0));
         test_case(0.0, f64::INFINITY, 1.0, |x| x.cdf(f64::INFINITY));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_lower_bound() {
+        get_value(0.0, 3.0, |x| x.cdf(-1.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_upper_bound() {
+        get_value(0.0, 3.0, |x| x.cdf(5.0));
     }
 }
