@@ -147,9 +147,9 @@ impl Univariate<i64, f64> for Binomial {
     ///
     /// where `I_(x)(a, b)` is the regularized incomplete beta function
     fn cdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            0.0
-        } else if x >= self.n as f64 {
+        assert!(x >= 0.0 && x <= self.n as f64,
+                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, self.n as f64)));
+        if x == self.n as f64 {
             1.0
         } else {
             let k = x.floor();
