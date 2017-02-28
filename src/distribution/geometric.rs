@@ -122,6 +122,7 @@ impl Univariate<i64, f64> for Geometric {
     /// 1 - (1 - p) ^ x
     /// ```
     fn cdf(&self, x: f64) -> f64 {
+        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
         1.0 - (1.0 - self.p).powf(x)
     }
 }
@@ -425,6 +426,12 @@ mod test {
         test_case(1.0, 1.0, |x| x.pmf(1));
         test_case(1.0, 0.0, |x| x.pmf(2));
     }
+    
+    #[test]
+    #[should_panic]
+    fn test_pmf_lower_bound() {
+        get_value(0.3, |x| x.pmf(0));
+    }
 
     #[test]
     fn test_ln_pmf() {
@@ -435,9 +442,20 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_ln_pmf_lower_bound() {
+        get_value(0.3, |x| x.ln_pmf(0));
+    }
+
+    #[test]
     fn test_cdf() {
-        test_case(0.3, 0.0, |x| x.cdf(0.0));
         test_case(1.0, 1.0, |x| x.cdf(1.0));
         test_case(1.0, 1.0, |x| x.cdf(2.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_lower_bound() {
+        get_value(0.3, |x| x.cdf(0.0));
     }
 }
