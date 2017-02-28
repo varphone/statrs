@@ -138,9 +138,9 @@ impl Univariate<f64, f64> for FisherSnedecor {
     /// Calculates the cumulative distribution function for the fisher-snedecor distribution
     /// at `x`
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `NaN` if `freedom_1`, `freedom_2` is `INF`, or `x` is `+INF` or `-INF`
+    /// If `x` is not in `[0, +inf)`
     ///
     /// # Formula
     ///
@@ -152,13 +152,12 @@ impl Univariate<f64, f64> for FisherSnedecor {
     /// the second degree of freedom, and `I` is the regularized incomplete
     /// beta function
     fn cdf(&self, x: f64) -> f64 {
-        if self.freedom_1 == f64::INFINITY || self.freedom_2 == f64::INFINITY || x.is_infinite() {
-            f64::NAN
-        } else {
-            beta::beta_reg(self.freedom_1 / 2.0,
-                           self.freedom_2 / 2.0,
-                           self.freedom_1 * x / (self.freedom_1 * x + self.freedom_2))
-        }
+        assert!(x >= 0.0 && x < f64::INFINITY,
+                format!("{}",
+                        StatsError::ArgIntervalExclMax("x", 0.0, f64::INFINITY)));
+        beta::beta_reg(self.freedom_1 / 2.0,
+                       self.freedom_2 / 2.0,
+                       self.freedom_1 * x / (self.freedom_1 * x + self.freedom_2))
     }
 }
 
@@ -558,5 +557,17 @@ mod test {
         test_almost(0.1, 1.0, 0.83265648499055728859, 1e-15, |x| x.cdf(1.0));
         test_almost(1.0, 1.0, 0.5, 1e-15, |x| x.cdf(1.0));
         test_almost(10.0, 1.0, 0.340893132302059872675, 1e-15, |x| x.cdf(1.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_lower_bound() {
+        get_value(0.1, 0.1, |x| x.cdf(-1.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_upper_bound() {
+        get_value(0.1, 0.1, |x| x.cdf(f64::INFINITY));
     }
 }

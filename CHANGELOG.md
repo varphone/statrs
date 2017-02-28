@@ -8,6 +8,7 @@ v0.6.0
  - `Uniform::cdf` no longer accepts arguments outside the domain of `[min, max]`
  - `Triangular::cdf` no longer accepts arguments outside the domain of `[min, max]`
  - `FisherSnedecor` no longer accepts `f64::INFINITY` as a valid argument for `freedom_1` or `freedom_2`
+ - `FisherSnedecor::cdf` no longer accepts arguments outside the domain of `[0, +inf)`
 
 v0.5.1
  - Fixed critical bug in `normal::sample_unchecked` where it was returning `NaN`
