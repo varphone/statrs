@@ -170,7 +170,7 @@ impl Univariate<u64, f64> for Hypergeometric {
     ///
     /// # Panics
     ///
-    /// If `x < n + K - N` or `x >= min(K, n)`
+    /// If `x < max(0, n + K - N)` or `x >= min(K, n)`
     ///
     /// # Formula
     ///
@@ -182,7 +182,7 @@ impl Univariate<u64, f64> for Hypergeometric {
     /// and `p_F_q` is the [generalized hypergeometric function](https://en.wikipedia.org/wiki/Generalized_hypergeometric_function)
     fn cdf(&self, x: f64) -> f64 {
         assert!(x >= self.min() as f64,
-                format!("{}", StatsError::ArgGteArg("x", "n + K - N")));
+                format!("{}", StatsError::ArgGteArg("x", "max(0, n + K - N)")));
         assert!(x < self.max() as f64,
                 format!("{}", StatsError::ArgLtArg("x", "min(K, n)")));
         let k = x.floor() as u64;

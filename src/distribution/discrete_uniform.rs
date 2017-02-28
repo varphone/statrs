@@ -100,9 +100,9 @@ impl Univariate<i64, f64> for DiscreteUniform {
     /// Calculates the cumulative distribution function for the
     /// discrete uniform distribution at `x`
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `0.0` if `x < min` and `1.0` if `x >= max`
+    /// If `x < min` or `x > max`
     ///
     /// # Formula
     ///
@@ -110,13 +110,9 @@ impl Univariate<i64, f64> for DiscreteUniform {
     /// (floor(x) - min + 1) / (max - min + 1)
     /// ```
     fn cdf(&self, x: f64) -> f64 {
-        if x < self.min as f64 {
-            return 0.0;
-        }
-        if x >= self.max as f64 {
-            return 1.0;
-        }
-
+        assert!(x >= self.min as f64 && x <= self.max as f64,
+                format!("{}",
+                        StatsError::ArgIntervalIncl("x", self.min as f64, self.max as f64)));
         let lower = self.min as f64;
         let upper = self.max as f64;
         let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
@@ -311,12 +307,19 @@ mod test {
         assert!(n.is_err());
     }
 
-    fn test_case<T, F>(min: i64, max: i64, expected: T, eval: F)
+    fn get_value<T, F>(min: i64, max: i64, eval: F) -> T
         where T: PartialEq + Debug,
               F: Fn(DiscreteUniform) -> T
     {
         let n = try_create(min, max);
-        let x = eval(n);
+        eval(n)
+    }
+
+    fn test_case<T, F>(min: i64, max: i64, expected: T, eval: F)
+        where T: PartialEq + Debug,
+              F: Fn(DiscreteUniform) -> T
+    {
+        let x = get_value(min, max, eval);
         assert_eq!(expected, x);
     }
 
@@ -413,8 +416,18 @@ mod test {
         test_case(-10, 10, 0.2857142857142857142857, |x| x.cdf(-5.0));
         test_case(-10, 10, 0.5714285714285714285714, |x| x.cdf(1.0));
         test_case(-10, 10, 1.0, |x| x.cdf(10.0));
-        test_case(-10, -10, 1.0, |x| x.cdf(0.0));
         test_case(-10, -10, 1.0, |x| x.cdf(-10.0));
-        test_case(-10, -10, 0.0, |x| x.cdf(-11.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_lower_bound() {
+        get_value(0, 3, |x| x.cdf(-1.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_upper_bound() {
+        get_value(0, 3, |x| x.cdf(5.0));
     }
 }

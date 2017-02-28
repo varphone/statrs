@@ -32,7 +32,7 @@ impl InverseGamma {
     /// # Errors
     ///
     /// Returns an error if `shape` or `rate` are `NaN`.
-    /// Also returns an error if `shape <= 0.0` or `rate <= 0.0`
+    /// Also returns an error if `shape` or `rate` are not in `(0, +inf)`
     ///
     /// # Examples
     ///
@@ -50,6 +50,9 @@ impl InverseGamma {
         match (shape, rate, is_nan) {
             (_, _, true) => Err(StatsError::BadParams),
             (_, _, false) if shape <= 0.0 || rate <= 0.0 => Err(StatsError::BadParams),
+            (_, _, false) if shape == f64::INFINITY || rate == f64::INFINITY => {
+                Err(StatsError::BadParams)
+            }
             (_, _, false) => {
                 Ok(InverseGamma {
                     shape: shape,
@@ -133,6 +136,10 @@ impl Univariate<f64, f64> for InverseGamma {
     /// Calculates the cumulative distribution function for the inverse gamma
     /// distribution at `x`
     ///
+    /// # Panics
+    ///
+    /// If `x` is not in `(0, +inf)`
+    ///
     /// # Formula
     ///
     /// ```ignore
@@ -143,6 +150,8 @@ impl Univariate<f64, f64> for InverseGamma {
     /// the denominator is the gamma function, `α` is the shape,
     /// and `β` is the rate
     fn cdf(&self, x: f64) -> f64 {
+        assert!(x > 0.0 && x < f64::INFINITY,
+                format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
         gamma::gamma_ur(self.shape, self.rate / x)
     }
 }
@@ -295,12 +304,7 @@ impl Continuous<f64, f64> for InverseGamma {
     ///
     /// # Panics
     ///
-    /// If `x <= 0.0`
-    ///
-    /// # Remarks
-    ///
-    /// Returns `NAN` if `rate` is `INF`, returns `0.0`
-    /// if `shape` is `INF`, returns `NAN` if both are `INF`
+    /// If `x` not in `(0, +inf)`
     ///
     /// # Formula
     ///
@@ -310,7 +314,8 @@ impl Continuous<f64, f64> for InverseGamma {
     ///
     /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
+        assert!(x > 0.0 && x < f64::INFINITY,
+                format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
         if self.shape == 1.0 {
             self.rate / (x * x) * (-self.rate / x).exp()
         } else {
@@ -324,12 +329,7 @@ impl Continuous<f64, f64> for InverseGamma {
     ///
     /// # Panics
     ///
-    /// If `x <= 0.0`
-    ///
-    /// # Remarks
-    ///
-    /// Returns `NAN` if `rate` is `INF`, returns `-INF`
-    /// if `shape` is `INF`, returns `NAN` if both are `INF`
+    /// If `x` is not in `(0, +inf)`
     ///
     /// # Formula
     ///
@@ -388,13 +388,6 @@ mod test {
         assert_almost_eq!(expected, x, acc);
     }
 
-    fn test_is_nan<F>(shape: f64, rate: f64, eval: F)
-        where F: Fn(InverseGamma) -> f64
-    {
-        let x = get_value(shape, rate, eval);
-        assert!(x.is_nan());
-    }
-
     #[test]
     fn test_create() {
         create_case(0.1, 0.1);
@@ -413,13 +406,15 @@ mod test {
         bad_create_case(1.0, -100.0);
         bad_create_case(1.0, f64::NEG_INFINITY);
         bad_create_case(1.0, f64::NAN);
+        bad_create_case(f64::INFINITY, 1.0);
+        bad_create_case(1.0, f64::INFINITY);
+        bad_create_case(f64::INFINITY, f64::INFINITY);
     }
 
     #[test]
     fn test_mean() {
         test_almost(1.1, 0.1, 1.0, 1e-14, |x| x.mean());
         test_almost(1.1, 1.0, 10.0, 1e-14, |x| x.mean());
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.mean());
     }
 
     #[test]
@@ -432,7 +427,6 @@ mod test {
     fn test_variance() {
         test_almost(2.1, 0.1, 0.08264462809917355371901, 1e-15, |x| x.variance());
         test_almost(2.1, 1.0, 8.264462809917355371901, 1e-13, |x| x.variance());
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.variance());
     }
 
     #[test]
@@ -445,7 +439,6 @@ mod test {
     fn test_std_dev() {
         test_almost(2.1, 0.1, 0.2874797872880344847272, 1e-15, |x| x.std_dev());
         test_almost(2.1, 1.0, 2.874797872880344847272, 1e-14, |x| x.std_dev());
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.std_dev());
     }
 
     #[test]
@@ -458,7 +451,6 @@ mod test {
     fn test_entropy() {
         test_almost(0.1, 0.1, 11.51625799319234475054, 1e-14, |x| x.entropy());
         test_almost(1.0, 1.0, 2.154431329803065721213, 1e-14, |x| x.entropy());
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.entropy());
     }
 
     #[test]
@@ -466,7 +458,6 @@ mod test {
         test_almost(3.1, 0.1, 41.95235392680606187966, 1e-13, |x| x.skewness());
         test_almost(3.1, 1.0, 41.95235392680606187966, 1e-13, |x| x.skewness());
         test_case(5.0, 0.1, 3.464101615137754587055, |x| x.skewness());
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.skewness());
     }
 
     #[test]
@@ -479,7 +470,6 @@ mod test {
     fn test_mode() {
         test_case(0.1, 0.1, 0.09090909090909090909091, |x| x.mode());
         test_case(1.0, 1.0, 0.5, |x| x.mode());
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.mode());
     }
 
     #[test]
@@ -492,39 +482,24 @@ mod test {
     fn test_pdf() {
         test_almost(0.1, 0.1, 0.0628591853882328004197, 1e-15, |x| x.pdf(1.2));
         test_almost(0.1, 1.0, 0.0297426109178248997426, 1e-15, |x| x.pdf(2.0));
-        test_is_nan(0.1 ,f64::INFINITY, |x| x.pdf(1.1));
         test_case(1.0, 0.1, 0.04157808822362745501024, |x| x.pdf(1.5));
         test_case(1.0, 1.0, 0.3018043114632487660842, |x| x.pdf(1.2));
-        test_is_nan(1.0, f64::INFINITY, |x| x.pdf(1.5));
-        test_case(f64::INFINITY, 0.1, 0.0, |x| x.pdf(5.0));
-        test_case(f64::INFINITY, 1.0, 0.0, |x| x.pdf(2.5));
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.pdf(1.0));
     }
 
     #[test]
     fn test_ln_pdf() {
         test_almost(0.1, 0.1, 0.0628591853882328004197f64.ln(), 1e-15, |x| x.ln_pdf(1.2));
         test_almost(0.1, 1.0, 0.0297426109178248997426f64.ln(), 1e-15, |x| x.ln_pdf(2.0));
-        test_is_nan(0.1 ,f64::INFINITY, |x| x.ln_pdf(1.1));
         test_case(1.0, 0.1, 0.04157808822362745501024f64.ln(), |x| x.ln_pdf(1.5));
         test_case(1.0, 1.0, 0.3018043114632487660842f64.ln(), |x| x.ln_pdf(1.2));
-        test_is_nan(1.0, f64::INFINITY, |x| x.ln_pdf(1.5));
-        test_case(f64::INFINITY, 0.1, f64::NEG_INFINITY, |x| x.ln_pdf(5.0));
-        test_case(f64::INFINITY, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(2.5));
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.ln_pdf(1.0));
     }
 
     #[test]
     fn test_cdf() {
         test_almost(0.1, 0.1, 0.1862151961946054271994, 1e-14, |x| x.cdf(1.2));
         test_almost(0.1, 1.0, 0.05859755410986647796141, 1e-14, |x| x.cdf(2.0));
-        test_case(0.1, f64::INFINITY, 0.0, |x| x.cdf(1.1));
         test_case(1.0, 0.1, 0.9355069850316177377304, |x| x.cdf(1.5));
         test_almost(1.0, 1.0, 0.4345982085070782231613, 1e-14, |x| x.cdf(1.2));
-        test_case(1.0, f64::INFINITY, 0.0, |x| x.cdf(1.5));
-        test_is_nan(f64::INFINITY, 0.1, |x| x.cdf(5.0));
-        test_is_nan(f64::INFINITY, 1.0, |x| x.cdf(2.5));
-        test_is_nan(f64::INFINITY, f64::INFINITY, |x| x.cdf(1.0));
     }
 
     #[test]

@@ -110,10 +110,14 @@ impl Univariate<f64, f64> for Triangular {
     /// Calculates the cumulative distribution function for the triangular distribution
     /// at `x`
     ///
+    /// # Panics
+    ///
+    /// If `x < min` or `x > max`
+    ///
     /// # Formula
     ///
     /// ```ignore
-    /// if x <= min {
+    /// if x == min {
     ///     0
     /// } if min < x <= mode {
     ///     (x - min)^2 / ((max - min) * (mode - min))
@@ -124,10 +128,13 @@ impl Univariate<f64, f64> for Triangular {
     /// }
     /// ```
     fn cdf(&self, x: f64) -> f64 {
+        assert!(x >= self.min as f64 && x <= self.max as f64,
+                format!("{}",
+                        StatsError::ArgIntervalIncl("x", self.min as f64, self.max as f64)));
         let a = self.min;
         let b = self.max;
         let c = self.mode;
-        if x <= a {
+        if x == a {
             0.0
         } else if a < x && x <= c {
             (x - a) * (x - a) / ((b - a) * (c - a))
@@ -335,6 +342,7 @@ fn sample_unchecked<R: Rng>(r: &mut R, min: f64, max: f64, mode: f64) -> f64 {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
+    use std::fmt::Debug;
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Triangular};
@@ -357,21 +365,25 @@ mod test {
         assert!(n.is_err());
     }
 
+    fn get_value<T, F>(min: f64, max: f64, mode: f64, eval: F) -> T
+        where T: PartialEq + Debug,
+              F: Fn(Triangular) -> T
+    {
+        let n = try_create(min, max, mode);
+        eval(n)
+    }
+
     fn test_case<F>(min: f64, max: f64, mode: f64, expected: f64, eval: F)
         where F: Fn(Triangular) -> f64
     {
-
-        let n = try_create(min, max, mode);
-        let x = eval(n);
+        let x = get_value(min, max, mode, eval);
         assert_eq!(expected, x);
     }
 
     fn test_almost<F>(min: f64, max: f64, mode: f64, expected: f64, acc: f64, eval: F)
         where F: Fn(Triangular) -> f64
     {
-
-        let n = try_create(min, max, mode);
-        let x = eval(n);
+        let x = get_value(min, max, mode, eval);
         assert_almost_eq!(expected, x, acc);
     }
 
@@ -501,20 +513,26 @@ mod test {
 
     #[test]
     fn test_cdf() {
-        test_case(0.0, 1.0, 0.5, 0.0, |x| x.cdf(-1.0));
-        test_case(0.0, 1.0, 0.5, 1.0, |x| x.cdf(1.1));
         test_case(0.0, 1.0, 0.5, 0.125, |x| x.cdf(0.25));
         test_case(0.0, 1.0, 0.5, 0.5, |x| x.cdf(0.5));
         test_case(0.0, 1.0, 0.5, 0.875, |x| x.cdf(0.75));
-        test_case(-5.0, 8.0, -3.5, 0.0, |x| x.cdf(-5.1));
-        test_case(-5.0, 8.0, -3.5, 1.0, |x| x.cdf(8.1));
         test_case(-5.0, 8.0, -3.5, 0.05128205128205128205128, |x| x.cdf(-4.0));
         test_case(-5.0, 8.0, -3.5, 0.1153846153846153846154, |x| x.cdf(-3.5));
         test_case(-5.0, 8.0, -3.5, 0.892976588628762541806, |x| x.cdf(4.0));
-        test_case(-5.0, -3.0, -4.0, 0.0, |x| x.cdf(-5.1));
-        test_case(-5.0, -3.0, -4.0, 1.0, |x| x.cdf(-2.9));
         test_case(-5.0, -3.0, -4.0, 0.125, |x| x.cdf(-4.5));
         test_case(-5.0, -3.0, -4.0, 0.5, |x| x.cdf(-4.0));
         test_case(-5.0, -3.0, -4.0, 0.875, |x| x.cdf(-3.5));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_lower_bound() {
+        get_value(0.0, 3.0, 1.5, |x| x.cdf(-1.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_upper_bound() {
+        get_value(0.0, 3.0, 1.5, |x| x.cdf(5.0));
     }
 }

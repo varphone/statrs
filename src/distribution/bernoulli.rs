@@ -127,9 +127,9 @@ impl Univariate<i64, f64> for Bernoulli {
     /// Calculates the cumulative distribution
     /// function for the bernoulli distribution at `x`.
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `0.0` if `x < 0.0` and `1.0` if `x >= 1.0`
+    /// If `x < 0.0` or `x > 1.0`
     ///
     /// # Formula
     ///

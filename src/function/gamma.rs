@@ -78,7 +78,7 @@ pub fn gamma(x: f64) -> f64 {
 ///
 /// # Panics
 ///
-/// If `a` is negative infinity or `x < 0.0`
+/// if `a` or `x` are not in `(0, +inf)`
 pub fn gamma_ui(a: f64, x: f64) -> f64 {
     gamma_ur(a, x) * gamma(a)
 }
@@ -91,7 +91,7 @@ pub fn gamma_ui(a: f64, x: f64) -> f64 {
 ///
 /// # Panics
 ///
-/// if `a` or `x` are less than `0.0`
+/// if `a` or `x` are not in `(0, +inf)`
 pub fn gamma_li(a: f64, x: f64) -> f64 {
     gamma_lr(a, x) * gamma(a)
 }
@@ -103,25 +103,19 @@ pub fn gamma_li(a: f64, x: f64) -> f64 {
 ///
 /// # Remarks
 ///
-/// Returns `f64::NAN` if either argument is `f64::NAN` or `a` is
-/// is positive infinity
+/// Returns `f64::NAN` if either argument is `f64::NAN`
 ///
 /// # Panics
 ///
-/// If `a` is negative infinity or `x < 0`
+/// if `a` or `x` are not in `(0, +inf)`
 pub fn gamma_ur(a: f64, x: f64) -> f64 {
     if a.is_nan() || x.is_nan() {
         return f64::NAN;
     }
-    if a == f64::INFINITY {
-        return f64::NAN;
-    }
-    if x == f64::INFINITY {
-        return 0.0;
-    }
-    assert!(a > f64::NEG_INFINITY,
-            format!("{}", StatsError::ArgGt("a", f64::NEG_INFINITY)));
-    assert!(x >= 0.0, format!("{}", StatsError::ArgGte("x", 0.0)));
+    assert!(a > 0.0 && a < f64::INFINITY,
+            format!("{}", StatsError::ArgIntervalExcl("a", 0.0, f64::INFINITY)));
+    assert!(x > 0.0 && x < f64::INFINITY,
+            format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
 
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
@@ -188,14 +182,16 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
 ///
 /// # Panics
 ///
-/// if `a` or `x` are less than 0.0
+/// if `a` or `x` are not in `(0, +inf)`
 pub fn gamma_lr(a: f64, x: f64) -> f64 {
     if a.is_nan() || x.is_nan() {
         return f64::NAN;
     }
 
-    assert!(a >= 0.0, format!("{}", StatsError::ArgNotNegative("a")));
-    assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
+    assert!(a > 0.0 && a < f64::INFINITY,
+            format!("{}", StatsError::ArgIntervalExcl("a", 0.0, f64::INFINITY)));
+    assert!(x > 0.0 && x < f64::INFINITY,
+            format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
 
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
@@ -449,6 +445,30 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_gamma_lr_a_lower_bound() {
+        super::gamma_lr(-1.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_lr_a_upper_bound() {
+        super::gamma_lr(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_lr_x_lower_bound() {
+        super::gamma_lr(1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_lr_x_upper_bound() {
+        super::gamma_lr(1.0, f64::INFINITY);
+    }
+
+    #[test]
     fn test_gamma_li() {
         assert!(super::gamma_li(f64::NAN, f64::NAN).is_nan());
         assert_almost_eq!(super::gamma_li(0.1, 1.0), 9.2839720283798852469443229940217320532607158711056334, 1e-14);
@@ -463,6 +483,30 @@ mod test {
         assert_almost_eq!(super::gamma_li(5.5, 1.0), 0.078729729026968321691794205337720556329618007004848672, 1e-16);
         assert_almost_eq!(super::gamma_li(5.5, 2.0), 1.5746265342113649473739798668921124454837064926448459, 1e-15);
         assert_almost_eq!(super::gamma_li(5.5, 8.0), 44.955595480196465884619737757794960132425035578313584, 1e-12);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_li_a_lower_bound() {
+        super::gamma_li(-1.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_li_a_upper_bound() {
+        super::gamma_li(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_li_x_lower_bound() {
+        super::gamma_li(1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_li_x_upper_bound() {
+        super::gamma_li(1.0, f64::INFINITY);
     }
 
     // TODO: precision testing could be more accurate, borrowed wholesale from Math.NET
@@ -500,6 +544,30 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_gamma_ur_a_lower_bound() {
+        super::gamma_ur(-1.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ur_a_upper_bound() {
+        super::gamma_ur(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ur_x_lower_bound() {
+        super::gamma_ur(1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ur_x_upper_bound() {
+        super::gamma_ur(1.0, f64::INFINITY);
+    }
+
+    #[test]
     fn test_gamma_ui() {
         assert!(super::gamma_ui(f64::NAN, f64::NAN).is_nan());
         assert_almost_eq!(super::gamma_ui(0.1, 1.0), 0.2295356702888460382790772147651768201739736396141314, 1e-14);
@@ -514,6 +582,30 @@ mod test {
         assert_almost_eq!(super::gamma_ui(5.5, 1.0), 52.264048055526551859457214287080473123160514369109, 1e-12);
         assert_almost_eq!(super::gamma_ui(5.5, 2.0), 50.768151250342155233775028625526081234006425883469, 1e-12);
         assert_almost_eq!(super::gamma_ui(5.5, 8.0), 7.3871823043570542965292707346232335470650967978006, 1e-13);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ui_a_lower_bound() {
+        super::gamma_ui(-1.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ui_a_upper_bound() {
+        super::gamma_ui(f64::INFINITY, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ui_x_lower_bound() {
+        super::gamma_ui(1.0, -1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_gamma_ui_x_upper_bound() {
+        super::gamma_ui(1.0, f64::INFINITY);
     }
 
     // TODO: precision testing could be more accurate

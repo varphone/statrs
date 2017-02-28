@@ -135,9 +135,9 @@ impl Univariate<i64, f64> for Binomial {
     /// Calulcates the cumulative distribution function for the
     /// binomial distribution at `x`
     ///
-    /// # Remarks
+    /// # Panics
     ///
-    /// Returns `0,0` if `x < 0.0` and `1.0` if `x >= n`
+    /// If `x < 0.0` or `x > n`
     ///
     /// # Formula
     ///
@@ -147,9 +147,9 @@ impl Univariate<i64, f64> for Binomial {
     ///
     /// where `I_(x)(a, b)` is the regularized incomplete beta function
     fn cdf(&self, x: f64) -> f64 {
-        if x < 0.0 {
-            0.0
-        } else if x >= self.n as f64 {
+        assert!(x >= 0.0 && x <= self.n as f64,
+                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, self.n as f64)));
+        if x == self.n as f64 {
             1.0
         } else {
             let k = x.floor();
@@ -546,5 +546,17 @@ mod test {
         test_case(1.0, 10, 0.0, |x| x.cdf(0.0));
         test_case(1.0, 10, 0.0, |x| x.cdf(1.0));
         test_case(1.0, 10, 1.0, |x| x.cdf(10.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_lower_bound() {
+        get_value(0.5, 3, |x| x.cdf(-1.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cdf_upper_bound() {
+        get_value(0.5, 3, |x| x.cdf(5.0));
     }
 }

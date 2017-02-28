@@ -1,3 +1,16 @@
+v0.6.0
+ - `gamma::gamma_ur`, `gamma::gamma_ui`, `gamma::gamma_lr`, and `gamma::gamma_li` now follow strict gamma function domain, panicking if `a` or `x` are not in `(0, +inf)`
+ - `beta::beta_reg` no longer allows `0.0` for `a` or `b` arguments
+ - `InverseGamma` distribution no longer accepts `f64::INFINITY` as valid arguments for `shape` or `rate` as the value is nonsense
+ - `Binomial::cdf` no longer accepts arguments outside the domain of `[0, n]`
+ - `Bernoulli::cdf` no longer accepts arguments outside the domain of `[0, 1]`
+ - `DiscreteUniform::cdf` no longer accepts arguments outside the domain of `[min, max]`
+ - `Uniform::cdf` no longer accepts arguments outside the domain of `[min, max]`
+ - `Triangular::cdf` no longer accepts arguments outside the domain of `[min, max]`
+ - `FisherSnedecor` no longer accepts `f64::INFINITY` as a valid argument for `freedom_1` or `freedom_2`
+ - `FisherSnedecor::cdf` no longer accepts arguments outside the domain of `[0, +inf)`
+ - `Geometric::cdf` no longer accepts non-positive arguments
+
 v0.5.1
  - Fixed critical bug in `normal::sample_unchecked` where it was returning `NaN`
 
