@@ -2,7 +2,7 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
+use distribution::{Univariate, Continuous, Distribution, ziggurat};
 use {Result, StatsError};
 
 /// Implements the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
@@ -103,11 +103,7 @@ impl Distribution<f64> for Exponential {
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        let mut x = r.next_f64();
-        while x == 0.0 {
-            x = r.next_f64();
-        }
-        -x.ln() / self.rate
+        ziggurat::sample_exp_1(r) / self.rate
     }
 }
 

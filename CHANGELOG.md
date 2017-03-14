@@ -10,6 +10,9 @@ v0.6.0
  - `FisherSnedecor` no longer accepts `f64::INFINITY` as a valid argument for `freedom_1` or `freedom_2`
  - `FisherSnedecor::cdf` no longer accepts arguments outside the domain of `[0, +inf)`
  - `Geometric::cdf` no longer accepts non-positive arguments
+ - `Normal` now uses the Ziggurat method to generate random samples. This also affects all distributions depending on `Normal` for sampling
+    including `Chi`, `LogNormal`, `Gamma`, and `StudentsT`
+ - `Exponential` now uses the Ziggurat methd to generate random samples.
 
 v0.5.1
  - Fixed critical bug in `normal::sample_unchecked` where it was returning `NaN`

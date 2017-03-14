@@ -3,7 +3,7 @@ use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::erf;
 use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
+use distribution::{Univariate, Continuous, Distribution, ziggurat};
 use {Result, StatsError, consts};
 
 /// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
@@ -288,50 +288,9 @@ pub fn ln_pdf_unchecked(x: f64, mean: f64, std_dev: f64) -> f64 {
     (-0.5 * d * d) - consts::LN_SQRT_2PI - std_dev.ln()
 }
 
-/// `sample_unchecked` draws a sample from a normal distribution using
-/// the box-muller algorithm
+/// `sample_unchecked` draws a sample from a normal distribution
 pub fn sample_unchecked<R: Rng>(r: &mut R, mean: f64, std_dev: f64) -> f64 {
-    let mut results = polar_transform(r.next_f64(), r.next_f64());
-    while !results.valid {
-        results = polar_transform(r.next_f64(), r.next_f64());
-    }
-    mean + std_dev * results.value
-}
-
-struct PolarTransformResults {
-    value: f64,
-    valid: bool,
-}
-
-fn polar_transform(a: f64, b: f64) -> PolarTransformResults {
-    let v1 = 2.0 * a - 1.0;
-    let v2 = 2.0 * b - 1.0;
-    let r = v1 * v1 + v2 * v2;
-    if r >= 1.0 || r == 0.0 {
-        PolarTransformResults {
-            value: 0.0,
-            valid: false,
-        }
-    } else {
-        let fac = (-2.0 * r.ln() / r).sqrt();
-        PolarTransformResults {
-            value: v1 * fac,
-            valid: true,
-        }
-    }
-}
-
-#[test]
-fn test_polar_transform() {
-    let mut a = 0.0;
-    let mut b = 0.0;
-    while a < 2.0 {
-        while b < 2.0 {
-            assert!(!polar_transform(a, b).value.is_nan());
-            b += 0.001;
-        }
-        a += 0.001;
-    }
+    mean + std_dev * ziggurat::sample_std_normal(r)
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]

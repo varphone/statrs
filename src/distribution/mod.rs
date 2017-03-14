@@ -47,6 +47,8 @@ mod students_t;
 mod triangular;
 mod uniform;
 mod weibull;
+mod ziggurat;
+mod ziggurat_tables;
 
 /// The `Distribution` trait is used to specify an interface
 /// for sampling statistical distributions
