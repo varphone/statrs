@@ -295,7 +295,7 @@ impl Discrete<u64, f64> for Binomial {
     ///
     /// # Panics
     ///
-    /// If `x > n || x < 0`
+    /// If `x > n`
     ///
     /// # Formula
     ///
@@ -323,7 +323,7 @@ impl Discrete<u64, f64> for Binomial {
     ///
     /// # Panics
     ///
-    /// If `x > n || x < 0`
+    /// If `x > n`
     ///
     /// # Formula
     ///

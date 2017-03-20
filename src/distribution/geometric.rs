@@ -1,4 +1,4 @@
-use std::{i64, f64};
+use std::{u64, f64};
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
@@ -112,7 +112,7 @@ impl Distribution<f64> for Geometric {
     }
 }
 
-impl Univariate<i64, f64> for Geometric {
+impl Univariate<u64, f64> for Geometric {
     /// Calculates the cumulative distribution function for the geometric
     /// distribution at `x`
     ///
@@ -127,7 +127,7 @@ impl Univariate<i64, f64> for Geometric {
     }
 }
 
-impl Min<i64> for Geometric {
+impl Min<u64> for Geometric {
     /// Returns the minimum value in the domain of the
     /// geometric distribution representable by a 64-bit
     /// integer
@@ -137,12 +137,12 @@ impl Min<i64> for Geometric {
     /// ```ignore
     /// 1
     /// ```
-    fn min(&self) -> i64 {
+    fn min(&self) -> u64 {
         1
     }
 }
 
-impl Max<i64> for Geometric {
+impl Max<u64> for Geometric {
     /// Returns the maximum value in the domain of the
     /// geometric distribution representable by a 64-bit
     /// integer
@@ -152,8 +152,8 @@ impl Max<i64> for Geometric {
     /// ```ignore
     /// 2^63 - 1
     /// ```
-    fn max(&self) -> i64 {
-        i64::MAX
+    fn max(&self) -> u64 {
+        u64::MAX
     }
 }
 
@@ -258,20 +258,20 @@ impl Median<f64> for Geometric {
     }
 }
 
-impl Discrete<i64, f64> for Geometric {
+impl Discrete<u64, f64> for Geometric {
     /// Calculates the probability mass function for the geometric
     /// distribution at `x`
     ///
     /// # Panics
     ///
-    /// If `x <= 0`
+    /// If `x == 0`
     ///
     /// # Formula
     ///
     /// ```ignore
     /// (1 - p)^(x - 1) * p
     /// ```
-    fn pmf(&self, x: i64) -> f64 {
+    fn pmf(&self, x: u64) -> f64 {
         assert!(x > 0, format!("{}", StatsError::ArgGt("x", 0.0)));
         (1.0 - self.p).powi(x as i32 - 1) * self.p
     }
@@ -281,14 +281,14 @@ impl Discrete<i64, f64> for Geometric {
     ///
     /// # Panics
     ///
-    /// If `x <= 0`
+    /// If `x == 0`
     ///
     /// # Formula
     ///
     /// ```ignore
     /// ln((1 - p)^(x - 1) * p)
     /// ```
-    fn ln_pmf(&self, x: i64) -> f64 {
+    fn ln_pmf(&self, x: u64) -> f64 {
         assert!(x > 0, format!("{}", StatsError::ArgGt("x", 0.0)));
         if self.p == 1.0 && x == 1 {
             0.0
@@ -304,7 +304,7 @@ impl Discrete<i64, f64> for Geometric {
 #[cfg(test)]
 mod test {
     use std::fmt::Debug;
-    use std::{i64, f64};
+    use std::{u64, f64};
     use statistics::*;
     use distribution::{Univariate, Discrete, Geometric};
 
@@ -416,7 +416,7 @@ mod test {
     #[test]
     fn test_min_max() {
         test_case(0.3, 1, |x| x.min());
-        test_case(0.3, i64::MAX, |x| x.max());
+        test_case(0.3, u64::MAX, |x| x.max());
     }
 
     #[test]

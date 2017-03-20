@@ -279,7 +279,7 @@ impl Discrete<u64, f64> for Bernoulli {
     ///
     /// # Panics
     ///
-    /// If `x < 0 || x > 1`
+    /// If `x > 1`
     ///
     /// # Formula
     ///
@@ -296,7 +296,7 @@ impl Discrete<u64, f64> for Bernoulli {
     ///
     /// # Panics
     ///
-    /// If `x < 0 || x > 1`
+    /// If `x > 1`
     ///
     /// # Formula
     ///
