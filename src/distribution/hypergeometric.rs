@@ -334,7 +334,7 @@ impl Mode<i64> for Hypergeometric {
     }
 }
 
-impl Discrete<i64, f64> for Hypergeometric {
+impl Discrete<u64, f64> for Hypergeometric {
     /// Calculates the probability mass function for the hypergeometric
     /// distribution at `x`
     ///
@@ -345,9 +345,9 @@ impl Discrete<i64, f64> for Hypergeometric {
     /// ```
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
-    fn pmf(&self, x: i64) -> f64 {
-        factorial::binomial(self.successes, x as u64) *
-        factorial::binomial(self.population - self.successes, self.draws - x as u64) /
+    fn pmf(&self, x: u64) -> f64 {
+        factorial::binomial(self.successes, x) *
+        factorial::binomial(self.population - self.successes, self.draws - x) /
         factorial::binomial(self.population, self.draws)
     }
 
@@ -361,9 +361,9 @@ impl Discrete<i64, f64> for Hypergeometric {
     /// ```
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
-    fn ln_pmf(&self, x: i64) -> f64 {
-        factorial::ln_binomial(self.successes, x as u64) +
-        factorial::ln_binomial(self.population - self.successes, self.draws - x as u64) -
+    fn ln_pmf(&self, x: u64) -> f64 {
+        factorial::ln_binomial(self.successes, x) +
+        factorial::ln_binomial(self.population - self.successes, self.draws - x) -
         factorial::ln_binomial(self.population, self.draws)
     }
 }
