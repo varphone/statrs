@@ -224,7 +224,7 @@ impl Skewness<f64> for Geometric {
     }
 }
 
-impl Mode<i64> for Geometric {
+impl Mode<u64> for Geometric {
     /// Returns the mode of the geometric distribution
     ///
     /// # Formula
@@ -232,7 +232,7 @@ impl Mode<i64> for Geometric {
     /// ```ignore
     /// 1
     /// ```
-    fn mode(&self) -> i64 {
+    fn mode(&self) -> u64 {
         1
     }
 }

@@ -319,7 +319,7 @@ impl Skewness<f64> for Hypergeometric {
     }
 }
 
-impl Mode<i64> for Hypergeometric {
+impl Mode<u64> for Hypergeometric {
     /// Returns the mode of the hypergeometric distribution
     ///
     /// # Formula
@@ -329,8 +329,8 @@ impl Mode<i64> for Hypergeometric {
     /// ```
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
-    fn mode(&self) -> i64 {
-        ((self.draws + 1) * (self.successes + 1) / (self.population + 2)) as i64
+    fn mode(&self) -> u64 {
+        ((self.draws + 1) * (self.successes + 1) / (self.population + 2)) as u64
     }
 }
 

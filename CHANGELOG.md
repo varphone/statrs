@@ -19,11 +19,14 @@ v0.6.0
  - `Poisson` now implements `Univariate<u64, f64>` rather than `Univariate<i64, f64>`, meaning `Poisson::min` and `Poisson::min` now return `u64`
  - `Binomial` now implements `Mode<u64>` instead of `Mode<i64>`
  - `Bernoulli` now implements `Mode<u64>` instead of `Mode<i64>`
- - `Bernoulli` now implements `Mode<u64>` instead of `Mode<i64>`
+ - `Poisson` now implements `Mode<u64>` instead of `Mode<i64>`
+ - `Geometric` now implements `Mode<u64>` instead of `Mode<i64>`
+ - `Hypergeometric` now implements `Mode<u64>` instead of `Mode<i64>`
  - `Binomial` now implements `Discrete<u64, f64>` rather than `Discrete<i64, f64>`
  - `Bernoulli` now implements `Discrete<u64, f64>` rather than `Discrete<i64, f64>`
  - `Geometric` now implements `Discrete<u64, f64>` rather than `Discrete<i64, f64>`
  - `Hypergeometric` now implements `Discrete<u64, f64>` rather than `Discrete<i64, f64>`
+ - `Poisson` now implements `Discrete<u64, f64>` rather than `Discrete<i64, f64>`
 
 v0.5.1
  - Fixed critical bug in `normal::sample_unchecked` where it was returning `NaN`
