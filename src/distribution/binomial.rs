@@ -23,7 +23,7 @@ use {Result, StatsError};
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Binomial {
     p: f64,
-    n: i64,
+    n: u64,
 }
 
 impl Binomial {
@@ -44,11 +44,11 @@ impl Binomial {
     /// let mut result = Binomial::new(0.5, 5);
     /// assert!(result.is_ok());
     ///
-    /// result = Binomial::new(-0.5, -5);
+    /// result = Binomial::new(-0.5, 5);
     /// assert!(result.is_err());
     /// ```
-    pub fn new(p: f64, n: i64) -> Result<Binomial> {
-        if p.is_nan() || p < 0.0 || p > 1.0 || n < 0 {
+    pub fn new(p: f64, n: u64) -> Result<Binomial> {
+        if p.is_nan() || p < 0.0 || p > 1.0 {
             Err(StatsError::BadParams)
         } else {
             Ok(Binomial { p: p, n: n })
@@ -81,7 +81,7 @@ impl Binomial {
     /// let n = Binomial::new(0.5, 5).unwrap();
     /// assert_eq!(n.n(), 5);
     /// ```
-    pub fn n(&self) -> i64 {
+    pub fn n(&self) -> u64 {
         self.n
     }
 }
@@ -131,7 +131,7 @@ impl Distribution<f64> for Binomial {
     }
 }
 
-impl Univariate<i64, f64> for Binomial {
+impl Univariate<u64, f64> for Binomial {
     /// Calulcates the cumulative distribution function for the
     /// binomial distribution at `x`
     ///
@@ -158,7 +158,7 @@ impl Univariate<i64, f64> for Binomial {
     }
 }
 
-impl Min<i64> for Binomial {
+impl Min<u64> for Binomial {
     /// Returns the minimum value in the domain of the
     /// binomial distribution representable by a 64-bit
     /// integer
@@ -168,12 +168,12 @@ impl Min<i64> for Binomial {
     /// ```ignore
     /// 0
     /// ```
-    fn min(&self) -> i64 {
+    fn min(&self) -> u64 {
         0
     }
 }
 
-impl Max<i64> for Binomial {
+impl Max<u64> for Binomial {
     /// Returns the maximum value in the domain of the
     /// binomial distribution representable by a 64-bit
     /// integer
@@ -183,7 +183,7 @@ impl Max<i64> for Binomial {
     /// ```ignore
     /// n
     /// ```
-    fn max(&self) -> i64 {
+    fn max(&self) -> u64 {
         self.n
     }
 }
@@ -272,7 +272,7 @@ impl Median<f64> for Binomial {
     }
 }
 
-impl Mode<i64> for Binomial {
+impl Mode<u64> for Binomial {
     /// Returns the mode for the binomial distribution
     ///
     /// # Formula
@@ -280,31 +280,31 @@ impl Mode<i64> for Binomial {
     /// ```ignore
     /// floor((n + 1) * p)
     /// ```
-    fn mode(&self) -> i64 {
+    fn mode(&self) -> u64 {
         match self.p {
             0.0 => 0,
             1.0 => self.n,
-            _ => ((self.n as f64 + 1.0) * self.p).floor() as i64,
+            _ => ((self.n as f64 + 1.0) * self.p).floor() as u64,
         }
     }
 }
 
-impl Discrete<i64, f64> for Binomial {
+impl Discrete<u64, f64> for Binomial {
     /// Calculates the probability mass function for the binomial
     /// distribution at `x`
     ///
     /// # Panics
     ///
-    /// If `x > n || x < 0`
+    /// If `x > n`
     ///
     /// # Formula
     ///
     /// ```ignore
     /// (n choose k) * p^k * (1 - p)^(n - k)
     /// ```
-    fn pmf(&self, x: i64) -> f64 {
-        assert!(x >= 0 && x <= self.n,
-                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
+    fn pmf(&self, x: u64) -> f64 {
+        assert!(x <= self.n,
+                format!("{}", StatsError::ArgLte("x", 1.0)));
         match self.p {
             0.0 if x == 0 => 1.0,
             0.0 => 0.0,
@@ -323,16 +323,16 @@ impl Discrete<i64, f64> for Binomial {
     ///
     /// # Panics
     ///
-    /// If `x > n || x < 0`
+    /// If `x > n`
     ///
     /// # Formula
     ///
     /// ```ignore
     /// ln((n choose k) * p^k * (1 - p)^(n - k))
     /// ```
-    fn ln_pmf(&self, x: i64) -> f64 {
-        assert!(x >= 0 && x <= self.n,
-                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
+    fn ln_pmf(&self, x: u64) -> f64 {
+        assert!(x <= self.n,
+                format!("{}", StatsError::ArgLte("x", 1.0)));
         match self.p {
             0.0 if x == 0 => 0.0,
             0.0 => f64::NEG_INFINITY,
@@ -354,24 +354,24 @@ mod test {
     use statistics::*;
     use distribution::{Univariate, Discrete, Binomial};
 
-    fn try_create(p: f64, n: i64) -> Binomial {
+    fn try_create(p: f64, n: u64) -> Binomial {
         let n = Binomial::new(p, n);
         assert!(n.is_ok());
         n.unwrap()
     }
 
-    fn create_case(p: f64, n: i64) {
+    fn create_case(p: f64, n: u64) {
         let dist = try_create(p, n);
         assert_eq!(p, dist.p());
         assert_eq!(n, dist.n());
     }
 
-    fn bad_create_case(p: f64, n: i64) {
+    fn bad_create_case(p: f64, n: u64) {
         let n = Binomial::new(p, n);
         assert!(n.is_err());
     }
 
-    fn get_value<T, F>(p: f64, n: i64, eval: F) -> T
+    fn get_value<T, F>(p: f64, n: u64, eval: F) -> T
         where T: PartialEq + Debug,
               F: Fn(Binomial) -> T
     {
@@ -379,7 +379,7 @@ mod test {
         eval(n)
     }
 
-    fn test_case<T, F>(p: f64, n: i64, expected: T, eval: F)
+    fn test_case<T, F>(p: f64, n: u64, expected: T, eval: F)
         where T: PartialEq + Debug,
               F: Fn(Binomial) -> T
     {
@@ -387,7 +387,7 @@ mod test {
         assert_eq!(expected, x);
     }
 
-    fn test_almost<F>(p: f64, n: i64, expected: f64, acc: f64, eval: F)
+    fn test_almost<F>(p: f64, n: u64, expected: f64, acc: f64, eval: F)
         where F: Fn(Binomial) -> f64
     {
         let x = get_value(p, n, eval);
@@ -406,7 +406,6 @@ mod test {
         bad_create_case(f64::NAN, 1);
         bad_create_case(-1.0, 1);
         bad_create_case(2.0, 1);
-        bad_create_case(0.3, -2);
     }
 
     #[test]

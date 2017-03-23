@@ -74,7 +74,7 @@ impl Bernoulli {
     /// let n = Bernoulli::new(0.5).unwrap();
     /// assert_eq!(n.n(), 1);
     /// ```
-    pub fn n(&self) -> i64 {
+    pub fn n(&self) -> u64 {
         1
     }
 }
@@ -123,7 +123,7 @@ impl Distribution<f64> for Bernoulli {
     }
 }
 
-impl Univariate<i64, f64> for Bernoulli {
+impl Univariate<u64, f64> for Bernoulli {
     /// Calculates the cumulative distribution
     /// function for the bernoulli distribution at `x`.
     ///
@@ -143,7 +143,7 @@ impl Univariate<i64, f64> for Bernoulli {
     }
 }
 
-impl Min<i64> for Bernoulli {
+impl Min<u64> for Bernoulli {
     /// Returns the minimum value in the domain of the
     /// bernoulli distribution representable by a 64-
     /// bit integer
@@ -153,12 +153,12 @@ impl Min<i64> for Bernoulli {
     /// ```ignore
     /// 0
     /// ```
-    fn min(&self) -> i64 {
+    fn min(&self) -> u64 {
         0
     }
 }
 
-impl Max<i64> for Bernoulli {
+impl Max<u64> for Bernoulli {
     /// Returns the maximum value in the domain of the
     /// bernoulli distribution representable by a 64-
     /// bit integer
@@ -168,7 +168,7 @@ impl Max<i64> for Bernoulli {
     /// ```ignore
     /// 1
     /// ```
-    fn max(&self) -> i64 {
+    fn max(&self) -> u64 {
         1
     }
 }
@@ -259,7 +259,7 @@ impl Median<f64> for Bernoulli {
     }
 }
 
-impl Mode<i64> for Bernoulli {
+impl Mode<u64> for Bernoulli {
     /// Returns the mode of the bernoulli distribution
     ///
     /// # Formula
@@ -268,18 +268,18 @@ impl Mode<i64> for Bernoulli {
     /// if p < 0.5 { 0 }
     /// else { 1 }
     /// ```
-    fn mode(&self) -> i64 {
+    fn mode(&self) -> u64 {
         self.b.mode()
     }
 }
 
-impl Discrete<i64, f64> for Bernoulli {
+impl Discrete<u64, f64> for Bernoulli {
     /// Calculates the probability mass function for the
     /// bernoulli distribution at `x`.
     ///
     /// # Panics
     ///
-    /// If `x < 0 || x > 1`
+    /// If `x > 1`
     ///
     /// # Formula
     ///
@@ -287,7 +287,7 @@ impl Discrete<i64, f64> for Bernoulli {
     /// if x == 0 { 1 - p }
     /// else { p }
     /// ```
-    fn pmf(&self, x: i64) -> f64 {
+    fn pmf(&self, x: u64) -> f64 {
         self.b.pmf(x)
     }
 
@@ -296,7 +296,7 @@ impl Discrete<i64, f64> for Bernoulli {
     ///
     /// # Panics
     ///
-    /// If `x < 0 || x > 1`
+    /// If `x > 1`
     ///
     /// # Formula
     ///
@@ -304,7 +304,7 @@ impl Discrete<i64, f64> for Bernoulli {
     /// else if x == 0 { ln(1 - p) }
     /// else { ln(p) }
     /// ```
-    fn ln_pmf(&self, x: i64) -> f64 {
+    fn ln_pmf(&self, x: u64) -> f64 {
         self.b.ln_pmf(x)
     }
 }
