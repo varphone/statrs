@@ -16,8 +16,10 @@ v0.6.0
  - `Binomial` now implements `Univariate<u64, f64>` rather than `Univariate<i64, f64>`, meaning `Binomial::min` and `Binomial::max` now return `u64`
  - `Bernoulli` now implements `Univariate<u64, f64>` rather than `Univariate<i64, f64>`, meaning `Bernoulli::min` and `Bernoulli::min` now return `u64`
  - `Geometric` now implements `Univariate<u64, f64>` rather than `Univariate<i64, f64>`, meaning `Geometric::min` and `Geometric::min` now return `u64`
+ - `Poisson` now implements `Univariate<u64, f64>` rather than `Univariate<i64, f64>`, meaning `Poisson::min` and `Poisson::min` now return `u64`
  - `Binomial` now implements `Mode<u64>` instead of `Mode<i64>`
- - `Bernoulli` now implements `Mode<u64>` instead of `Mode<i64`
+ - `Bernoulli` now implements `Mode<u64>` instead of `Mode<i64>`
+ - `Bernoulli` now implements `Mode<u64>` instead of `Mode<i64>`
  - `Binomial` now implements `Discrete<u64, f64>` rather than `Discrete<i64, f64>`
  - `Bernoulli` now implements `Discrete<u64, f64>` rather than `Discrete<i64, f64>`
  - `Geometric` now implements `Discrete<u64, f64>` rather than `Discrete<i64, f64>`

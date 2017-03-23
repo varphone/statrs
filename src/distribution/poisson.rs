@@ -1,5 +1,5 @@
 use std::f64;
-use std::i64;
+use std::u64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::{factorial, gamma};
@@ -112,7 +112,7 @@ impl Distribution<f64> for Poisson {
     }
 }
 
-impl Univariate<i64, f64> for Poisson {
+impl Univariate<u64, f64> for Poisson {
     /// Calculates the cumulative distribution function for the poisson
     /// distribution at `x`
     ///
@@ -133,7 +133,7 @@ impl Univariate<i64, f64> for Poisson {
     }
 }
 
-impl Min<i64> for Poisson {
+impl Min<u64> for Poisson {
     /// Returns the minimum value in the domain of the poisson distribution
     /// representable by a 64-bit integer
     ///
@@ -142,12 +142,12 @@ impl Min<i64> for Poisson {
     /// ```ignore
     /// 0
     /// ```
-    fn min(&self) -> i64 {
+    fn min(&self) -> u64 {
         0
     }
 }
 
-impl Max<i64> for Poisson {
+impl Max<u64> for Poisson {
     /// Returns the maximum value in the domain of the poisson distribution
     /// representable by a 64-bit integer
     ///
@@ -156,8 +156,8 @@ impl Max<i64> for Poisson {
     /// ```ignore
     /// 2^63 - 1
     /// ```
-    fn max(&self) -> i64 {
-        i64::MAX
+    fn max(&self) -> u64 {
+        u64::MAX
     }
 }
 
@@ -251,7 +251,7 @@ impl Median<f64> for Poisson {
     }
 }
 
-impl Mode<i64> for Poisson {
+impl Mode<u64> for Poisson {
     /// Returns the mode of the poisson distribution
     ///
     /// # Formula
@@ -261,18 +261,14 @@ impl Mode<i64> for Poisson {
     /// ```
     ///
     /// where `λ` is the rate
-    fn mode(&self) -> i64 {
-        self.lambda.floor() as i64
+    fn mode(&self) -> u64 {
+        self.lambda.floor() as u64
     }
 }
 
-impl Discrete<i64, f64> for Poisson {
+impl Discrete<u64, f64> for Poisson {
     /// Calculates the probability mass function for the poisson distribution at
     /// `x`
-    ///
-    /// # Panics
-    ///
-    /// Panics if `x < 0.0`
     ///
     /// # Formula
     ///
@@ -281,17 +277,12 @@ impl Discrete<i64, f64> for Poisson {
     /// ```
     ///
     /// where `λ` is the rate
-    fn pmf(&self, x: i64) -> f64 {
-        assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
+    fn pmf(&self, x: u64) -> f64 {
         (-self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)).exp()
     }
 
     /// Calculates the log probability mass function for the poisson distribution at
     /// `x`
-    ///
-    /// # Panics
-    ///
-    /// Panics if `x < 0.0`
     ///
     /// # Formula
     ///
@@ -300,8 +291,7 @@ impl Discrete<i64, f64> for Poisson {
     /// ```
     ///
     /// where `λ` is the rate
-    fn ln_pmf(&self, x: i64) -> f64 {
-        assert!(x >= 0, format!("{}", StatsError::ArgNotNegative("x")));
+    fn ln_pmf(&self, x: u64) -> f64 {
         -self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)
     }
 }
@@ -352,7 +342,7 @@ fn sample_unchecked<R: Rng>(r: &mut R, lambda: f64) -> f64 {
 mod test {
     use std::fmt::Debug;
     use std::f64;
-    use std::i64;
+    use std::u64;
     use statistics::*;
     use distribution::{Univariate, Discrete, Poisson};
 
@@ -463,9 +453,9 @@ mod test {
         test_case(1.5, 0, |x| x.min());
         test_case(5.4, 0, |x| x.min());
         test_case(10.8, 0, |x| x.min());
-        test_case(1.5, i64::MAX, |x| x.max());
-        test_case(5.4, i64::MAX, |x| x.max());
-        test_case(10.8, i64::MAX, |x| x.max());
+        test_case(1.5, u64::MAX, |x| x.max());
+        test_case(5.4, u64::MAX, |x| x.max());
+        test_case(10.8, u64::MAX, |x| x.max());
     }
 
     #[test]
@@ -482,12 +472,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
-    fn test_neg_pmf() {
-        get_value(1.5, |x| x.pmf(-1));
-    }
-
-    #[test]
     fn test_ln_pmf() {
         test_almost(1.5, -1.09453489189183485135413967177, 1e-15, |x| x.ln_pmf(1));
         test_almost(1.5, -12.5497614919938728510400000000, 1e-14, |x| x.ln_pmf(10));
@@ -498,12 +482,6 @@ mod test {
         test_almost(10.8, -8.42045386586982559781714423000, 1e-14, |x| x.ln_pmf(1));
         test_almost(10.8, -2.10895123177378079525424989992, 1e-14, |x| x.ln_pmf(10));
         test_almost(10.8, -5.54469377815000936289610059500, 1e-14, |x| x.ln_pmf(20));
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_neg_ln_pmf() {
-        get_value(1.5, |x| x.ln_pmf(-1));
     }
 
     #[test]
