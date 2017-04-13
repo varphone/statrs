@@ -1,3 +1,4 @@
+use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use function::gamma;
@@ -47,15 +48,11 @@ impl Dirichlet {
     /// assert!(result.is_err());
     /// ```
     pub fn new(alpha: &[f64]) -> Result<Dirichlet> {
-        if alpha.len() < 2 {
-            return Err(StatsError::BadParams);
+        if !is_valid_alpha(alpha) {
+            Err(StatsError::BadParams)
+        } else {
+            Ok(Dirichlet { alpha: alpha.to_vec() })
         }
-        for x in alpha {
-            if *x <= 0.0 || x.is_nan() {
-                return Err(StatsError::BadParams);
-            }
-        }
-        Ok(Dirichlet { alpha: alpha.to_vec() })
     }
 
     /// Constructs a new dirichlet distribution with the given
@@ -306,6 +303,26 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
     }
 }
 
+// determines if `a` is a valid alpha array
+// for the Dirichlet distribution
+fn is_valid_alpha(a: &[f64]) -> bool {
+    a.len() >= 2 && !a.iter().any(|&x| x <= 0.0 || x.is_nan()) && !a.iter().all(|&x| x == 0.0)
+}
+
+#[test]
+fn test_is_valid_alpha() {
+    let invalid = [1.0, f64::NAN, 3.0];
+    assert!(!is_valid_alpha(&invalid));
+    let invalid2 = [-2.0, 5.0, 1.0, 6.2];
+    assert!(!is_valid_alpha(&invalid2));
+    let invalid3 = [0.0, 0.0, 0.0];
+    assert!(!is_valid_alpha(&invalid3));
+    let invalid4 = [1.0];
+    assert!(!is_valid_alpha(&invalid4));
+    let valid = [5.2, 0.00001, 1e-15, 1000000.12];
+    assert!(is_valid_alpha(&valid));
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
@@ -344,6 +361,7 @@ mod test {
         bad_create_case(&[1.0]);
         bad_create_case(&[1.0, 2.0, 0.0, 4.0, 5.0]);
         bad_create_case(&[1.0, f64::NAN, 3.0, 4.0, 5.0]);
+        bad_create_case(&[0.0, 0.0, 0.0]);
     }
 
     #[test]
