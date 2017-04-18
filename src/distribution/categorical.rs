@@ -1,5 +1,8 @@
 use std::f64;
 use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
+use statistics::*;
+use distribution::{Distribution};
 use {Result, StatsError};
 
 /// Implements the [Categorical](https://en.wikipedia.org/wiki/Categorical_distribution)
@@ -12,19 +15,15 @@ use {Result, StatsError};
 /// use statrs::statistics::Mode;
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Categorical<R>
-    where R: Rng
+pub struct Categorical
 {
     norm_pmf: Vec<f64>,
     cdf: Vec<f64>,
-    r: R,
 }
 
-impl<R> Categorical<R>
-    where R: Rng
+impl Categorical
 {
-    pub fn new(prob_mass: &[f64], r: R) -> Result<Categorical<R>>
-        where R: Rng
+    pub fn new(prob_mass: &[f64]) -> Result<Categorical>
     {
         if !is_valid_prob_mass(prob_mass) {
             Err(StatsError::BadParams)
@@ -52,9 +51,70 @@ impl<R> Categorical<R>
             Ok(Categorical {
                 norm_pmf: norm_pmf,
                 cdf: cdf,
-                r: r,
             })
         }
+    }
+}
+
+impl Sample<f64> for Categorical
+{
+    /// Generate a random sample from a categorical
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for Categorical
+{
+    /// Generate a random independent sample from a categorical
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl Distribution<f64> for Categorical
+{
+    /// Generate a random sample from the categorical distribution
+    /// using `r` as the source of randomness
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Categorical, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Categorical::new(&[1.0, 2.0, 3.0]).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));
+    /// # }
+    /// ```
+    fn sample<R: Rng>(&self, r: &mut R) -> f64 {
+        let draw = r.next_f64() * unsafe { self.cdf.get_unchecked(self.cdf.len() - 1) };
+        let mut idx = 0;
+
+        if draw == 0.0 {
+            // skip zero-probability categories
+            let mut el = unsafe { self.cdf.get_unchecked(idx) };
+            while *el == 0.0 {
+                // don't need bounds checking because we do not allow
+                // creating Categorical distributions with all 0.0 probs
+                idx += 1;
+                el = unsafe { self.cdf.get_unchecked(idx) }
+            }
+        }
+        let mut el = unsafe { self.cdf.get_unchecked(idx) };
+        while draw > *el {
+            idx += 1;
+            el = unsafe { self.cdf.get_unchecked(idx) };
+        }
+        return idx as f64;
     }
 }
 
@@ -81,12 +141,10 @@ fn test_is_valid_prob_mass() {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
-    use rand::StdRng;
     use distribution::Categorical;
 
-    fn try_create(prob_mass: &[f64]) -> Categorical<StdRng> {
-        let r = StdRng::new().unwrap();
-        let n = Categorical::new(prob_mass, r);
+    fn try_create(prob_mass: &[f64]) -> Categorical {
+        let n = Categorical::new(prob_mass);
         assert!(n.is_ok());
         n.unwrap()
     }
@@ -96,8 +154,7 @@ mod test {
     }
 
     fn bad_create_case(prob_mass: &[f64]) {
-        let r = StdRng::new().unwrap();
-        let n = Categorical::new(prob_mass, r);
+        let n = Categorical::new(prob_mass);
         assert!(n.is_err());
     }
 
