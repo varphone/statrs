@@ -180,13 +180,47 @@ impl Mean<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// E[X] = sum(j * p_j) for j in 0..k-1
+    /// sum(j * p_j) for j in 0..k-1
     /// ```
     ///
     /// where `p_j` is the `j`th probability mass and `k` is the number
-    /// of categoires
+    /// of categories
     fn mean(&self) -> f64 {
         self.norm_pmf.iter().enumerate().fold(0.0, |acc, (idx, &val)| acc + idx as f64 * val)
+    }
+}
+
+impl Variance<f64> for Categorical {
+    /// Returns the variance of the categorical distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sum(p_j * (j - μ)^2) for j in 0..k-1
+    /// ```
+    ///
+    /// where `p_j` is the `j`th probability mass, `k` is the number
+    /// of categories, and `μ` is the mean
+    fn variance(&self) -> f64 {
+        let mu = self.mean();
+        self.norm_pmf.iter().enumerate().fold(0.0, |acc, (idx, &val)| {
+            let r = idx as f64 - mu;
+            acc + r * r * val
+        })
+    }
+
+    /// Returns the standard deviation of the categorical distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(sum(p_j * (j - μ)^2)) for j in 0..k-1
+    /// ```
+    ///
+    /// where `p_j` is the `j`th probability mass, `k` is the number
+    /// of categories, and `μ` is the mean
+    fn std_dev(&self) -> f64 {
+        self.variance().sqrt()
     }
 }
 
@@ -259,7 +293,24 @@ mod test {
         test_case(&[0.0, 0.5, 0.5], 1.5, |x| x.mean());
         test_case(&[0.75, 0.25], 0.25, |x| x.mean());
         test_case(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], 5.0, |x| x.mean());
+    }
 
+    #[test]
+    fn test_variance() {
+        test_case(&[0.0, 0.25, 0.5, 0.25], 0.5, |x| x.variance());
+        test_case(&[0.0, 1.0, 2.0, 1.0], 0.5, |x| x.variance());
+        test_case(&[0.0, 0.5, 0.5], 0.25, |x| x.variance());
+        test_case(&[0.75, 0.25], 0.1875, |x| x.variance());
+        test_case(&[1.0, 0.0, 1.0], 1.0, |x| x.variance());
+    }
+
+    #[test]
+    fn test_std_dev() {
+        test_case(&[0.0, 0.25, 0.5, 0.25], 0.70710678118654752440084436210485, |x| x.std_dev());
+        test_case(&[0.0, 1.0, 2.0, 1.0], 0.70710678118654752440084436210485, |x| x.std_dev());
+        test_case(&[0.0, 0.5, 0.5], 0.5, |x| x.std_dev());
+        test_case(&[0.75, 0.25], 0.43301270189221932338186158537647, |x| x.std_dev());
+        test_case(&[1.0, 0.0, 1.0], 1.0, |x| x.std_dev());
     }
 
     #[test]
