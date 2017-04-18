@@ -174,6 +174,22 @@ impl Max<u64> for Categorical {
     }
 }
 
+impl Mean<f64> for Categorical {
+    /// Returns the mean of the categorical distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// E[X] = sum(j * p_j) for j in 0..k-1
+    /// ```
+    ///
+    /// where `p_j` is the `j`th probability mass and `k` is the number
+    /// of categoires
+    fn mean(&self) -> f64 {
+        self.norm_pmf.iter().enumerate().fold(0.0, |acc, (idx, &val)| acc + idx as f64 * val)
+    }
+}
+
 // determines if `p` is a valid probability mass array
 // for the Categorical distribution
 fn is_valid_prob_mass(p: &[f64]) -> bool {
@@ -234,6 +250,16 @@ mod test {
     fn test_bad_create() {
         bad_create_case(&[-1.0, 1.0]);
         bad_create_case(&[0.0, 0.0]);
+    }
+
+    #[test]
+    fn test_mean() {
+        test_case(&[0.0, 0.25, 0.5, 0.25], 2.0, |x| x.mean());
+        test_case(&[0.0, 1.0, 2.0, 1.0], 2.0, |x| x.mean());
+        test_case(&[0.0, 0.5, 0.5], 1.5, |x| x.mean());
+        test_case(&[0.75, 0.25], 0.25, |x| x.mean());
+        test_case(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], 5.0, |x| x.mean());
+
     }
 
     #[test]
