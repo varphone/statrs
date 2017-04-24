@@ -224,6 +224,31 @@ impl Variance<f64> for Categorical {
     }
 }
 
+impl Discrete<u64, f64> for Categorical {
+    /// Calculates the probability mass function for the categorical
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x >= k` where `k` is the number of categories
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// p_x
+    /// ```
+    fn pmf(&self, x: u64) -> f64 {
+        assert!(x < self.norm_pmf.len() as u64, format!("{}", StatsError::ArgLtArg("x", "k")));
+        unsafe { *self.norm_pmf.get_unchecked(x as usize) }
+    }
+
+    /// Calculates the log probability mass function for the categorical
+    /// distribution at `x`
+    fn ln_pmf(&self, x: u64) -> f64 {
+        self.pmf(x).ln()
+    }
+}
+
 // determines if `p` is a valid probability mass array
 // for the Categorical distribution
 fn is_valid_prob_mass(p: &[f64]) -> bool {
@@ -249,7 +274,7 @@ fn test_is_valid_prob_mass() {
 mod test {
     use std::fmt::Debug;
     use statistics::*;
-    use distribution::{Univariate, Categorical};
+    use distribution::{Univariate, Discrete, Categorical};
 
     fn try_create(prob_mass: &[f64]) -> Categorical {
         let n = Categorical::new(prob_mass);
@@ -266,12 +291,19 @@ mod test {
         assert!(n.is_err());
     }
 
-    fn test_case<T, F>(prob_mass: &[f64], expected: T, eval: F)
+    fn get_value<T, F>(prob_mass: &[f64], eval: F) -> T
         where T: PartialEq + Debug,
               F: Fn(Categorical) -> T
     {
         let n = try_create(prob_mass);
-        let x = eval(n);
+        eval(n)
+    }
+
+    fn test_case<T, F>(prob_mass: &[f64], expected: T, eval: F)
+        where T: PartialEq + Debug,
+              F: Fn(Categorical) -> T
+    {
+        let x = get_value(prob_mass, eval);
         assert_eq!(expected, x);
     }
 
@@ -320,6 +352,32 @@ mod test {
     }
 
     #[test]
+    fn test_pmf() {
+        test_case(&[0.0, 0.25, 0.5, 0.25], 0.0, |x| x.pmf(0));
+        test_case(&[0.0, 0.25, 0.5, 0.25], 0.25, |x| x.pmf(1));
+        test_case(&[0.0, 0.25, 0.5, 0.25], 0.25, |x| x.pmf(3));
+    }
+
+    #[test]
+    #[should_panic] 
+    fn test_pmf_x_too_high() {
+        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.pmf(4));
+    }
+
+    #[test]
+    fn test_ln_pmf() {
+        test_case(&[0.0, 0.25, 0.5, 0.25], 0f64.ln(), |x| x.ln_pmf(0));
+        test_case(&[0.0, 0.25, 0.5, 0.25], 0.25f64.ln(), |x| x.ln_pmf(1));
+        test_case(&[0.0, 0.25, 0.5, 0.25], 0.25f64.ln(), |x| x.ln_pmf(3));
+    }
+
+    #[test]
+    #[should_panic] 
+    fn test_ln_pmf_x_too_high() {
+        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.ln_pmf(4));
+    }
+
+    #[test]
     fn test_cdf() {
         test_case(&[0.0, 3.0, 1.0, 1.0], 3.0 / 5.0, |x| x.cdf(1.5));
         test_case(&[1.0, 1.0, 1.0, 1.0], 0.25, |x| x.cdf(0.0));
@@ -331,12 +389,12 @@ mod test {
     #[test]
     #[should_panic]
     fn test_cdf_input_low() {
-        test_case(&[4.0, 2.5, 2.5, 1.0], 1.0, |x| x.cdf(-1.0));
+        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.cdf(-1.0));
     }
 
     #[test]
     #[should_panic]
     fn test_cdf_input_high() {
-        test_case(&[4.0, 2.5, 2.5, 1.0], 1.0, |x| x.cdf(4.5));
+        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.cdf(4.5));
     }
 }
