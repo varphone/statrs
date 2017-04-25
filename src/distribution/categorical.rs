@@ -2,7 +2,7 @@ use std::f64;
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
-use distribution::{Univariate, Discrete, Distribution};
+use distribution::{Univariate, Discrete, Distribution, InverseCDF};
 use {Result, StatsError};
 
 /// Implements the [Categorical](https://en.wikipedia.org/wiki/Categorical_distribution)
@@ -54,6 +54,10 @@ impl Categorical {
 
     fn cdf_max(&self) -> f64 {
         *unsafe { self.cdf.get_unchecked(self.cdf.len() - 1) }
+    }
+
+    fn cdf_min(&self) -> f64 {
+        *unsafe { self.cdf.get_unchecked(0) }
     }
 }
 
@@ -141,6 +145,14 @@ impl Univariate<u64, f64> for Categorical {
         } else {
             unsafe { self.cdf.get_unchecked(x as usize) / self.cdf_max() }
         }
+    }
+}
+
+impl InverseCDF<f64> for Categorical {
+    fn inverse_cdf(&self, x: f64) -> f64 {
+        assert!(x > 0.0 && x < 1.0, format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0)));
+        let denorm_prob = x * self.cdf_max();
+        binary_index(&self.cdf, denorm_prob) as f64
     }
 }
 
@@ -255,6 +267,30 @@ fn is_valid_prob_mass(p: &[f64]) -> bool {
     !p.iter().any(|&x| x < 0.0 || x.is_nan()) && !p.iter().all(|&x| x == 0.0)
 }
 
+// Returns the index of val if placed into the sorted search array.
+// If val is greater than all elements, it therefore would return
+// the length of the array (N). If val is less than all elements, it would
+// return 0. Otherwise val returns the index of the first element larger than
+// it within the search array.
+fn binary_index(search: &[f64], val: f64) -> usize {
+    use std::cmp;
+
+    let mut low = 0 as isize;
+    let mut high = search.len() as isize - 1;
+    while low <= high {
+        let mid = low + ((high - low) / 2);
+        let el = *unsafe { search.get_unchecked(mid as usize) };
+        if el > val {
+            high = mid - 1;
+        } else if el < val {
+            low = mid.saturating_add(1);
+        } else {
+            return mid as usize;
+        }
+    }
+    cmp::min(search.len(), cmp::max(low, 0) as usize)
+}
+
 #[test]
 fn test_is_valid_prob_mass() {
     let invalid = [1.0, f64::NAN, 3.0];
@@ -267,6 +303,15 @@ fn test_is_valid_prob_mass() {
     assert!(!is_valid_prob_mass(&invalid4));
     let valid = [5.2, 0.00001, 1e-15, 1000000.12];
     assert!(is_valid_prob_mass(&valid));
+}
+
+#[test]
+fn test_binary_index() {
+    let arr = [0.0, 3.0, 5.0, 9.0, 10.0];
+    assert_eq!(0, binary_index(&arr, -1.0));
+    assert_eq!(2, binary_index(&arr, 5.0));
+    assert_eq!(3, binary_index(&arr, 5.2));
+    assert_eq!(5, binary_index(&arr, 10.1));
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
