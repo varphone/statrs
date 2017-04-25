@@ -100,6 +100,22 @@ pub trait Univariate<T, K>: Distribution<K> + Min<T> + Max<T> {
     fn cdf(&self, x: K) -> K;
 }
 
+/// The `InverseCDF` trait used to specify an interface for distributions
+/// with a closed form solution to the inverse cumulative distribution function.
+/// This trait will probably be merged into `Univariate` in a future release
+/// when already implemented distributions have `InverseCDF` back ported
+pub trait InverseCDF<T> {
+    /// Returns the inverse cumulative distribution function
+    /// calculated at `x` for a given distribution. May panic
+    /// depending on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// ```
+    fn inverse_cdf(&self, x: T) -> T;
+}
+
 /// The `Continuous` trait extends the `Distribution`
 /// trait and provides an interface for interacting with continuous
 /// statistical distributions
