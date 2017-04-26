@@ -11,8 +11,14 @@ use {Result, StatsError};
 /// # Examples
 ///
 /// ```
+///
 /// use statrs::distribution::{Categorical, Discrete};
-/// use statrs::statistics::Mode;
+/// use statrs::statistics::Mean;
+/// use statrs::prec;
+///
+/// let n = Categorical::new(&[0.0, 1.0, 2.0]).unwrap();
+/// assert!(prec::almost_eq(n.mean(), 5.0 / 3.0, 1e-15));
+/// assert_eq!(n.pmf(1), 1.0 / 3.0);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Categorical {
@@ -21,6 +27,26 @@ pub struct Categorical {
 }
 
 impl Categorical {
+    /// Constructs a new categorical distribution
+    /// with the probabilities masses defined by `prob_mass`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `prob_mass` is empty, the sum of
+    /// the elements in `prob_mass` is 0, or any element is less than
+    /// 0 or `f64::NAN`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::Categorical;
+    ///
+    /// let mut result = Categorical::new(&[0.0, 1.0, 2.0]);
+    /// assert!(result.is_ok());
+    ///
+    /// result = Categorical::new(&[0.0, -1.0, 2.0]);
+    /// assert!(result.is_err());
+    /// ```
     pub fn new(prob_mass: &[f64]) -> Result<Categorical> {
         if !is_valid_prob_mass(prob_mass) {
             Err(StatsError::BadParams)
@@ -54,10 +80,6 @@ impl Categorical {
 
     fn cdf_max(&self) -> f64 {
         *unsafe { self.cdf.get_unchecked(self.cdf.len() - 1) }
-    }
-
-    fn cdf_min(&self) -> f64 {
-        *unsafe { self.cdf.get_unchecked(0) }
     }
 }
 
@@ -252,6 +274,19 @@ impl Variance<f64> for Categorical {
     }
 }
 
+impl Median<f64> for Categorical {
+    /// Returns the median of the categorical distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// CDF^-1(0.5)
+    /// ```
+    fn median(&self) -> f64 {
+        self.inverse_cdf(0.5)
+    }
+}
+
 impl Discrete<u64, f64> for Categorical {
     /// Calculates the probability mass function for the categorical
     /// distribution at `x`
@@ -404,6 +439,12 @@ mod test {
         test_case(&[0.0, 0.5, 0.5], 0.5, |x| x.std_dev());
         test_case(&[0.75, 0.25], 0.43301270189221932338186158537647, |x| x.std_dev());
         test_case(&[1.0, 0.0, 1.0], 1.0, |x| x.std_dev());
+    }
+
+    #[test]
+    fn test_median() {
+        test_case(&[0.0, 3.0, 1.0, 1.0], 1.0, |x| x.median());
+        test_case(&[4.0, 2.5, 2.5, 1.0], 1.0, |x| x.median());
     }
 
     #[test]
