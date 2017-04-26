@@ -7,6 +7,7 @@ use statistics::{Min, Max};
 pub use self::bernoulli::Bernoulli;
 pub use self::beta::Beta;
 pub use self::binomial::Binomial;
+pub use self::categorical::Categorical;
 pub use self::cauchy::Cauchy;
 pub use self::chi::Chi;
 pub use self::chi_squared::ChiSquared;
@@ -29,6 +30,7 @@ pub use self::weibull::Weibull;
 mod bernoulli;
 mod beta;
 mod binomial;
+mod categorical;
 mod cauchy;
 mod chi;
 mod chi_squared;
@@ -96,6 +98,22 @@ pub trait Univariate<T, K>: Distribution<K> + Min<T> + Max<T> {
     /// assert_eq!(0.5, n.cdf(0.5));
     /// ```
     fn cdf(&self, x: K) -> K;
+}
+
+/// The `InverseCDF` trait used to specify an interface for distributions
+/// with a closed form solution to the inverse cumulative distribution function.
+/// This trait will probably be merged into `Univariate` in a future release
+/// when already implemented distributions have `InverseCDF` back ported
+pub trait InverseCDF<T> {
+    /// Returns the inverse cumulative distribution function
+    /// calculated at `x` for a given distribution. May panic
+    /// depending on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// ```
+    fn inverse_cdf(&self, x: T) -> T;
 }
 
 /// The `Continuous` trait extends the `Distribution`

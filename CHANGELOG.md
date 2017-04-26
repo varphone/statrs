@@ -1,3 +1,7 @@
+v0.7.0
+ - Implemented `Categorical` distribution
+ - New `InverseCDF` trait for distributions that implement the inverse cdf function
+
 v0.6.0
  - `gamma::gamma_ur`, `gamma::gamma_ui`, `gamma::gamma_lr`, and `gamma::gamma_li` now follow strict gamma function domain, panicking if `a` or `x` are not in `(0, +inf)`
  - `beta::beta_reg` no longer allows `0.0` for `a` or `b` arguments
