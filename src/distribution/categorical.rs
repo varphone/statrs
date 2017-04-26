@@ -149,6 +149,22 @@ impl Univariate<u64, f64> for Categorical {
 }
 
 impl InverseCDF<f64> for Categorical {
+    /// Calculates the inverse cumulative distribution function for the categorical
+    /// distribution at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0` or `x >= 1.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// i
+    /// ```
+    ///
+    /// where `i` is the first index such that `x < f(i)`
+    /// and `f(x)` is defined as `p_x + f(x - 1)` and `f(0) = p_0` where
+    /// `p_x` is the `x`th probability mass
     fn inverse_cdf(&self, x: f64) -> f64 {
         assert!(x > 0.0 && x < 1.0, format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0)));
         let denorm_prob = x * self.cdf_max();
@@ -319,7 +335,7 @@ fn test_binary_index() {
 mod test {
     use std::fmt::Debug;
     use statistics::*;
-    use distribution::{Univariate, Discrete, Categorical};
+    use distribution::{Univariate, Discrete, InverseCDF, Categorical};
 
     fn try_create(prob_mass: &[f64]) -> Categorical {
         let n = Categorical::new(prob_mass);
@@ -441,5 +457,27 @@ mod test {
     #[should_panic]
     fn test_cdf_input_high() {
         get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.cdf(4.5));
+    }
+
+    #[test]
+    fn test_inverse_cdf() {
+        test_case(&[0.0, 3.0, 1.0, 1.0], 1.0, |x| x.inverse_cdf(0.2));
+        test_case(&[0.0, 3.0, 1.0, 1.0], 1.0, |x| x.inverse_cdf(0.5));
+        test_case(&[0.0, 3.0, 1.0, 1.0], 3.0, |x| x.inverse_cdf(0.95));
+        test_case(&[4.0, 2.5, 2.5, 1.0], 0.0, |x| x.inverse_cdf(0.2));
+        test_case(&[4.0, 2.5, 2.5, 1.0], 1.0, |x| x.inverse_cdf(0.5));
+        test_case(&[4.0, 2.5, 2.5, 1.0], 3.0, |x| x.inverse_cdf(0.95));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_inverse_cdf_input_low() {
+        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.inverse_cdf(0.0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_inverse_cdf_input_high() {
+        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.inverse_cdf(1.0));
     }
 }
