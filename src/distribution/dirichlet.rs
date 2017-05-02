@@ -5,7 +5,6 @@ use function::gamma;
 use statistics::*;
 use distribution::{Continuous, Distribution};
 use {Result, StatsError, prec};
-use super::internal;
 
 /// Implements the [Dirichlet](https://en.wikipedia.org/wiki/Dirichlet_distribution)
 /// distribution
@@ -307,7 +306,7 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
 // determines if `a` is a valid alpha array
 // for the Dirichlet distribution
 fn is_valid_alpha(a: &[f64]) -> bool {
-    a.len() >= 2 && internal::is_valid_multinomial(a, false)
+    a.len() >= 2 && super::internal::is_valid_multinomial(a, false)
 }
 
 #[test]

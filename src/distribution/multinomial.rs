@@ -1,5 +1,7 @@
+use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
+use distribution::Distribution;
 use {Result, StatsError};
-use super::internal;
 
 /// Implements the [Multinomial](https://en.wikipedia.org/wiki/Multinomial_distribution)
 /// distribution which is a generalization of the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
@@ -40,7 +42,7 @@ impl Multinomial {
     /// assert!(result.is_err());
     /// ```
     pub fn new(p: &[f64], n: u64) -> Result<Multinomial> {
-        if !internal::is_valid_multinomial(p, true) {
+        if !super::internal::is_valid_multinomial(p, true) {
             Err(StatsError::BadParams)
         } else {
             Ok(Multinomial {
@@ -78,6 +80,54 @@ impl Multinomial {
     /// ```
     pub fn n(&self) -> u64 {
         self.n
+    }
+}
+
+impl Sample<Vec<f64>> for Multinomial {
+    /// Generate random samples from a multinomial
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
+    fn sample<R: Rng>(&mut self, r: &mut R) -> Vec<f64> {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<Vec<f64>> for Multinomial {
+    /// Generate random independent samples from a M=multinomial
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> Vec<f64> {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl Distribution<Vec<f64>> for Multinomial {
+    /// Generate random samples from the multinomial distribution
+    /// using `r` as the source of randomness
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Multinomial, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Multinomial::new(&[0.0, 1.0, 2.0], 4).unwrap();
+    /// print!("{:?}", n.sample::<StdRng>(&mut r));
+    /// # }
+    /// ```
+    fn sample<R: Rng>(&self, r: &mut R) -> Vec<f64> {
+        let p_cdf = super::categorical::prob_mass_to_cdf(self.p());
+        let mut res = vec![0.0; self.p.len()];
+        for _ in 0..self.n {
+            let i = super::categorical::sample_unchecked(r, &p_cdf);
+            let mut el = unsafe { res.get_unchecked_mut(i as usize) };
+            *el = *el + 1.0; 
+        }
+        res
     }
 }
 

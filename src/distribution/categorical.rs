@@ -4,7 +4,6 @@ use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
 use distribution::{Univariate, Discrete, Distribution, InverseCDF};
 use {Result, StatsError};
-use super::internal;
 
 /// Implements the [Categorical](https://en.wikipedia.org/wiki/Categorical_distribution)
 /// distribution, also known as the generalized Bernoulli or discrete distribution
@@ -53,20 +52,11 @@ impl Categorical {
     /// assert!(result.is_err());
     /// ```
     pub fn new(prob_mass: &[f64]) -> Result<Categorical> {
-        if !internal::is_valid_multinomial(prob_mass, true) {
+        if !super::internal::is_valid_multinomial(prob_mass, true) {
             Err(StatsError::BadParams)
         } else {
             // extract un-normalized cdf
-            let mut cdf = vec![0.0; prob_mass.len()];
-            cdf[0] = prob_mass[0];
-            for i in 1..prob_mass.len() {
-                unsafe {
-                    let val = cdf.get_unchecked(i - 1) + prob_mass.get_unchecked(i);
-                    let elem = cdf.get_unchecked_mut(i);
-                    *elem = val;
-                }
-            }
-
+            let cdf = prob_mass_to_cdf(prob_mass);
             // extract normalized probability mass
             let sum = cdf[cdf.len() - 1];
             let mut norm_pmf = vec![0.0; prob_mass.len()];
@@ -125,25 +115,7 @@ impl Distribution<f64> for Categorical {
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        let draw = r.next_f64() * self.cdf_max();
-        let mut idx = 0;
-
-        if draw == 0.0 {
-            // skip zero-probability categories
-            let mut el = unsafe { self.cdf.get_unchecked(idx) };
-            while *el == 0.0 {
-                // don't need bounds checking because we do not allow
-                // creating Categorical distributions with all 0.0 probs
-                idx += 1;
-                el = unsafe { self.cdf.get_unchecked(idx) }
-            }
-        }
-        let mut el = unsafe { self.cdf.get_unchecked(idx) };
-        while draw > *el {
-            idx += 1;
-            el = unsafe { self.cdf.get_unchecked(idx) };
-        }
-        return idx as f64;
+        sample_unchecked(r, &self.cdf)
     }
 }
 
@@ -193,7 +165,8 @@ impl InverseCDF<f64> for Categorical {
     /// and `f(x)` is defined as `p_x + f(x - 1)` and `f(0) = p_0` where
     /// `p_x` is the `x`th probability mass
     fn inverse_cdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0 && x < 1.0, format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0)));
+        assert!(x > 0.0 && x < 1.0,
+                format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0)));
         let denorm_prob = x * self.cdf_max();
         binary_index(&self.cdf, denorm_prob) as f64
     }
@@ -306,7 +279,8 @@ impl Discrete<u64, f64> for Categorical {
     /// p_x
     /// ```
     fn pmf(&self, x: u64) -> f64 {
-        assert!(x < self.norm_pmf.len() as u64, format!("{}", StatsError::ArgLtArg("x", "k")));
+        assert!(x < self.norm_pmf.len() as u64,
+                format!("{}", StatsError::ArgLtArg("x", "k")));
         unsafe { *self.norm_pmf.get_unchecked(x as usize) }
     }
 
@@ -315,6 +289,45 @@ impl Discrete<u64, f64> for Categorical {
     fn ln_pmf(&self, x: u64) -> f64 {
         self.pmf(x).ln()
     }
+}
+
+/// Draws a sample from the categorical distribution described by `cdf`
+/// without doing any bounds checking
+pub fn sample_unchecked<R: Rng>(r: &mut R, cdf: &[f64]) -> f64 {
+    let draw = r.next_f64() * unsafe { cdf.get_unchecked(cdf.len() - 1) };
+    let mut idx = 0;
+
+    if draw == 0.0 {
+        // skip zero-probability categories
+        let mut el = unsafe { cdf.get_unchecked(idx) };
+        while *el == 0.0 {
+            // don't need bounds checking because we do not allow
+            // creating Categorical distributions with all 0.0 probs
+            idx += 1;
+            el = unsafe { cdf.get_unchecked(idx) }
+        }
+    }
+    let mut el = unsafe { cdf.get_unchecked(idx) };
+    while draw > *el {
+        idx += 1;
+        el = unsafe { cdf.get_unchecked(idx) };
+    }
+    return idx as f64;
+}
+
+/// Computes the cdf from the given probability masses. Performs
+/// no parameter or bounds checking.
+pub fn prob_mass_to_cdf(prob_mass: &[f64]) -> Vec<f64> {
+    let mut cdf = vec![0.0; prob_mass.len()];
+    cdf[0] = prob_mass[0];
+    for i in 1..prob_mass.len() {
+        unsafe {
+            let val = cdf.get_unchecked(i - 1) + prob_mass.get_unchecked(i);
+            let elem = cdf.get_unchecked_mut(i);
+            *elem = val;
+        }
+    }
+    cdf
 }
 
 // Returns the index of val if placed into the sorted search array.
@@ -339,6 +352,13 @@ fn binary_index(search: &[f64], val: f64) -> usize {
         }
     }
     cmp::min(search.len(), cmp::max(low, 0) as usize)
+}
+
+#[test]
+fn test_prob_mass_to_cdf() {
+    let arr = [0.0, 0.5, 0.5, 3.0, 1.1];
+    let res = prob_mass_to_cdf(&arr);
+    assert_eq!(res, [0.0, 0.5, 1.0, 4.0, 5.1]);
 }
 
 #[test]
