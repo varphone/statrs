@@ -4,6 +4,7 @@ use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
 use distribution::{Univariate, Discrete, Distribution, InverseCDF};
 use {Result, StatsError};
+use super::internal;
 
 /// Implements the [Categorical](https://en.wikipedia.org/wiki/Categorical_distribution)
 /// distribution, also known as the generalized Bernoulli or discrete distribution
@@ -34,7 +35,11 @@ impl Categorical {
     ///
     /// Returns an error if `prob_mass` is empty, the sum of
     /// the elements in `prob_mass` is 0, or any element is less than
-    /// 0 or `f64::NAN`
+    /// 0 or is `f64::NAN`
+    ///
+    /// # Note
+    ///
+    /// The elements in `prob_mass` do not need to be normalized
     ///
     /// # Examples
     ///
@@ -48,7 +53,7 @@ impl Categorical {
     /// assert!(result.is_err());
     /// ```
     pub fn new(prob_mass: &[f64]) -> Result<Categorical> {
-        if !is_valid_prob_mass(prob_mass) {
+        if !internal::is_valid_multinomial(prob_mass, true) {
             Err(StatsError::BadParams)
         } else {
             // extract un-normalized cdf
@@ -312,12 +317,6 @@ impl Discrete<u64, f64> for Categorical {
     }
 }
 
-// determines if `p` is a valid probability mass array
-// for the Categorical distribution
-fn is_valid_prob_mass(p: &[f64]) -> bool {
-    !p.iter().any(|&x| x < 0.0 || x.is_nan()) && !p.iter().all(|&x| x == 0.0)
-}
-
 // Returns the index of val if placed into the sorted search array.
 // If val is greater than all elements, it therefore would return
 // the length of the array (N). If val is less than all elements, it would
@@ -340,20 +339,6 @@ fn binary_index(search: &[f64], val: f64) -> usize {
         }
     }
     cmp::min(search.len(), cmp::max(low, 0) as usize)
-}
-
-#[test]
-fn test_is_valid_prob_mass() {
-    let invalid = [1.0, f64::NAN, 3.0];
-    assert!(!is_valid_prob_mass(&invalid));
-    let invalid2 = [-2.0, 5.0, 1.0, 6.2];
-    assert!(!is_valid_prob_mass(&invalid2));
-    let invalid3 = [0.0, 0.0, 0.0];
-    assert!(!is_valid_prob_mass(&invalid3));
-    let invalid4: [f64; 0] = [];
-    assert!(!is_valid_prob_mass(&invalid4));
-    let valid = [5.2, 0.00001, 1e-15, 1000000.12];
-    assert!(is_valid_prob_mass(&valid));
 }
 
 #[test]

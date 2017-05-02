@@ -42,6 +42,7 @@ mod fisher_snedecor;
 mod gamma;
 mod geometric;
 mod hypergeometric;
+mod internal;
 mod inverse_gamma;
 mod log_normal;
 mod multinomial;
