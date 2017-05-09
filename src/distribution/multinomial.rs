@@ -1,5 +1,6 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
+use statistics::*;
 use distribution::Distribution;
 use {Result, StatsError};
 
@@ -125,15 +126,32 @@ impl Distribution<Vec<f64>> for Multinomial {
         for _ in 0..self.n {
             let i = super::categorical::sample_unchecked(r, &p_cdf);
             let mut el = unsafe { res.get_unchecked_mut(i as usize) };
-            *el = *el + 1.0; 
+            *el = *el + 1.0;
         }
         res
+    }
+}
+
+impl Mean<Vec<f64>> for Multinomial {
+    /// / Returns the mean of the multinomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// n * p_i for i in 1..k
+    /// ```
+    ///
+    /// where `n` is the number of trials, `p_i` is the `i`th probability,
+    /// and `k` is the total number of probabilities
+    fn mean(&self) -> Vec<f64> {
+        self.p.iter().map(|x| x * self.n as f64).collect()
     }
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
+    use statistics::*;
     use distribution::Multinomial;
 
     fn try_create(p: &[f64], n: u64) -> Multinomial {
@@ -153,6 +171,14 @@ mod test {
         assert!(dist.is_err());
     }
 
+    fn test_case<F>(p: &[f64], n: u64, expected: &[f64], eval: F)
+        where F: Fn(Multinomial) -> Vec<f64>
+    {
+        let dist = try_create(p, n);
+        let x = eval(dist);
+        assert_eq!(*expected, *x);
+    }
+
     #[test]
     fn test_create() {
         create_case(&[1.0, 1.0, 1.0], 4);
@@ -163,5 +189,12 @@ mod test {
     fn test_bad_create() {
         bad_create_case(&[-1.0, 1.0], 4);
         bad_create_case(&[0.0, 0.0], 4);
+    }
+
+    #[test]
+    fn test_mean() {
+        test_case(&[0.3, 0.7], 5, &[1.5, 3.5], |x| x.mean());
+        test_case(&[0.1, 0.3, 0.6], 10, &[1.0, 3.0, 6.0], |x| x.mean());
+        test_case(&[0.15, 0.35, 0.3, 0.2], 20, &[3.0, 7.0, 6.0, 4.0], |x| x.mean());
     }
 }
