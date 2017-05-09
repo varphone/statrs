@@ -133,7 +133,7 @@ impl Distribution<Vec<f64>> for Multinomial {
 }
 
 impl Mean<Vec<f64>> for Multinomial {
-    /// / Returns the mean of the multinomial distribution
+    /// Returns the mean of the multinomial distribution
     ///
     /// # Formula
     ///
@@ -145,6 +145,36 @@ impl Mean<Vec<f64>> for Multinomial {
     /// and `k` is the total number of probabilities
     fn mean(&self) -> Vec<f64> {
         self.p.iter().map(|x| x * self.n as f64).collect()
+    }
+}
+
+impl Variance<Vec<f64>> for Multinomial {
+    /// Returns the variance of the multinomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// n * p_i * (1 - p_1)
+    /// ```
+    ///
+    /// where `n` is the number of trials, `p_i` is the `i`th probability,
+    /// and `k` is the total number of probabilities
+    fn variance(&self) -> Vec<f64> {
+        self.p.iter().map(|x| x * self.n as f64 * (1.0 - x)).collect()
+    }
+
+    /// Returns the standard deviation of the multinomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(n * p_i * (1 - p_1))
+    /// ```
+    ///
+    /// where `n` is the number of trials, `p_i` is the `i`th probability,
+    /// and `k` is the total number of probabilities
+    fn std_dev(&self) -> Vec<f64> {
+        self.variance().iter().map(|x| x.sqrt()).collect()
     }
 }
 
@@ -179,6 +209,17 @@ mod test {
         assert_eq!(*expected, *x);
     }
 
+    fn test_almost<F>(p: &[f64], n: u64, expected: &[f64], acc: f64, eval: F)
+        where F: Fn(Multinomial) -> Vec<f64>
+    {
+        let dist = try_create(p, n);
+        let x = eval(dist);
+        assert_eq!(expected.len(), x.len());
+        for i in 0..expected.len() {
+            assert_almost_eq!(expected[i], x[i], acc);
+        }
+    }
+
     #[test]
     fn test_create() {
         create_case(&[1.0, 1.0, 1.0], 4);
@@ -196,5 +237,19 @@ mod test {
         test_case(&[0.3, 0.7], 5, &[1.5, 3.5], |x| x.mean());
         test_case(&[0.1, 0.3, 0.6], 10, &[1.0, 3.0, 6.0], |x| x.mean());
         test_case(&[0.15, 0.35, 0.3, 0.2], 20, &[3.0, 7.0, 6.0, 4.0], |x| x.mean());
+    }
+
+    #[test]
+    fn test_variance() {
+        test_almost(&[0.3, 0.7], 5, &[1.05, 1.05], 1e-15, |x| x.variance());
+        test_almost(&[0.1, 0.3, 0.6], 10, &[0.9, 2.1, 2.4], 1e-15, |x| x.variance());
+        test_almost(&[0.15, 0.35, 0.3, 0.2], 20, &[2.55, 4.55, 4.2, 3.2], 1e-15, |x| x.variance());
+    }
+
+    #[test]
+    fn test_std_dev() {
+        test_almost(&[0.3, 0.7], 5, &[1.05f64.sqrt(), 1.05f64.sqrt()], 1e-15, |x| x.std_dev());
+        test_almost(&[0.1, 0.3, 0.6], 10, &[0.9f64.sqrt(), 2.1f64.sqrt(), 2.4f64.sqrt()], 1e-15, |x| x.std_dev());
+        test_almost(&[0.15, 0.35, 0.3, 0.2], 20, &[2.55f64.sqrt(), 4.55f64.sqrt(), 4.2f64.sqrt(), 3.2f64.sqrt()], 1e-15, |x| x.std_dev());
     }
 }

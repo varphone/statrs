@@ -182,7 +182,7 @@ impl Variance<Vec<f64>> for Dirichlet {
         self.alpha.iter().map(|x| x * (sum - x) / (sum * sum * (sum + 1.0))).collect()
     }
 
-    /// Returns the variances of the dirichlet distribution
+    /// Returns the standard deviation of the dirichlet distribution
     ///
     /// # Formula
     ///
