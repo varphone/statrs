@@ -182,7 +182,7 @@ impl Variance<Vec<f64>> for Dirichlet {
         self.alpha.iter().map(|x| x * (sum - x) / (sum * sum * (sum + 1.0))).collect()
     }
 
-    /// Returns the variances of the dirichlet distribution
+    /// Returns the standard deviation of the dirichlet distribution
     ///
     /// # Formula
     ///
@@ -306,21 +306,13 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
 // determines if `a` is a valid alpha array
 // for the Dirichlet distribution
 fn is_valid_alpha(a: &[f64]) -> bool {
-    a.len() >= 2 && !a.iter().any(|&x| x <= 0.0 || x.is_nan()) && !a.iter().all(|&x| x == 0.0)
+    a.len() >= 2 && super::internal::is_valid_multinomial(a, false)
 }
 
 #[test]
 fn test_is_valid_alpha() {
-    let invalid = [1.0, f64::NAN, 3.0];
+    let invalid = [1.0];
     assert!(!is_valid_alpha(&invalid));
-    let invalid2 = [-2.0, 5.0, 1.0, 6.2];
-    assert!(!is_valid_alpha(&invalid2));
-    let invalid3 = [0.0, 0.0, 0.0];
-    assert!(!is_valid_alpha(&invalid3));
-    let invalid4 = [1.0];
-    assert!(!is_valid_alpha(&invalid4));
-    let valid = [5.2, 0.00001, 1e-15, 1000000.12];
-    assert!(is_valid_alpha(&valid));
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]

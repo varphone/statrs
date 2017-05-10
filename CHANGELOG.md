@@ -1,5 +1,6 @@
 v0.7.0
  - Implemented `Categorical` distribution
+ - Implemented `Multinomial` distribution
  - New `InverseCDF` trait for distributions that implement the inverse cdf function
 
 v0.6.0
