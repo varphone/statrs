@@ -1,7 +1,8 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
+use function::factorial;
 use statistics::*;
-use distribution::Distribution;
+use distribution::{Discrete, Distribution};
 use {Result, StatsError};
 
 /// Implements the [Multinomial](https://en.wikipedia.org/wiki/Multinomial_distribution)
@@ -11,6 +12,11 @@ use {Result, StatsError};
 /// # Examples
 ///
 /// ```
+/// use statrs::distribution::Multinomial;
+/// use statrs::statistics::Mean;
+///
+/// let n = Multinomial::new(&[0.3, 0.7], 5).unwrap();
+/// assert_eq!(n.mean(), [1.5, 3.5]);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Multinomial {
@@ -138,7 +144,7 @@ impl Mean<Vec<f64>> for Multinomial {
     /// # Formula
     ///
     /// ```ignore
-    /// n * p_i for i in 1..k
+    /// n * p_i for i in 1...k
     /// ```
     ///
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
@@ -154,7 +160,7 @@ impl Variance<Vec<f64>> for Multinomial {
     /// # Formula
     ///
     /// ```ignore
-    /// n * p_i * (1 - p_1) for i in 1..k
+    /// n * p_i * (1 - p_1) for i in 1...k
     /// ```
     ///
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
@@ -168,7 +174,7 @@ impl Variance<Vec<f64>> for Multinomial {
     /// # Formula
     ///
     /// ```ignore
-    /// sqrt(n * p_i * (1 - p_1)) for i in 1..k
+    /// sqrt(n * p_i * (1 - p_1)) for i in 1...k
     /// ```
     ///
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
@@ -184,7 +190,7 @@ impl Skewness<Vec<f64>> for Multinomial {
     /// # Formula
     ///
     /// ```ignore
-    /// (1 - 2 * p_i) / (n * p_i * (1 - p_i)) for i in 1..k
+    /// (1 - 2 * p_i) / (n * p_i * (1 - p_i)) for i in 1...k
     /// ```
     ///
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
@@ -197,11 +203,74 @@ impl Skewness<Vec<f64>> for Multinomial {
     }
 }
 
+impl<'a> Discrete<&'a [u64], f64> for Multinomial {
+    /// Calculates the probability mass function for the multinomial distribution
+    /// with the given `x`'s corresponding to the probabilities for this distribution
+    ///
+    /// # Panics
+    ///
+    /// If the elements in `x` do not sum to `n` or if the length of `x` is not
+    /// equivalent to the length of `p`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (n! / x_1!...x_k!) * p_i^x_i for i in 1...k
+    /// ```
+    ///
+    /// where `n` is the number of trials, `p_i` is the `i`th probability,
+    /// `x_i` is the `i`th `x` value, and `k` is the total number of probabilities
+    fn pmf(&self, x: &[u64]) -> f64 {
+        assert!(self.p.len() == x.len(),
+                format!("{}", StatsError::ContainersMustBeSameLength));
+        assert!(x.iter().fold(0, |acc, x| acc + x) == self.n,
+                format!("{}", StatsError::ContainerExpectedSumVar("x", "n")));
+
+        let coeff = factorial::multinomial(self.n, x);
+        coeff *
+        self.p
+            .iter()
+            .zip(x.iter())
+            .fold(1.0, |acc, (pi, xi)| acc * pi.powf(*xi as f64))
+    }
+
+    /// Calculates the log probability mass function for the multinomial distribution
+    /// with the given `x`'s corresponding to the probabilities for this distribution
+    ///
+    /// # Panics
+    ///
+    /// If the elements in `x` do not sum to `n` or if the length of `x` is not
+    /// equivalent to the length of `p`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((n! / x_1!...x_k!) * p_i^x_i) for i in 1...k
+    /// ```
+    ///
+    /// where `n` is the number of trials, `p_i` is the `i`th probability,
+    /// `x_i` is the `i`th `x` value, and `k` is the total number of probabilities
+    fn ln_pmf(&self, x: &[u64]) -> f64 {
+        assert!(self.p.len() == x.len(),
+                format!("{}", StatsError::ContainersMustBeSameLength));
+        assert!(x.iter().fold(0, |acc, x| acc + x) == self.n,
+                format!("{}", StatsError::ContainerExpectedSumVar("x", "n")));
+
+        let coeff = factorial::multinomial(self.n, x).ln();
+        coeff +
+        self.p
+            .iter()
+            .zip(x.iter())
+            .map(|(pi, xi)| *xi as f64 * pi.ln())
+            .fold(0.0, |acc, x| acc + x)
+    }
+}
+
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
     use statistics::*;
-    use distribution::Multinomial;
+    use distribution::{Discrete, Multinomial};
 
     fn try_create(p: &[f64], n: u64) -> Multinomial {
         let dist = Multinomial::new(p, n);
@@ -237,6 +306,14 @@ mod test {
         for i in 0..expected.len() {
             assert_almost_eq!(expected[i], x[i], acc);
         }
+    }
+
+    fn test_almost_sr<F>(p: &[f64], n: u64, expected: f64, acc:f64, eval: F)
+        where F: Fn(Multinomial) -> f64
+    {
+        let dist = try_create(p, n);
+        let x = eval(dist);
+        assert_almost_eq!(expected, x, acc);
     }
 
     #[test]
@@ -277,5 +354,54 @@ mod test {
         test_almost(&[0.3, 0.7], 5, &[0.390360029179413, -0.390360029179413], 1e-15, |x| x.skewness());
         test_almost(&[0.1, 0.3, 0.6], 10, &[0.843274042711568, 0.276026223736942, -0.12909944487358], 1e-15, |x| x.skewness());
         test_almost(&[0.15, 0.35, 0.3, 0.2], 20, &[0.438357003759605, 0.140642169281549, 0.195180014589707, 0.335410196624968], 1e-15, |x| x.skewness());
+    }
+
+    #[test]
+    fn test_pmf() {
+        test_almost_sr(&[0.3, 0.7], 10, 0.121060821, 1e-15, |x| x.pmf(&[1, 9]));
+        test_almost_sr(&[0.1, 0.3, 0.6], 10, 0.105815808, 1e-15, |x| x.pmf(&[1, 3, 6]));
+        test_almost_sr(&[0.15, 0.35, 0.3, 0.2], 10, 0.000145152, 1e-15, |x| x.pmf(&[1, 1, 1, 7]));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_pmf_x_wrong_length() {
+        let n = Multinomial::new(&[0.3, 0.7], 10).unwrap();
+        n.pmf(&[1]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_pmf_x_wrong_sum() {
+        let n = Multinomial::new(&[0.3, 0.7], 10).unwrap();
+        n.pmf(&[1, 3]);
+    }
+
+    #[test]
+    fn test_ln_pmf() {
+        let large_p = &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+        let n = Multinomial::new(large_p, 45).unwrap();
+        let x = &[1, 2, 3, 4, 5, 6, 7, 8, 9];
+        assert_almost_eq!(n.pmf(x).ln(), n.ln_pmf(x), 1e-13);
+        let n2 = Multinomial::new(large_p, 18).unwrap();
+        let x2 = &[1, 1, 1, 2, 2, 2, 3, 3, 3];
+        assert_almost_eq!(n2.pmf(x2).ln(), n2.ln_pmf(x2), 1e-13);
+        let n3 = Multinomial::new(large_p, 51).unwrap();
+        let x3 = &[5, 6, 7, 8, 7, 6, 5, 4, 3];
+        assert_almost_eq!(n3.pmf(x3).ln(), n3.ln_pmf(x3), 1e-13);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_ln_pmf_x_wrong_length() {
+        let n = Multinomial::new(&[0.3, 0.7], 10).unwrap();
+        n.ln_pmf(&[1]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_ln_pmf_x_wrong_sum() {
+        let n = Multinomial::new(&[0.3, 0.7], 10).unwrap();
+        n.ln_pmf(&[1, 3]);
     }
 }
