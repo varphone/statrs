@@ -154,7 +154,7 @@ impl Variance<Vec<f64>> for Multinomial {
     /// # Formula
     ///
     /// ```ignore
-    /// n * p_i * (1 - p_1)
+    /// n * p_i * (1 - p_1) for i in 1..k
     /// ```
     ///
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
@@ -168,13 +168,32 @@ impl Variance<Vec<f64>> for Multinomial {
     /// # Formula
     ///
     /// ```ignore
-    /// sqrt(n * p_i * (1 - p_1))
+    /// sqrt(n * p_i * (1 - p_1)) for i in 1..k
     /// ```
     ///
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
     /// and `k` is the total number of probabilities
     fn std_dev(&self) -> Vec<f64> {
         self.variance().iter().map(|x| x.sqrt()).collect()
+    }
+}
+
+impl Skewness<Vec<f64>> for Multinomial {
+    /// Returns the skewness of the multinomial distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (1 - 2 * p_i) / (n * p_i * (1 - p_i)) for i in 1..k
+    /// ```
+    ///
+    /// where `n` is the number of trials, `p_i` is the `i`th probability,
+    /// and `k` is the total number of probabilities
+    fn skewness(&self) -> Vec<f64> {
+        self.p
+            .iter()
+            .map(|x| (1.0 - 2.0 * x) / (self.n as f64 * (1.0 - x) * x).sqrt())
+            .collect()
     }
 }
 
@@ -251,5 +270,12 @@ mod test {
         test_almost(&[0.3, 0.7], 5, &[1.05f64.sqrt(), 1.05f64.sqrt()], 1e-15, |x| x.std_dev());
         test_almost(&[0.1, 0.3, 0.6], 10, &[0.9f64.sqrt(), 2.1f64.sqrt(), 2.4f64.sqrt()], 1e-15, |x| x.std_dev());
         test_almost(&[0.15, 0.35, 0.3, 0.2], 20, &[2.55f64.sqrt(), 4.55f64.sqrt(), 4.2f64.sqrt(), 3.2f64.sqrt()], 1e-15, |x| x.std_dev());
+    }
+
+    #[test]
+    fn test_skewness() {
+        test_almost(&[0.3, 0.7], 5, &[0.390360029179413, -0.390360029179413], 1e-15, |x| x.skewness());
+        test_almost(&[0.1, 0.3, 0.6], 10, &[0.843274042711568, 0.276026223736942, -0.12909944487358], 1e-15, |x| x.skewness());
+        test_almost(&[0.15, 0.35, 0.3, 0.2], 20, &[0.438357003759605, 0.140642169281549, 0.195180014589707, 0.335410196624968], 1e-15, |x| x.skewness());
     }
 }
