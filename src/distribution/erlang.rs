@@ -1,6 +1,7 @@
 use rand::Rng;
 use rand::distributions::{Sample, IndependentSample};
 use statistics::*;
+use distribution::{Univariate, Continuous, Distribution, Gamma};
 use {Result, StatsError};
 
 /// Implements the [Erlang](https://en.wikipedia.org/wiki/Erlang_distribution) distribution
@@ -16,8 +17,7 @@ use {Result, StatsError};
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Erlang {
-    shape: u64,
-    rate: f64,
+    g: Gamma
 }
 
 impl Erlang {
@@ -41,11 +41,7 @@ impl Erlang {
     /// assert!(result.is_err());
     /// ```
     pub fn new(shape: u64, rate: f64) -> Result<Erlang> {
-        if rate.is_nan() || shape == 0 || rate <= 0.0 {
-            Err(StatsError::BadParams)
-        } else {
-            Ok(Erlang { shape: shape, rate: rate })
-        }
+        Gamma::new(shape as f64, rate).map(|g| Erlang { g: g })
     }
 
     /// Returns the shape (k) of the erlang distribution
@@ -59,7 +55,7 @@ impl Erlang {
     /// assert_eq!(n.shape(), 3);
     /// ```
     pub fn shape(&self) -> u64 {
-        self.shape
+        self.g.shape() as u64
     }
 
     /// Returns the rate (λ) of the erlang distribution
@@ -73,7 +69,7 @@ impl Erlang {
     /// assert_eq!(n.rate(), 1.0);
     /// ```
     pub fn rate(&self) -> f64 {
-        self.rate
+        self.g.rate()
     }
 }
 
@@ -114,7 +110,57 @@ impl Distribution<f64> for Erlang {
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        super::gammma::sample_unchecked(r, self.shape, self.rate)
+        self.g.sample(r)
+    }
+}
+
+impl Univariate<f64, f64> for Erlang {
+    /// Calculates the cumulative distribution function for the erlang distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// γ(k, λx)  (k - 1)!
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the rate, and `γ` is the lower incomplete gamma function
+    fn cdf(&self, x: f64) -> f64 {
+        self.g.cdf(x)
+    }
+}
+
+impl Min<f64> for Erlang {
+    /// Returns the minimum value in the domain of the
+    /// erlang distribution representable by a double precision
+    /// float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 0
+    /// ```
+    fn min(&self) -> f64 {
+        self.g.min()
+    }
+}
+
+impl Max<f64> for Erlang {
+    /// Returns the maximum value in the domain of the
+    /// erlang distribution representable by a double precision
+    /// float
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// INF
+    /// ```
+    fn max(&self) -> f64 {
+        self.g.max()
     }
 }
 
