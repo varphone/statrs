@@ -1,6 +1,11 @@
+use rand::Rng;
+use rand::distributions::{Sample, IndependentSample};
+use statistics::*;
 use {Result, StatsError};
 
 /// Implements the [Erlang](https://en.wikipedia.org/wiki/Erlang_distribution) distribution
+/// which is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution)
+/// distribution
 ///
 /// # Examples
 ///
@@ -69,6 +74,47 @@ impl Erlang {
     /// ```
     pub fn rate(&self) -> f64 {
         self.rate
+    }
+}
+
+impl Sample<f64> for Erlang {
+    /// Generate a random sample from a erlang
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
+    fn sample<R: Rng>(&mut self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl IndependentSample<f64> for Erlang {
+    /// Generate a random independent sample from a erlang
+    /// distribution using `r` as the source of randomness.
+    /// Refer [here](#method.sample-1) for implementation details
+    fn ind_sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::Distribution::sample(self, r)
+    }
+}
+
+impl Distribution<f64> for Erlang {
+    /// Generate a random sample from a erlang distribution using
+    /// `r` as the source of randomness.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # extern crate rand;
+    /// # extern crate statrs;
+    /// use rand::StdRng;
+    /// use statrs::distribution::{Erlang, Distribution};
+    ///
+    /// # fn main() {
+    /// let mut r = rand::StdRng::new().unwrap();
+    /// let n = Erlang::new(3, 1.0).unwrap();
+    /// print!("{}", n.sample::<StdRng>(&mut r));
+    /// # }
+    /// ```
+    fn sample<R: Rng>(&self, r: &mut R) -> f64 {
+        super::gammma::sample_unchecked(r, self.shape, self.rate)
     }
 }
 
