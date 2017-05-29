@@ -248,7 +248,7 @@ impl Variance<f64> for Gamma {
     ///
     /// where `α` is the shape and `β` is the rate
     fn std_dev(&self) -> f64 {
-        self.variance().sqrt()
+        self.shape.sqrt() / self.rate
     }
 }
 

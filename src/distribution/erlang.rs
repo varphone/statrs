@@ -14,10 +14,14 @@ use {Result, StatsError};
 /// use statrs::distribution::{Erlang, Continuous};
 /// use statrs::statistics::Mean;
 /// use statrs::prec;
+///
+/// let n = Erlang::new(3, 1.0).unwrap();
+/// assert_eq!(n.mean(), 3.0);
+/// assert!(prec::almost_eq(n.pdf(2.0), 0.270670566473225383788, 1e-15));
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Erlang {
-    g: Gamma
+    g: Gamma,
 }
 
 impl Erlang {
@@ -161,6 +165,159 @@ impl Max<f64> for Erlang {
     /// ```
     fn max(&self) -> f64 {
         self.g.max()
+    }
+}
+
+impl Mean<f64> for Erlang {
+    /// Returns the mean of the erlang distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `shape` if `rate == f64::INFINITY`. This behavior
+    /// is borrowed from the Math.NET implementation
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// k / λ
+    /// ```
+    ///
+    /// where `k` is the shape and `λ` is the rate
+    fn mean(&self) -> f64 {
+        self.g.mean()
+    }
+}
+
+impl Variance<f64> for Erlang {
+    /// Returns the variance of the erlang distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// k / λ^2
+    /// ```
+    ///
+    /// where `α` is the shape and `λ` is the rate
+    fn variance(&self) -> f64 {
+        self.g.variance()
+    }
+
+    /// Returns the standard deviation of the erlang distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(k) / λ
+    /// ```
+    ///
+    /// where `k` is the shape and `λ` is the rate
+    fn std_dev(&self) -> f64 {
+        self.g.std_dev()
+    }
+}
+
+impl Entropy<f64> for Erlang {
+    /// Returns the entropy of the erlang distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// k - ln(λ) + ln(Γ(k)) + (1 - k) * ψ(k)
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the rate, `Γ` is the gamma function,
+    /// and `ψ` is the digamma function
+    fn entropy(&self) -> f64 {
+        self.g.entropy()
+    }
+}
+
+impl Skewness<f64> for Erlang {
+    /// Returns the skewness of the erlang distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// 2 / sqrt(k)
+    /// ```
+    ///
+    /// where `k` is the shape
+    fn skewness(&self) -> f64 {
+        self.g.skewness()
+    }
+}
+
+impl Mode<f64> for Erlang {
+    /// Returns the mode for the erlang distribution
+    ///
+    /// # Remarks
+    ///
+    /// Returns `shape` if `rate ==f64::INFINITY`. This behavior
+    /// is borrowed from the Math.NET implementation
+    ///
+    /// # Panics
+    ///
+    /// If `k < 1`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (k - 1) / λ
+    /// ```
+    ///
+    /// where `k` is the shape and `λ` is the rate
+    fn mode(&self) -> f64 {
+        assert!(self.g.shape() >= 1.0,
+                format!("{}", StatsError::ArgGte("shape", 1.0)));
+        self.g.mode()
+    }
+}
+
+impl Continuous<f64, f64> for Erlang {
+    /// Calculates the probability density function for the erlang distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `NAN` if any of `shape` or `rate` are `INF`
+    /// or if `x` is `INF`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// (λ^k / Γ(k)) * x^(k - 1) * e^(-λ * x)
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the rate, and `Γ` is the gamma function
+    fn pdf(&self, x: f64) -> f64 {
+        self.g.pdf(x)
+    }
+
+    /// Calculates the log probability density function for the erlang distribution
+    /// at `x`
+    ///
+    /// # Panics
+    ///
+    /// If `x <= 0.0`
+    ///
+    /// # Remarks
+    ///
+    /// Returns `NAN` if any of `shape` or `rate` are `INF`
+    /// or if `x` is `INF`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// ln((λ^k / Γ(k)) * x^(k - 1) * e ^(-λ * x))
+    /// ```
+    ///
+    /// where `k` is the shape, `λ` is the rate, and `Γ` is the gamma function
+    fn ln_pdf(&self, x: f64) -> f64 {
+        self.g.ln_pdf(x)
     }
 }
 
