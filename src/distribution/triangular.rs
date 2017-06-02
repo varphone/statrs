@@ -110,10 +110,6 @@ impl Univariate<f64, f64> for Triangular {
     /// Calculates the cumulative distribution function for the triangular distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < min` or `x > max`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -128,17 +124,14 @@ impl Univariate<f64, f64> for Triangular {
     /// }
     /// ```
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= self.min as f64 && x <= self.max as f64,
-                format!("{}",
-                        StatsError::ArgIntervalIncl("x", self.min as f64, self.max as f64)));
         let a = self.min;
         let b = self.max;
         let c = self.mode;
-        if x == a {
-            0.0
-        } else if a < x && x <= c {
+		if x <= a {
+			0.0
+		} else if x <= c {
             (x - a) * (x - a) / ((b - a) * (c - a))
-        } else if c < x && x < b {
+        } else if x < b {
             1.0 - (b - x) * (b - x) / ((b - a) * (b - c))
         } else {
             1.0
@@ -346,6 +339,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Triangular};
+	use distribution::internal::*;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
         let n = Triangular::new(min, max, mode);
@@ -525,14 +519,18 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_lower_bound() {
-        get_value(0.0, 3.0, 1.5, |x| x.cdf(-1.0));
+        test_case(0.0, 3.0, 1.5, 0.0, |x| x.cdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_upper_bound() {
-        get_value(0.0, 3.0, 1.5, |x| x.cdf(5.0));
+        test_case(0.0, 3.0, 1.5, 1.0, |x| x.cdf(5.0));
     }
+	
+	#[test]
+	fn test_continuous() {
+		test::check_continuous_distribution(&try_create(-5.0, 5.0, 0.0), -5.0, 5.0);
+		test::check_continuous_distribution(&try_create(-15.0, -2.0, -3.0), -15.0, -2.0);
+	}
 }

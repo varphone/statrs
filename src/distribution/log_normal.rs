@@ -104,10 +104,6 @@ impl Univariate<f64, f64> for LogNormal {
     /// Calculates the cumulative distribution function for the log-normal distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -117,8 +113,13 @@ impl Univariate<f64, f64> for LogNormal {
     /// where `μ` is the location, `σ` is the scale, and `erf` is the
     /// error function
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
+		if x <= 0.0 {
+			0.0
+		} else if x == f64::INFINITY {
+			1.0
+		} else {
+			0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
+		}
     }
 }
 
@@ -259,10 +260,6 @@ impl Continuous<f64, f64> for LogNormal {
     /// Calculates the probability density function for the log-normal
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -271,17 +268,18 @@ impl Continuous<f64, f64> for LogNormal {
     ///
     /// where `μ` is the location and `σ` is the scale
     fn pdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        let d = (x.ln() - self.location) / self.scale;
-        (-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.scale)
+		if x <= 0.0 {
+			0.0
+		} else if x == f64::INFINITY {
+			0.0
+		} else {
+			let d = (x.ln() - self.location) / self.scale;
+			(-0.5 * d * d).exp() / (x * consts::SQRT_2PI * self.scale)
+		}
     }
 
     /// Calculates the log probability density function for the log-normal
     /// distribution at `x`
-    ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
     ///
     /// # Formula
     ///
@@ -291,9 +289,14 @@ impl Continuous<f64, f64> for LogNormal {
     ///
     /// where `μ` is the location and `σ` is the scale
     fn ln_pdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        let d = (x.ln() - self.location) / self.scale;
-        (-0.5 * d * d) - consts::LN_SQRT_2PI - (x * self.scale).ln()
+		if x <= 0.0 {
+			f64::NEG_INFINITY
+		} else if x == f64::INFINITY {
+			f64::NEG_INFINITY
+		} else {
+			let d = (x.ln() - self.location) / self.scale;
+			(-0.5 * d * d) - consts::LN_SQRT_2PI - (x * self.scale).ln()
+		}
     }
 }
 
@@ -303,6 +306,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, LogNormal};
+	use distribution::internal::*;
 
     fn try_create(mean: f64, std_dev: f64) -> LogNormal {
         let n = LogNormal::new(mean, std_dev);
@@ -566,9 +570,8 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_pdf() {
-        get_value(0.0, 1.0, |x| x.pdf(0.0));
+        test_case(0.0, 1.0, 0.0, |x| x.pdf(0.0));
     }
 
     #[test]
@@ -603,9 +606,8 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_ln_pdf() {
-        get_value(0.0, 1.0, |x| x.ln_pdf(0.0));
+        test_case(0.0, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(0.0));
     }
 
     #[test]
@@ -640,8 +642,13 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_cdf() {
-        get_value(0.0, 1.0, |x| x.cdf(0.0));
+        test_case(0.0, 1.0, 0.0, |x| x.cdf(0.0));
     }
+	
+	#[test]
+	fn test_continuous() {
+		test::check_continuous_distribution(&try_create(0.0, 0.25), 0.0, 10.0);
+		test::check_continuous_distribution(&try_create(0.0, 0.5), 0.0, 10.0);
+	}
 }

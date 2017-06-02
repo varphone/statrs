@@ -135,10 +135,6 @@ impl Univariate<u64, f64> for Binomial {
     /// Calulcates the cumulative distribution function for the
     /// binomial distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0` or `x > n`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -147,11 +143,11 @@ impl Univariate<u64, f64> for Binomial {
     ///
     /// where `I_(x)(a, b)` is the regularized incomplete beta function
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0 && x <= self.n as f64,
-                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, self.n as f64)));
-        if x == self.n as f64 {
-            1.0
-        } else {
+		if x < 0.0 {
+			0.0
+		} else if x >= self.n as f64 {
+			1.0
+		} else {
             let k = x.floor();
             beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p)
         }
@@ -293,18 +289,15 @@ impl Discrete<u64, f64> for Binomial {
     /// Calculates the probability mass function for the binomial
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x > n`
-    ///
     /// # Formula
     ///
     /// ```ignore
     /// (n choose k) * p^k * (1 - p)^(n - k)
     /// ```
     fn pmf(&self, x: u64) -> f64 {
-        assert!(x <= self.n,
-                format!("{}", StatsError::ArgLte("x", 1.0)));
+		if x > self.n {
+			return 0.0;
+		}
         match self.p {
             0.0 if x == 0 => 1.0,
             0.0 => 0.0,
@@ -321,18 +314,15 @@ impl Discrete<u64, f64> for Binomial {
     /// Calculates the log probability mass function for the binomial
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x > n`
-    ///
     /// # Formula
     ///
     /// ```ignore
     /// ln((n choose k) * p^k * (1 - p)^(n - k))
     /// ```
     fn ln_pmf(&self, x: u64) -> f64 {
-        assert!(x <= self.n,
-                format!("{}", StatsError::ArgLte("x", 1.0)));
+		if x > self.n {
+			return f64::NEG_INFINITY;
+		}
         match self.p {
             0.0 if x == 0 => 0.0,
             0.0 => f64::NEG_INFINITY,
@@ -353,6 +343,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Discrete, Binomial};
+	use distribution::internal::*;
 
     fn try_create(p: f64, n: u64) -> Binomial {
         let n = Binomial::new(p, n);
@@ -548,14 +539,18 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_lower_bound() {
-        get_value(0.5, 3, |x| x.cdf(-1.0));
+        test_case(0.5, 3, 0.0, |x| x.cdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_upper_bound() {
-        get_value(0.5, 3, |x| x.cdf(5.0));
+        test_case(0.5, 3, 1.0, |x| x.cdf(5.0));
     }
+	
+	#[test]
+	fn test_discrete() {
+		test::check_discrete_distribution(&try_create(0.3, 5), 5);
+		test::check_discrete_distribution(&try_create(0.7, 10), 10);
+	}
 }

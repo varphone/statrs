@@ -100,21 +100,15 @@ impl Univariate<f64, f64> for Uniform {
     /// Calculates the cumulative distribution function for the uniform distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < min` or `x > max`
-    ///
     /// # Formula
     ///
     /// ```ignore
     /// (x - min) / (max - min)
     /// ```
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= self.min && x <= self.max,
-                format!("{}", StatsError::ArgIntervalIncl("x", self.min, self.max)));
-        if x == self.min {
+        if x <= self.min {
             0.0
-        } else if x == self.max {
+        } else if x >= self.max {
             1.0
         } else {
             (x - self.min) / (self.max - self.min)
@@ -276,6 +270,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Uniform};
+	use distribution::internal::*;
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let n = Uniform::new(min, max);
@@ -455,14 +450,18 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_lower_bound() {
-        get_value(0.0, 3.0, |x| x.cdf(-1.0));
+        test_case(0.0, 3.0, 0.0, |x| x.cdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_upper_bound() {
-        get_value(0.0, 3.0, |x| x.cdf(5.0));
+        test_case(0.0, 3.0, 1.0, |x| x.cdf(5.0));
     }
+	
+	#[test]
+	fn test_continuous() {
+		test::check_continuous_distribution(&try_create(0.0, 10.0), 0.0, 10.0);
+		test::check_continuous_distribution(&try_create(-2.0, 15.0), -2.0, 15.0);
+	}
 }

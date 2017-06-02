@@ -127,10 +127,6 @@ impl Univariate<u64, f64> for Bernoulli {
     /// Calculates the cumulative distribution
     /// function for the bernoulli distribution at `x`.
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0` or `x > 1.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -277,10 +273,6 @@ impl Discrete<u64, f64> for Bernoulli {
     /// Calculates the probability mass function for the
     /// bernoulli distribution at `x`.
     ///
-    /// # Panics
-    ///
-    /// If `x > 1`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -293,10 +285,6 @@ impl Discrete<u64, f64> for Bernoulli {
 
     /// Calculates the log probability mass function for the
     /// bernoulli distribution at `x`.
-    ///
-    /// # Panics
-    ///
-    /// If `x > 1`
     ///
     /// # Formula
     ///

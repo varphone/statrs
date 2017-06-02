@@ -136,10 +136,6 @@ impl Univariate<f64, f64> for Beta {
     /// Calculates the cumulative distribution function for the beta distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0` or `x > 1.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -149,9 +145,9 @@ impl Univariate<f64, f64> for Beta {
     /// where `α` is shapeA, `β` is shapeB, and `I_x` is the regularized
     /// lower incomplete beta function
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0 && x <= 1.0,
-                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
-        if x == 1.0 {
+        if x < 0.0 {
+			0.0
+		} else if x >= 1.0 {
             1.0
         } else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
             if x < 0.5 { 0.0 } else { 1.0 }
@@ -348,10 +344,6 @@ impl Mode<f64> for Beta {
 impl Continuous<f64, f64> for Beta {
     /// Calculates the probability density function for the beta distribution at `x`.
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0` or `x > 1.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -362,9 +354,9 @@ impl Continuous<f64, f64> for Beta {
     ///
     /// where `α` is shapeA, `β` is shapeB, and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0 && x <= 1.0,
-                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
-        if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+		if x < 0.0 || x > 1.0 {
+			0.0
+		} else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
             if x == 0.5 { f64::INFINITY } else { 0.0 }
         } else if self.shape_a == f64::INFINITY {
             if x == 1.0 { f64::INFINITY } else { 0.0 }
@@ -383,10 +375,6 @@ impl Continuous<f64, f64> for Beta {
 
     /// Calculates the log probability density function for the beta distribution at `x`.
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0` or `x > 1.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -397,9 +385,9 @@ impl Continuous<f64, f64> for Beta {
     ///
     /// where `α` is shapeA, `β` is shapeB, and `Γ` is the gamma function
     fn ln_pdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0 && x <= 1.0,
-                format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
-        if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+		if x < 0.0 || x > 1.0 {
+			f64::NEG_INFINITY
+        } else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
             if x == 0.5 {
                 f64::INFINITY
             } else {
@@ -443,6 +431,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Beta};
+	use distribution::internal::*;
 
     fn try_create(shape_a: f64, shape_b: f64) -> Beta {
         let n = Beta::new(shape_a, shape_b);
@@ -612,15 +601,13 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_pdf_input_lt_zero() {
-        get_value(1.0, 1.0, |x| x.pdf(-1.0));
+        test_case(1.0, 1.0, 0.0, |x| x.pdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_pdf_input_gt_one() {
-        get_value(1.0, 1.0, |x| x.pdf(2.0));
+        test_case(1.0, 1.0, 0.0, |x| x.pdf(2.0));
     }
 
     #[test]
@@ -646,15 +633,13 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_ln_pdf_input_lt_zero() {
-        get_value(1.0, 1.0, |x| x.ln_pdf(-1.0));
+        test_case(1.0, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_ln_pdf_input_gt_one() {
-        get_value(1.0, 1.0, |x| x.ln_pdf(2.0));
+        test_case(1.0, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(2.0));
     }
 
     #[test]
@@ -680,14 +665,18 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_input_lt_zero() {
-        get_value(1.0, 1.0, |x| x.cdf(-1.0));
+        test_case(1.0, 1.0, 0.0, |x| x.cdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_input_gt_zero() {
-        get_value(1.0, 1.0, |x| x.cdf(2.0));
+        test_case(1.0, 1.0, 1.0, |x| x.cdf(2.0));
     }
+	
+	#[test]
+	fn test_continuous() {
+		test::check_continuous_distribution(&try_create(1.2, 3.4), 0.0, 1.0);
+		test::check_continuous_distribution(&try_create(4.5, 6.7), 0.0, 1.0);
+	}
 }
