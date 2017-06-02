@@ -483,6 +483,7 @@ mod test {
         test_case(f64::INFINITY, 0.0, |x| x.pdf(1.0));
         test_case(f64::INFINITY, 0.0, |x| x.pdf(5.5));
         test_case(f64::INFINITY, 0.0, |x| x.pdf(f64::INFINITY));
+        test_almost(170.0, 0.5644678498668440878, 1e-13, |x| x.pdf(13.0));
     }
 
     #[test]
@@ -512,6 +513,7 @@ mod test {
         test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(1.0));
         test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(5.5));
         test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
+        test_almost(170.0, -0.57187185030600516424237, 1e-13, |x| x.ln_pdf(13.0));
     }
 
     #[test]
