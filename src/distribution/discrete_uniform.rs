@@ -49,7 +49,7 @@ impl DiscreteUniform {
         } else {
             Ok(DiscreteUniform {
                 min: min,
-                max: max,
+                max: max
             })
         }
     }
@@ -100,23 +100,22 @@ impl Univariate<i64, f64> for DiscreteUniform {
     /// Calculates the cumulative distribution function for the
     /// discrete uniform distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < min` or `x > max`
-    ///
     /// # Formula
     ///
     /// ```ignore
     /// (floor(x) - min + 1) / (max - min + 1)
     /// ```
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= self.min as f64 && x <= self.max as f64,
-                format!("{}",
-                        StatsError::ArgIntervalIncl("x", self.min as f64, self.max as f64)));
-        let lower = self.min as f64;
-        let upper = self.max as f64;
-        let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
-        if ans > 1.0 { 1.0 } else { ans }
+        if x < self.min as f64 {
+            0.0
+        } else if x >= self.max as f64 {
+            1.0
+        } else {
+            let lower = self.min as f64;
+            let upper = self.max as f64;
+            let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
+            if ans > 1.0 { 1.0 } else { ans }
+        }
     }
 }
 
@@ -420,14 +419,12 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_lower_bound() {
-        get_value(0, 3, |x| x.cdf(-1.0));
+        test_case(0, 3, 0.0, |x| x.cdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_upper_bound() {
-        get_value(0, 3, |x| x.cdf(5.0));
+        test_case(0, 3, 1.0, |x| x.cdf(5.0));
     }
 }

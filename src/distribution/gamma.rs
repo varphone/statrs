@@ -142,10 +142,6 @@ impl Univariate<f64, f64> for Gamma {
     /// Calculates the cumulative distribution function for the gamma distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -155,11 +151,14 @@ impl Univariate<f64, f64> for Gamma {
     /// where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
     /// and `γ` is the lower incomplete gamma function
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        if x == self.shape && self.rate == f64::INFINITY {
+        if x <= 0.0 {
+            0.0
+        } else if x == self.shape && self.rate == f64::INFINITY {
             1.0
         } else if self.rate == f64::INFINITY {
             0.0
+        } else if x == f64::INFINITY {
+            1.0
         } else {
             gamma::gamma_lr(self.shape, x * self.rate)
         }
@@ -316,10 +315,6 @@ impl Continuous<f64, f64> for Gamma {
     /// Calculates the probability density function for the gamma distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
-    ///
     /// # Remarks
     ///
     /// Returns `NAN` if any of `shape` or `rate` are `INF`
@@ -333,11 +328,14 @@ impl Continuous<f64, f64> for Gamma {
     ///
     /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        if self.shape == 1.0 {
+        if x < 0.0 {
+            0.0
+        } else if self.shape == 1.0 {
             self.rate * (-self.rate * x).exp()
         } else if self.shape > 160.0 {
             self.ln_pdf(x).exp()
+        } else if x == f64::INFINITY {
+            0.0
         } else {
             self.rate.powf(self.shape) * x.powf(self.shape - 1.0) * (-self.rate * x).exp() /
             gamma::gamma(self.shape)
@@ -346,10 +344,6 @@ impl Continuous<f64, f64> for Gamma {
 
     /// Calculates the log probability density function for the gamma distribution
     /// at `x`
-    ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
     ///
     /// # Remarks
     ///
@@ -364,9 +358,12 @@ impl Continuous<f64, f64> for Gamma {
     ///
     /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn ln_pdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0, format!("{}", StatsError::ArgMustBePositive("x")));
-        if self.shape == 1.0 {
+        if x < 0.0 {
+            f64::NEG_INFINITY
+        } else if self.shape == 1.0 {
             self.rate.ln() - self.rate * x
+        } else if x == f64::INFINITY {
+            f64::NEG_INFINITY
         } else {
             self.shape * self.rate.ln() + (self.shape - 1.0) * x.ln() - self.rate * x -
             gamma::ln_gamma(self.shape)
@@ -423,6 +420,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Gamma};
+    use distribution::internal::*;
 
     fn try_create(shape: f64, rate: f64) -> Gamma {
         let n = Gamma::new(shape, rate);
@@ -566,14 +564,14 @@ mod test {
         test_almost(10.0, 10.0, 1.0251532120868705806216092933926141802686541811003037e-30, 1e-44, |x| x.pdf(10.0));
         test_almost(10.0, 1.0, 0.0000010137771196302974029859010421116095333052555418644397, 1e-20, |x| x.pdf(1.0));
         test_almost(10.0, 1.0, 0.12511003572113329898476497894772544708420990097708601, 1e-15, |x| x.pdf(10.0));
-        test_is_nan(10.0, f64::INFINITY, |x| x.pdf(1.0));
-        test_is_nan(10.0, f64::INFINITY, |x| x.pdf(f64::INFINITY));
+        test_is_nan(10.0, f64::INFINITY, |x| x.pdf(1.0)); // is this really the behavior we want?
+        test_case(10.0, f64::INFINITY, 0.0, |x| x.pdf(f64::INFINITY));
     }
 
     #[test]
-    #[should_panic]
-    fn test_non_positive_pdf() {
-        get_value(1.0, 0.1, |x| x.pdf(0.0));
+    fn test_pdf_at_zero() {
+        test_almost(1.0, 0.1, 0.1, 1e-10, |x| x.pdf(0.0));
+        test_almost(1.0, 0.1, 0.1f64.ln(), 1e-10, |x| x.ln_pdf(0.0));
     }
 
     #[test]
@@ -586,14 +584,8 @@ mod test {
         test_case(10.0, 10.0, -69.052710713194601614865880235563786219860220971716511, |x| x.ln_pdf(10.0));
         test_almost(10.0, 1.0, -13.801827480081469611207717874566706164281149255663166, 1e-14, |x| x.ln_pdf(1.0));
         test_almost(10.0, 1.0,  -2.0785616431350584550457947824074282958712358580042068, 1e-14, |x| x.ln_pdf(10.0));
-        test_is_nan(10.0, f64::INFINITY, |x| x.ln_pdf(1.0));
-        test_is_nan(10.0, f64::INFINITY, |x| x.ln_pdf(f64::INFINITY));
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_non_positive_ln_pdf() {
-        get_value(1.0, 0.1, |x| x.ln_pdf(0.0));
+        test_is_nan(10.0, f64::INFINITY, |x| x.ln_pdf(1.0)); // is this really the behavior we want?
+        test_case(10.0, f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
     }
 
     #[test]
@@ -611,8 +603,13 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
-    fn test_non_positive_cdf() {
-        get_value(1.0, 0.1, |x| x.cdf(0.0));
+    fn test_cdf_at_zero() {
+        test_case(1.0, 0.1, 0.0, |x| x.cdf(0.0));
+    }
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1.0, 0.5), 0.0, 20.0);
+        test::check_continuous_distribution(&try_create(9.0, 2.0), 0.0, 20.0);
     }
 }

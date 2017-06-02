@@ -117,10 +117,6 @@ impl Univariate<f64, f64> for Chi {
     /// Calculates the cumulative distribution function for the chi
     /// distribution at `x`.
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -130,10 +126,9 @@ impl Univariate<f64, f64> for Chi {
     /// where `k` is the degrees of freedom and `P` is
     /// the regularized Gamma function
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
         if self.freedom == f64::INFINITY || x == f64::INFINITY {
             1.0
-        } else if x == 0.0 {
+        } else if x <= 0.0 {
             0.0
         } else {
             gamma::gamma_lr(self.freedom / 2.0, x * x / 2.0)
@@ -294,10 +289,6 @@ impl Continuous<f64, f64> for Chi {
     /// Calculates the probability density function for the chi
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -306,11 +297,10 @@ impl Continuous<f64, f64> for Chi {
     ///
     /// where `k` is the degrees of freedom and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        if self.freedom == f64::INFINITY || x == f64::INFINITY || x == 0.0 {
+        if self.freedom == f64::INFINITY || x == f64::INFINITY || x <= 0.0 {
             0.0
         } else if self.freedom > 160.0 {
-            self.ln_pdf(x)
+            self.ln_pdf(x).exp()
         } else {
             (2.0f64).powf(1.0 - self.freedom / 2.0) * x.powf(self.freedom - 1.0) *
             (-x * x / 2.0).exp() / gamma::gamma(self.freedom / 2.0)
@@ -320,18 +310,13 @@ impl Continuous<f64, f64> for Chi {
     /// Calculates the log probability density function for the chi distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
     /// ln((2^(1 - (k / 2)) * x^(k - 1) * e^(-x^2 / 2)) / Γ(k / 2))
     /// ```
     fn ln_pdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        if self.freedom == f64::INFINITY || x == f64::INFINITY || x == 0.0 {
+        if self.freedom == f64::INFINITY || x == f64::INFINITY || x <= 0.0 {
             f64::NEG_INFINITY
         } else {
             (1.0 - self.freedom / 2.0) * (2.0f64).ln() + ((self.freedom - 1.0) * x.ln()) -
@@ -346,6 +331,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Chi};
+    use distribution::internal::*;
 
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);
@@ -497,12 +483,12 @@ mod test {
         test_case(f64::INFINITY, 0.0, |x| x.pdf(1.0));
         test_case(f64::INFINITY, 0.0, |x| x.pdf(5.5));
         test_case(f64::INFINITY, 0.0, |x| x.pdf(f64::INFINITY));
+        test_almost(170.0, 0.5644678498668440878, 1e-13, |x| x.pdf(13.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_pdf() {
-        get_value(1.0, |x| x.pdf(-1.0));
+        test_case(1.0, 0.0, |x| x.pdf(-1.0));
     }
 
     #[test]
@@ -527,12 +513,12 @@ mod test {
         test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(1.0));
         test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(5.5));
         test_case(f64::INFINITY, f64::NEG_INFINITY, |x| x.ln_pdf(f64::INFINITY));
+        test_almost(170.0, -0.57187185030600516424237, 1e-13, |x| x.ln_pdf(13.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_ln_pdf() {
-        get_value(1.0, |x| x.ln_pdf(-1.0));
+        test_case(1.0, f64::NEG_INFINITY, |x| x.ln_pdf(-1.0));
     }
 
     #[test]
@@ -560,8 +546,14 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_cdf() {
-        get_value(1.0, |x| x.cdf(-1.0));
+        test_case(1.0, 0.0, |x| x.cdf(-1.0));
+    }
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1.0), 0.0, 10.0);
+        test::check_continuous_distribution(&try_create(2.0), 0.0, 10.0);
+        test::check_continuous_distribution(&try_create(5.0), 0.0, 10.0);
     }
 }

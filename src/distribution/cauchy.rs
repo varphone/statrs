@@ -253,6 +253,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Cauchy};
+    use distribution::internal::*;
 
     fn try_create(location: f64, scale: f64) -> Cauchy {
         let n = Cauchy::new(location, scale);
@@ -437,5 +438,11 @@ mod test {
         test_case(f64::INFINITY, 1.0, 0.0, |x| x.cdf(0.0));
         test_case(f64::INFINITY, 1.0, 0.0, |x| x.cdf(1.0));
         test_case(f64::INFINITY, 1.0, 0.0, |x| x.cdf(5.0));
+    }
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(-1.2, 3.4), -1500.0, 1500.0);
+        test::check_continuous_distribution(&try_create(-4.5, 6.7), -5000.0, 5000.0);
     }
 }

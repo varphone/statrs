@@ -111,10 +111,6 @@ impl Univariate<f64, f64> for Exponential {
     /// Calculates the cumulative distribution function for the
     /// exponential distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -123,8 +119,11 @@ impl Univariate<f64, f64> for Exponential {
     ///
     /// where `λ` is the rate
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        1.0 - (-self.rate * x).exp()
+        if x < 0.0 {
+            0.0
+        } else {
+            1.0 - (-self.rate * x).exp()
+        }
     }
 }
 
@@ -259,10 +258,6 @@ impl Continuous<f64, f64> for Exponential {
     /// Calculates the probability density function for the exponential
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -271,16 +266,15 @@ impl Continuous<f64, f64> for Exponential {
     ///
     /// where `λ` is the rate
     fn pdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        self.rate * (-self.rate * x).exp()
+        if x < 0.0 {
+            0.0
+        } else {
+            self.rate * (-self.rate * x).exp()
+        }
     }
 
     /// Calculates the log probability density function for the exponential
     /// distribution at `x`
-    ///
-    /// # Panics
-    ///
-    /// If `x < 0.0`
     ///
     /// # Formula
     ///
@@ -290,8 +284,11 @@ impl Continuous<f64, f64> for Exponential {
     ///
     /// where `λ` is the rate
     fn ln_pdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0, format!("{}", StatsError::ArgNotNegative("x")));
-        self.rate.ln() - self.rate * x
+        if x < 0.0 {
+            f64::NEG_INFINITY
+        } else {
+            self.rate.ln() - self.rate * x
+        }
     }
 }
 
@@ -301,6 +298,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Exponential};
+    use distribution::internal::*;
 
     fn try_create(rate: f64) -> Exponential {
         let n = Exponential::new(rate);
@@ -441,9 +439,8 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_pdf() {
-        get_value(0.1, |x| x.pdf(-1.0));
+        test_case(0.1, 0.0, |x| x.pdf(-1.0));
     }
 
     #[test]
@@ -467,9 +464,8 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_ln_pdf() {
-        get_value(0.1, |x| x.ln_pdf(-1.0));
+        test_case(0.1, f64::NEG_INFINITY, |x| x.ln_pdf(-1.0));
     }
 
     #[test]
@@ -493,8 +489,14 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_neg_cdf() {
-        get_value(0.1, |x| x.cdf(-1.0));
+        test_case(0.1, 0.0, |x| x.cdf(-1.0));
+    }
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(0.5), 0.0, 10.0);
+        test::check_continuous_distribution(&try_create(1.5), 0.0, 20.0);
+        test::check_continuous_distribution(&try_create(2.5), 0.0, 50.0);
     }
 }

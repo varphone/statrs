@@ -130,10 +130,10 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
 
         if (del - 1.0).abs() <= eps {
             return if symm_transform {
-                1.0 - bt * h / a
-            } else {
-                bt * h / a
-            };
+                       1.0 - bt * h / a
+                   } else {
+                       bt * h / a
+                   };
         }
     }
 

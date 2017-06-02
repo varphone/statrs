@@ -98,5 +98,7 @@ pub fn sinusoidal_custom(length: usize,
     let pi2 = consts::PI * 2.0;
     let step = frequency / sampling_rate * pi2;
     let phase = (phase - delay as f64 * step) % pi2;
-    (0..length).map(|i| mean + amplitude * (phase + i as f64 * step).sin()).collect()
+    (0..length)
+        .map(|i| mean + amplitude * (phase + i as f64 * step).sin())
+        .collect()
 }

@@ -123,11 +123,6 @@ impl Univariate<u64, f64> for Categorical {
     /// Calculates the cumulative distribution function for the categorical
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < 0.0` or `x > k` where `k` is the number of categories
-    /// (i.e. the length of the `prob_mass` slice passed to the constructor)
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -136,10 +131,9 @@ impl Univariate<u64, f64> for Categorical {
     ///
     /// where `p_j` is the probability mass for the `j`th category
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0 && x <= self.cdf.len() as f64,
-                format!("{}",
-                        StatsError::ArgIntervalIncl("x", 0.0, self.cdf.len() as f64)));
-        if x == self.cdf.len() as f64 {
+        if x < 0.0 {
+            0.0
+        } else if x >= self.cdf.len() as f64 {
             1.0
         } else {
             unsafe { self.cdf.get_unchecked(x as usize) / self.cdf_max() }
@@ -214,7 +208,10 @@ impl Mean<f64> for Categorical {
     /// where `p_j` is the `j`th probability mass and `k` is the number
     /// of categories
     fn mean(&self) -> f64 {
-        self.norm_pmf.iter().enumerate().fold(0.0, |acc, (idx, &val)| acc + idx as f64 * val)
+        self.norm_pmf
+            .iter()
+            .enumerate()
+            .fold(0.0, |acc, (idx, &val)| acc + idx as f64 * val)
     }
 }
 
@@ -231,10 +228,13 @@ impl Variance<f64> for Categorical {
     /// of categories, and `μ` is the mean
     fn variance(&self) -> f64 {
         let mu = self.mean();
-        self.norm_pmf.iter().enumerate().fold(0.0, |acc, (idx, &val)| {
-            let r = idx as f64 - mu;
-            acc + r * r * val
-        })
+        self.norm_pmf
+            .iter()
+            .enumerate()
+            .fold(0.0, |acc, (idx, &val)| {
+                let r = idx as f64 - mu;
+                acc + r * r * val
+            })
     }
 
     /// Returns the standard deviation of the categorical distribution
@@ -269,19 +269,17 @@ impl Discrete<u64, f64> for Categorical {
     /// Calculates the probability mass function for the categorical
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x >= k` where `k` is the number of categories
-    ///
     /// # Formula
     ///
     /// ```ignore
     /// p_x
     /// ```
     fn pmf(&self, x: u64) -> f64 {
-        assert!(x < self.norm_pmf.len() as u64,
-                format!("{}", StatsError::ArgLtArg("x", "k")));
-        unsafe { *self.norm_pmf.get_unchecked(x as usize) }
+        if x >= self.norm_pmf.len() as u64 {
+            0.0
+        } else {
+            unsafe { *self.norm_pmf.get_unchecked(x as usize) }
+        }
     }
 
     /// Calculates the log probability mass function for the categorical
@@ -373,9 +371,11 @@ fn test_binary_index() {
 #[cfg_attr(rustfmt, rustfmt_skip)]
 #[cfg(test)]
 mod test {
+    use std::f64;
     use std::fmt::Debug;
     use statistics::*;
     use distribution::{Univariate, Discrete, InverseCDF, Categorical};
+    use distribution::internal::*;
 
     fn try_create(prob_mass: &[f64]) -> Categorical {
         let n = Categorical::new(prob_mass);
@@ -466,9 +466,8 @@ mod test {
     }
 
     #[test]
-    #[should_panic] 
     fn test_pmf_x_too_high() {
-        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.pmf(4));
+        test_case(&[4.0, 2.5, 2.5, 1.0], 0.0, |x| x.pmf(4));
     }
 
     #[test]
@@ -479,9 +478,8 @@ mod test {
     }
 
     #[test]
-    #[should_panic] 
     fn test_ln_pmf_x_too_high() {
-        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.ln_pmf(4));
+        test_case(&[4.0, 2.5, 2.5, 1.0], f64::NEG_INFINITY, |x| x.ln_pmf(4));
     }
 
     #[test]
@@ -494,15 +492,13 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_input_low() {
-        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.cdf(-1.0));
+        test_case(&[4.0, 2.5, 2.5, 1.0], 0.0, |x| x.cdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_input_high() {
-        get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.cdf(4.5));
+        test_case(&[4.0, 2.5, 2.5, 1.0], 1.0, |x| x.cdf(4.5));
     }
 
     #[test]
@@ -525,5 +521,11 @@ mod test {
     #[should_panic]
     fn test_inverse_cdf_input_high() {
         get_value(&[4.0, 2.5, 2.5, 1.0], |x| x.inverse_cdf(1.0));
+    }
+
+    #[test]
+    fn test_discrete() {
+        test::check_discrete_distribution(&try_create(&[1.0, 2.0, 3.0, 4.0]), 4);
+        test::check_discrete_distribution(&try_create(&[0.0, 1.0, 2.0, 3.0, 4.0]), 5);
     }
 }

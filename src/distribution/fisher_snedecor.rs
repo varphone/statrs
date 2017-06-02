@@ -138,10 +138,6 @@ impl Univariate<f64, f64> for FisherSnedecor {
     /// Calculates the cumulative distribution function for the fisher-snedecor distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x` is not in `[0, +inf)`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -152,12 +148,15 @@ impl Univariate<f64, f64> for FisherSnedecor {
     /// the second degree of freedom, and `I` is the regularized incomplete
     /// beta function
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= 0.0 && x < f64::INFINITY,
-                format!("{}",
-                        StatsError::ArgIntervalExclMax("x", 0.0, f64::INFINITY)));
-        beta::beta_reg(self.freedom_1 / 2.0,
-                       self.freedom_2 / 2.0,
-                       self.freedom_1 * x / (self.freedom_1 * x + self.freedom_2))
+        if x < 0.0 {
+            0.0
+        } else if x == f64::INFINITY {
+            1.0
+        } else {
+            beta::beta_reg(self.freedom_1 / 2.0,
+                           self.freedom_2 / 2.0,
+                           self.freedom_1 * x / (self.freedom_1 * x + self.freedom_2))
+        }
     }
 }
 
@@ -331,9 +330,16 @@ impl Continuous<f64, f64> for FisherSnedecor {
     /// where `d1` is the first degree of freedom, `d2` is
     /// the second degree of freedom, and `β` is the beta function
     fn pdf(&self, x: f64) -> f64 {
-        ((self.freedom_1 * x).powf(self.freedom_1) * self.freedom_2.powf(self.freedom_2) /
-         (self.freedom_1 * x + self.freedom_2).powf(self.freedom_1 + self.freedom_2))
-            .sqrt() / (x * beta::beta(self.freedom_1 / 2.0, self.freedom_2 / 2.0))
+        if x == f64::NEG_INFINITY || x == f64::INFINITY {
+            0.0
+        } else if x <= 0.0 {
+            0.0
+        } else {
+            ((self.freedom_1 * x).powf(self.freedom_1) * self.freedom_2.powf(self.freedom_2) /
+             (self.freedom_1 * x + self.freedom_2).powf(self.freedom_1 + self.freedom_2))
+                    .sqrt() /
+            (x * beta::beta(self.freedom_1 / 2.0, self.freedom_2 / 2.0))
+        }
     }
 
     /// Calculates the log probability density function for the fisher-snedecor distribution
@@ -362,6 +368,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, FisherSnedecor};
+    use distribution::internal::*;
 
     fn try_create(freedom_1: f64, freedom_2: f64) -> FisherSnedecor {
         let n = FisherSnedecor::new(freedom_1, freedom_2);
@@ -560,14 +567,12 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_lower_bound() {
-        get_value(0.1, 0.1, |x| x.cdf(-1.0));
+        test_case(0.1, 0.1, 0.0, |x| x.cdf(-1.0));
     }
 
     #[test]
-    #[should_panic]
-    fn test_cdf_upper_bound() {
-        get_value(0.1, 0.1, |x| x.cdf(f64::INFINITY));
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(10.0, 10.0), 0.0, 10.0);
     }
 }

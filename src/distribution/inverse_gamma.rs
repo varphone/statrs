@@ -136,10 +136,6 @@ impl Univariate<f64, f64> for InverseGamma {
     /// Calculates the cumulative distribution function for the inverse gamma
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x` is not in `(0, +inf)`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -150,9 +146,13 @@ impl Univariate<f64, f64> for InverseGamma {
     /// the denominator is the gamma function, `α` is the shape,
     /// and `β` is the rate
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0 && x < f64::INFINITY,
-                format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
-        gamma::gamma_ur(self.shape, self.rate / x)
+        if x <= 0.0 {
+            0.0
+        } else if x == f64::INFINITY {
+            1.0
+        } else {
+            gamma::gamma_ur(self.shape, self.rate / x)
+        }
     }
 }
 
@@ -302,10 +302,6 @@ impl Continuous<f64, f64> for InverseGamma {
     /// Calculates the probability density function for the
     /// inverse gamma distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x` not in `(0, +inf)`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -314,9 +310,11 @@ impl Continuous<f64, f64> for InverseGamma {
     ///
     /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0 && x < f64::INFINITY,
-                format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
-        if self.shape == 1.0 {
+        if x <= 0.0 {
+            0.0
+        } else if x == f64::INFINITY {
+            0.0
+        } else if self.shape == 1.0 {
             self.rate / (x * x) * (-self.rate / x).exp()
         } else {
             self.rate.powf(self.shape) * x.powf(-self.shape - 1.0) * (-self.rate / x).exp() /
@@ -326,10 +324,6 @@ impl Continuous<f64, f64> for InverseGamma {
 
     /// Calculates the probability density function for the
     /// inverse gamma distribution at `x`
-    ///
-    /// # Panics
-    ///
-    /// If `x` is not in `(0, +inf)`
     ///
     /// # Formula
     ///
@@ -349,6 +343,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, InverseGamma};
+    use distribution::internal::*;
 
     fn try_create(shape: f64, rate: f64) -> InverseGamma {
         let n = InverseGamma::new(shape, rate);
@@ -503,8 +498,8 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
-    fn test_cdf_panics() {
-        get_value(0.1, 0.1, |x| x.cdf(-1.0));
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1.0, 0.5), 0.0, 100.0);
+        test::check_continuous_distribution(&try_create(9.0, 2.0), 0.0, 100.0);
     }
 }

@@ -168,10 +168,6 @@ impl Univariate<u64, f64> for Hypergeometric {
     /// Calculates the cumulative distribution function for the hypergeometric
     /// distribution at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x < max(0, n + K - N)` or `x >= min(K, n)`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -181,19 +177,21 @@ impl Univariate<u64, f64> for Hypergeometric {
     // where `N` is population, `K` is successes, `n` is draws,
     /// and `p_F_q` is the [generalized hypergeometric function](https://en.wikipedia.org/wiki/Generalized_hypergeometric_function)
     fn cdf(&self, x: f64) -> f64 {
-        assert!(x >= self.min() as f64,
-                format!("{}", StatsError::ArgGteArg("x", "max(0, n + K - N)")));
-        assert!(x < self.max() as f64,
-                format!("{}", StatsError::ArgLtArg("x", "min(K, n)")));
-        let k = x.floor() as u64;
-        let ln_denom = factorial::ln_binomial(self.population, self.draws);
-        (0..k + 1).fold(0.0, |acc, i| {
-            acc +
-            (factorial::ln_binomial(self.successes, i) +
-             factorial::ln_binomial(self.population - self.successes, self.draws - i) -
-             ln_denom)
-                .exp()
-        })
+        if x < self.min() as f64 {
+            0.0
+        } else if x >= self.max() as f64 {
+            1.0
+        } else {
+            let k = x.floor() as u64;
+            let ln_denom = factorial::ln_binomial(self.population, self.draws);
+            (0..k + 1).fold(0.0, |acc, i| {
+                acc +
+                (factorial::ln_binomial(self.successes, i) +
+                 factorial::ln_binomial(self.population - self.successes, self.draws - i) -
+                 ln_denom)
+                        .exp()
+            })
+        }
     }
 }
 
@@ -346,9 +344,13 @@ impl Discrete<u64, f64> for Hypergeometric {
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
     fn pmf(&self, x: u64) -> f64 {
-        factorial::binomial(self.successes, x) *
-        factorial::binomial(self.population - self.successes, self.draws - x) /
-        factorial::binomial(self.population, self.draws)
+        if x > self.draws {
+            0.0
+        } else {
+            factorial::binomial(self.successes, x) *
+            factorial::binomial(self.population - self.successes, self.draws - x) /
+            factorial::binomial(self.population, self.draws)
+        }
     }
 
     /// Calculates the log probability mass function for the hypergeometric
@@ -375,6 +377,7 @@ mod test {
     use std::fmt::Debug;
     use statistics::*;
     use distribution::{Univariate, Discrete, Hypergeometric};
+    use distribution::internal::*;
 
     fn try_create(population: u64, successes: u64, draws: u64) -> Hypergeometric {
         let n = Hypergeometric::new(population, successes, draws);
@@ -557,14 +560,18 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_arg_too_big() {
-        get_value(0, 0, 0, |x| x.cdf(0.5));
+        test_case(0, 0, 0, 1.0, |x| x.cdf(0.5));
     }
 
     #[test]
-    #[should_panic]
     fn test_cdf_arg_too_small() {
-        get_value(2, 2, 2, |x| x.cdf(0.0));
+        test_case(2, 2, 2, 0.0, |x| x.cdf(0.0));
+    }
+
+    #[test]
+    fn test_discrete() {
+        test::check_discrete_distribution(&try_create(5, 4, 3), 4);
+        test::check_discrete_distribution(&try_create(3, 2, 1), 2);
     }
 }

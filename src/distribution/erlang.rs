@@ -122,10 +122,6 @@ impl Univariate<f64, f64> for Erlang {
     /// Calculates the cumulative distribution function for the erlang distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
-    ///
     /// # Formula
     ///
     /// ```ignore
@@ -277,10 +273,6 @@ impl Continuous<f64, f64> for Erlang {
     /// Calculates the probability density function for the erlang distribution
     /// at `x`
     ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
-    ///
     /// # Remarks
     ///
     /// Returns `NAN` if any of `shape` or `rate` are `INF`
@@ -299,10 +291,6 @@ impl Continuous<f64, f64> for Erlang {
 
     /// Calculates the log probability density function for the erlang distribution
     /// at `x`
-    ///
-    /// # Panics
-    ///
-    /// If `x <= 0.0`
     ///
     /// # Remarks
     ///
@@ -326,6 +314,7 @@ impl Continuous<f64, f64> for Erlang {
 mod test {
     use std::f64;
     use distribution::{Univariate, Continuous, Erlang};
+    use distribution::internal::*;
 
     fn try_create(shape: u64, rate: f64) -> Erlang {
         let n = Erlang::new(shape, rate);
@@ -359,5 +348,12 @@ mod test {
         bad_create_case(1, 0.0);
         bad_create_case(1, f64::NAN);
         bad_create_case(1, -1.0);
+    }
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1, 2.5), 0.0, 20.0);
+        test::check_continuous_distribution(&try_create(2, 1.5), 0.0, 20.0);
+        test::check_continuous_distribution(&try_create(3, 0.5), 0.0, 20.0);
     }
 }

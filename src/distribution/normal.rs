@@ -299,6 +299,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Normal};
+    use distribution::internal::*;
 
     fn try_create(mean: f64, std_dev: f64) -> Normal {
         let n = Normal::new(mean, std_dev);
@@ -467,5 +468,11 @@ mod test {
         test_case(5.0, 2.0, 0.5, |x| x.cdf(5.0));
         test_case(5.0, 2.0, 0.69146246127401310363770461060833773988360217555457859, |x| x.cdf(6.0));
         test_almost(5.0, 2.0, 0.993790334674, 1e-12, |x| x.cdf(10.0));
+    }
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(0.0, 1.0), -10.0, 10.0);
+        test::check_continuous_distribution(&try_create(20.0, 0.5), 10.0, 30.0);
     }
 }
