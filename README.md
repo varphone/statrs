@@ -98,6 +98,11 @@ git push -u origin <feature_branch>
 
 Then submit a PR, preferably referencing the relevant issue.
 
+### Style
+
+This repo makes use of `rustfmt` with the default configuration. See https://github.com/rust-lang-nursery/rustfmt
+for instructions on installation and usage
+
 ### Commit messages
 
 Please be explicit and and purposeful with commit messages.
