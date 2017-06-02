@@ -124,13 +124,13 @@ impl Univariate<u64, f64> for Poisson {
     ///
     /// where `λ` is the rate and `P` is the lower regularized gamma function
     fn cdf(&self, x: f64) -> f64 {
-		if x < 0.0 {
-			0.0
-		} else if x == f64::INFINITY {
-			1.0
-		} else {
-			1.0 - gamma::gamma_lr(x.floor() + 1.0, self.lambda)
-		}
+        if x < 0.0 {
+            0.0
+        } else if x == f64::INFINITY {
+            1.0
+        } else {
+            1.0 - gamma::gamma_lr(x.floor() + 1.0, self.lambda)
+        }
     }
 }
 
@@ -346,7 +346,7 @@ mod test {
     use std::u64;
     use statistics::*;
     use distribution::{Univariate, Discrete, Poisson};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(lambda: f64) -> Poisson {
         let n = Poisson::new(lambda);
@@ -503,10 +503,10 @@ mod test {
     fn test_neg_cdf() {
         test_case(1.5, 0.0, |x| x.cdf(-1.0));
     }
-	
-	#[test]
-	fn test_discrete() {
-		test::check_discrete_distribution(&try_create(0.3), 10);
-		test::check_discrete_distribution(&try_create(4.5), 30);
-	}
+
+    #[test]
+    fn test_discrete() {
+        test::check_discrete_distribution(&try_create(0.3), 10);
+        test::check_discrete_distribution(&try_create(4.5), 30);
+    }
 }

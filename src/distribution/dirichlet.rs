@@ -179,7 +179,10 @@ impl Variance<Vec<f64>> for Dirichlet {
     /// and `α_0` is the sum of all concentration parameters
     fn variance(&self) -> Vec<f64> {
         let sum = self.alpha_sum();
-        self.alpha.iter().map(|x| x * (sum - x) / (sum * sum * (sum + 1.0))).collect()
+        self.alpha
+            .iter()
+            .map(|x| x * (sum - x) / (sum * sum * (sum + 1.0)))
+            .collect()
     }
 
     /// Returns the standard deviation of the dirichlet distribution
@@ -217,7 +220,9 @@ impl Entropy<f64> for Dirichlet {
     /// is the `i`th concentration parameter, and `Σ` is the sum from `1` to `K`
     fn entropy(&self) -> f64 {
         let sum = self.alpha_sum();
-        let num = self.alpha.iter().fold(0.0, |acc, &x| acc + (x - 1.0) * gamma::digamma(x));
+        let num = self.alpha
+            .iter()
+            .fold(0.0, |acc, &x| acc + (x - 1.0) * gamma::digamma(x));
         gamma::ln_gamma(sum) + (sum - self.alpha.len() as f64) * gamma::digamma(sum) - num
     }
 }

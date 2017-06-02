@@ -166,7 +166,10 @@ impl Variance<Vec<f64>> for Multinomial {
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
     /// and `k` is the total number of probabilities
     fn variance(&self) -> Vec<f64> {
-        self.p.iter().map(|x| x * self.n as f64 * (1.0 - x)).collect()
+        self.p
+            .iter()
+            .map(|x| x * self.n as f64 * (1.0 - x))
+            .collect()
     }
 
     /// Returns the standard deviation of the multinomial distribution

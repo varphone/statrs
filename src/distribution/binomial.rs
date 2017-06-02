@@ -143,11 +143,11 @@ impl Univariate<u64, f64> for Binomial {
     ///
     /// where `I_(x)(a, b)` is the regularized incomplete beta function
     fn cdf(&self, x: f64) -> f64 {
-		if x < 0.0 {
-			0.0
-		} else if x >= self.n as f64 {
-			1.0
-		} else {
+        if x < 0.0 {
+            0.0
+        } else if x >= self.n as f64 {
+            1.0
+        } else {
             let k = x.floor();
             beta::beta_reg(self.n as f64 - k, k + 1.0, 1.0 - self.p)
         }
@@ -295,9 +295,9 @@ impl Discrete<u64, f64> for Binomial {
     /// (n choose k) * p^k * (1 - p)^(n - k)
     /// ```
     fn pmf(&self, x: u64) -> f64 {
-		if x > self.n {
-			return 0.0;
-		}
+        if x > self.n {
+            return 0.0;
+        }
         match self.p {
             0.0 if x == 0 => 1.0,
             0.0 => 0.0,
@@ -320,9 +320,9 @@ impl Discrete<u64, f64> for Binomial {
     /// ln((n choose k) * p^k * (1 - p)^(n - k))
     /// ```
     fn ln_pmf(&self, x: u64) -> f64 {
-		if x > self.n {
-			return f64::NEG_INFINITY;
-		}
+        if x > self.n {
+            return f64::NEG_INFINITY;
+        }
         match self.p {
             0.0 if x == 0 => 0.0,
             0.0 => f64::NEG_INFINITY,
@@ -343,7 +343,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Discrete, Binomial};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(p: f64, n: u64) -> Binomial {
         let n = Binomial::new(p, n);
@@ -547,10 +547,10 @@ mod test {
     fn test_cdf_upper_bound() {
         test_case(0.5, 3, 1.0, |x| x.cdf(5.0));
     }
-	
-	#[test]
-	fn test_discrete() {
-		test::check_discrete_distribution(&try_create(0.3, 5), 5);
-		test::check_discrete_distribution(&try_create(0.7, 10), 10);
-	}
+
+    #[test]
+    fn test_discrete() {
+        test::check_discrete_distribution(&try_create(0.3, 5), 5);
+        test::check_discrete_distribution(&try_create(0.7, 10), 10);
+    }
 }

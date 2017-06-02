@@ -49,7 +49,7 @@ impl Uniform {
         } else {
             Ok(Uniform {
                 min: min,
-                max: max,
+                max: max
             })
         }
     }
@@ -270,7 +270,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Uniform};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(min: f64, max: f64) -> Uniform {
         let n = Uniform::new(min, max);
@@ -458,10 +458,10 @@ mod test {
     fn test_cdf_upper_bound() {
         test_case(0.0, 3.0, 1.0, |x| x.cdf(5.0));
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(0.0, 10.0), 0.0, 10.0);
-		test::check_continuous_distribution(&try_create(-2.0, 15.0), -2.0, 15.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(0.0, 10.0), 0.0, 10.0);
+        test::check_continuous_distribution(&try_create(-2.0, 15.0), -2.0, 15.0);
+    }
 }

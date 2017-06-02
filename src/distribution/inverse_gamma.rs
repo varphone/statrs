@@ -146,13 +146,13 @@ impl Univariate<f64, f64> for InverseGamma {
     /// the denominator is the gamma function, `α` is the shape,
     /// and `β` is the rate
     fn cdf(&self, x: f64) -> f64 {
-		if x <= 0.0 {
-			0.0
-		} else if x == f64::INFINITY {
-			1.0
-		} else {
-			gamma::gamma_ur(self.shape, self.rate / x)
-		}
+        if x <= 0.0 {
+            0.0
+        } else if x == f64::INFINITY {
+            1.0
+        } else {
+            gamma::gamma_ur(self.shape, self.rate / x)
+        }
     }
 }
 
@@ -310,11 +310,11 @@ impl Continuous<f64, f64> for InverseGamma {
     ///
     /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-		if x <= 0.0 {
-			0.0
-		} else if x == f64::INFINITY {
-			0.0
-		} else if self.shape == 1.0 {
+        if x <= 0.0 {
+            0.0
+        } else if x == f64::INFINITY {
+            0.0
+        } else if self.shape == 1.0 {
             self.rate / (x * x) * (-self.rate / x).exp()
         } else {
             self.rate.powf(self.shape) * x.powf(-self.shape - 1.0) * (-self.rate / x).exp() /
@@ -343,7 +343,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, InverseGamma};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(shape: f64, rate: f64) -> InverseGamma {
         let n = InverseGamma::new(shape, rate);
@@ -496,10 +496,10 @@ mod test {
         test_case(1.0, 0.1, 0.9355069850316177377304, |x| x.cdf(1.5));
         test_almost(1.0, 1.0, 0.4345982085070782231613, 1e-14, |x| x.cdf(1.2));
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(1.0, 0.5), 0.0, 100.0);
-		test::check_continuous_distribution(&try_create(9.0, 2.0), 0.0, 100.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1.0, 0.5), 0.0, 100.0);
+        test::check_continuous_distribution(&try_create(9.0, 2.0), 0.0, 100.0);
+    }
 }

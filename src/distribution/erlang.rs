@@ -314,7 +314,7 @@ impl Continuous<f64, f64> for Erlang {
 mod test {
     use std::f64;
     use distribution::{Univariate, Continuous, Erlang};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(shape: u64, rate: f64) -> Erlang {
         let n = Erlang::new(shape, rate);
@@ -349,11 +349,11 @@ mod test {
         bad_create_case(1, f64::NAN);
         bad_create_case(1, -1.0);
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(1, 2.5), 0.0, 20.0);
-		test::check_continuous_distribution(&try_create(2, 1.5), 0.0, 20.0);
-		test::check_continuous_distribution(&try_create(3, 0.5), 0.0, 20.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1, 2.5), 0.0, 20.0);
+        test::check_continuous_distribution(&try_create(2, 1.5), 0.0, 20.0);
+        test::check_continuous_distribution(&try_create(3, 0.5), 0.0, 20.0);
+    }
 }

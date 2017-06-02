@@ -303,7 +303,7 @@ impl Continuous<f64, f64> for Chi {
             self.ln_pdf(x).exp()
         } else {
             (2.0f64).powf(1.0 - self.freedom / 2.0) * x.powf(self.freedom - 1.0) *
-				(-x * x / 2.0).exp() / gamma::gamma(self.freedom / 2.0)
+            (-x * x / 2.0).exp() / gamma::gamma(self.freedom / 2.0)
         }
     }
 
@@ -320,7 +320,7 @@ impl Continuous<f64, f64> for Chi {
             f64::NEG_INFINITY
         } else {
             (1.0 - self.freedom / 2.0) * (2.0f64).ln() + ((self.freedom - 1.0) * x.ln()) -
-				x * x / 2.0 - gamma::ln_gamma(self.freedom / 2.0)
+            x * x / 2.0 - gamma::ln_gamma(self.freedom / 2.0)
         }
     }
 }
@@ -331,7 +331,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Chi};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(freedom: f64) -> Chi {
         let n = Chi::new(freedom);
@@ -547,11 +547,11 @@ mod test {
     fn test_neg_cdf() {
         test_case(1.0, 0.0, |x| x.cdf(-1.0));
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(1.0), 0.0, 10.0);
-		test::check_continuous_distribution(&try_create(2.0), 0.0, 10.0);
-		test::check_continuous_distribution(&try_create(5.0), 0.0, 10.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1.0), 0.0, 10.0);
+        test::check_continuous_distribution(&try_create(2.0), 0.0, 10.0);
+        test::check_continuous_distribution(&try_create(5.0), 0.0, 10.0);
+    }
 }

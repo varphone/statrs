@@ -1,3 +1,5 @@
+#![cfg_attr(rustfmt, rustfmt_skip)]
+
 //! Generated ziggurat tables borrowed from
 //! https://github.com/rust-lang-nursery/rand/blob/master/src/distributions/ziggurat_tables.rs
 

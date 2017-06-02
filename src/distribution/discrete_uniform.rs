@@ -49,7 +49,7 @@ impl DiscreteUniform {
         } else {
             Ok(DiscreteUniform {
                 min: min,
-                max: max,
+                max: max
             })
         }
     }
@@ -106,16 +106,16 @@ impl Univariate<i64, f64> for DiscreteUniform {
     /// (floor(x) - min + 1) / (max - min + 1)
     /// ```
     fn cdf(&self, x: f64) -> f64 {
-		if x < self.min as f64 {
-			0.0
-		} else if x >= self.max as f64 {
-			1.0
-		} else {
-			let lower = self.min as f64;
-			let upper = self.max as f64;
-			let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
-			if ans > 1.0 { 1.0 } else { ans }
-		}
+        if x < self.min as f64 {
+            0.0
+        } else if x >= self.max as f64 {
+            1.0
+        } else {
+            let lower = self.min as f64;
+            let upper = self.max as f64;
+            let ans = (x.floor() - lower + 1.0) / (upper - lower + 1.0);
+            if ans > 1.0 { 1.0 } else { ans }
+        }
     }
 }
 

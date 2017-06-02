@@ -145,11 +145,11 @@ impl Univariate<f64, f64> for Weibull {
     ///
     /// where `k` is the shape and `λ` is the scale
     fn cdf(&self, x: f64) -> f64 {
-		if x < 0.0 {
-			0.0
-		} else {
-			-stable::exp_minus_one(-x.powf(self.shape) * self.scale_pow_shape_inv)
-		}
+        if x < 0.0 {
+            0.0
+        } else {
+            -stable::exp_minus_one(-x.powf(self.shape) * self.scale_pow_shape_inv)
+        }
     }
 }
 
@@ -315,17 +315,16 @@ impl Continuous<f64, f64> for Weibull {
     ///
     /// where `k` is the shape and `λ` is the scale
     fn pdf(&self, x: f64) -> f64 {
-		if x < 0.0 {
-			0.0
-		} else if x == 0.0 && self.shape == 1.0 {
-			1.0 / self.scale
-		} else if x == f64::INFINITY {
-			0.0
-		} else {
-			self.shape * (x / self.scale).powf(self.shape - 1.0) *
-				(-(x.powf(self.shape)) * self.scale_pow_shape_inv).exp() /
-				self.scale
-		}
+        if x < 0.0 {
+            0.0
+        } else if x == 0.0 && self.shape == 1.0 {
+            1.0 / self.scale
+        } else if x == f64::INFINITY {
+            0.0
+        } else {
+            self.shape * (x / self.scale).powf(self.shape - 1.0) *
+            (-(x.powf(self.shape)) * self.scale_pow_shape_inv).exp() / self.scale
+        }
     }
 
     /// Calculates the log probability density function for the weibull
@@ -339,15 +338,15 @@ impl Continuous<f64, f64> for Weibull {
     ///
     /// where `k` is the shape and `λ` is the scale
     fn ln_pdf(&self, x: f64) -> f64 {
-		if x < 0.0 {
-			f64::NEG_INFINITY
-		} else if x == 0.0 && self.shape == 1.0 {
-			0.0 - self.scale.ln()
-		} else if x == f64::INFINITY {
-			f64::NEG_INFINITY
-		} else {
+        if x < 0.0 {
+            f64::NEG_INFINITY
+        } else if x == 0.0 && self.shape == 1.0 {
+            0.0 - self.scale.ln()
+        } else if x == f64::INFINITY {
+            f64::NEG_INFINITY
+        } else {
             self.shape.ln() + (self.shape - 1.0) * (x / self.scale).ln() -
-                x.powf(self.shape) * self.scale_pow_shape_inv - self.scale.ln()
+            x.powf(self.shape) * self.scale_pow_shape_inv - self.scale.ln()
         }
     }
 }
@@ -358,7 +357,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Weibull};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(shape: f64, scale: f64) -> Weibull {
         let n = Weibull::new(shape, scale);
@@ -528,9 +527,9 @@ mod test {
         test_case(10.0, 1.0, 0.63212055882855767840447622983853913255418886896823, |x| x.cdf(1.0));
         test_case(10.0, 1.0, 1.0, |x| x.cdf(10.0));
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(1.0, 0.2), 0.0, 10.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1.0, 0.2), 0.0, 10.0);
+    }
 }

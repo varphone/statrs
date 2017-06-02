@@ -52,10 +52,10 @@ impl StudentsT {
             Err(StatsError::BadParams)
         } else {
             Ok(StudentsT {
-                location: location,
-                scale: scale,
-                freedom: freedom,
-            })
+                   location: location,
+                   scale: scale,
+                   freedom: freedom,
+               })
         }
     }
 
@@ -370,8 +370,8 @@ impl Continuous<f64, f64> for StudentsT {
     /// where `k = (x - μ) / σ`, `μ` is the location, `σ` is the scale, `v` is the freedom,
     /// and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-		if x == f64::NEG_INFINITY || x == f64::INFINITY {
-			0.0
+        if x == f64::NEG_INFINITY || x == f64::INFINITY {
+            0.0
         } else if self.freedom >= 1e8 {
             super::normal::pdf_unchecked(x, self.location, self.scale)
         } else {
@@ -396,7 +396,7 @@ impl Continuous<f64, f64> for StudentsT {
     /// and `Γ` is the gamma function
     fn ln_pdf(&self, x: f64) -> f64 {
         if x == f64::NEG_INFINITY || x == f64::INFINITY {
-			f64::NEG_INFINITY
+            f64::NEG_INFINITY
         } else if self.freedom >= 1e8 {
             super::normal::ln_pdf_unchecked(x, self.location, self.scale)
         } else {
@@ -416,7 +416,7 @@ mod test {
     use std::panic;
     use statistics::*;
     use distribution::{Univariate, Continuous, StudentsT};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(location: f64, scale: f64, freedom: f64) -> StudentsT {
         let n = StudentsT::new(location, scale, freedom);
@@ -618,11 +618,11 @@ mod test {
         test_almost(0.0, 1.0, f64::INFINITY, 0.841344746068543, 1e-10, |x| x.cdf(1.0));
         test_almost(0.0, 1.0, f64::INFINITY, 0.977249868051821, 1e-11, |x| x.cdf(2.0));
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(0.0, 1.0, 3.0), -30.0, 30.0);
-		test::check_continuous_distribution(&try_create(0.0, 1.0, 10.0), -10.0, 10.0);
-		test::check_continuous_distribution(&try_create(20.0, 0.5, 10.0), 10.0, 30.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(0.0, 1.0, 3.0), -30.0, 30.0);
+        test::check_continuous_distribution(&try_create(0.0, 1.0, 10.0), -10.0, 10.0);
+        test::check_continuous_distribution(&try_create(20.0, 0.5, 10.0), 10.0, 30.0);
+    }
 }

@@ -122,13 +122,13 @@ impl Univariate<u64, f64> for Geometric {
     /// 1 - (1 - p) ^ (x + 1)
     /// ```
     fn cdf(&self, x: f64) -> f64 {
-		if x < 1.0 {
-			0.0
-		} else if x == f64::INFINITY {
-			1.0
-		} else {
-			1.0 - (1.0 - self.p).powf(x.floor())
-		}
+        if x < 1.0 {
+            0.0
+        } else if x == f64::INFINITY {
+            1.0
+        } else {
+            1.0 - (1.0 - self.p).powf(x.floor())
+        }
     }
 }
 
@@ -273,11 +273,11 @@ impl Discrete<u64, f64> for Geometric {
     /// (1 - p)^(x - 1) * p
     /// ```
     fn pmf(&self, x: u64) -> f64 {
-		if x == 0 {
-			0.0
-		} else {
-			(1.0 - self.p).powi(x as i32 - 1) * self.p
-		}
+        if x == 0 {
+            0.0
+        } else {
+            (1.0 - self.p).powi(x as i32 - 1) * self.p
+        }
     }
 
     /// Calculates the log probability mass function for the geometric
@@ -289,9 +289,9 @@ impl Discrete<u64, f64> for Geometric {
     /// ln((1 - p)^(x - 1) * p)
     /// ```
     fn ln_pmf(&self, x: u64) -> f64 {
-		if x == 0 {
+        if x == 0 {
             f64::NEG_INFINITY
-		} else if self.p == 1.0 && x == 1 {
+        } else if self.p == 1.0 && x == 1 {
             0.0
         } else if self.p == 1.0 {
             f64::NEG_INFINITY
@@ -308,7 +308,7 @@ mod test {
     use std::{u64, f64};
     use statistics::*;
     use distribution::{Univariate, Discrete, Geometric};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(p: f64) -> Geometric {
         let n = Geometric::new(p);
@@ -430,7 +430,7 @@ mod test {
         test_almost(0.5, 0.5, 1e-10, |x| x.pmf(1));
         test_almost(0.5, 0.25, 1e-10, |x| x.pmf(2));
     }
-    
+
     #[test]
     fn test_pmf_lower_bound() {
         test_case(0.3, 0.0, |x| x.pmf(0));
@@ -461,11 +461,11 @@ mod test {
     fn test_cdf_lower_bound() {
         test_case(0.3, 0.0, |x| x.cdf(0.0));
     }
-	
-	#[test]
-	fn test_discrete() {
-		test::check_discrete_distribution(&try_create(0.3), 100);
-		test::check_discrete_distribution(&try_create(0.6), 100);
-		test::check_discrete_distribution(&try_create(1.0), 1);
-	}
+
+    #[test]
+    fn test_discrete() {
+        test::check_discrete_distribution(&try_create(0.3), 100);
+        test::check_discrete_distribution(&try_create(0.6), 100);
+        test::check_discrete_distribution(&try_create(1.0), 1);
+    }
 }

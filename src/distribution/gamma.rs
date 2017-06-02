@@ -151,15 +151,15 @@ impl Univariate<f64, f64> for Gamma {
     /// where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
     /// and `γ` is the lower incomplete gamma function
     fn cdf(&self, x: f64) -> f64 {
-		if x <= 0.0 {
-			0.0
+        if x <= 0.0 {
+            0.0
         } else if x == self.shape && self.rate == f64::INFINITY {
             1.0
         } else if self.rate == f64::INFINITY {
             0.0
         } else if x == f64::INFINITY {
-			1.0
-		} else {
+            1.0
+        } else {
             gamma::gamma_lr(self.shape, x * self.rate)
         }
     }
@@ -328,17 +328,17 @@ impl Continuous<f64, f64> for Gamma {
     ///
     /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-		if x < 0.0 {
-			0.0
-		} else if self.shape == 1.0 {
+        if x < 0.0 {
+            0.0
+        } else if self.shape == 1.0 {
             self.rate * (-self.rate * x).exp()
         } else if self.shape > 160.0 {
             self.ln_pdf(x).exp()
         } else if x == f64::INFINITY {
-			0.0
-		} else {
+            0.0
+        } else {
             self.rate.powf(self.shape) * x.powf(self.shape - 1.0) * (-self.rate * x).exp() /
-			gamma::gamma(self.shape)
+            gamma::gamma(self.shape)
         }
     }
 
@@ -358,15 +358,15 @@ impl Continuous<f64, f64> for Gamma {
     ///
     /// where `α` is the shape, `β` is the rate, and `Γ` is the gamma function
     fn ln_pdf(&self, x: f64) -> f64 {
-		if x < 0.0 {
-			f64::NEG_INFINITY
-		} else if self.shape == 1.0 {
+        if x < 0.0 {
+            f64::NEG_INFINITY
+        } else if self.shape == 1.0 {
             self.rate.ln() - self.rate * x
         } else if x == f64::INFINITY {
-			f64::NEG_INFINITY
-		} else {
+            f64::NEG_INFINITY
+        } else {
             self.shape * self.rate.ln() + (self.shape - 1.0) * x.ln() - self.rate * x -
-			gamma::ln_gamma(self.shape)
+            gamma::ln_gamma(self.shape)
         }
     }
 }
@@ -420,7 +420,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Gamma};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(shape: f64, rate: f64) -> Gamma {
         let n = Gamma::new(shape, rate);
@@ -606,10 +606,10 @@ mod test {
     fn test_cdf_at_zero() {
         test_case(1.0, 0.1, 0.0, |x| x.cdf(0.0));
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(1.0, 0.5), 0.0, 20.0);
-		test::check_continuous_distribution(&try_create(9.0, 2.0), 0.0, 20.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1.0, 0.5), 0.0, 20.0);
+        test::check_continuous_distribution(&try_create(9.0, 2.0), 0.0, 20.0);
+    }
 }

@@ -146,8 +146,8 @@ impl Univariate<f64, f64> for Beta {
     /// lower incomplete beta function
     fn cdf(&self, x: f64) -> f64 {
         if x < 0.0 {
-			0.0
-		} else if x >= 1.0 {
+            0.0
+        } else if x >= 1.0 {
             1.0
         } else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
             if x < 0.5 { 0.0 } else { 1.0 }
@@ -354,9 +354,9 @@ impl Continuous<f64, f64> for Beta {
     ///
     /// where `α` is shapeA, `β` is shapeB, and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
-		if x < 0.0 || x > 1.0 {
-			0.0
-		} else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
+        if x < 0.0 || x > 1.0 {
+            0.0
+        } else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
             if x == 0.5 { f64::INFINITY } else { 0.0 }
         } else if self.shape_a == f64::INFINITY {
             if x == 1.0 { f64::INFINITY } else { 0.0 }
@@ -385,8 +385,8 @@ impl Continuous<f64, f64> for Beta {
     ///
     /// where `α` is shapeA, `β` is shapeB, and `Γ` is the gamma function
     fn ln_pdf(&self, x: f64) -> f64 {
-		if x < 0.0 || x > 1.0 {
-			f64::NEG_INFINITY
+        if x < 0.0 || x > 1.0 {
+            f64::NEG_INFINITY
         } else if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
             if x == 0.5 {
                 f64::INFINITY
@@ -431,7 +431,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Beta};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(shape_a: f64, shape_b: f64) -> Beta {
         let n = Beta::new(shape_a, shape_b);
@@ -673,10 +673,10 @@ mod test {
     fn test_cdf_input_gt_zero() {
         test_case(1.0, 1.0, 1.0, |x| x.cdf(2.0));
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(1.2, 3.4), 0.0, 1.0);
-		test::check_continuous_distribution(&try_create(4.5, 6.7), 0.0, 1.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(1.2, 3.4), 0.0, 1.0);
+        test::check_continuous_distribution(&try_create(4.5, 6.7), 0.0, 1.0);
+    }
 }

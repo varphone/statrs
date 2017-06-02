@@ -127,9 +127,9 @@ impl Univariate<f64, f64> for Triangular {
         let a = self.min;
         let b = self.max;
         let c = self.mode;
-		if x <= a {
-			0.0
-		} else if x <= c {
+        if x <= a {
+            0.0
+        } else if x <= c {
             (x - a) * (x - a) / ((b - a) * (c - a))
         } else if x < b {
             1.0 - (b - x) * (b - x) / ((b - a) * (b - c))
@@ -339,7 +339,7 @@ mod test {
     use std::f64;
     use statistics::*;
     use distribution::{Univariate, Continuous, Triangular};
-	use distribution::internal::*;
+    use distribution::internal::*;
 
     fn try_create(min: f64, max: f64, mode: f64) -> Triangular {
         let n = Triangular::new(min, max, mode);
@@ -527,10 +527,10 @@ mod test {
     fn test_cdf_upper_bound() {
         test_case(0.0, 3.0, 1.5, 1.0, |x| x.cdf(5.0));
     }
-	
-	#[test]
-	fn test_continuous() {
-		test::check_continuous_distribution(&try_create(-5.0, 5.0, 0.0), -5.0, 5.0);
-		test::check_continuous_distribution(&try_create(-15.0, -2.0, -3.0), -15.0, -2.0);
-	}
+
+    #[test]
+    fn test_continuous() {
+        test::check_continuous_distribution(&try_create(-5.0, 5.0, 0.0), -5.0, 5.0);
+        test::check_continuous_distribution(&try_create(-15.0, -2.0, -3.0), -15.0, -2.0);
+    }
 }
