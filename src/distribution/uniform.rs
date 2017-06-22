@@ -464,4 +464,22 @@ mod test {
         test::check_continuous_distribution(&try_create(0.0, 10.0), 0.0, 10.0);
         test::check_continuous_distribution(&try_create(-2.0, 15.0), -2.0, 15.0);
     }
+
+    #[test]
+    fn test_in_range() {
+        use super::Distribution;
+
+        use rand::StdRng;
+        let mut r = StdRng::new().unwrap();
+
+        let min = -4.2;
+        let max = 0.42;
+        let num_trials = 1000;
+        let n = try_create(min, max);
+
+        assert!((0..num_trials)
+            .map(|_| n.sample::<StdRng>(&mut r))
+            .all(|v| (min <= v) && (v < max))
+        );
+    }
 }
