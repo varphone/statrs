@@ -92,7 +92,7 @@ impl Distribution<f64> for Uniform {
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        r.gen_range(self.min, self.max + 1.0)
+        r.gen_range(self.min, self.max)
     }
 }
 
