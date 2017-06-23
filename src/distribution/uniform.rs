@@ -466,7 +466,7 @@ mod test {
     }
 
     #[test]
-    fn test_in_range() {
+    fn test_samples_in_range() {
         use super::Distribution;
 
         use rand::{StdRng, SeedableRng};
