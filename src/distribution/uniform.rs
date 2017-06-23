@@ -473,9 +473,9 @@ mod test {
         let seed: &[_] = &[1, 2, 3, 4, 5];
         let mut r: StdRng = SeedableRng::from_seed(seed);
 
-        let min = -4.2;
-        let max = 0.42;
-        let num_trials = 1000;
+        let min = -0.5;
+        let max = 0.5;
+        let num_trials = 10_000;
         let n = try_create(min, max);
 
         assert!((0..num_trials)
