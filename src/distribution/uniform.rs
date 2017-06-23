@@ -469,8 +469,9 @@ mod test {
     fn test_in_range() {
         use super::Distribution;
 
-        use rand::StdRng;
-        let mut r = StdRng::new().unwrap();
+        use rand::{StdRng, SeedableRng};
+        let seed: &[_] = &[1, 2, 3, 4, 5];
+        let mut r: StdRng = SeedableRng::from_seed(seed);
 
         let min = -4.2;
         let max = 0.42;
