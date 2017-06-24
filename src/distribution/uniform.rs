@@ -92,7 +92,9 @@ impl Distribution<f64> for Uniform {
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        r.gen_range(self.min, self.max)
+        use rand::{Closed01, Rand};
+        let Closed01(rand01) =  Closed01::<f64>::rand(r);
+        self.min + rand01 * (self.max - self.min)
     }
 }
 
