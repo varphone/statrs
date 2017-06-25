@@ -92,7 +92,9 @@ impl Distribution<f64> for Uniform {
     /// # }
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
-        r.gen_range(self.min, self.max + 1.0)
+        use rand::{Closed01, Rand};
+        let Closed01(rand01) =  Closed01::<f64>::rand(r);
+        self.min + rand01 * (self.max - self.min)
     }
 }
 
@@ -463,5 +465,24 @@ mod test {
     fn test_continuous() {
         test::check_continuous_distribution(&try_create(0.0, 10.0), 0.0, 10.0);
         test::check_continuous_distribution(&try_create(-2.0, 15.0), -2.0, 15.0);
+    }
+
+    #[test]
+    fn test_samples_in_range() {
+        use super::Distribution;
+
+        use rand::{StdRng, SeedableRng};
+        let seed: &[_] = &[1, 2, 3, 4, 5];
+        let mut r: StdRng = SeedableRng::from_seed(seed);
+
+        let min = -0.5;
+        let max = 0.5;
+        let num_trials = 10_000;
+        let n = try_create(min, max);
+
+        assert!((0..num_trials)
+            .map(|_| n.sample::<StdRng>(&mut r))
+            .all(|v| (min <= v) && (v < max))
+        );
     }
 }
