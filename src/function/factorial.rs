@@ -1,3 +1,5 @@
+//! Provides functions related to factorial calculations (e.g. binomial coefficient, factorial, multinomial)
+
 use std::f64;
 use std::sync::{Once, ONCE_INIT};
 use error::StatsError;

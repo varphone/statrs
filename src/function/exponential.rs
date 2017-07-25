@@ -1,3 +1,5 @@
+//! Provides functions related to exponential calculations
+
 use {Result, StatsError, consts};
 
 /// Computes the generalized Exponential Integral function
