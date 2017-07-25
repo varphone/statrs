@@ -60,13 +60,12 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
     assert!(x >= 0.0 && x <= 1.0,
             format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
 
-    let bt = match x {
-        0.0 | 1.0 => 0.0,
-        _ => {
-            (gamma::ln_gamma(a + b) - gamma::ln_gamma(a) - gamma::ln_gamma(b) + a * x.ln() +
-             b * (1.0 - x).ln())
-                .exp()
-        }
+    let bt = if x == 0.0 || x == 1.0 {
+        0.0
+    } else {
+        (gamma::ln_gamma(a + b) - gamma::ln_gamma(a) - gamma::ln_gamma(b) + a * x.ln() +
+         b * (1.0 - x).ln())
+            .exp()
     };
     let symm_transform = x >= (a + 1.0) / (a + b + 2.0);
     let eps = prec::F64_PREC;
@@ -130,10 +129,10 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
 
         if (del - 1.0).abs() <= eps {
             return if symm_transform {
-                       1.0 - bt * h / a
-                   } else {
-                       bt * h / a
-                   };
+                1.0 - bt * h / a
+            } else {
+                bt * h / a
+            };
         }
     }
 

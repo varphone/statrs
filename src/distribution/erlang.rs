@@ -313,7 +313,7 @@ impl Continuous<f64, f64> for Erlang {
 #[cfg(test)]
 mod test {
     use std::f64;
-    use distribution::{Univariate, Continuous, Erlang};
+    use distribution::Erlang;
     use distribution::internal::*;
 
     fn try_create(shape: u64, rate: f64) -> Erlang {

@@ -230,14 +230,13 @@ impl Entropy<f64> for Binomial {
     /// (1 / 2) * ln (2 * π * e * n * p * (1 - p))
     /// ```
     fn entropy(&self) -> f64 {
-        match self.p {
-            0.0 | 1.0 => 0.0,
-            _ => {
-                (0..self.n + 1).fold(0.0, |acc, x| {
-                    let p = self.pmf(x);
-                    acc - p * p.ln()
-                })
-            }
+        if self.p == 0.0 || self.p == 1.0 {
+            0.0
+        } else {
+            (0..self.n + 1).fold(0.0, |acc, x| {
+                let p = self.pmf(x);
+                acc - p * p.ln()
+            })
         }
     }
 }
@@ -277,10 +276,12 @@ impl Mode<u64> for Binomial {
     /// floor((n + 1) * p)
     /// ```
     fn mode(&self) -> u64 {
-        match self.p {
-            0.0 => 0,
-            1.0 => self.n,
-            _ => ((self.n as f64 + 1.0) * self.p).floor() as u64,
+        if self.p == 0.0 {
+            0
+        } else if self.p == 1.0 {
+            self.n
+        } else {
+            ((self.n as f64 + 1.0) * self.p).floor() as u64
         }
     }
 }
@@ -296,18 +297,15 @@ impl Discrete<u64, f64> for Binomial {
     /// ```
     fn pmf(&self, x: u64) -> f64 {
         if x > self.n {
-            return 0.0;
-        }
-        match self.p {
-            0.0 if x == 0 => 1.0,
-            0.0 => 0.0,
-            1.0 if x == self.n => 1.0,
-            1.0 => 0.0,
-            _ => {
-                (factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
-                 (self.n - x) as f64 * (1.0 - self.p).ln())
-                    .exp()
-            }
+            0.0
+        } else if self.p == 0.0 {
+            if x == 0 { 1.0 } else { 0.0 }
+        } else if self.p == 1.0 {
+            if x == self.n { 1.0 } else { 0.0 }
+        } else {
+            (factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
+             (self.n - x) as f64 * (1.0 - self.p).ln())
+                .exp()
         }
     }
 
@@ -321,17 +319,14 @@ impl Discrete<u64, f64> for Binomial {
     /// ```
     fn ln_pmf(&self, x: u64) -> f64 {
         if x > self.n {
-            return f64::NEG_INFINITY;
-        }
-        match self.p {
-            0.0 if x == 0 => 0.0,
-            0.0 => f64::NEG_INFINITY,
-            1.0 if x == self.n => 0.0,
-            1.0 => f64::NEG_INFINITY,
-            _ => {
-                factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
-                (self.n - x) as f64 * (1.0 - self.p).ln()
-            }
+            f64::NEG_INFINITY
+        } else if self.p == 0.0 {
+            if x == 0 { 0.0 } else { f64::NEG_INFINITY }
+        } else if self.p == 1.0 {
+            if x == self.n { 0.0 } else { f64::NEG_INFINITY }
+        } else {
+            factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
+            (self.n - x) as f64 * (1.0 - self.p).ln()
         }
     }
 }

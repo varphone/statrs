@@ -29,8 +29,7 @@ const GAMMA_DK: &'static [f64] = &[2.48574089138753565546e-5,
 /// Glendon Ralph Pugh, 2004 p. 116
 pub fn ln_gamma(x: f64) -> f64 {
     if x < 0.5 {
-        let s = GAMMA_DK
-            .iter()
+        let s = GAMMA_DK.iter()
             .enumerate()
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
@@ -38,8 +37,7 @@ pub fn ln_gamma(x: f64) -> f64 {
         consts::LN_PI - (f64::consts::PI * x).sin().ln() - s.ln() - consts::LN_2_SQRT_E_OVER_PI -
         (0.5 - x) * ((0.5 - x + GAMMA_R) / f64::consts::E).ln()
     } else {
-        let s = GAMMA_DK
-            .iter()
+        let s = GAMMA_DK.iter()
             .enumerate()
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
@@ -55,8 +53,7 @@ pub fn ln_gamma(x: f64) -> f64 {
 /// Glendon Ralph Pugh, 2004 p. 116
 pub fn gamma(x: f64) -> f64 {
     if x < 0.5 {
-        let s = GAMMA_DK
-            .iter()
+        let s = GAMMA_DK.iter()
             .enumerate()
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
@@ -65,8 +62,7 @@ pub fn gamma(x: f64) -> f64 {
         ((f64::consts::PI * x).sin() * s * consts::TWO_SQRT_E_OVER_PI *
          ((0.5 - x + GAMMA_R) / f64::consts::E).powf(0.5 - x))
     } else {
-        let s = GAMMA_DK
-            .iter()
+        let s = GAMMA_DK.iter()
             .enumerate()
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
@@ -343,10 +339,7 @@ pub fn inv_digamma(x: f64) -> f64 {
 // by inv_digamma, may consider extracting into a public
 // method
 fn signum(x: f64) -> f64 {
-    match x {
-        0.0 => 0.0,
-        _ => x.signum(),
-    }
+    if x == 0.0 { 0.0 } else { x.signum() }
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
