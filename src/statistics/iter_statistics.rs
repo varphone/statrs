@@ -211,6 +211,8 @@ impl<T> Statistics<f64> for T
 #[cfg(test)]
 mod test {
     use std::f64::consts;
+    use rand::{SeedableRng, StdRng};
+    use distribution::{Distribution, Normal};
     use statistics::Statistics;
     use generate;
     use testing;
@@ -276,11 +278,16 @@ mod test {
         assert_eq!(data.max(), 10.0);
     }
 
-    #[ignore]
     #[test]
     fn test_mean_variance_stability() {
-        // TODO: Implement tests. Depends on Mersenne Twister RNG implementation.
-        // Currently hesistant to bring extra dependency just for test
+        let seed: &[_] = &[1,2,3,4];
+        let mut rng: StdRng = SeedableRng::from_seed(seed);
+        let normal = Normal::new(1e9, 2.0).unwrap();
+        let samples = (0..10000).map(|_| normal.sample::<StdRng>(&mut rng)).collect::<Vec<f64>>();
+        assert_almost_eq!((&samples).mean(), 1e9, 10.0);
+        assert_almost_eq!((&samples).variance(), 4.0, 0.1);
+        assert_almost_eq!((&samples).std_dev(), 2.0, 0.01);
+        assert_almost_eq!((&samples).quadratic_mean(), 1e9, 10.0);
     }
 
     #[test]
