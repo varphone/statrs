@@ -30,6 +30,32 @@ pub fn linear_spaced(length: usize, start: f64, stop: f64) -> Vec<f64> {
     }
 }
 
+/// Generates a base 10 log spaced vector of the given length between the specified
+/// decade exponents (inclusive). Equivalent to MATLAB logspace
+///
+/// # Examples
+///
+/// ```
+/// use statrs::generate;
+///
+/// let x = generate::log_spaced(5, 0.0, 4.0);
+/// assert_eq!(x, [1.0, 10.0, 100.0, 1000.0, 10000.0]);
+/// ```
+pub fn log_spaced(length: usize, start_exp: f64, stop_exp: f64) -> Vec<f64> {
+    match length {
+        0 => Vec::new(),
+        1 => vec![10f64.powf(stop_exp)],
+        _ => {
+            let step = (stop_exp - start_exp) / (length - 1) as f64;
+            let mut vec = (0..length)
+                .map(|x| 10f64.powf(start_exp + (x as f64) * step))
+                .collect::<Vec<f64>>();
+            vec[length - 1] = 10f64.powf(stop_exp);
+            vec
+        }
+    }
+}
+
 /// Creates a vector of `f64` points representing a periodic wave with an amplitude
 /// of `1.0`, phase of `0.0`, and delay of `0`.
 ///
