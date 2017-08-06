@@ -408,3 +408,50 @@ impl Iterator for Triangle {
         })
     }
 }
+
+/// Finite iterator returning floats forming a sawtooth wave
+/// starting with the lowest sample
+pub struct Sawtooth {
+    periodic: Periodic,
+    low_value: f64,
+}
+
+impl Sawtooth {
+    /// Constructs a new sawtooth wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::Sawtooth;
+    ///
+    /// let x = Sawtooth::new(12, 5, 1.0, -1.0, 1).collect::<Vec<f64>>();
+    /// assert_eq!(x, [1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0]);
+    /// ```
+    pub fn new(length: usize,
+               period: i64,
+               high_value: f64,
+               low_value: f64,
+               delay: i64)
+               -> Sawtooth {
+
+        let height = high_value - low_value;
+        let period = period as f64;
+        Sawtooth {
+            periodic: Periodic::new(length,
+                                    1.0,
+                                    1.0 / period,
+                                    height * period / (period - 1.0),
+                                    0.0,
+                                    delay),
+            low_value: low_value as f64,
+        }
+    }
+}
+
+impl Iterator for Sawtooth {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        self.periodic.next().and_then(|x| Some(x + self.low_value))
+    }
+}
