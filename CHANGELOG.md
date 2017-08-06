@@ -1,8 +1,36 @@
 v0.8.0
  - `cdf(x)`, `pdf(x)` and `pmf(x)` now return the correct value instead of panicking when `x` is outside the range of values that the distribution can attain.
  - Fixed a bug in the `Uniform` distribution implementation where samples were drawn from range `[min, max + 1)` instead of `[min, max]`. The samples are now drawn correctly from the range `[min, max]`.
- - Implement `generate::linear_spaced` function
  - Implement `generate::log_spaced` function
+ - Implement `generate::Periodic` iterator
+ - Implement `generate::Sinusoidal` iterator
+ - Implement `generate::Square` iterator
+ - Implement `generate::Triangle` iterator
+ - Implement `generate::Sawtooth` iterator
+ - Deprecate `generate::periodic` and `generate::periodic_custom`
+ - Deprecate `generate::sinusoidal` and `generate::sinusoidal_custom`
+
+ Note: A recent commit to the Rust nightly build causes compile errors when using
+ empty slices with the `Statistics` trait, specifically the `Statistics::min` and
+ `Statistics::max` methods. This only affects the case where the compiler must infer
+ the type of the empty slice:
+
+```
+use statrs::statistics::Statistics;
+
+// compile error! Assumes the use of Ord::min rather than
+// Statistcs::min
+let x = [];
+assert!(x.min().is_nan());
+```
+
+The fix is to pin the type of the empty slice:
+
+```
+// no compile error
+let x: [f64; 0] = [];
+assert!(x.min().is_nan());
+```
 
 v0.7.0
  - Implemented `Categorical` distribution
