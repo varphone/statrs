@@ -17,7 +17,7 @@ pub enum RankTieBreaker {
 pub trait Statistics<T> {
     /// Returns the minimum value in the data
     ///
-    /// # Rermarks
+    /// # Remarks
     ///
     /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`
     ///
@@ -27,7 +27,7 @@ pub trait Statistics<T> {
     /// use std::f64;
     /// use statrs::statistics::Statistics;
     ///
-    /// let x = [];
+    /// let x: [f64; 0] = [];
     /// assert!(x.min().is_nan());
     ///
     /// let y = [0.0, f64::NAN, 3.0, -2.0];
@@ -50,7 +50,7 @@ pub trait Statistics<T> {
     /// use std::f64;
     /// use statrs::statistics::Max;
     ///
-    /// let x = [];
+    /// let x: [f64; 0] = [];
     /// assert!(x.max().is_nan());
     ///
     /// let y = [0.0, f64::NAN, 3.0, -2.0];

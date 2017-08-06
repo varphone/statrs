@@ -118,7 +118,7 @@ impl Min<f64> for [f64] {
     /// use std::f64;
     /// use statrs::statistics::Min;
     ///
-    /// let x = [];
+    /// let x: [f64; 0] = [];
     /// assert!(x.min().is_nan());
     ///
     /// let y = [0.0, f64::NAN, 3.0, -2.0];
@@ -145,7 +145,7 @@ impl Max<f64> for [f64] {
     /// use std::f64;
     /// use statrs::statistics::Max;
     ///
-    /// let x = [];
+    /// let x: [f64; 0] = [];
     /// assert!(x.max().is_nan());
     ///
     /// let y = [0.0, f64::NAN, 3.0, -2.0];
