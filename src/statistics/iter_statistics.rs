@@ -214,7 +214,7 @@ mod test {
     use rand::{SeedableRng, StdRng};
     use distribution::{Distribution, Normal};
     use statistics::Statistics;
-    use generate;
+    use generate::{Periodic, Sinusoidal};
     use testing;
 
     #[test]
@@ -349,8 +349,8 @@ mod test {
 
     #[test]
     fn test_large_samples() {
-        let shorter = generate::periodic(4*4096, 4.0, 1.0);
-        let longer = generate::periodic(4*32768, 4.0, 1.0);
+        let shorter = Periodic::default(4*4096, 4.0, 1.0).collect::<Vec<f64>>();
+        let longer = Periodic::default(4*32768, 4.0, 1.0).collect::<Vec<f64>>();
         assert_almost_eq!((&shorter).mean(), 0.375, 1e-14);
         assert_almost_eq!((&longer).mean(), 0.375, 1e-14);
         assert_almost_eq!((&shorter).quadratic_mean(), (0.21875f64).sqrt(), 1e-14);
@@ -359,7 +359,7 @@ mod test {
 
     #[test]
     fn test_quadratic_mean_of_sinusoidal() {
-        let data = generate::sinusoidal(128, 64.0, 16.0, 2.0);
+        let data = Sinusoidal::default(128, 64.0, 16.0, 2.0).collect::<Vec<f64>>();
         assert_almost_eq!((&data).quadratic_mean(), 2.0 / consts::SQRT_2, 1e-15);
     }
 }

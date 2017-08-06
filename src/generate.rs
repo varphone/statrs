@@ -28,6 +28,81 @@ pub fn log_spaced(length: usize, start_exp: f64, stop_exp: f64) -> Vec<f64> {
     }
 }
 
+/// Finite iterator returning floats that form a periodic wave
+pub struct Periodic {
+    length: usize,
+    amplitude: f64,
+    step: f64,
+    phase: f64,
+    k: f64,
+    i: usize,
+}
+
+impl Periodic {
+    /// Constructs a new periodic wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::Periodic;
+    ///
+    /// let x = Periodic::new(10, 8.0, 2.0, 10.0, 1.0, 2).collect::<Vec<f64>>();
+    /// assert_eq!(x, [6.0, 8.5, 1.0, 3.5, 6.0, 8.5, 1.0, 3.5, 6.0, 8.5]);
+    /// ```
+    pub fn new(length: usize,
+               sampling_rate: f64,
+               frequency: f64,
+               amplitude: f64,
+               phase: f64,
+               delay: i64)
+               -> Periodic {
+
+        let step = frequency / sampling_rate * amplitude;
+        Periodic {
+            length: length,
+            amplitude: amplitude,
+            step: step,
+            phase: (phase - delay as f64 * step).modulus(amplitude),
+            k: 0.0,
+            i: 0,
+        }
+    }
+
+    /// Constructs a default periodic wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::Periodic;
+    ///
+    /// let x = Periodic::default(10, 8.0, 2.0).collect::<Vec<f64>>();
+    /// assert_eq!(x, [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.75, 0.0, 0.25]);
+    /// ```
+    pub fn default(length: usize, sampling_rate: f64, frequency: f64) -> Periodic {
+        Self::new(length, sampling_rate, frequency, 1.0, 0.0, 0)
+    }
+}
+
+impl Iterator for Periodic {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        if self.i == self.length {
+            None
+        } else {
+            let mut x = self.phase + self.k * self.step;
+            if x >= self.amplitude {
+                x %= self.amplitude;
+                self.phase = x;
+                self.k = 0.0;
+            }
+            self.k += 1.0;
+            self.i += 1;
+            Some(x)
+        }
+    }
+}
+
 /// Creates a vector of `f64` points representing a periodic wave with an amplitude
 /// of `1.0`, phase of `0.0`, and delay of `0`.
 ///
@@ -39,6 +114,7 @@ pub fn log_spaced(length: usize, start_exp: f64, stop_exp: f64) -> Vec<f64> {
 /// let x = generate::periodic(10, 8.0, 2.0);
 /// assert_eq!(x, [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.75, 0.0, 0.25]);
 /// ```
+#[deprecated(since="0.8.0", note="please use `Periodic::default` instead")]
 pub fn periodic(length: usize, sampling_rate: f64, frequency: f64) -> Vec<f64> {
     periodic_custom(length, sampling_rate, frequency, 1.0, 0.0, 0)
 }
@@ -53,6 +129,7 @@ pub fn periodic(length: usize, sampling_rate: f64, frequency: f64) -> Vec<f64> {
 /// let x = generate::periodic_custom(10, 8.0, 2.0, 10.0, 1.0, 2);
 /// assert_eq!(x, [6.0, 8.5, 1.0, 3.5, 6.0, 8.5, 1.0, 3.5, 6.0, 8.5]);
 /// ```
+#[deprecated(since="0.8.0", note="please use `Periodic::new` instead")]
 pub fn periodic_custom(length: usize,
                        sampling_rate: f64,
                        frequency: f64,
@@ -79,6 +156,90 @@ pub fn periodic_custom(length: usize,
     data
 }
 
+/// Finite iterator returning floats that form a sinusoidal wave
+pub struct Sinusoidal {
+    length: usize,
+    amplitude: f64,
+    mean: f64,
+    step: f64,
+    phase: f64,
+    i: usize,
+}
+
+impl Sinusoidal {
+    /// Constructs a new sinusoidal wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::Sinusoidal;
+    ///
+    /// let x = Sinusoidal::new(10, 8.0, 2.0, 1.0, 5.0, 2.0, 1).collect::<Vec<f64>>();
+    /// assert_eq!(x,
+    ///     [5.416146836547142, 5.909297426825682, 4.583853163452858,
+    ///     4.090702573174318, 5.416146836547142, 5.909297426825682,
+    ///     4.583853163452858, 4.090702573174318, 5.416146836547142,
+    ///     5.909297426825682]);
+    /// ```
+    pub fn new(length: usize,
+               sampling_rate: f64,
+               frequency: f64,
+               amplitude: f64,
+               mean: f64,
+               phase: f64,
+               delay: i64)
+               -> Sinusoidal {
+
+        let pi2 = consts::PI * 2.0;
+        let step = frequency / sampling_rate * pi2;
+        Sinusoidal {
+            length: length,
+            amplitude: amplitude,
+            mean: mean,
+            step: step,
+            phase: (phase - delay as f64 * step) % pi2,
+            i: 0,
+        }
+    }
+
+    /// Constructs a default sinusoidal wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::Sinusoidal;
+    ///
+    /// let x = Sinusoidal::default(10, 8.0, 2.0, 1.0).collect::<Vec<f64>>();
+    /// assert_eq!(x,
+    ///     [0.0, 1.0, 0.00000000000000012246467991473532,
+    ///     -1.0, -0.00000000000000024492935982947064, 1.0,
+    ///     0.00000000000000036739403974420594, -1.0,
+    ///     -0.0000000000000004898587196589413, 1.0]);
+    /// ```
+    pub fn default(length: usize,
+                   sampling_rate: f64,
+                   frequency: f64,
+                   amplitude: f64)
+                   -> Sinusoidal {
+
+        Self::new(length, sampling_rate, frequency, amplitude, 0.0, 0.0, 0)
+    }
+}
+
+impl Iterator for Sinusoidal {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        if self.i == self.length {
+            None
+        } else {
+            let x = self.mean + self.amplitude * (self.phase + self.i as f64 * self.step).sin();
+            self.i += 1;
+            Some(x)
+        }
+    }
+}
+
 /// Creates a vector of `f64` points representing a Sine wave with a mean of `0.0`,
 /// phase of `0.0`, and delay of `0`.
 ///
@@ -94,6 +255,7 @@ pub fn periodic_custom(length: usize,
 ///     0.00000000000000036739403974420594, -1.0,
 ///     -0.0000000000000004898587196589413, 1.0]);
 /// ```
+#[deprecated(since="0.8.0", note="please use `Sinusoidal::default` instead")]
 pub fn sinusoidal(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64) -> Vec<f64> {
     sinusoidal_custom(length, sampling_rate, frequency, amplitude, 0.0, 0.0, 0)
 }
@@ -112,6 +274,7 @@ pub fn sinusoidal(length: usize, sampling_rate: f64, frequency: f64, amplitude: 
 ///     4.583853163452858, 4.090702573174318, 5.416146836547142,
 ///     5.909297426825682]);
 /// ```
+#[deprecated(since="0.8.0", note="please use `Sinusoidal::new` instead")]
 pub fn sinusoidal_custom(length: usize,
                          sampling_rate: f64,
                          frequency: f64,
