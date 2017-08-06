@@ -291,3 +291,53 @@ pub fn sinusoidal_custom(length: usize,
         .map(|i| mean + amplitude * (phase + i as f64 * step).sin())
         .collect()
 }
+
+/// Finite iterator returning floats forming a square wave starting
+/// with the high phase
+pub struct Square {
+    periodic: Periodic,
+    high_duration: f64,
+    high_value: f64,
+    low_value: f64,
+}
+
+impl Square {
+    /// Constructs a new square wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::Square;
+    ///
+    /// let x = Square::new(12, 3, 7, 1.0, -1.0, 1).collect::<Vec<f64>>();
+    /// assert_eq!(x, [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0])
+    /// ```
+    pub fn new(length: usize,
+               high_duration: i64,
+               low_duration: i64,
+               high_value: f64,
+               low_value: f64,
+               delay: i64)
+               -> Square {
+
+        let duration = (high_duration + low_duration) as f64;
+        Square {
+            periodic: Periodic::new(length, 1.0, 1.0 / duration, duration, 0.0, delay),
+            high_duration: high_duration as f64,
+            high_value: high_value,
+            low_value: low_value,
+        }
+    }
+}
+
+impl Iterator for Square {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        self.periodic.next().and_then(|x| if x < self.high_duration {
+            Some(self.high_value)
+        } else {
+            Some(self.low_value)
+        })
+    }
+}
