@@ -2,34 +2,6 @@
 use std::f64::consts;
 use euclid::Modulus;
 
-/// Generates a linearly spaced vector of the given length between
-/// the specified values (inclusive). Equivalent to MATLAB linspace
-///
-/// # Note
-///
-/// Will become deprecated once `step_by` becomes stable
-///
-/// # Examples
-///
-/// ```
-/// use statrs::generate;
-///
-/// let x = generate::linear_spaced(9, 0.0, 64.0);
-/// assert_eq!(x, [0.0, 8.0, 16.0, 24.0, 32.0, 40.0, 48.0, 56.0, 64.0]);
-/// ```
-pub fn linear_spaced(length: usize, start: f64, stop: f64) -> Vec<f64> {
-    match length {
-        0 => Vec::new(),
-        1 => vec![stop],
-        _ => {
-            let step = (stop - start) / (length - 1) as f64;
-            let mut vec = (0..length).map(|x| start + (x as f64) * step).collect::<Vec<f64>>();
-            vec[length - 1] = stop;
-            vec
-        }
-    }
-}
-
 /// Generates a base 10 log spaced vector of the given length between the specified
 /// decade exponents (inclusive). Equivalent to MATLAB logspace
 ///
