@@ -334,10 +334,77 @@ impl Iterator for Square {
     type Item = f64;
 
     fn next(&mut self) -> Option<f64> {
-        self.periodic.next().and_then(|x| if x < self.high_duration {
-            Some(self.high_value)
-        } else {
-            Some(self.low_value)
+        self.periodic.next().and_then(|x| {
+            if x < self.high_duration {
+                Some(self.high_value)
+            } else {
+                Some(self.low_value)
+            }
+        })
+    }
+}
+
+/// Finite iterator returning floats forming a triangle wave
+/// starting with the raise phase from the lowest sample
+pub struct Triangle {
+    periodic: Periodic,
+    raise_duration: f64,
+    raise: f64,
+    fall: f64,
+    high_value: f64,
+    low_value: f64,
+}
+
+impl Triangle {
+    /// Constructs a new triangle wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use statrs::generate::Triangle;
+    ///
+    /// # fn main() {
+    /// let x = Triangle::new(12, 4, 7, 1.0, -1.0, 1).collect::<Vec<f64>>();
+    /// let expected: [f64; 12] = [-0.714, -1.0, -0.5, 0.0, 0.5, 1.0, 0.714, 0.429, 0.143, -0.143, -0.429, -0.714];
+    /// for (&left, &right) in x.iter().zip(expected.iter()) {
+    ///     assert_almost_eq!(left, right, 1e-3);
+    /// }
+    /// # }
+    /// ```
+    pub fn new(length: usize,
+               raise_duration: i64,
+               fall_duration: i64,
+               high_value: f64,
+               low_value: f64,
+               delay: i64)
+               -> Triangle {
+
+        let duration = (raise_duration + fall_duration) as f64;
+        let height = high_value - low_value;
+        Triangle {
+            periodic: Periodic::new(length, 1.0, 1.0 / duration, duration, 0.0, delay),
+            raise_duration: raise_duration as f64,
+            raise: height / raise_duration as f64,
+            fall: height / fall_duration as f64,
+            high_value: high_value,
+            low_value: low_value,
+        }
+    }
+}
+
+impl Iterator for Triangle {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        self.periodic.next().and_then(|x| {
+            if x < self.raise_duration {
+                Some(self.low_value + x * self.raise)
+            } else {
+                Some(self.high_value - (x - self.raise_duration) * self.fall)
+            }
         })
     }
 }
