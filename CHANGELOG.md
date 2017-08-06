@@ -32,6 +32,8 @@ let x: [f64; 0] = [];
 assert!(x.min().is_nan());
 ```
 
+Since the regression affects a very slim edge-case and the fix is very simple, no breaking changes to the `Statistics` API was deemed necessary
+
 v0.7.0
  - Implemented `Categorical` distribution
  - Implemented `Erlang` distribution
