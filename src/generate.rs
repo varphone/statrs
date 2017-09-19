@@ -1,5 +1,6 @@
 //! Provides utility functions for generating data sequences
 use std::f64::consts;
+use std::iter::Take;
 use euclid::Modulus;
 
 /// Generates a base 10 log spaced vector of the given length between the specified
@@ -28,14 +29,74 @@ pub fn log_spaced(length: usize, start_exp: f64, stop_exp: f64) -> Vec<f64> {
     }
 }
 
-/// Finite iterator returning floats that form a periodic wave
-pub struct Periodic {
-    length: usize,
+/// Infinite iterator returning floats that form a periodic wave
+pub struct InfinitePeriodic {
     amplitude: f64,
     step: f64,
     phase: f64,
     k: f64,
-    i: usize,
+}
+
+impl InfinitePeriodic {
+    /// Constructs a new infinite periodic wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::InfinitePeriodic;
+    ///
+    /// let x = InfinitePeriodic::new(8.0, 2.0, 10.0, 1.0, 2).take(10).collect::<Vec<f64>>();
+    /// assert_eq!(x, [6.0, 8.5, 1.0, 3.5, 6.0, 8.5, 1.0, 3.5, 6.0, 8.5]);
+    /// ```
+    pub fn new(sampling_rate: f64,
+               frequency: f64,
+               amplitude: f64,
+               phase: f64,
+               delay: i64)
+               -> InfinitePeriodic {
+
+        let step = frequency / sampling_rate * amplitude;
+        InfinitePeriodic {
+            amplitude: amplitude,
+            step: step,
+            phase: (phase - delay as f64 * step).modulus(amplitude),
+            k: 0.0,
+        }
+    }
+
+    /// Constructs a default infinite periodic wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::InfinitePeriodic;
+    ///
+    /// let x = InfinitePeriodic::default(8.0, 2.0).take(10).collect::<Vec<f64>>();
+    /// assert_eq!(x, [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.75, 0.0, 0.25]);
+    /// ```
+    pub fn default(sampling_rate: f64, frequency: f64) -> InfinitePeriodic {
+        Self::new(sampling_rate, frequency, 1.0, 0.0, 0)
+    }
+}
+
+impl Iterator for InfinitePeriodic {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        let mut x = self.phase + self.k * self.step;
+        if x >= self.amplitude {
+            x %= self.amplitude;
+            self.phase = x;
+            self.k = 0.0;
+        }
+        self.k += 1.0;
+        Some(x)
+    }
+}
+
+/// Finite iterator returning floats that form a periodic wave
+pub struct Periodic {
+    internal: Take<InfinitePeriodic>,
 }
 
 impl Periodic {
@@ -49,6 +110,7 @@ impl Periodic {
     /// let x = Periodic::new(10, 8.0, 2.0, 10.0, 1.0, 2).collect::<Vec<f64>>();
     /// assert_eq!(x, [6.0, 8.5, 1.0, 3.5, 6.0, 8.5, 1.0, 3.5, 6.0, 8.5]);
     /// ```
+    #[deprecated(since="0.9.0", note="please use `InfinitePeriodic::new` and `take` instead")]
     pub fn new(length: usize,
                sampling_rate: f64,
                frequency: f64,
@@ -57,14 +119,9 @@ impl Periodic {
                delay: i64)
                -> Periodic {
 
-        let step = frequency / sampling_rate * amplitude;
         Periodic {
-            length: length,
-            amplitude: amplitude,
-            step: step,
-            phase: (phase - delay as f64 * step).modulus(amplitude),
-            k: 0.0,
-            i: 0,
+            internal: InfinitePeriodic::new(sampling_rate, frequency, amplitude, phase, delay)
+                .take(length),
         }
     }
 
@@ -78,6 +135,7 @@ impl Periodic {
     /// let x = Periodic::default(10, 8.0, 2.0).collect::<Vec<f64>>();
     /// assert_eq!(x, [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.75, 0.0, 0.25]);
     /// ```
+    #[deprecated(since="0.9.0", note="please use `InfinitePeriodic::default` and `take` instead")]
     pub fn default(length: usize, sampling_rate: f64, frequency: f64) -> Periodic {
         Self::new(length, sampling_rate, frequency, 1.0, 0.0, 0)
     }
@@ -87,19 +145,7 @@ impl Iterator for Periodic {
     type Item = f64;
 
     fn next(&mut self) -> Option<f64> {
-        if self.i == self.length {
-            None
-        } else {
-            let mut x = self.phase + self.k * self.step;
-            if x >= self.amplitude {
-                x %= self.amplitude;
-                self.phase = x;
-                self.k = 0.0;
-            }
-            self.k += 1.0;
-            self.i += 1;
-            Some(x)
-        }
+        self.internal.next()
     }
 }
 
@@ -156,14 +202,85 @@ pub fn periodic_custom(length: usize,
     data
 }
 
-/// Finite iterator returning floats that form a sinusoidal wave
-pub struct Sinusoidal {
-    length: usize,
+/// Infinite iterator returning floats that form a sinusoidal wave
+pub struct InfiniteSinusoidal {
     amplitude: f64,
     mean: f64,
     step: f64,
     phase: f64,
     i: usize,
+}
+
+impl InfiniteSinusoidal {
+    /// Constructs a new infinite sinusoidal wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::InfiniteSinusoidal;
+    ///
+    /// let x = InfiniteSinusoidal::new(8.0, 2.0, 1.0, 5.0, 2.0, 1).take(10).collect::<Vec<f64>>();
+    /// assert_eq!(x,
+    ///     [5.416146836547142, 5.909297426825682, 4.583853163452858,
+    ///     4.090702573174318, 5.416146836547142, 5.909297426825682,
+    ///     4.583853163452858, 4.090702573174318, 5.416146836547142,
+    ///     5.909297426825682]);
+    /// ```
+    pub fn new(sampling_rate: f64,
+               frequency: f64,
+               amplitude: f64,
+               mean: f64,
+               phase: f64,
+               delay: i64)
+               -> InfiniteSinusoidal {
+
+        let pi2 = consts::PI * 2.0;
+        let step = frequency / sampling_rate * pi2;
+        InfiniteSinusoidal {
+            amplitude: amplitude,
+            mean: mean,
+            step: step,
+            phase: (phase - delay as f64 * step) % pi2,
+            i: 0,
+        }
+    }
+
+    /// Constructs a default infinite sinusoidal wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::InfiniteSinusoidal;
+    ///
+    /// let x = InfiniteSinusoidal::default(8.0, 2.0, 1.0).take(10).collect::<Vec<f64>>();
+    /// assert_eq!(x,
+    ///     [0.0, 1.0, 0.00000000000000012246467991473532,
+    ///     -1.0, -0.00000000000000024492935982947064, 1.0,
+    ///     0.00000000000000036739403974420594, -1.0,
+    ///     -0.0000000000000004898587196589413, 1.0]);
+    /// ```
+    pub fn default(sampling_rate: f64, frequency: f64, amplitude: f64) -> InfiniteSinusoidal {
+        Self::new(sampling_rate, frequency, amplitude, 0.0, 0.0, 0)
+    }
+}
+
+impl Iterator for InfiniteSinusoidal {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        let x = self.mean + self.amplitude * (self.phase + self.i as f64 * self.step).sin();
+        self.i += 1;
+        if self.i == 1000 {
+            self.i = 0;
+            self.phase = (self.phase + 1000.0 * self.step) % (consts::PI * 2.0);
+        }
+        Some(x)
+    }
+}
+
+/// Finite iterator returning floats that form a sinusoidal wave
+pub struct Sinusoidal {
+    internal: Take<InfiniteSinusoidal>,
 }
 
 impl Sinusoidal {
@@ -181,6 +298,7 @@ impl Sinusoidal {
     ///     4.583853163452858, 4.090702573174318, 5.416146836547142,
     ///     5.909297426825682]);
     /// ```
+    #[deprecated(since="0.9.0", note="please use `InfiniteSinusoidal::new` and `take` instead")]
     pub fn new(length: usize,
                sampling_rate: f64,
                frequency: f64,
@@ -190,15 +308,14 @@ impl Sinusoidal {
                delay: i64)
                -> Sinusoidal {
 
-        let pi2 = consts::PI * 2.0;
-        let step = frequency / sampling_rate * pi2;
         Sinusoidal {
-            length: length,
-            amplitude: amplitude,
-            mean: mean,
-            step: step,
-            phase: (phase - delay as f64 * step) % pi2,
-            i: 0,
+            internal: InfiniteSinusoidal::new(sampling_rate,
+                                              frequency,
+                                              amplitude,
+                                              mean,
+                                              phase,
+                                              delay)
+                .take(length),
         }
     }
 
@@ -216,6 +333,7 @@ impl Sinusoidal {
     ///     0.00000000000000036739403974420594, -1.0,
     ///     -0.0000000000000004898587196589413, 1.0]);
     /// ```
+    #[deprecated(since="0.9.0", note="please use `InfiniteSinusoidal::default` and `take` instead")]
     pub fn default(length: usize,
                    sampling_rate: f64,
                    frequency: f64,
@@ -230,13 +348,7 @@ impl Iterator for Sinusoidal {
     type Item = f64;
 
     fn next(&mut self) -> Option<f64> {
-        if self.i == self.length {
-            None
-        } else {
-            let x = self.mean + self.amplitude * (self.phase + self.i as f64 * self.step).sin();
-            self.i += 1;
-            Some(x)
-        }
+        self.internal.next()
     }
 }
 
@@ -292,37 +404,36 @@ pub fn sinusoidal_custom(length: usize,
         .collect()
 }
 
-/// Finite iterator returning floats forming a square wave starting
+/// Infinite iterator returning floats forming a square wave starting
 /// with the high phase
-pub struct Square {
-    periodic: Periodic,
+pub struct InfiniteSquare {
+    periodic: InfinitePeriodic,
     high_duration: f64,
     high_value: f64,
     low_value: f64,
 }
 
-impl Square {
-    /// Constructs a new square wave generator
+impl InfiniteSquare {
+    /// Constructs a new infinite square wave generator
     ///
     /// # Examples
     ///
     /// ```
-    /// use statrs::generate::Square;
+    /// use statrs::generate::InfiniteSquare;
     ///
-    /// let x = Square::new(12, 3, 7, 1.0, -1.0, 1).collect::<Vec<f64>>();
+    /// let x = InfiniteSquare::new(3, 7, 1.0, -1.0, 1).take(12).collect::<Vec<f64>>();
     /// assert_eq!(x, [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0])
     /// ```
-    pub fn new(length: usize,
-               high_duration: i64,
+    pub fn new(high_duration: i64,
                low_duration: i64,
                high_value: f64,
                low_value: f64,
                delay: i64)
-               -> Square {
+               -> InfiniteSquare {
 
         let duration = (high_duration + low_duration) as f64;
-        Square {
-            periodic: Periodic::new(length, 1.0, 1.0 / duration, duration, 0.0, delay),
+        InfiniteSquare {
+            periodic: InfinitePeriodic::new(1.0, 1.0 / duration, duration, 0.0, delay),
             high_duration: high_duration as f64,
             high_value: high_value,
             low_value: low_value,
@@ -330,7 +441,7 @@ impl Square {
     }
 }
 
-impl Iterator for Square {
+impl Iterator for InfiniteSquare {
     type Item = f64;
 
     fn next(&mut self) -> Option<f64> {
@@ -344,15 +455,120 @@ impl Iterator for Square {
     }
 }
 
-/// Finite iterator returning floats forming a triangle wave
+/// Finite iterator returning floats forming a square wave starting
+/// with the high phase
+pub struct Square {
+    internal: Take<InfiniteSquare>,
+}
+
+impl Square {
+    /// Constructs a new square wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::Square;
+    ///
+    /// let x = Square::new(12, 3, 7, 1.0, -1.0, 1).collect::<Vec<f64>>();
+    /// assert_eq!(x, [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0])
+    /// ```
+    #[deprecated(since="0.9.0", note="please use `InfiniteSquare::new` and `take` instead")]
+    pub fn new(length: usize,
+               high_duration: i64,
+               low_duration: i64,
+               high_value: f64,
+               low_value: f64,
+               delay: i64)
+               -> Square {
+
+        Square {
+            internal: InfiniteSquare::new(high_duration,
+                                          low_duration,
+                                          high_value,
+                                          low_value,
+                                          delay)
+                .take(length),
+        }
+    }
+}
+
+impl Iterator for Square {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        self.internal.next()
+    }
+}
+
+/// Infinite iterator returning floats forming a triangle wave
 /// starting with the raise phase from the lowest sample
-pub struct Triangle {
-    periodic: Periodic,
+pub struct InfiniteTriangle {
+    periodic: InfinitePeriodic,
     raise_duration: f64,
     raise: f64,
     fall: f64,
     high_value: f64,
     low_value: f64,
+}
+
+impl InfiniteTriangle {
+    /// Constructs a new infinite triangle wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #[macro_use]
+    /// extern crate statrs;
+    ///
+    /// use statrs::generate::InfiniteTriangle;
+    ///
+    /// # fn main() {
+    /// let x = InfiniteTriangle::new(4, 7, 1.0, -1.0, 1).take(12).collect::<Vec<f64>>();
+    /// let expected: [f64; 12] = [-0.714, -1.0, -0.5, 0.0, 0.5, 1.0, 0.714, 0.429, 0.143, -0.143, -0.429, -0.714];
+    /// for (&left, &right) in x.iter().zip(expected.iter()) {
+    ///     assert_almost_eq!(left, right, 1e-3);
+    /// }
+    /// # }
+    /// ```
+    pub fn new(raise_duration: i64,
+               fall_duration: i64,
+               high_value: f64,
+               low_value: f64,
+               delay: i64)
+               -> InfiniteTriangle {
+
+        let duration = (raise_duration + fall_duration) as f64;
+        let height = high_value - low_value;
+        InfiniteTriangle {
+            periodic: InfinitePeriodic::new(1.0, 1.0 / duration, duration, 0.0, delay),
+            raise_duration: raise_duration as f64,
+            raise: height / raise_duration as f64,
+            fall: height / fall_duration as f64,
+            high_value: high_value,
+            low_value: low_value,
+        }
+    }
+}
+
+impl Iterator for InfiniteTriangle {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        self.periodic.next().and_then(|x| {
+            if x < self.raise_duration {
+                Some(self.low_value + x * self.raise)
+            } else {
+                Some(self.high_value - (x - self.raise_duration) * self.fall)
+            }
+        })
+    }
+}
+
+
+/// Finite iterator returning floats forming a triangle wave
+/// starting with the raise phase from the lowest sample
+pub struct Triangle {
+    internal: Take<InfiniteTriangle>,
 }
 
 impl Triangle {
@@ -374,6 +590,7 @@ impl Triangle {
     /// }
     /// # }
     /// ```
+    #[deprecated(since="0.9.0", note="please use `InfiniteTriangle::new` and `take` instead")]
     pub fn new(length: usize,
                raise_duration: i64,
                fall_duration: i64,
@@ -382,15 +599,13 @@ impl Triangle {
                delay: i64)
                -> Triangle {
 
-        let duration = (raise_duration + fall_duration) as f64;
-        let height = high_value - low_value;
         Triangle {
-            periodic: Periodic::new(length, 1.0, 1.0 / duration, duration, 0.0, delay),
-            raise_duration: raise_duration as f64,
-            raise: height / raise_duration as f64,
-            fall: height / fall_duration as f64,
-            high_value: high_value,
-            low_value: low_value,
+            internal: InfiniteTriangle::new(raise_duration,
+                                            fall_duration,
+                                            high_value,
+                                            low_value,
+                                            delay)
+                .take(length),
         }
     }
 }
@@ -399,21 +614,55 @@ impl Iterator for Triangle {
     type Item = f64;
 
     fn next(&mut self) -> Option<f64> {
-        self.periodic.next().and_then(|x| {
-            if x < self.raise_duration {
-                Some(self.low_value + x * self.raise)
-            } else {
-                Some(self.high_value - (x - self.raise_duration) * self.fall)
-            }
-        })
+        self.internal.next()
+    }
+}
+
+/// Infinite iterator returning floats forming a sawtooth wave
+/// starting with the lowest sample
+pub struct InfiniteSawtooth {
+    periodic: InfinitePeriodic,
+    low_value: f64,
+}
+
+impl InfiniteSawtooth {
+    /// Constructs a new infinite sawtooth wave generator
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::generate::InfiniteSawtooth;
+    ///
+    /// let x = InfiniteSawtooth::new(5, 1.0, -1.0, 1).take(12).collect::<Vec<f64>>();
+    /// assert_eq!(x, [1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0]);
+    /// ```
+    pub fn new(period: i64, high_value: f64, low_value: f64, delay: i64) -> InfiniteSawtooth {
+
+        let height = high_value - low_value;
+        let period = period as f64;
+        InfiniteSawtooth {
+            periodic: InfinitePeriodic::new(1.0,
+                                            1.0 / period,
+                                            height * period / (period - 1.0),
+                                            0.0,
+                                            delay),
+            low_value: low_value as f64,
+        }
+    }
+}
+
+impl Iterator for InfiniteSawtooth {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        self.periodic.next().and_then(|x| Some(x + self.low_value))
     }
 }
 
 /// Finite iterator returning floats forming a sawtooth wave
 /// starting with the lowest sample
 pub struct Sawtooth {
-    periodic: Periodic,
-    low_value: f64,
+    internal: Take<InfiniteSawtooth>,
 }
 
 impl Sawtooth {
@@ -427,6 +676,7 @@ impl Sawtooth {
     /// let x = Sawtooth::new(12, 5, 1.0, -1.0, 1).collect::<Vec<f64>>();
     /// assert_eq!(x, [1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0]);
     /// ```
+    #[deprecated(since="0.9.0", note="please use `InfiniteSawtooth::new` and `take` instead")]
     pub fn new(length: usize,
                period: i64,
                high_value: f64,
@@ -434,16 +684,8 @@ impl Sawtooth {
                delay: i64)
                -> Sawtooth {
 
-        let height = high_value - low_value;
-        let period = period as f64;
         Sawtooth {
-            periodic: Periodic::new(length,
-                                    1.0,
-                                    1.0 / period,
-                                    height * period / (period - 1.0),
-                                    0.0,
-                                    delay),
-            low_value: low_value as f64,
+            internal: InfiniteSawtooth::new(period, high_value, low_value, delay).take(length),
         }
     }
 }
@@ -452,6 +694,6 @@ impl Iterator for Sawtooth {
     type Item = f64;
 
     fn next(&mut self) -> Option<f64> {
-        self.periodic.next().and_then(|x| Some(x + self.low_value))
+        self.internal.next()
     }
 }

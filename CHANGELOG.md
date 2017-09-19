@@ -1,3 +1,11 @@
+HEAD
+ - implemented infinite sequence generator for periodic sequence
+ - implemented infinite sequence generator for sinusoidal sequence
+ - implemented infinite sequence generator for square sequence
+ - implemented infinite sequence generator for triangle sequence
+ - implemented infinite sequence generator for sawtooth sequence
+ - deprecate old non-infinite iterators in favor of new infinite iterators with `take`
+
 v0.8.0
  - `cdf(x)`, `pdf(x)` and `pmf(x)` now return the correct value instead of panicking when `x` is outside the range of values that the distribution can attain.
  - Fixed a bug in the `Uniform` distribution implementation where samples were drawn from range `[min, max + 1)` instead of `[min, max]`. The samples are now drawn correctly from the range `[min, max]`.
