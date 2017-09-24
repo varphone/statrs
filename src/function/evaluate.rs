@@ -2,7 +2,8 @@
 //! be solved computationally (e.g. evaluation of a polynomial)
 
 /// evaluates a polynomial at `z` where `coeff` are the coeffecients
-/// to a polynomial of order `k` where `k` is the length of `coeff` and the coeffecient
+/// to a polynomial of order `k` where `k` is the length of `coeff` and the
+/// coeffecient
 /// to the `k`th power is the `k`th element in coeff. E.g. [3,-1,2] equates to
 /// `2z^2 - z + 3`
 ///
@@ -29,7 +30,7 @@ pub fn polynomial(z: f64, coeff: &[f64]) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
-    
+
     // these tests probably could be more robust
     #[test]
     fn test_polynomial() {
@@ -41,7 +42,7 @@ mod test {
 
         let mut coeff = [1.0, 0.0, 5.0];
         assert_eq!(super::polynomial(2.0, &coeff), 21.0);
-        
+
         coeff = [-5.0, -2.0, 3.0];
         assert_eq!(super::polynomial(2.0, &coeff), 3.0);
         assert_eq!(super::polynomial(-2.0, &coeff), 11.0);

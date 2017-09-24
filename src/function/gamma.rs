@@ -1,26 +1,28 @@
 //! Provides the [gamma](https://en.wikipedia.org/wiki/Gamma_function) and
 //! related functions
 
-use std::f64;
 use consts;
 use error::StatsError;
 use prec;
+use std::f64;
 
 /// Auxiliary variable when evaluating the `gamma_ln` function
 const GAMMA_R: f64 = 10.900511;
 
 /// Polynomial coefficients for approximating the `gamma_ln` function
-const GAMMA_DK: &'static [f64] = &[2.48574089138753565546e-5,
-                                   1.05142378581721974210,
-                                   -3.45687097222016235469,
-                                   4.51227709466894823700,
-                                   -2.98285225323576655721,
-                                   1.05639711577126713077,
-                                   -1.95428773191645869583e-1,
-                                   1.70970543404441224307e-2,
-                                   -5.71926117404305781283e-4,
-                                   4.63399473359905636708e-6,
-                                   -2.71994908488607703910e-9];
+const GAMMA_DK: &'static [f64] = &[
+    2.48574089138753565546e-5,
+    1.05142378581721974210,
+    -3.45687097222016235469,
+    4.51227709466894823700,
+    -2.98285225323576655721,
+    1.05639711577126713077,
+    -1.95428773191645869583e-1,
+    1.70970543404441224307e-2,
+    -5.71926117404305781283e-4,
+    4.63399473359905636708e-6,
+    -2.71994908488607703910e-9,
+];
 
 /// Computes the logarithm of the gamma function
 /// with an accuracy of 16 floating point digits.
@@ -30,20 +32,18 @@ const GAMMA_DK: &'static [f64] = &[2.48574089138753565546e-5,
 pub fn ln_gamma(x: f64) -> f64 {
     if x < 0.5 {
         let s = GAMMA_DK.iter()
-            .enumerate()
-            .skip(1)
-            .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
+                        .enumerate()
+                        .skip(1)
+                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
-        consts::LN_PI - (f64::consts::PI * x).sin().ln() - s.ln() - consts::LN_2_SQRT_E_OVER_PI -
-        (0.5 - x) * ((0.5 - x + GAMMA_R) / f64::consts::E).ln()
+        consts::LN_PI - (f64::consts::PI * x).sin().ln() - s.ln() - consts::LN_2_SQRT_E_OVER_PI - (0.5 - x) * ((0.5 - x + GAMMA_R) / f64::consts::E).ln()
     } else {
         let s = GAMMA_DK.iter()
-            .enumerate()
-            .skip(1)
-            .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
+                        .enumerate()
+                        .skip(1)
+                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
-        s.ln() + consts::LN_2_SQRT_E_OVER_PI +
-        (x - 0.5) * ((x - 0.5 + GAMMA_R) / f64::consts::E).ln()
+        s.ln() + consts::LN_2_SQRT_E_OVER_PI + (x - 0.5) * ((x - 0.5 + GAMMA_R) / f64::consts::E).ln()
     }
 }
 
@@ -54,18 +54,16 @@ pub fn ln_gamma(x: f64) -> f64 {
 pub fn gamma(x: f64) -> f64 {
     if x < 0.5 {
         let s = GAMMA_DK.iter()
-            .enumerate()
-            .skip(1)
-            .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
+                        .enumerate()
+                        .skip(1)
+                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
-        f64::consts::PI /
-        ((f64::consts::PI * x).sin() * s * consts::TWO_SQRT_E_OVER_PI *
-         ((0.5 - x + GAMMA_R) / f64::consts::E).powf(0.5 - x))
+        f64::consts::PI / ((f64::consts::PI * x).sin() * s * consts::TWO_SQRT_E_OVER_PI * ((0.5 - x + GAMMA_R) / f64::consts::E).powf(0.5 - x))
     } else {
         let s = GAMMA_DK.iter()
-            .enumerate()
-            .skip(1)
-            .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
+                        .enumerate()
+                        .skip(1)
+                        .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
         s * consts::TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / f64::consts::E).powf(x - 0.5)
     }
@@ -112,10 +110,14 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
     if a.is_nan() || x.is_nan() {
         return f64::NAN;
     }
-    assert!(a > 0.0 && a < f64::INFINITY,
-            format!("{}", StatsError::ArgIntervalExcl("a", 0.0, f64::INFINITY)));
-    assert!(x > 0.0 && x < f64::INFINITY,
-            format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
+    assert!(
+        a > 0.0 && a < f64::INFINITY,
+        format!("{}", StatsError::ArgIntervalExcl("a", 0.0, f64::INFINITY))
+    );
+    assert!(
+        x > 0.0 && x < f64::INFINITY,
+        format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY))
+    );
 
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;
@@ -174,7 +176,8 @@ pub fn gamma_ur(a: f64, x: f64) -> f64 {
 
 /// Computes the lower incomplete regularized gamma function
 /// `P(a,x) = 1 / Gamma(a) * int(exp(-t)t^(a-1), t=0..x) for real a > 0, x > 0`
-/// where `a` is the argument for the gamma function and `x` is the upper integral limit.
+/// where `a` is the argument for the gamma function and `x` is the upper
+/// integral limit.
 ///
 /// # Remarks
 ///
@@ -188,10 +191,14 @@ pub fn gamma_lr(a: f64, x: f64) -> f64 {
         return f64::NAN;
     }
 
-    assert!(a > 0.0 && a < f64::INFINITY,
-            format!("{}", StatsError::ArgIntervalExcl("a", 0.0, f64::INFINITY)));
-    assert!(x > 0.0 && x < f64::INFINITY,
-            format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY)));
+    assert!(
+        a > 0.0 && a < f64::INFINITY,
+        format!("{}", StatsError::ArgIntervalExcl("a", 0.0, f64::INFINITY))
+    );
+    assert!(
+        x > 0.0 && x < f64::INFINITY,
+        format!("{}", StatsError::ArgIntervalExcl("x", 0.0, f64::INFINITY))
+    );
 
     let eps = 0.000000000000001;
     let big = 4503599627370496.0;

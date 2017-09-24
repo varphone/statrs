@@ -1,10 +1,10 @@
 //! Provides the [beta](https://en.wikipedia.org/wiki/Beta_function) and related
 //! function
 
-use std::f64;
 use error::StatsError;
 use function::gamma;
 use prec;
+use std::f64;
 
 /// Computes the natural logarithm
 /// of the beta function
@@ -57,15 +57,15 @@ pub fn beta_inc(a: f64, b: f64, x: f64) -> f64 {
 pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
     assert!(a > 0.0, format!("{}", StatsError::ArgMustBePositive("a")));
     assert!(b > 0.0, format!("{}", StatsError::ArgMustBePositive("b")));
-    assert!(x >= 0.0 && x <= 1.0,
-            format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0)));
+    assert!(
+        x >= 0.0 && x <= 1.0,
+        format!("{}", StatsError::ArgIntervalIncl("x", 0.0, 1.0))
+    );
 
     let bt = if x == 0.0 || x == 1.0 {
         0.0
     } else {
-        (gamma::ln_gamma(a + b) - gamma::ln_gamma(a) - gamma::ln_gamma(b) + a * x.ln() +
-         b * (1.0 - x).ln())
-            .exp()
+        (gamma::ln_gamma(a + b) - gamma::ln_gamma(a) - gamma::ln_gamma(b) + a * x.ln() + b * (1.0 - x).ln()).exp()
     };
     let symm_transform = x >= (a + 1.0) / (a + b + 2.0);
     let eps = prec::F64_PREC;

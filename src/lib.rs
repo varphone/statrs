@@ -1,8 +1,12 @@
 //! This crate aims to be a functional
-//! port of the Math.NET Numerics Distribution package and in doing so providing the Rust numerical
-//! computing community with a robust, well-tested statistical distribution package. This crate
-//! also ports over some of the special statistical functions from Math.NET in so far as they are
-//! used in the computation of distribution values. This crate depends on the `rand` crate to provide
+//! port of the Math.NET Numerics Distribution package and in doing so
+//! providing the Rust numerical
+//! computing community with a robust, well-tested statistical distribution
+//! package. This crate
+//! also ports over some of the special statistical functions from Math.NET in
+//! so far as they are
+//! used in the computation of distribution values. This crate depends on the
+//! `rand` crate to provide
 //! RNG.
 //!
 //! # Example

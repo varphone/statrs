@@ -1,10 +1,10 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::gamma;
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use function::gamma;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
 /// Implements the [Chi](https://en.wikipedia.org/wiki/Chi_distribution)
 /// distribution
@@ -107,8 +107,9 @@ impl Distribution<f64> for Chi {
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         (0..self.freedom as i64)
-            .fold(0.0,
-                  |acc, _| acc + super::normal::sample_unchecked(r, 0.0, 1.0).powf(2.0))
+            .fold(0.0, |acc, _| {
+                acc + super::normal::sample_unchecked(r, 0.0, 1.0).powf(2.0)
+            })
             .sqrt()
     }
 }
@@ -179,8 +180,7 @@ impl Mean<f64> for Chi {
     ///
     /// where `k` is degrees of freedom and `Γ` is the gamma function
     fn mean(&self) -> f64 {
-        f64::consts::SQRT_2 * gamma::gamma((self.freedom + 1.0) / 2.0) /
-        gamma::gamma(self.freedom / 2.0)
+        f64::consts::SQRT_2 * gamma::gamma((self.freedom + 1.0) / 2.0) / gamma::gamma(self.freedom / 2.0)
     }
 }
 
@@ -238,9 +238,7 @@ impl Entropy<f64> for Chi {
     /// where `k` is degrees of freedom, `Γ` is the gamma function,
     /// and `ψ` is the digamma function
     fn entropy(&self) -> f64 {
-        gamma::ln_gamma(self.freedom / 2.0) +
-        (self.freedom - (2.0f64).ln() - (self.freedom - 1.0) * gamma::digamma(self.freedom / 2.0)) /
-        2.0
+        gamma::ln_gamma(self.freedom / 2.0) + (self.freedom - (2.0f64).ln() - (self.freedom - 1.0) * gamma::digamma(self.freedom / 2.0)) / 2.0
     }
 }
 
@@ -279,8 +277,10 @@ impl Mode<f64> for Chi {
     ///
     /// where `k` is the degrees of freedom
     fn mode(&self) -> f64 {
-        assert!(self.freedom >= 1.0,
-                format!("{}", StatsError::ArgGte("freedom", 1.0)));
+        assert!(
+            self.freedom >= 1.0,
+            format!("{}", StatsError::ArgGte("freedom", 1.0))
+        );
         (self.freedom - 1.0).sqrt()
     }
 }
@@ -302,8 +302,7 @@ impl Continuous<f64, f64> for Chi {
         } else if self.freedom > 160.0 {
             self.ln_pdf(x).exp()
         } else {
-            (2.0f64).powf(1.0 - self.freedom / 2.0) * x.powf(self.freedom - 1.0) *
-            (-x * x / 2.0).exp() / gamma::gamma(self.freedom / 2.0)
+            (2.0f64).powf(1.0 - self.freedom / 2.0) * x.powf(self.freedom - 1.0) * (-x * x / 2.0).exp() / gamma::gamma(self.freedom / 2.0)
         }
     }
 
@@ -319,8 +318,7 @@ impl Continuous<f64, f64> for Chi {
         if self.freedom == f64::INFINITY || x == f64::INFINITY || x <= 0.0 {
             f64::NEG_INFINITY
         } else {
-            (1.0 - self.freedom / 2.0) * (2.0f64).ln() + ((self.freedom - 1.0) * x.ln()) -
-            x * x / 2.0 - gamma::ln_gamma(self.freedom / 2.0)
+            (1.0 - self.freedom / 2.0) * (2.0f64).ln() + ((self.freedom - 1.0) * x.ln()) - x * x / 2.0 - gamma::ln_gamma(self.freedom / 2.0)
         }
     }
 }

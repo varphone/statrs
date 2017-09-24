@@ -1,10 +1,10 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::{beta, gamma};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use function::{beta, gamma};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
 /// Implements the [Student's T](https://en.wikipedia.org/wiki/Student%27s_t-distribution) distribution
 ///
@@ -27,7 +27,8 @@ pub struct StudentsT {
 }
 
 impl StudentsT {
-    /// Constructs a new student's t-distribution with location `location`, scale `scale`,
+    /// Constructs a new student's t-distribution with location `location`,
+    /// scale `scale`,
     /// and `freedom` freedom.
     ///
     /// # Errors
@@ -52,10 +53,10 @@ impl StudentsT {
             Err(StatsError::BadParams)
         } else {
             Ok(StudentsT {
-                   location: location,
-                   scale: scale,
-                   freedom: freedom,
-               })
+                location: location,
+                scale: scale,
+                freedom: freedom,
+            })
         }
     }
 
@@ -142,14 +143,13 @@ impl Distribution<f64> for StudentsT {
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         let gamma = super::gamma::sample_unchecked(r, 0.5 * self.freedom, 0.5);
-        super::normal::sample_unchecked(r,
-                                        self.location,
-                                        self.scale * (self.freedom / gamma).sqrt())
+        super::normal::sample_unchecked(r, self.location, self.scale * (self.freedom / gamma).sqrt())
     }
 }
 
 impl Univariate<f64, f64> for StudentsT {
-    /// Calculates the cumulative distribution function for the student's t-distribution
+    /// Calculates the cumulative distribution function for the student's
+    /// t-distribution
     /// at `x`
     ///
     /// # Formula
@@ -163,7 +163,8 @@ impl Univariate<f64, f64> for StudentsT {
     /// ```
     ///
     /// where `t = v / (v + k^2)`, `k = (x - μ) / σ`, `μ` is the location,
-    /// `σ` is the scale, `v` is the freedom, and `I` is the regularized incomplete
+    /// `σ` is the scale, `v` is the freedom, and `I` is the regularized
+    /// incomplete
     /// beta function
     fn cdf(&self, x: f64) -> f64 {
         if self.freedom == f64::INFINITY {
@@ -220,8 +221,10 @@ impl Mean<f64> for StudentsT {
     ///
     /// where `μ` is the location
     fn mean(&self) -> f64 {
-        assert!(self.freedom > 1.0,
-                format!("{}", StatsError::ArgGt("freedom", 1.0)));
+        assert!(
+            self.freedom > 1.0,
+            format!("{}", StatsError::ArgGt("freedom", 1.0))
+        );
         self.location
     }
 }
@@ -247,8 +250,10 @@ impl Variance<f64> for StudentsT {
     ///
     /// where `σ` is the scale and `v` is the freedom
     fn variance(&self) -> f64 {
-        assert!(self.freedom > 1.0,
-                format!("{}", StatsError::ArgGt("freedom", 1.0)));
+        assert!(
+            self.freedom > 1.0,
+            format!("{}", StatsError::ArgGt("freedom", 1.0))
+        );
         if self.freedom == f64::INFINITY {
             self.scale * self.scale
         } else if self.freedom > 2.0 {
@@ -293,18 +298,21 @@ impl Entropy<f64> for StudentsT {
     /// # Formula
     ///
     /// ```ignore
-    /// (v + 1) / 2 * (ψ((v + 1) / 2) - ψ(v / 2)) + ln(sqrt(v) * B(v / 2, 1 / 2))
+    /// (v + 1) / 2 * (ψ((v + 1) / 2) - ψ(v / 2)) + ln(sqrt(v) * B(v / 2, 1 /
+    /// 2))
     /// ```
     ///
-    /// where `v` is the freedom, `ψ` is the digamma function, and `B` is the beta function
+    /// where `v` is the freedom, `ψ` is the digamma function, and `B` is the
+    /// beta function
     fn entropy(&self) -> f64 {
-        assert!(self.location == 0.0 && self.scale == 1.0,
-                "Cannot calculate entropy for StudentsT distribution where location is not 0 and \
-                 scale is not 1");
+        assert!(
+            self.location == 0.0 && self.scale == 1.0,
+            "Cannot calculate entropy for StudentsT distribution where location is not 0 and \
+                 scale is not 1"
+        );
 
-        (self.freedom + 1.0) / 2.0 *
-        (gamma::digamma((self.freedom + 1.0) / 2.0) - gamma::digamma(self.freedom / 2.0)) +
-        (self.freedom.sqrt() * beta::beta(self.freedom / 2.0, 0.5)).ln()
+        (self.freedom + 1.0) / 2.0 * (gamma::digamma((self.freedom + 1.0) / 2.0) - gamma::digamma(self.freedom / 2.0)) +
+            (self.freedom.sqrt() * beta::beta(self.freedom / 2.0, 0.5)).ln()
     }
 }
 
@@ -321,8 +329,10 @@ impl Skewness<f64> for StudentsT {
     /// 0
     /// ```
     fn skewness(&self) -> f64 {
-        assert!(self.freedom > 3.0,
-                format!("{}", StatsError::ArgGt("freedom", 3.0)));
+        assert!(
+            self.freedom > 3.0,
+            format!("{}", StatsError::ArgGt("freedom", 3.0))
+        );
         0.0
     }
 }
@@ -358,16 +368,19 @@ impl Mode<f64> for StudentsT {
 }
 
 impl Continuous<f64, f64> for StudentsT {
-    /// Calculates the probability density function for the student's t-distribution
+    /// Calculates the probability density function for the student's
+    /// t-distribution
     /// at `x`
     ///
     /// # Formula
     ///
     /// ```ignore
-    /// Γ((v + 1) / 2) / (sqrt(vπ) * Γ(v / 2) * σ) * (1 + k^2 / v)^(-1 / 2 * (v + 1))
+    /// Γ((v + 1) / 2) / (sqrt(vπ) * Γ(v / 2) * σ) * (1 + k^2 / v)^(-1 / 2 * (v
+    /// + 1))
     /// ```
     ///
-    /// where `k = (x - μ) / σ`, `μ` is the location, `σ` is the scale, `v` is the freedom,
+    /// where `k = (x - μ) / σ`, `μ` is the location, `σ` is the scale, `v` is
+    /// the freedom,
     /// and `Γ` is the gamma function
     fn pdf(&self, x: f64) -> f64 {
         if x == f64::NEG_INFINITY || x == f64::INFINITY {
@@ -376,23 +389,24 @@ impl Continuous<f64, f64> for StudentsT {
             super::normal::pdf_unchecked(x, self.location, self.scale)
         } else {
             let d = (x - self.location) / self.scale;
-            (gamma::ln_gamma((self.freedom + 1.0) / 2.0) - gamma::ln_gamma(self.freedom / 2.0))
-                .exp() *
-            (1.0 + d * d / self.freedom).powf(-0.5 * (self.freedom + 1.0)) /
-            (self.freedom * f64::consts::PI).sqrt() / self.scale
+            (gamma::ln_gamma((self.freedom + 1.0) / 2.0) - gamma::ln_gamma(self.freedom / 2.0)).exp() *
+                (1.0 + d * d / self.freedom).powf(-0.5 * (self.freedom + 1.0)) / (self.freedom * f64::consts::PI).sqrt() / self.scale
         }
     }
 
-    /// Calculates the log probability density function for the student's t-distribution
+    /// Calculates the log probability density function for the student's
+    /// t-distribution
     /// at `x`
     ///
     /// # Formula
     ///
     /// ```ignore
-    /// ln(Γ((v + 1) / 2) / (sqrt(vπ) * Γ(v / 2) * σ) * (1 + k^2 / v)^(-1 / 2 * (v + 1)))
+    /// ln(Γ((v + 1) / 2) / (sqrt(vπ) * Γ(v / 2) * σ) * (1 + k^2 / v)^(-1 / 2 *
+    /// (v + 1)))
     /// ```
     ///
-    /// where `k = (x - μ) / σ`, `μ` is the location, `σ` is the scale, `v` is the freedom,
+    /// where `k = (x - μ) / σ`, `μ` is the location, `σ` is the scale, `v` is
+    /// the freedom,
     /// and `Γ` is the gamma function
     fn ln_pdf(&self, x: f64) -> f64 {
         if x == f64::NEG_INFINITY || x == f64::INFINITY {
@@ -401,10 +415,8 @@ impl Continuous<f64, f64> for StudentsT {
             super::normal::ln_pdf_unchecked(x, self.location, self.scale)
         } else {
             let d = (x - self.location) / self.scale;
-            gamma::ln_gamma((self.freedom + 1.0) / 2.0) -
-            0.5 * ((self.freedom + 1.0) * (1.0 + d * d / self.freedom).ln()) -
-            gamma::ln_gamma(self.freedom / 2.0) -
-            0.5 * (self.freedom * f64::consts::PI).ln() - self.scale.ln()
+            gamma::ln_gamma((self.freedom + 1.0) / 2.0) - 0.5 * ((self.freedom + 1.0) * (1.0 + d * d / self.freedom).ln()) -
+                gamma::ln_gamma(self.freedom / 2.0) - 0.5 * (self.freedom * f64::consts::PI).ln() - self.scale.ln()
         }
     }
 }

@@ -1,12 +1,14 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::gamma;
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use function::gamma;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Inverse Gamma](https://en.wikipedia.org/wiki/Inverse-gamma_distribution) distribution
+/// Implements the [Inverse
+/// Gamma](https://en.wikipedia.org/wiki/Inverse-gamma_distribution)
+/// distribution
 ///
 /// # Examples
 ///
@@ -50,9 +52,7 @@ impl InverseGamma {
         match (shape, rate, is_nan) {
             (_, _, true) => Err(StatsError::BadParams),
             (_, _, false) if shape <= 0.0 || rate <= 0.0 => Err(StatsError::BadParams),
-            (_, _, false) if shape == f64::INFINITY || rate == f64::INFINITY => {
-                Err(StatsError::BadParams)
-            }
+            (_, _, false) if shape == f64::INFINITY || rate == f64::INFINITY => Err(StatsError::BadParams),
             (_, _, false) => {
                 Ok(InverseGamma {
                     shape: shape,
@@ -201,8 +201,10 @@ impl Mean<f64> for InverseGamma {
     ///
     /// where `α` is the shape and `β` is the rate
     fn mean(&self) -> f64 {
-        assert!(self.shape > 1.0,
-                format!("{}", StatsError::ArgGt("shape", 1.0)));
+        assert!(
+            self.shape > 1.0,
+            format!("{}", StatsError::ArgGt("shape", 1.0))
+        );
         self.rate / (self.shape - 1.0)
     }
 }
@@ -222,8 +224,10 @@ impl Variance<f64> for InverseGamma {
     ///
     /// where `α` is the shape and `β` is the rate
     fn variance(&self) -> f64 {
-        assert!(self.shape > 2.0,
-                format!("{}", StatsError::ArgGt("shape", 2.0)));
+        assert!(
+            self.shape > 2.0,
+            format!("{}", StatsError::ArgGt("shape", 2.0))
+        );
         self.rate * self.rate / ((self.shape - 1.0) * (self.shape - 1.0) * (self.shape - 2.0))
     }
 
@@ -257,8 +261,7 @@ impl Entropy<f64> for InverseGamma {
     /// where `α` is the shape, `β` is the rate, `Γ` is the gamma function,
     /// and `ψ` is the digamma function
     fn entropy(&self) -> f64 {
-        self.shape + self.rate.ln() + gamma::ln_gamma(self.shape) -
-        (1.0 + self.shape) * gamma::digamma(self.shape)
+        self.shape + self.rate.ln() + gamma::ln_gamma(self.shape) - (1.0 + self.shape) * gamma::digamma(self.shape)
     }
 }
 
@@ -277,8 +280,10 @@ impl Skewness<f64> for InverseGamma {
     ///
     /// where `α` is the shape
     fn skewness(&self) -> f64 {
-        assert!(self.shape > 3.0,
-                format!("{}", StatsError::ArgGt("shape", 3.0)));
+        assert!(
+            self.shape > 3.0,
+            format!("{}", StatsError::ArgGt("shape", 3.0))
+        );
         4.0 * (self.shape - 2.0).sqrt() / (self.shape - 3.0)
     }
 }
@@ -317,8 +322,7 @@ impl Continuous<f64, f64> for InverseGamma {
         } else if self.shape == 1.0 {
             self.rate / (x * x) * (-self.rate / x).exp()
         } else {
-            self.rate.powf(self.shape) * x.powf(-self.shape - 1.0) * (-self.rate / x).exp() /
-            gamma::gamma(self.shape)
+            self.rate.powf(self.shape) * x.powf(-self.shape - 1.0) * (-self.rate / x).exp() / gamma::gamma(self.shape)
         }
     }
 

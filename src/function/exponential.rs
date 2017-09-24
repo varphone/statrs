@@ -16,15 +16,18 @@ use {Result, StatsError, consts};
 /// This implementation follows the derivation in
 /// <br />
 /// <div>
-/// <i>"Handbook of Mathematical Functions, Applied Mathematics Series, Volume 55"</i> - Abramowitz, M., and Stegun, I.A 1964
+/// <i>"Handbook of Mathematical Functions, Applied Mathematics Series, Volume
+/// 55"</i> - Abramowitz, M., and Stegun, I.A 1964
 /// </div>
 /// AND
 /// <br />
 /// <div>
-/// <i>"Advanced mathematical methods for scientists and engineers" - Bender, Carl M.; Steven A. Orszag (1978). page 253
+/// <i>"Advanced mathematical methods for scientists and engineers" - Bender,
+/// Carl M.; Steven A. Orszag (1978). page 253
 /// </div>
 /// <br />
-/// The continued fraction approac is used for `x > 1.0` while the taylor series expansions
+/// The continued fraction approac is used for `x > 1.0` while the taylor
+/// series expansions
 /// is used for `0.0 < x <= 1`
 ///
 /// # Examples

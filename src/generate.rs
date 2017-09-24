@@ -1,9 +1,11 @@
 //! Provides utility functions for generating data sequences
+
+use euclid::Modulus;
 use std::f64::consts;
 use std::iter::Take;
-use euclid::Modulus;
 
-/// Generates a base 10 log spaced vector of the given length between the specified
+/// Generates a base 10 log spaced vector of the given length between the
+/// specified
 /// decade exponents (inclusive). Equivalent to MATLAB logspace
 ///
 /// # Examples
@@ -45,15 +47,11 @@ impl InfinitePeriodic {
     /// ```
     /// use statrs::generate::InfinitePeriodic;
     ///
-    /// let x = InfinitePeriodic::new(8.0, 2.0, 10.0, 1.0, 2).take(10).collect::<Vec<f64>>();
+    /// let x = InfinitePeriodic::new(8.0, 2.0, 10.0, 1.0,
+    /// 2).take(10).collect::<Vec<f64>>();
     /// assert_eq!(x, [6.0, 8.5, 1.0, 3.5, 6.0, 8.5, 1.0, 3.5, 6.0, 8.5]);
     /// ```
-    pub fn new(sampling_rate: f64,
-               frequency: f64,
-               amplitude: f64,
-               phase: f64,
-               delay: i64)
-               -> InfinitePeriodic {
+    pub fn new(sampling_rate: f64, frequency: f64, amplitude: f64, phase: f64, delay: i64) -> InfinitePeriodic {
 
         let step = frequency / sampling_rate * amplitude;
         InfinitePeriodic {
@@ -71,7 +69,8 @@ impl InfinitePeriodic {
     /// ```
     /// use statrs::generate::InfinitePeriodic;
     ///
-    /// let x = InfinitePeriodic::default(8.0, 2.0).take(10).collect::<Vec<f64>>();
+    /// let x = InfinitePeriodic::default(8.0,
+    /// 2.0).take(10).collect::<Vec<f64>>();
     /// assert_eq!(x, [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.75, 0.0, 0.25]);
     /// ```
     pub fn default(sampling_rate: f64, frequency: f64) -> InfinitePeriodic {
@@ -110,19 +109,10 @@ impl Periodic {
     /// let x = Periodic::new(10, 8.0, 2.0, 10.0, 1.0, 2).collect::<Vec<f64>>();
     /// assert_eq!(x, [6.0, 8.5, 1.0, 3.5, 6.0, 8.5, 1.0, 3.5, 6.0, 8.5]);
     /// ```
-    #[deprecated(since="0.9.0", note="please use `InfinitePeriodic::new` and `take` instead")]
-    pub fn new(length: usize,
-               sampling_rate: f64,
-               frequency: f64,
-               amplitude: f64,
-               phase: f64,
-               delay: i64)
-               -> Periodic {
+    #[deprecated(since = "0.9.0", note = "please use `InfinitePeriodic::new` and `take` instead")]
+    pub fn new(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64, phase: f64, delay: i64) -> Periodic {
 
-        Periodic {
-            internal: InfinitePeriodic::new(sampling_rate, frequency, amplitude, phase, delay)
-                .take(length),
-        }
+        Periodic { internal: InfinitePeriodic::new(sampling_rate, frequency, amplitude, phase, delay).take(length) }
     }
 
     /// Constructs a default periodic wave generator
@@ -135,7 +125,7 @@ impl Periodic {
     /// let x = Periodic::default(10, 8.0, 2.0).collect::<Vec<f64>>();
     /// assert_eq!(x, [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.75, 0.0, 0.25]);
     /// ```
-    #[deprecated(since="0.9.0", note="please use `InfinitePeriodic::default` and `take` instead")]
+    #[deprecated(since = "0.9.0", note = "please use `InfinitePeriodic::default` and `take` instead")]
     pub fn default(length: usize, sampling_rate: f64, frequency: f64) -> Periodic {
         Self::new(length, sampling_rate, frequency, 1.0, 0.0, 0)
     }
@@ -149,7 +139,8 @@ impl Iterator for Periodic {
     }
 }
 
-/// Creates a vector of `f64` points representing a periodic wave with an amplitude
+/// Creates a vector of `f64` points representing a periodic wave with an
+/// amplitude
 /// of `1.0`, phase of `0.0`, and delay of `0`.
 ///
 /// # Examples
@@ -160,7 +151,7 @@ impl Iterator for Periodic {
 /// let x = generate::periodic(10, 8.0, 2.0);
 /// assert_eq!(x, [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.75, 0.0, 0.25]);
 /// ```
-#[deprecated(since="0.8.0", note="please use `Periodic::default` instead")]
+#[deprecated(since = "0.8.0", note = "please use `Periodic::default` instead")]
 pub fn periodic(length: usize, sampling_rate: f64, frequency: f64) -> Vec<f64> {
     periodic_custom(length, sampling_rate, frequency, 1.0, 0.0, 0)
 }
@@ -175,14 +166,8 @@ pub fn periodic(length: usize, sampling_rate: f64, frequency: f64) -> Vec<f64> {
 /// let x = generate::periodic_custom(10, 8.0, 2.0, 10.0, 1.0, 2);
 /// assert_eq!(x, [6.0, 8.5, 1.0, 3.5, 6.0, 8.5, 1.0, 3.5, 6.0, 8.5]);
 /// ```
-#[deprecated(since="0.8.0", note="please use `Periodic::new` instead")]
-pub fn periodic_custom(length: usize,
-                       sampling_rate: f64,
-                       frequency: f64,
-                       amplitude: f64,
-                       phase: f64,
-                       delay: i64)
-                       -> Vec<f64> {
+#[deprecated(since = "0.8.0", note = "please use `Periodic::new` instead")]
+pub fn periodic_custom(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64, phase: f64, delay: i64) -> Vec<f64> {
 
     let step = frequency / sampling_rate * amplitude;
     let mut phase = (phase - delay as f64 * step).modulus(amplitude);
@@ -219,20 +204,15 @@ impl InfiniteSinusoidal {
     /// ```
     /// use statrs::generate::InfiniteSinusoidal;
     ///
-    /// let x = InfiniteSinusoidal::new(8.0, 2.0, 1.0, 5.0, 2.0, 1).take(10).collect::<Vec<f64>>();
+    /// let x = InfiniteSinusoidal::new(8.0, 2.0, 1.0, 5.0, 2.0,
+    /// 1).take(10).collect::<Vec<f64>>();
     /// assert_eq!(x,
     ///     [5.416146836547142, 5.909297426825682, 4.583853163452858,
     ///     4.090702573174318, 5.416146836547142, 5.909297426825682,
     ///     4.583853163452858, 4.090702573174318, 5.416146836547142,
     ///     5.909297426825682]);
     /// ```
-    pub fn new(sampling_rate: f64,
-               frequency: f64,
-               amplitude: f64,
-               mean: f64,
-               phase: f64,
-               delay: i64)
-               -> InfiniteSinusoidal {
+    pub fn new(sampling_rate: f64, frequency: f64, amplitude: f64, mean: f64, phase: f64, delay: i64) -> InfiniteSinusoidal {
 
         let pi2 = consts::PI * 2.0;
         let step = frequency / sampling_rate * pi2;
@@ -252,7 +232,8 @@ impl InfiniteSinusoidal {
     /// ```
     /// use statrs::generate::InfiniteSinusoidal;
     ///
-    /// let x = InfiniteSinusoidal::default(8.0, 2.0, 1.0).take(10).collect::<Vec<f64>>();
+    /// let x = InfiniteSinusoidal::default(8.0, 2.0,
+    /// 1.0).take(10).collect::<Vec<f64>>();
     /// assert_eq!(x,
     ///     [0.0, 1.0, 0.00000000000000012246467991473532,
     ///     -1.0, -0.00000000000000024492935982947064, 1.0,
@@ -291,32 +272,18 @@ impl Sinusoidal {
     /// ```
     /// use statrs::generate::Sinusoidal;
     ///
-    /// let x = Sinusoidal::new(10, 8.0, 2.0, 1.0, 5.0, 2.0, 1).collect::<Vec<f64>>();
+    /// let x = Sinusoidal::new(10, 8.0, 2.0, 1.0, 5.0, 2.0,
+    /// 1).collect::<Vec<f64>>();
     /// assert_eq!(x,
     ///     [5.416146836547142, 5.909297426825682, 4.583853163452858,
     ///     4.090702573174318, 5.416146836547142, 5.909297426825682,
     ///     4.583853163452858, 4.090702573174318, 5.416146836547142,
     ///     5.909297426825682]);
     /// ```
-    #[deprecated(since="0.9.0", note="please use `InfiniteSinusoidal::new` and `take` instead")]
-    pub fn new(length: usize,
-               sampling_rate: f64,
-               frequency: f64,
-               amplitude: f64,
-               mean: f64,
-               phase: f64,
-               delay: i64)
-               -> Sinusoidal {
+    #[deprecated(since = "0.9.0", note = "please use `InfiniteSinusoidal::new` and `take` instead")]
+    pub fn new(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64, mean: f64, phase: f64, delay: i64) -> Sinusoidal {
 
-        Sinusoidal {
-            internal: InfiniteSinusoidal::new(sampling_rate,
-                                              frequency,
-                                              amplitude,
-                                              mean,
-                                              phase,
-                                              delay)
-                .take(length),
-        }
+        Sinusoidal { internal: InfiniteSinusoidal::new(sampling_rate, frequency, amplitude, mean, phase, delay).take(length) }
     }
 
     /// Constructs a default sinusoidal wave generator
@@ -333,12 +300,8 @@ impl Sinusoidal {
     ///     0.00000000000000036739403974420594, -1.0,
     ///     -0.0000000000000004898587196589413, 1.0]);
     /// ```
-    #[deprecated(since="0.9.0", note="please use `InfiniteSinusoidal::default` and `take` instead")]
-    pub fn default(length: usize,
-                   sampling_rate: f64,
-                   frequency: f64,
-                   amplitude: f64)
-                   -> Sinusoidal {
+    #[deprecated(since = "0.9.0", note = "please use `InfiniteSinusoidal::default` and `take` instead")]
+    pub fn default(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64) -> Sinusoidal {
 
         Self::new(length, sampling_rate, frequency, amplitude, 0.0, 0.0, 0)
     }
@@ -352,7 +315,8 @@ impl Iterator for Sinusoidal {
     }
 }
 
-/// Creates a vector of `f64` points representing a Sine wave with a mean of `0.0`,
+/// Creates a vector of `f64` points representing a Sine wave with a mean of
+/// `0.0`,
 /// phase of `0.0`, and delay of `0`.
 ///
 /// # Examples
@@ -367,7 +331,7 @@ impl Iterator for Sinusoidal {
 ///     0.00000000000000036739403974420594, -1.0,
 ///     -0.0000000000000004898587196589413, 1.0]);
 /// ```
-#[deprecated(since="0.8.0", note="please use `Sinusoidal::default` instead")]
+#[deprecated(since = "0.8.0", note = "please use `Sinusoidal::default` instead")]
 pub fn sinusoidal(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64) -> Vec<f64> {
     sinusoidal_custom(length, sampling_rate, frequency, amplitude, 0.0, 0.0, 0)
 }
@@ -386,15 +350,8 @@ pub fn sinusoidal(length: usize, sampling_rate: f64, frequency: f64, amplitude: 
 ///     4.583853163452858, 4.090702573174318, 5.416146836547142,
 ///     5.909297426825682]);
 /// ```
-#[deprecated(since="0.8.0", note="please use `Sinusoidal::new` instead")]
-pub fn sinusoidal_custom(length: usize,
-                         sampling_rate: f64,
-                         frequency: f64,
-                         amplitude: f64,
-                         mean: f64,
-                         phase: f64,
-                         delay: i64)
-                         -> Vec<f64> {
+#[deprecated(since = "0.8.0", note = "please use `Sinusoidal::new` instead")]
+pub fn sinusoidal_custom(length: usize, sampling_rate: f64, frequency: f64, amplitude: f64, mean: f64, phase: f64, delay: i64) -> Vec<f64> {
 
     let pi2 = consts::PI * 2.0;
     let step = frequency / sampling_rate * pi2;
@@ -421,15 +378,12 @@ impl InfiniteSquare {
     /// ```
     /// use statrs::generate::InfiniteSquare;
     ///
-    /// let x = InfiniteSquare::new(3, 7, 1.0, -1.0, 1).take(12).collect::<Vec<f64>>();
-    /// assert_eq!(x, [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0])
+    /// let x = InfiniteSquare::new(3, 7, 1.0, -1.0,
+    /// 1).take(12).collect::<Vec<f64>>();
+    /// assert_eq!(x, [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+    /// -1.0, 1.0])
     /// ```
-    pub fn new(high_duration: i64,
-               low_duration: i64,
-               high_value: f64,
-               low_value: f64,
-               delay: i64)
-               -> InfiniteSquare {
+    pub fn new(high_duration: i64, low_duration: i64, high_value: f64, low_value: f64, delay: i64) -> InfiniteSquare {
 
         let duration = (high_duration + low_duration) as f64;
         InfiniteSquare {
@@ -470,25 +424,13 @@ impl Square {
     /// use statrs::generate::Square;
     ///
     /// let x = Square::new(12, 3, 7, 1.0, -1.0, 1).collect::<Vec<f64>>();
-    /// assert_eq!(x, [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0])
+    /// assert_eq!(x, [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
+    /// -1.0, 1.0])
     /// ```
-    #[deprecated(since="0.9.0", note="please use `InfiniteSquare::new` and `take` instead")]
-    pub fn new(length: usize,
-               high_duration: i64,
-               low_duration: i64,
-               high_value: f64,
-               low_value: f64,
-               delay: i64)
-               -> Square {
+    #[deprecated(since = "0.9.0", note = "please use `InfiniteSquare::new` and `take` instead")]
+    pub fn new(length: usize, high_duration: i64, low_duration: i64, high_value: f64, low_value: f64, delay: i64) -> Square {
 
-        Square {
-            internal: InfiniteSquare::new(high_duration,
-                                          low_duration,
-                                          high_value,
-                                          low_value,
-                                          delay)
-                .take(length),
-        }
+        Square { internal: InfiniteSquare::new(high_duration, low_duration, high_value, low_value, delay).take(length) }
     }
 }
 
@@ -523,19 +465,16 @@ impl InfiniteTriangle {
     /// use statrs::generate::InfiniteTriangle;
     ///
     /// # fn main() {
-    /// let x = InfiniteTriangle::new(4, 7, 1.0, -1.0, 1).take(12).collect::<Vec<f64>>();
-    /// let expected: [f64; 12] = [-0.714, -1.0, -0.5, 0.0, 0.5, 1.0, 0.714, 0.429, 0.143, -0.143, -0.429, -0.714];
+    /// let x = InfiniteTriangle::new(4, 7, 1.0, -1.0,
+    /// 1).take(12).collect::<Vec<f64>>();
+    /// let expected: [f64; 12] = [-0.714, -1.0, -0.5, 0.0, 0.5, 1.0, 0.714,
+    /// 0.429, 0.143, -0.143, -0.429, -0.714];
     /// for (&left, &right) in x.iter().zip(expected.iter()) {
     ///     assert_almost_eq!(left, right, 1e-3);
     /// }
     /// # }
     /// ```
-    pub fn new(raise_duration: i64,
-               fall_duration: i64,
-               high_value: f64,
-               low_value: f64,
-               delay: i64)
-               -> InfiniteTriangle {
+    pub fn new(raise_duration: i64, fall_duration: i64, high_value: f64, low_value: f64, delay: i64) -> InfiniteTriangle {
 
         let duration = (raise_duration + fall_duration) as f64;
         let height = high_value - low_value;
@@ -584,29 +523,17 @@ impl Triangle {
     ///
     /// # fn main() {
     /// let x = Triangle::new(12, 4, 7, 1.0, -1.0, 1).collect::<Vec<f64>>();
-    /// let expected: [f64; 12] = [-0.714, -1.0, -0.5, 0.0, 0.5, 1.0, 0.714, 0.429, 0.143, -0.143, -0.429, -0.714];
+    /// let expected: [f64; 12] = [-0.714, -1.0, -0.5, 0.0, 0.5, 1.0, 0.714,
+    /// 0.429, 0.143, -0.143, -0.429, -0.714];
     /// for (&left, &right) in x.iter().zip(expected.iter()) {
     ///     assert_almost_eq!(left, right, 1e-3);
     /// }
     /// # }
     /// ```
-    #[deprecated(since="0.9.0", note="please use `InfiniteTriangle::new` and `take` instead")]
-    pub fn new(length: usize,
-               raise_duration: i64,
-               fall_duration: i64,
-               high_value: f64,
-               low_value: f64,
-               delay: i64)
-               -> Triangle {
+    #[deprecated(since = "0.9.0", note = "please use `InfiniteTriangle::new` and `take` instead")]
+    pub fn new(length: usize, raise_duration: i64, fall_duration: i64, high_value: f64, low_value: f64, delay: i64) -> Triangle {
 
-        Triangle {
-            internal: InfiniteTriangle::new(raise_duration,
-                                            fall_duration,
-                                            high_value,
-                                            low_value,
-                                            delay)
-                .take(length),
-        }
+        Triangle { internal: InfiniteTriangle::new(raise_duration, fall_duration, high_value, low_value, delay).take(length) }
     }
 }
 
@@ -633,19 +560,23 @@ impl InfiniteSawtooth {
     /// ```
     /// use statrs::generate::InfiniteSawtooth;
     ///
-    /// let x = InfiniteSawtooth::new(5, 1.0, -1.0, 1).take(12).collect::<Vec<f64>>();
-    /// assert_eq!(x, [1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0]);
+    /// let x = InfiniteSawtooth::new(5, 1.0, -1.0,
+    /// 1).take(12).collect::<Vec<f64>>();
+    /// assert_eq!(x, [1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0, -0.5, 0.0, 0.5,
+    /// 1.0, -1.0]);
     /// ```
     pub fn new(period: i64, high_value: f64, low_value: f64, delay: i64) -> InfiniteSawtooth {
 
         let height = high_value - low_value;
         let period = period as f64;
         InfiniteSawtooth {
-            periodic: InfinitePeriodic::new(1.0,
-                                            1.0 / period,
-                                            height * period / (period - 1.0),
-                                            0.0,
-                                            delay),
+            periodic: InfinitePeriodic::new(
+                1.0,
+                1.0 / period,
+                height * period / (period - 1.0),
+                0.0,
+                delay,
+            ),
             low_value: low_value as f64,
         }
     }
@@ -655,7 +586,9 @@ impl Iterator for InfiniteSawtooth {
     type Item = f64;
 
     fn next(&mut self) -> Option<f64> {
-        self.periodic.next().and_then(|x| Some(x + self.low_value))
+        self.periodic.next().and_then(|x| {
+            Some(x + self.low_value)
+        })
     }
 }
 
@@ -674,19 +607,13 @@ impl Sawtooth {
     /// use statrs::generate::Sawtooth;
     ///
     /// let x = Sawtooth::new(12, 5, 1.0, -1.0, 1).collect::<Vec<f64>>();
-    /// assert_eq!(x, [1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0]);
+    /// assert_eq!(x, [1.0, -1.0, -0.5, 0.0, 0.5, 1.0, -1.0, -0.5, 0.0, 0.5,
+    /// 1.0, -1.0]);
     /// ```
-    #[deprecated(since="0.9.0", note="please use `InfiniteSawtooth::new` and `take` instead")]
-    pub fn new(length: usize,
-               period: i64,
-               high_value: f64,
-               low_value: f64,
-               delay: i64)
-               -> Sawtooth {
+    #[deprecated(since = "0.9.0", note = "please use `InfiniteSawtooth::new` and `take` instead")]
+    pub fn new(length: usize, period: i64, high_value: f64, low_value: f64, delay: i64) -> Sawtooth {
 
-        Sawtooth {
-            internal: InfiniteSawtooth::new(period, high_value, low_value, delay).take(length),
-        }
+        Sawtooth { internal: InfiniteSawtooth::new(period, high_value, low_value, delay).take(length) }
     }
 }
 

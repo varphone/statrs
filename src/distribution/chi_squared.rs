@@ -1,12 +1,14 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution, Gamma};
 use Result;
+use distribution::{Continuous, Distribution, Gamma, Univariate};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
-/// distribution which is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
+/// Implements the
+/// [Chi-squared](https://en.wikipedia.org/wiki/Chi-squared_distribution)
+/// distribution which is a special case of the
+/// [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
 /// (referenced [Here](./struct.Gamma.html))
 ///
 /// # Examples
@@ -273,8 +275,7 @@ impl Median<f64> for ChiSquared {
     fn median(&self) -> f64 {
         if self.freedom < 1.0 {
             // if k is small, calculate using expansion of formula
-            self.freedom - 2.0 / 3.0 + 12.0 / (81.0 * self.freedom) -
-            8.0 / (729.0 * self.freedom * self.freedom)
+            self.freedom - 2.0 / 3.0 + 12.0 / (81.0 * self.freedom) - 8.0 / (729.0 * self.freedom * self.freedom)
         } else {
             // if k is large enough, median heads toward k - 2/3
             self.freedom - 2.0 / 3.0

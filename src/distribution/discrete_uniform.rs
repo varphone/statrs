@@ -1,11 +1,12 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Discrete, Distribution};
 use {Result, StatsError};
+use distribution::{Discrete, Distribution, Univariate};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Discrete Uniform](https://en.wikipedia.org/wiki/Discrete_uniform_distribution)
+/// Implements the [Discrete
+/// Uniform](https://en.wikipedia.org/wiki/Discrete_uniform_distribution)
 /// distribution
 ///
 /// # Examples
@@ -47,10 +48,7 @@ impl DiscreteUniform {
         if max < min {
             Err(StatsError::BadParams)
         } else {
-            Ok(DiscreteUniform {
-                min: min,
-                max: max
-            })
+            Ok(DiscreteUniform { min: min, max: max })
         }
     }
 }

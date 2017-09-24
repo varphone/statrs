@@ -1,8 +1,9 @@
-//! Defines common interfaces for interacting with statistical distributions and provides
+//! Defines common interfaces for interacting with statistical distributions
+//! and provides
 //! concrete implementations for a variety of distributions.
 
 use rand::Rng;
-use statistics::{Min, Max};
+use statistics::{Max, Min};
 
 pub use self::bernoulli::Bernoulli;
 pub use self::beta::Beta;
@@ -87,7 +88,8 @@ pub trait Distribution<T> {
 }
 
 /// The `Univariate` trait is used to specify an interface for univariate
-/// distributions e.g. distributions that have a closed form cumulative distribution
+/// distributions e.g. distributions that have a closed form cumulative
+/// distribution
 /// function
 pub trait Univariate<T, K>: Distribution<K> + Min<T> + Max<T> {
     /// Returns the cumulative distribution function calculated
@@ -131,7 +133,8 @@ pub trait InverseCDF<T> {
 /// they can panic if in an invalid state or encountering invalid input
 /// depending on the implementing distribution.
 pub trait Continuous<T, K> {
-    /// Returns the probability density function calculated at `x` for a given distribution.
+    /// Returns the probability density function calculated at `x` for a given
+    /// distribution.
     /// May panic depending on the implementor.
     ///
     /// # Examples
@@ -144,7 +147,8 @@ pub trait Continuous<T, K> {
     /// ```
     fn pdf(&self, x: T) -> K;
 
-    /// Returns the log of the probability density function calculated at `x` for a given distribution.
+    /// Returns the log of the probability density function calculated at `x`
+    /// for a given distribution.
     /// May panic depending on the implementor.
     ///
     /// # Examples
@@ -168,7 +172,8 @@ pub trait Continuous<T, K> {
 /// they can panic if in an invalid state or encountering invalid input
 /// depending on the implementing distribution.
 pub trait Discrete<T, K> {
-    /// Returns the probability mass function calculated at `x` for a given distribution.
+    /// Returns the probability mass function calculated at `x` for a given
+    /// distribution.
     /// May panic depending on the implementor.
     ///
     /// # Examples
@@ -182,7 +187,8 @@ pub trait Discrete<T, K> {
     /// ```
     fn pmf(&self, x: T) -> K;
 
-    /// Returns the log of the probability mass function calculated at `x` for a given distribution.
+    /// Returns the log of the probability mass function calculated at `x` for
+    /// a given distribution.
     /// May panic depending on the implementor.
     ///
     /// # Examples

@@ -1,4 +1,5 @@
-//! Provides functions for calculating [harmonic](https://en.wikipedia.org/wiki/Harmonic_number)
+//! Provides functions for calculating
+//! [harmonic](https://en.wikipedia.org/wiki/Harmonic_number)
 //! numbers
 
 use consts;

@@ -1,10 +1,10 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::beta;
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use function::beta;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
 /// Implements the [Fisher-Snedecor](https://en.wikipedia.org/wiki/F-distribution) distribution
 /// also commonly known as the F-distribution
@@ -130,12 +130,13 @@ impl Distribution<f64> for FisherSnedecor {
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         (super::gamma::sample_unchecked(r, self.freedom_1 / 2.0, 0.5) * self.freedom_2) /
-        (super::gamma::sample_unchecked(r, self.freedom_2 / 2.0, 0.5) * self.freedom_1)
+            (super::gamma::sample_unchecked(r, self.freedom_2 / 2.0, 0.5) * self.freedom_1)
     }
 }
 
 impl Univariate<f64, f64> for FisherSnedecor {
-    /// Calculates the cumulative distribution function for the fisher-snedecor distribution
+    /// Calculates the cumulative distribution function for the fisher-snedecor
+    /// distribution
     /// at `x`
     ///
     /// # Formula
@@ -153,9 +154,11 @@ impl Univariate<f64, f64> for FisherSnedecor {
         } else if x == f64::INFINITY {
             1.0
         } else {
-            beta::beta_reg(self.freedom_1 / 2.0,
-                           self.freedom_2 / 2.0,
-                           self.freedom_1 * x / (self.freedom_1 * x + self.freedom_2))
+            beta::beta_reg(
+                self.freedom_1 / 2.0,
+                self.freedom_2 / 2.0,
+                self.freedom_1 * x / (self.freedom_1 * x + self.freedom_2),
+            )
         }
     }
 }
@@ -236,7 +239,7 @@ impl Variance<f64> for FisherSnedecor {
     fn variance(&self) -> f64 {
         assert!(self.freedom_2 > 4.0, StatsError::ArgGt("freedom_2", 4.0));
         (2.0 * self.freedom_2 * self.freedom_2 * (self.freedom_1 + self.freedom_2 - 2.0)) /
-        (self.freedom_1 * (self.freedom_2 - 2.0) * (self.freedom_2 - 2.0) * (self.freedom_2 - 4.0))
+            (self.freedom_1 * (self.freedom_2 - 2.0) * (self.freedom_2 - 2.0) * (self.freedom_2 - 4.0))
     }
 
     /// Returns the standard deviation of the fisher-snedecor distribution
@@ -276,7 +279,8 @@ impl Skewness<f64> for FisherSnedecor {
     /// # Formula
     ///
     /// ```ignore
-    /// ((2d1 + d2 - 2) * sqrt(8 * (d2 - 4))) / ((d2 - 6) * sqrt(d1 * (d1 + d2 - 2)))
+    /// ((2d1 + d2 - 2) * sqrt(8 * (d2 - 4))) / ((d2 - 6) * sqrt(d1 * (d1 + d2
+    /// - 2)))
     /// ```
     ///
     /// where `d1` is the first degree of freedom and `d2` is
@@ -284,7 +288,7 @@ impl Skewness<f64> for FisherSnedecor {
     fn skewness(&self) -> f64 {
         assert!(self.freedom_2 > 6.0, StatsError::ArgGt("freedom_2", 6.0));
         ((2.0 * self.freedom_1 + self.freedom_2 - 2.0) * (8.0 * (self.freedom_2 - 4.0)).sqrt()) /
-        ((self.freedom_2 - 6.0) * (self.freedom_1 * (self.freedom_1 + self.freedom_2 - 2.0)).sqrt())
+            ((self.freedom_2 - 6.0) * (self.freedom_1 * (self.freedom_1 + self.freedom_2 - 2.0)).sqrt())
     }
 }
 
@@ -314,17 +318,20 @@ impl Mode<f64> for FisherSnedecor {
 }
 
 impl Continuous<f64, f64> for FisherSnedecor {
-    /// Calculates the probability density function for the fisher-snedecor distribution
+    /// Calculates the probability density function for the fisher-snedecor
+    /// distribution
     /// at `x`
     ///
     /// # Remarks
     ///
-    /// Returns `NaN` if `freedom_1`, `freedom_2` is `INF`, or `x` is `+INF` or `-INF`
+    /// Returns `NaN` if `freedom_1`, `freedom_2` is `INF`, or `x` is `+INF` or
+    /// `-INF`
     ///
     /// # Formula
     ///
     /// ```ignore
-    /// sqrt(((d1 * x) ^ d1 * d2 ^ d2) / (d1 * x + d2) ^ (d1 + d2)) / (x * β(d1 / 2, d2 / 2))
+    /// sqrt(((d1 * x) ^ d1 * d2 ^ d2) / (d1 * x + d2) ^ (d1 + d2)) / (x * β(d1
+    /// / 2, d2 / 2))
     /// ```
     ///
     /// where `d1` is the first degree of freedom, `d2` is
@@ -336,23 +343,25 @@ impl Continuous<f64, f64> for FisherSnedecor {
             0.0
         } else {
             ((self.freedom_1 * x).powf(self.freedom_1) * self.freedom_2.powf(self.freedom_2) /
-             (self.freedom_1 * x + self.freedom_2).powf(self.freedom_1 + self.freedom_2))
-                    .sqrt() /
-            (x * beta::beta(self.freedom_1 / 2.0, self.freedom_2 / 2.0))
+                 (self.freedom_1 * x + self.freedom_2).powf(self.freedom_1 + self.freedom_2))
+            .sqrt() / (x * beta::beta(self.freedom_1 / 2.0, self.freedom_2 / 2.0))
         }
     }
 
-    /// Calculates the log probability density function for the fisher-snedecor distribution
+    /// Calculates the log probability density function for the fisher-snedecor
+    /// distribution
     /// at `x`
     ///
     /// # Remarks
     ///
-    /// Returns `NaN` if `freedom_1`, `freedom_2` is `INF`, or `x` is `+INF` or `-INF`
+    /// Returns `NaN` if `freedom_1`, `freedom_2` is `INF`, or `x` is `+INF` or
+    /// `-INF`
     ///
     /// # Formula
     ///
     /// ```ignore
-    /// ln(sqrt(((d1 * x) ^ d1 * d2 ^ d2) / (d1 * x + d2) ^ (d1 + d2)) / (x * β(d1 / 2, d2 / 2)))
+    /// ln(sqrt(((d1 * x) ^ d1 * d2 ^ d2) / (d1 * x + d2) ^ (d1 + d2)) / (x *
+    /// β(d1 / 2, d2 / 2)))
     /// ```
     ///
     /// where `d1` is the first degree of freedom, `d2` is

@@ -5,7 +5,8 @@
 /// series summation where `next` returns the
 /// next summand in the series
 pub fn series<F>(mut next: F) -> f64
-    where F: FnMut() -> f64
+where
+    F: FnMut() -> f64,
 {
     let factor = (1 << 16) as f64;
     let mut comp = 0.0;

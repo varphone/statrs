@@ -1,4 +1,5 @@
-//! Provides the [logistic](http://en.wikipedia.org/wiki/Logistic_function) and related functions
+//! Provides the [logistic](http://en.wikipedia.org/wiki/Logistic_function) and
+//! related functions
 
 use error::StatsError;
 
@@ -13,8 +14,10 @@ pub fn logistic(p: f64) -> f64 {
 ///
 /// If `p < 0.0` or `p > 1.0`
 pub fn logit(p: f64) -> f64 {
-    assert!(p >= 0.0 && p <= 1.0,
-            format!("{}", StatsError::ArgIntervalIncl("p", 0.0, 1.0)));
+    assert!(
+        p >= 0.0 && p <= 1.0,
+        format!("{}", StatsError::ArgIntervalIncl("p", 0.0, 1.0))
+    );
     (p / (1.0 - p)).ln()
 }
 
@@ -22,7 +25,7 @@ pub fn logit(p: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
-    
+
     #[test]
     fn test_logistic() {
         assert_eq!(super::logistic(f64::NEG_INFINITY), 0.0);

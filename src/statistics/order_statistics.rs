@@ -8,8 +8,10 @@ pub trait OrderStatistics<T> {
     ///
     /// # Remarks
     ///
-    /// No sorting is assumed. Order must be one-based (between `1` and `N` inclusive)
-    /// Returns `f64::NAN` if order is outside the viable range or data is empty.
+    /// No sorting is assumed. Order must be one-based (between `1` and `N`
+    /// inclusive)
+    /// Returns `f64::NAN` if order is outside the viable range or data is
+    /// empty.
     ///
     /// # Examples
     ///
@@ -47,12 +49,14 @@ pub trait OrderStatistics<T> {
     fn median(&mut self) -> T;
 
     /// Estimates the tau-th quantile from the data. The tau-th quantile
-    /// is the data value where the cumulative distribution function crosses tau.
+    /// is the data value where the cumulative distribution function crosses
+    /// tau.
     ///
     /// # Remarks
     ///
     /// No sorting is assumed. Tau must be between `0` and `1` inclusive.
-    /// Returns `f64::NAN` if data is empty or tau is outside the inclusive range.
+    /// Returns `f64::NAN` if data is empty or tau is outside the inclusive
+    /// range.
     ///
     /// # Examples
     ///
@@ -74,8 +78,10 @@ pub trait OrderStatistics<T> {
     ///
     /// # Remarks
     ///
-    /// Use quantile for non-integer percentiles. `p` must be between `0` and `100` inclusive.
-    /// Returns `f64::NAN` if data is empty or `p` is outside the inclusive range.
+    /// Use quantile for non-integer percentiles. `p` must be between `0` and
+    /// `100` inclusive.
+    /// Returns `f64::NAN` if data is empty or `p` is outside the inclusive
+    /// range.
     ///
     /// # Examples
     ///
@@ -180,8 +186,10 @@ pub trait OrderStatistics<T> {
     /// assert_eq!(x.ranks(RankTieBreaker::Average).len(), 0);
     ///
     /// let y = [1.0, 3.0, 2.0, 2.0];
-    /// assert_eq!((&mut y.clone()).ranks(RankTieBreaker::Average), [1.0, 4.0, 2.5, 2.5]);
-    /// assert_eq!((&mut y.clone()).ranks(RankTieBreaker::Min), [1.0, 4.0, 2.0, 2.0]);
+    /// assert_eq!((&mut y.clone()).ranks(RankTieBreaker::Average), [1.0, 4.0,
+    /// 2.5, 2.5]);
+    /// assert_eq!((&mut y.clone()).ranks(RankTieBreaker::Min), [1.0, 4.0, 2.0,
+    /// 2.0]);
     /// ```
     fn ranks(&mut self, tie_breaker: RankTieBreaker) -> Vec<T>;
 }

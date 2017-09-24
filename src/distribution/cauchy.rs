@@ -1,9 +1,9 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
 /// Implements the [Cauchy](https://en.wikipedia.org/wiki/Cauchy_distribution)
 /// distribution, also known as the Lorentz distribution.
@@ -225,9 +225,7 @@ impl Continuous<f64, f64> for Cauchy {
     ///
     /// where `x_0` is the location and `γ` is the scale
     fn pdf(&self, x: f64) -> f64 {
-        1.0 /
-        (f64::consts::PI * self.scale *
-         (1.0 + ((x - self.location) / self.scale) * ((x - self.location) / self.scale)))
+        1.0 / (f64::consts::PI * self.scale * (1.0 + ((x - self.location) / self.scale) * ((x - self.location) / self.scale)))
     }
 
     /// Calculates the log probability density function for the cauchy
@@ -241,9 +239,7 @@ impl Continuous<f64, f64> for Cauchy {
     ///
     /// where `x_0` is the location and `γ` is the scale
     fn ln_pdf(&self, x: f64) -> f64 {
-        -(f64::consts::PI * self.scale *
-          (1.0 + ((x - self.location) / self.scale) * ((x - self.location) / self.scale)))
-            .ln()
+        -(f64::consts::PI * self.scale * (1.0 + ((x - self.location) / self.scale) * ((x - self.location) / self.scale))).ln()
     }
 }
 

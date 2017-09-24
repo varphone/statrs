@@ -1,12 +1,14 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution, ziggurat};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate, ziggurat};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
-/// distribution and is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
+/// Implements the
+/// [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution)
+/// distribution and is a special case of the
+/// [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
 /// (referenced [here](./struct.Gamma.html))
 ///
 /// # Examples

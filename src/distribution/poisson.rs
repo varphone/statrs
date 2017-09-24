@@ -1,11 +1,11 @@
+use {Result, StatsError};
+use distribution::{Discrete, Distribution, Univariate};
+use function::{factorial, gamma};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
 use std::f64;
 use std::u64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::{factorial, gamma};
-use statistics::*;
-use distribution::{Univariate, Discrete, Distribution};
-use {Result, StatsError};
 
 /// Implements the [Poisson](https://en.wikipedia.org/wiki/Poisson_distribution)
 /// distribution
@@ -216,9 +216,8 @@ impl Entropy<f64> for Poisson {
     ///
     /// where `λ` is the rate
     fn entropy(&self) -> f64 {
-        0.5 * (2.0 * f64::consts::PI * f64::consts::E * self.lambda).ln() -
-        1.0 / (12.0 * self.lambda) - 1.0 / (24.0 * self.lambda * self.lambda) -
-        19.0 / (360.0 * self.lambda * self.lambda * self.lambda)
+        0.5 * (2.0 * f64::consts::PI * f64::consts::E * self.lambda).ln() - 1.0 / (12.0 * self.lambda) - 1.0 / (24.0 * self.lambda * self.lambda) -
+            19.0 / (360.0 * self.lambda * self.lambda * self.lambda)
     }
 }
 
@@ -282,7 +281,8 @@ impl Discrete<u64, f64> for Poisson {
         (-self.lambda + x as f64 * self.lambda.ln() - factorial::ln_factorial(x as u64)).exp()
     }
 
-    /// Calculates the log probability mass function for the poisson distribution at
+    /// Calculates the log probability mass function for the poisson
+    /// distribution at
     /// `x`
     ///
     /// # Formula

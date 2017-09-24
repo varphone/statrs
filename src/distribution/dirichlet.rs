@@ -1,12 +1,13 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::gamma;
-use statistics::*;
-use distribution::{Continuous, Distribution};
 use {Result, StatsError, prec};
+use distribution::{Continuous, Distribution};
+use function::gamma;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Dirichlet](https://en.wikipedia.org/wiki/Dirichlet_distribution)
+/// Implements the
+/// [Dirichlet](https://en.wikipedia.org/wiki/Dirichlet_distribution)
 /// distribution
 ///
 /// # Examples
@@ -94,7 +95,10 @@ impl Dirichlet {
     }
 
     fn alpha_sum(&self) -> f64 {
-        self.alpha.iter().fold(0.0, |acc, x| acc + x)
+        self.alpha.iter().fold(
+            0.0,
+            |acc, x| acc + x,
+        )
     }
 }
 
@@ -162,7 +166,10 @@ impl Mean<Vec<f64>> for Dirichlet {
     /// and `α_0` is the sum of all concentration parameters
     fn mean(&self) -> Vec<f64> {
         let sum = self.alpha_sum();
-        self.alpha.iter().map(|x| x / sum).collect()
+        self.alpha
+            .iter()
+            .map(|x| x / sum)
+            .collect()
     }
 }
 
@@ -196,7 +203,10 @@ impl Variance<Vec<f64>> for Dirichlet {
     /// for the `i`th element where `α_i` is the `i`th concentration parameter
     /// and `α_0` is the sum of all concentration parameters
     fn std_dev(&self) -> Vec<f64> {
-        self.variance().iter().map(|x| x.sqrt()).collect()
+        self.variance()
+            .iter()
+            .map(|x| x.sqrt())
+            .collect()
     }
 }
 
@@ -216,26 +226,30 @@ impl Entropy<f64> for Dirichlet {
     /// ```
     ///
     /// `α_0` is the sum of all concentration parameters,
-    /// `K` is the number of concentration parameters, `ψ` is the digamma function, `α_i`
+    /// `K` is the number of concentration parameters, `ψ` is the digamma
+    /// function, `α_i`
     /// is the `i`th concentration parameter, and `Σ` is the sum from `1` to `K`
     fn entropy(&self) -> f64 {
         let sum = self.alpha_sum();
-        let num = self.alpha
-            .iter()
-            .fold(0.0, |acc, &x| acc + (x - 1.0) * gamma::digamma(x));
+        let num = self.alpha.iter().fold(0.0, |acc, &x| {
+            acc + (x - 1.0) * gamma::digamma(x)
+        });
         gamma::ln_gamma(sum) + (sum - self.alpha.len() as f64) * gamma::digamma(sum) - num
     }
 }
 
 impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
-    /// Calculates the probabiliy density function for the dirichlet distribution
+    /// Calculates the probabiliy density function for the dirichlet
+    /// distribution
     /// with given `x`'s corresponding to the concentration parameters for this
     /// distribution
     ///
     /// # Panics
     ///
-    /// If any element in `x` is not in `(0, 1)`, the elements in `x` do not sum to
-    /// `1` with a tolerance of `1e-4`,  or if `x` is not the same length as the vector of
+    /// If any element in `x` is not in `(0, 1)`, the elements in `x` do not
+    /// sum to
+    /// `1` with a tolerance of `1e-4`,  or if `x` is not the same length as
+    /// the vector of
     /// concentration parameters for this distribution
     ///
     /// # Formula
@@ -259,14 +273,17 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
         self.ln_pdf(x).exp()
     }
 
-    /// Calculates the log probabiliy density function for the dirichlet distribution
+    /// Calculates the log probabiliy density function for the dirichlet
+    /// distribution
     /// with given `x`'s corresponding to the concentration parameters for this
     /// distribution
     ///
     /// # Panics
     ///
-    /// If any element in `x` is not in `(0, 1)`, the elements in `x` do not sum to
-    /// `1` with a tolerance of `1e-4`,  or if `x` is not the same length as the vector of
+    /// If any element in `x` is not in `(0, 1)`, the elements in `x` do not
+    /// sum to
+    /// `1` with a tolerance of `1e-4`,  or if `x` is not the same length as
+    /// the vector of
     /// concentration parameters for this distribution
     ///
     /// # Formula
@@ -287,23 +304,31 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
     /// `Π` is the product from `1` to `K`, `Σ` is the sum from `1` to `K`,
     /// and `K` is the number of concentration parameters
     fn ln_pdf(&self, x: &[f64]) -> f64 {
-        assert!(self.alpha.len() == x.len(),
-                format!("{}", StatsError::ContainersMustBeSameLength));
+        assert!(
+            self.alpha.len() == x.len(),
+            format!("{}", StatsError::ContainersMustBeSameLength)
+        );
 
         let (term, sum_xi, sum_alpha) = x.iter()
-            .enumerate()
-            .map(|pair| (pair.1, self.alpha[pair.0]))
-            .fold((0.0, 0.0, 0.0), |acc, pair| {
-                assert!(*pair.0 > 0.0 && *pair.0 < 1.0,
-                        format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0)));
+                                         .enumerate()
+                                         .map(|pair| (pair.1, self.alpha[pair.0]))
+                                         .fold((0.0, 0.0, 0.0), |acc, pair| {
+            assert!(
+                *pair.0 > 0.0 && *pair.0 < 1.0,
+                format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0))
+            );
 
-                (acc.0 + (pair.1 - 1.0) * pair.0.ln() - gamma::ln_gamma(pair.1),
-                 acc.1 + pair.0,
-                 acc.2 + pair.1)
-            });
+            (
+                acc.0 + (pair.1 - 1.0) * pair.0.ln() - gamma::ln_gamma(pair.1),
+                acc.1 + pair.0,
+                acc.2 + pair.1,
+            )
+        });
 
-        assert!(prec::almost_eq(sum_xi, 1.0, 1e-4),
-                format!("{}", StatsError::ContainerExpectedSum("x", 1.0)));
+        assert!(
+            prec::almost_eq(sum_xi, 1.0, 1e-4),
+            format!("{}", StatsError::ContainerExpectedSum("x", 1.0))
+        );
         term + gamma::ln_gamma(sum_alpha)
     }
 }

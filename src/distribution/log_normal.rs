@@ -1,12 +1,13 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::erf;
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError, consts};
+use distribution::{Continuous, Distribution, Univariate};
+use function::erf;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution)
+/// Implements the
+/// [Log-normal](https://en.wikipedia.org/wiki/Log-normal_distribution)
 /// distribution
 ///
 /// # Examples
@@ -101,7 +102,8 @@ impl Distribution<f64> for LogNormal {
 }
 
 impl Univariate<f64, f64> for LogNormal {
-    /// Calculates the cumulative distribution function for the log-normal distribution
+    /// Calculates the cumulative distribution function for the log-normal
+    /// distribution
     /// at `x`
     ///
     /// # Formula
@@ -118,7 +120,10 @@ impl Univariate<f64, f64> for LogNormal {
         } else if x == f64::INFINITY {
             1.0
         } else {
-            0.5 * erf::erfc((self.location - x.ln()) / (self.scale * f64::consts::SQRT_2))
+            0.5 *
+                erf::erfc(
+                    (self.location - x.ln()) / (self.scale * f64::consts::SQRT_2),
+                )
         }
     }
 }

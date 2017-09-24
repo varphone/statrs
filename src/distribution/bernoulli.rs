@@ -1,11 +1,13 @@
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Discrete, Distribution, Binomial};
 use Result;
+use distribution::{Binomial, Discrete, Distribution, Univariate};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
 
-/// Implements the [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
-/// distribution which is a special case of the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
+/// Implements the
+/// [Bernoulli](https://en.wikipedia.org/wiki/Bernoulli_distribution)
+/// distribution which is a special case of the
+/// [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
 /// distribution where `n = 1` (referenced [Here](./struct.Binomial.html))
 ///
 /// # Examples

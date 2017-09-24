@@ -1,12 +1,13 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::{beta, gamma};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use function::{beta, gamma};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Beta](https://en.wikipedia.org/wiki/Beta_distribution) distribution
+/// Implements the [Beta](https://en.wikipedia.org/wiki/Beta_distribution)
+/// distribution
 ///
 /// # Examples
 ///
@@ -133,7 +134,8 @@ impl Distribution<f64> for Beta {
 }
 
 impl Univariate<f64, f64> for Beta {
-    /// Calculates the cumulative distribution function for the beta distribution
+    /// Calculates the cumulative distribution function for the beta
+    /// distribution
     /// at `x`
     ///
     /// # Formula
@@ -232,9 +234,7 @@ impl Variance<f64> for Beta {
     ///
     /// where `α` is shapeA and `β` is shapeB
     fn variance(&self) -> f64 {
-        self.shape_a * self.shape_b /
-        ((self.shape_a + self.shape_b) * (self.shape_a + self.shape_b) *
-         (self.shape_a + self.shape_b + 1.0))
+        self.shape_a * self.shape_b / ((self.shape_a + self.shape_b) * (self.shape_a + self.shape_b) * (self.shape_a + self.shape_b + 1.0))
     }
 
     /// Returns the standard deviation of the beta distribution
@@ -270,10 +270,9 @@ impl Entropy<f64> for Beta {
         if self.shape_a == f64::INFINITY || self.shape_b == f64::INFINITY {
             0.0
         } else {
-            beta::ln_beta(self.shape_a, self.shape_b) -
-            (self.shape_a - 1.0) * gamma::digamma(self.shape_a) -
-            (self.shape_b - 1.0) * gamma::digamma(self.shape_b) +
-            (self.shape_a + self.shape_b - 2.0) * gamma::digamma(self.shape_a + self.shape_b)
+            beta::ln_beta(self.shape_a, self.shape_b) - (self.shape_a - 1.0) * gamma::digamma(self.shape_a) -
+                (self.shape_b - 1.0) * gamma::digamma(self.shape_b) +
+                (self.shape_a + self.shape_b - 2.0) * gamma::digamma(self.shape_a + self.shape_b)
         }
     }
 }
@@ -297,7 +296,7 @@ impl Skewness<f64> for Beta {
             2.0
         } else {
             2.0 * (self.shape_b - self.shape_a) * (self.shape_a + self.shape_b + 1.0).sqrt() /
-            ((self.shape_a + self.shape_b + 2.0) * (self.shape_a * self.shape_b).sqrt())
+                ((self.shape_a + self.shape_b + 2.0) * (self.shape_a * self.shape_b).sqrt())
         }
     }
 }
@@ -308,7 +307,8 @@ impl Mode<f64> for Beta {
     /// # Remarks
     ///
     /// Since the mode is technically only calculate for `α > 1, β > 1`, those
-    /// are the only values we allow. We may consider relaxing this constraint in
+    /// are the only values we allow. We may consider relaxing this constraint
+    /// in
     /// the future.
     ///
     /// # Panics
@@ -325,10 +325,14 @@ impl Mode<f64> for Beta {
     fn mode(&self) -> f64 {
         // TODO: perhaps relax constraint in order to allow calculation
         // of 'anti-mode;
-        assert!(self.shape_a > 1.0,
-                format!("{}", StatsError::ArgGt("shape_a", 1.0)));
-        assert!(self.shape_b > 1.0,
-                format!("{}", StatsError::ArgGt("shape_b", 1.0)));
+        assert!(
+            self.shape_a > 1.0,
+            format!("{}", StatsError::ArgGt("shape_a", 1.0))
+        );
+        assert!(
+            self.shape_b > 1.0,
+            format!("{}", StatsError::ArgGt("shape_b", 1.0))
+        );
         if self.shape_a == f64::INFINITY && self.shape_b == f64::INFINITY {
             0.5
         } else if self.shape_a == f64::INFINITY {
@@ -342,7 +346,8 @@ impl Mode<f64> for Beta {
 }
 
 impl Continuous<f64, f64> for Beta {
-    /// Calculates the probability density function for the beta distribution at `x`.
+    /// Calculates the probability density function for the beta distribution
+    /// at `x`.
     ///
     /// # Formula
     ///
@@ -367,13 +372,13 @@ impl Continuous<f64, f64> for Beta {
         } else if self.shape_a > 80.0 || self.shape_b > 80.0 {
             self.ln_pdf(x).exp()
         } else {
-            let bb = gamma::gamma(self.shape_a + self.shape_b) /
-                     (gamma::gamma(self.shape_a) * gamma::gamma(self.shape_b));
+            let bb = gamma::gamma(self.shape_a + self.shape_b) / (gamma::gamma(self.shape_a) * gamma::gamma(self.shape_b));
             bb * x.powf(self.shape_a - 1.0) * (1.0 - x).powf(self.shape_b - 1.0)
         }
     }
 
-    /// Calculates the log probability density function for the beta distribution at `x`.
+    /// Calculates the log probability density function for the beta
+    /// distribution at `x`.
     ///
     /// # Formula
     ///
@@ -408,8 +413,7 @@ impl Continuous<f64, f64> for Beta {
         } else if self.shape_a == 1.0 && self.shape_b == 1.0 {
             0.0
         } else {
-            let aa = gamma::ln_gamma(self.shape_a + self.shape_b) - gamma::ln_gamma(self.shape_a) -
-                     gamma::ln_gamma(self.shape_b);
+            let aa = gamma::ln_gamma(self.shape_a + self.shape_b) - gamma::ln_gamma(self.shape_a) - gamma::ln_gamma(self.shape_b);
             let bb = if self.shape_a == 1.0 && x == 0.0 {
                 0.0
             } else if x == 0.0 {

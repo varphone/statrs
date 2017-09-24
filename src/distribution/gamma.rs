@@ -1,12 +1,13 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::gamma;
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use function::gamma;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution
+/// Implements the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution)
+/// distribution
 ///
 /// # Examples
 ///
@@ -112,10 +113,12 @@ impl Distribution<f64> for Gamma {
     /// on:
     /// <br />
     /// <div>
-    /// <i>"A Simple Method for Generating Gamma Variables"</i> - Marsaglia & Tsang
+    /// <i>"A Simple Method for Generating Gamma Variables"</i> - Marsaglia &
+    /// Tsang
     /// </div>
     /// <div>
-    /// ACM Transactions on Mathematical Software, Vol. 26, No. 3, September 2000, Pages 363-372
+    /// ACM Transactions on Mathematical Software, Vol. 26, No. 3, September
+    /// 2000, Pages 363-372
     /// </div>
     /// <br />
     ///
@@ -139,7 +142,8 @@ impl Distribution<f64> for Gamma {
 }
 
 impl Univariate<f64, f64> for Gamma {
-    /// Calculates the cumulative distribution function for the gamma distribution
+    /// Calculates the cumulative distribution function for the gamma
+    /// distribution
     /// at `x`
     ///
     /// # Formula
@@ -266,8 +270,7 @@ impl Entropy<f64> for Gamma {
         if self.rate == f64::INFINITY {
             0.0
         } else {
-            self.shape - self.rate.ln() + gamma::ln_gamma(self.shape) +
-            (1.0 - self.shape) * gamma::digamma(self.shape)
+            self.shape - self.rate.ln() + gamma::ln_gamma(self.shape) + (1.0 - self.shape) * gamma::digamma(self.shape)
         }
     }
 }
@@ -337,12 +340,12 @@ impl Continuous<f64, f64> for Gamma {
         } else if x == f64::INFINITY {
             0.0
         } else {
-            self.rate.powf(self.shape) * x.powf(self.shape - 1.0) * (-self.rate * x).exp() /
-            gamma::gamma(self.shape)
+            self.rate.powf(self.shape) * x.powf(self.shape - 1.0) * (-self.rate * x).exp() / gamma::gamma(self.shape)
         }
     }
 
-    /// Calculates the log probability density function for the gamma distribution
+    /// Calculates the log probability density function for the gamma
+    /// distribution
     /// at `x`
     ///
     /// # Remarks
@@ -365,8 +368,7 @@ impl Continuous<f64, f64> for Gamma {
         } else if x == f64::INFINITY {
             f64::NEG_INFINITY
         } else {
-            self.shape * self.rate.ln() + (self.shape - 1.0) * x.ln() - self.rate * x -
-            gamma::ln_gamma(self.shape)
+            self.shape * self.rate.ln() + (self.shape - 1.0) * x.ln() - self.rate * x - gamma::ln_gamma(self.shape)
         }
     }
 }
@@ -378,7 +380,8 @@ impl Continuous<f64, f64> for Gamma {
 /// <i>"A Simple Method for Generating Gamma Variables"</i> - Marsaglia & Tsang
 /// </div>
 /// <div>
-/// ACM Transactions on Mathematical Software, Vol. 26, No. 3, September 2000, Pages 363-372
+/// ACM Transactions on Mathematical Software, Vol. 26, No. 3, September 2000,
+/// Pages 363-372
 /// </div>
 /// <br />
 pub fn sample_unchecked<R: Rng>(r: &mut R, shape: f64, rate: f64) -> f64 {
