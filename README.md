@@ -100,8 +100,10 @@ Then submit a PR, preferably referencing the relevant issue.
 
 ### Style
 
-This repo makes use of `rustfmt` with the default configuration. See https://github.com/rust-lang-nursery/rustfmt
-for instructions on installation and usage
+This repo makes use of `rustfmt` with the configuration specified in `rustfmt.toml`.
+See https://github.com/rust-lang-nursery/rustfmt for instructions on installation
+and usage and run the formatter using `rustfmt --write-mode overwrite *.rs` in
+the `src` directory before committing.
 
 ### Commit messages
 
