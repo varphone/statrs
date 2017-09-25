@@ -1,8 +1,7 @@
 use std::error::Error;
 use std::fmt;
 
-/// Enumeration of possible errors thrown
-/// within the `statrs` library
+/// Enumeration of possible errors thrown within the `statrs` library
 #[derive(Debug)]
 pub enum StatsError {
     /// Generic bad input parameter error

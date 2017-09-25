@@ -5,8 +5,7 @@ use std::f64::consts;
 use std::iter::Take;
 
 /// Generates a base 10 log spaced vector of the given length between the
-/// specified
-/// decade exponents (inclusive). Equivalent to MATLAB logspace
+/// specified decade exponents (inclusive). Equivalent to MATLAB logspace
 ///
 /// # Examples
 ///
@@ -140,8 +139,7 @@ impl Iterator for Periodic {
 }
 
 /// Creates a vector of `f64` points representing a periodic wave with an
-/// amplitude
-/// of `1.0`, phase of `0.0`, and delay of `0`.
+/// amplitude of `1.0`, phase of `0.0`, and delay of `0`.
 ///
 /// # Examples
 ///
@@ -316,8 +314,7 @@ impl Iterator for Sinusoidal {
 }
 
 /// Creates a vector of `f64` points representing a Sine wave with a mean of
-/// `0.0`,
-/// phase of `0.0`, and delay of `0`.
+/// `0.0`, phase of `0.0`, and delay of `0`.
 ///
 /// # Examples
 ///
@@ -442,8 +439,8 @@ impl Iterator for Square {
     }
 }
 
-/// Infinite iterator returning floats forming a triangle wave
-/// starting with the raise phase from the lowest sample
+/// Infinite iterator returning floats forming a triangle wave starting with
+/// the raise phase from the lowest sample
 pub struct InfiniteTriangle {
     periodic: InfinitePeriodic,
     raise_duration: f64,
