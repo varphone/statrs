@@ -1,12 +1,13 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::{beta, factorial};
-use statistics::*;
-use distribution::{Univariate, Discrete, Distribution};
 use {Result, StatsError};
+use distribution::{Discrete, Distribution, Univariate};
+use function::{beta, factorial};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
+/// Implements the
+/// [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
 /// distribution
 ///
 /// # Examples
@@ -303,9 +304,7 @@ impl Discrete<u64, f64> for Binomial {
         } else if self.p == 1.0 {
             if x == self.n { 1.0 } else { 0.0 }
         } else {
-            (factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
-             (self.n - x) as f64 * (1.0 - self.p).ln())
-                .exp()
+            (factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() + (self.n - x) as f64 * (1.0 - self.p).ln()).exp()
         }
     }
 
@@ -325,8 +324,7 @@ impl Discrete<u64, f64> for Binomial {
         } else if self.p == 1.0 {
             if x == self.n { 0.0 } else { f64::NEG_INFINITY }
         } else {
-            factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() +
-            (self.n - x) as f64 * (1.0 - self.p).ln()
+            factorial::ln_binomial(self.n as u64, x as u64) + x as f64 * self.p.ln() + (self.n - x) as f64 * (1.0 - self.p).ln()
         }
     }
 }

@@ -1,11 +1,13 @@
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution, Gamma};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Gamma, Univariate};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
 
-/// Implements the [Erlang](https://en.wikipedia.org/wiki/Erlang_distribution) distribution
-/// which is a special case of the [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution)
+/// Implements the [Erlang](https://en.wikipedia.org/wiki/Erlang_distribution)
+/// distribution
+/// which is a special case of the
+/// [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution)
 /// distribution
 ///
 /// # Examples
@@ -119,7 +121,8 @@ impl Distribution<f64> for Erlang {
 }
 
 impl Univariate<f64, f64> for Erlang {
-    /// Calculates the cumulative distribution function for the erlang distribution
+    /// Calculates the cumulative distribution function for the erlang
+    /// distribution
     /// at `x`
     ///
     /// # Formula
@@ -128,7 +131,8 @@ impl Univariate<f64, f64> for Erlang {
     /// γ(k, λx)  (k - 1)!
     /// ```
     ///
-    /// where `k` is the shape, `λ` is the rate, and `γ` is the lower incomplete gamma function
+    /// where `k` is the shape, `λ` is the rate, and `γ` is the lower
+    /// incomplete gamma function
     fn cdf(&self, x: f64) -> f64 {
         self.g.cdf(x)
     }
@@ -263,8 +267,10 @@ impl Mode<f64> for Erlang {
     ///
     /// where `k` is the shape and `λ` is the rate
     fn mode(&self) -> f64 {
-        assert!(self.g.shape() >= 1.0,
-                format!("{}", StatsError::ArgGte("shape", 1.0)));
+        assert!(
+            self.g.shape() >= 1.0,
+            format!("{}", StatsError::ArgGte("shape", 1.0))
+        );
         self.g.mode()
     }
 }
@@ -289,7 +295,8 @@ impl Continuous<f64, f64> for Erlang {
         self.g.pdf(x)
     }
 
-    /// Calculates the log probability density function for the erlang distribution
+    /// Calculates the log probability density function for the erlang
+    /// distribution
     /// at `x`
     ///
     /// # Remarks

@@ -1,5 +1,5 @@
-use rand::{Rng, Open01};
 use super::ziggurat_tables;
+use rand::{Open01, Rng};
 
 pub fn sample_std_normal<R: Rng>(r: &mut R) -> f64 {
     #[inline]
@@ -25,12 +25,14 @@ pub fn sample_std_normal<R: Rng>(r: &mut R) -> f64 {
         }
     }
 
-    ziggurat(r,
-             true,
-             &ziggurat_tables::ZIG_NORM_X,
-             &ziggurat_tables::ZIG_NORM_F,
-             pdf,
-             zero_case)
+    ziggurat(
+        r,
+        true,
+        &ziggurat_tables::ZIG_NORM_X,
+        &ziggurat_tables::ZIG_NORM_F,
+        pdf,
+        zero_case,
+    )
 }
 
 pub fn sample_exp_1<R: Rng>(r: &mut R) -> f64 {
@@ -44,27 +46,25 @@ pub fn sample_exp_1<R: Rng>(r: &mut R) -> f64 {
         ziggurat_tables::ZIG_EXP_R - r.gen::<f64>().ln()
     }
 
-    ziggurat(r,
-             false,
-             &ziggurat_tables::ZIG_EXP_X,
-             &ziggurat_tables::ZIG_EXP_F,
-             pdf,
-             zero_case)
+    ziggurat(
+        r,
+        false,
+        &ziggurat_tables::ZIG_EXP_X,
+        &ziggurat_tables::ZIG_EXP_F,
+        pdf,
+        zero_case,
+    )
 }
 
 // Ziggurat method for sampling a random number based on the ZIGNOR
 // variant from Doornik 2005. Code borrowed from
-// https://github.com/rust-lang-nursery/rand/blob/master/src/distributions/mod.rs#L223
+// https://github.com/rust-lang-nursery/rand/blob/master/src/distributions/mod.
+// rs#L223
 #[inline(always)]
-fn ziggurat<R: Rng, P, Z>(rng: &mut R,
-                          symmetric: bool,
-                          x_tab: ziggurat_tables::ZigTable,
-                          f_tab: ziggurat_tables::ZigTable,
-                          mut pdf: P,
-                          mut zero_case: Z)
-                          -> f64
-    where P: FnMut(f64) -> f64,
-          Z: FnMut(&mut R, f64) -> f64
+fn ziggurat<R: Rng, P, Z>(rng: &mut R, symmetric: bool, x_tab: ziggurat_tables::ZigTable, f_tab: ziggurat_tables::ZigTable, mut pdf: P, mut zero_case: Z) -> f64
+where
+    P: FnMut(f64) -> f64,
+    Z: FnMut(&mut R, f64) -> f64,
 {
     const SCALE: f64 = (1u64 << 53) as f64;
     loop {
@@ -79,7 +79,8 @@ fn ziggurat<R: Rng, P, Z>(rng: &mut R,
 
         let test_x = if symmetric { x.abs() } else { x };
 
-        // algebraically equivalent to |u| < x_tab[i+1]/x_tab[i] (or u < x_tab[i+1]/x_tab[i])
+        // algebraically equivalent to |u| < x_tab[i+1]/x_tab[i] (or u <
+        // x_tab[i+1]/x_tab[i])
         if test_x < x_tab[i + 1] {
             return x;
         }

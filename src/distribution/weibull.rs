@@ -1,10 +1,10 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::{gamma, stable};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError, consts};
+use distribution::{Continuous, Distribution, Univariate};
+use function::{gamma, stable};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
 /// Implements the [Weibull](https://en.wikipedia.org/wiki/Weibull_distribution)
 /// distribution
@@ -17,7 +17,8 @@ use {Result, StatsError, consts};
 /// use statrs::prec;
 ///
 /// let n = Weibull::new(10.0, 1.0).unwrap();
-/// assert!(prec::almost_eq(n.mean(), 0.95135076986687318362924871772654021925505786260884, 1e-15));
+/// assert!(prec::almost_eq(n.mean(),
+/// 0.95135076986687318362924871772654021925505786260884, 1e-15));
 /// assert_eq!(n.pdf(1.0), 3.6787944117144232159552377016146086744581113103177);
 /// ```
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -260,8 +261,7 @@ impl Skewness<f64> for Weibull {
         let sigma = self.std_dev();
         let sigma2 = sigma * sigma;
         let sigma3 = sigma2 * sigma;
-        (self.scale * self.scale * self.scale * gamma::gamma(1.0 + 3.0 / self.shape) -
-         3.0 * sigma2 * mu - (mu * mu * mu)) / sigma3
+        (self.scale * self.scale * self.scale * gamma::gamma(1.0 + 3.0 / self.shape) - 3.0 * sigma2 * mu - (mu * mu * mu)) / sigma3
     }
 }
 
@@ -322,8 +322,7 @@ impl Continuous<f64, f64> for Weibull {
         } else if x == f64::INFINITY {
             0.0
         } else {
-            self.shape * (x / self.scale).powf(self.shape - 1.0) *
-            (-(x.powf(self.shape)) * self.scale_pow_shape_inv).exp() / self.scale
+            self.shape * (x / self.scale).powf(self.shape - 1.0) * (-(x.powf(self.shape)) * self.scale_pow_shape_inv).exp() / self.scale
         }
     }
 
@@ -345,8 +344,7 @@ impl Continuous<f64, f64> for Weibull {
         } else if x == f64::INFINITY {
             f64::NEG_INFINITY
         } else {
-            self.shape.ln() + (self.shape - 1.0) * (x / self.scale).ln() -
-            x.powf(self.shape) * self.scale_pow_shape_inv - self.scale.ln()
+            self.shape.ln() + (self.shape - 1.0) * (x / self.scale).ln() - x.powf(self.shape) * self.scale_pow_shape_inv - self.scale.ln()
         }
     }
 }

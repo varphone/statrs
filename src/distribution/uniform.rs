@@ -1,11 +1,13 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Continuous Uniform](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) distribution
+/// Implements the [Continuous
+/// Uniform](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous))
+/// distribution
 ///
 /// # Examples
 ///
@@ -47,10 +49,7 @@ impl Uniform {
         if min > max || min.is_nan() || max.is_nan() {
             Err(StatsError::BadParams)
         } else {
-            Ok(Uniform {
-                min: min,
-                max: max
-            })
+            Ok(Uniform { min: min, max: max })
         }
     }
 }
@@ -93,13 +92,14 @@ impl Distribution<f64> for Uniform {
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         use rand::{Closed01, Rand};
-        let Closed01(rand01) =  Closed01::<f64>::rand(r);
+        let Closed01(rand01) = Closed01::<f64>::rand(r);
         self.min + rand01 * (self.max - self.min)
     }
 }
 
 impl Univariate<f64, f64> for Uniform {
-    /// Calculates the cumulative distribution function for the uniform distribution
+    /// Calculates the cumulative distribution function for the uniform
+    /// distribution
     /// at `x`
     ///
     /// # Formula
@@ -245,7 +245,8 @@ impl Continuous<f64, f64> for Uniform {
         }
     }
 
-    /// Calculates the log probability density function for the continuous uniform
+    /// Calculates the log probability density function for the continuous
+    /// uniform
     /// distribution at `x`
     ///
     /// # Remarks

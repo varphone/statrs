@@ -12,7 +12,8 @@ pub enum RankTieBreaker {
     First,
 }
 
-/// The `Statistics` trait provides a host of statistical utilities for analzying
+/// The `Statistics` trait provides a host of statistical utilities for
+/// analzying
 /// data sets
 pub trait Statistics<T> {
     /// Returns the minimum value in the data
@@ -177,8 +178,10 @@ pub trait Statistics<T> {
     ///
     /// # Remarks
     ///
-    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`, or if any value
-    /// in data is less than `0`. Returns `0` if there are no values less than `0` but
+    /// Returns `f64::NAN` if data is empty or an entry is `f64::NAN`, or if
+    /// any value
+    /// in data is less than `0`. Returns `0` if there are no values less than
+    /// `0` but
     /// there exists values equal to `0`.
     ///
     /// # Examples
@@ -214,9 +217,11 @@ pub trait Statistics<T> {
     ///
     /// # Remarks
     ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's
+    /// correction).
     ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is
+    /// `f64::NAN`
     ///
     /// # Examples
     ///
@@ -235,13 +240,16 @@ pub trait Statistics<T> {
     /// ```
     fn variance(self) -> T;
 
-    /// Estimates the unbiased population standard deviation from the provided samples
+    /// Estimates the unbiased population standard deviation from the provided
+    /// samples
     ///
     /// # Remarks
     ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's
+    /// correction).
     ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is
+    /// `f64::NAN`
     ///
     /// # Examples
     ///
@@ -312,13 +320,16 @@ pub trait Statistics<T> {
     /// ```
     fn population_std_dev(self) -> T;
 
-    /// Estimates the unbiased population covariance between the two provided samples
+    /// Estimates the unbiased population covariance between the two provided
+    /// samples
     ///
     /// # Remarks
     ///
-    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's correction).
+    /// On a dataset of size `N`, `N-1` is used as a normalizer (Bessel's
+    /// correction).
     ///
-    /// Returns `f64::NAN` if data has less than two entries or if any entry is `f64::NAN`
+    /// Returns `f64::NAN` if data has less than two entries or if any entry is
+    /// `f64::NAN`
     ///
     /// # Panics
     ///

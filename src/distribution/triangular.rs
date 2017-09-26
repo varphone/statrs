@@ -1,11 +1,13 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution};
 use {Result, StatsError};
+use distribution::{Continuous, Distribution, Univariate};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Triangular](https://en.wikipedia.org/wiki/Triangular_distribution) distribution
+/// Implements the
+/// [Triangular](https://en.wikipedia.org/wiki/Triangular_distribution)
+/// distribution
 ///
 /// # Examples
 ///
@@ -107,7 +109,8 @@ impl Distribution<f64> for Triangular {
 }
 
 impl Univariate<f64, f64> for Triangular {
-    /// Calculates the cumulative distribution function for the triangular distribution
+    /// Calculates the cumulative distribution function for the triangular
+    /// distribution
     /// at `x`
     ///
     /// # Formula
@@ -196,7 +199,8 @@ impl Variance<f64> for Triangular {
     /// # Formula
     ///
     /// ```ignore
-    /// sqrt((min^2 + max^2 + mode^2 - min * max - min * mode - max * mode) / 18)
+    /// sqrt((min^2 + max^2 + mode^2 - min * max - min * mode - max * mode) /
+    /// 18)
     /// ```
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
@@ -222,8 +226,10 @@ impl Skewness<f64> for Triangular {
     /// # Formula
     ///
     /// ```ignore
-    /// (sqrt(2) * (min + max - 2 * mode) * (2 * min - max - mode) * (min - 2 * max + mode)) /
-    /// ( 5 * (min^2 + max^2 + mode^2 - min * max - min * mode - max * mode)^(3 / 2))
+    /// (sqrt(2) * (min + max - 2 * mode) * (2 * min - max - mode) * (min - 2 *
+    /// max + mode)) /
+    /// ( 5 * (min^2 + max^2 + mode^2 - min * max - min * mode - max * mode)^(3
+    /// / 2))
     /// ```
     fn skewness(&self) -> f64 {
         let a = self.min;
@@ -273,7 +279,8 @@ impl Mode<f64> for Triangular {
 }
 
 impl Continuous<f64, f64> for Triangular {
-    /// Calculates the probability density function for the triangular distribution
+    /// Calculates the probability density function for the triangular
+    /// distribution
     /// at `x`
     ///
     /// # Formula
@@ -302,7 +309,8 @@ impl Continuous<f64, f64> for Triangular {
         }
     }
 
-    /// Calculates the log probability density function for the triangular distribution
+    /// Calculates the log probability density function for the triangular
+    /// distribution
     /// at `x`
     ///
     /// # Formula

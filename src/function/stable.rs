@@ -1,7 +1,8 @@
-//! Provides [numerically stable](https://en.wikipedia.org/wiki/Numerical_stability) functions
+//! Provides [numerically
+//! stable](https://en.wikipedia.org/wiki/Numerical_stability) functions
 
-use std::f64;
 use function::internal;
+use std::f64;
 
 /// Calculates a numerically stable `exp(x) - 1`
 ///
@@ -32,7 +33,7 @@ pub fn exp_minus_one(pow: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use std::f64;
-    
+
     #[test]
     fn test_exp_minus_one() {
         assert!(super::exp_minus_one(f64::NAN).is_nan());

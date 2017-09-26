@@ -1,8 +1,7 @@
 use std::error::Error;
 use std::fmt;
 
-/// Enumeration of possible errors thrown
-/// within the `statrs` library
+/// Enumeration of possible errors thrown within the `statrs` library
 #[derive(Debug)]
 pub enum StatsError {
     /// Generic bad input parameter error
@@ -25,7 +24,8 @@ pub enum StatsError {
     ArgGtArg(&'static str, &'static str),
     /// An argument must have been greater than or equal to a value but wasn't
     ArgGte(&'static str, f64),
-    /// An argument must have been greater than or equal to another argument but wasn't
+    /// An argument must have been greater than or equal to another argument
+    /// but wasn't
     ArgGteArg(&'static str, &'static str),
     /// An argument must have been less than a value but wasn't
     ArgLt(&'static str, f64),
@@ -33,7 +33,8 @@ pub enum StatsError {
     ArgLtArg(&'static str, &'static str),
     /// An argument must have been less than or equal to a value but wasn't
     ArgLte(&'static str, f64),
-    /// An argument must have been less than or equal to another argument but wasn't
+    /// An argument must have been less than or equal to another argument but
+    /// wasn't
     ArgLteArg(&'static str, &'static str),
     /// Containers of the same length were expected
     ContainersMustBeSameLength,
@@ -57,46 +58,22 @@ impl fmt::Display for StatsError {
             StatsError::BadParams => write!(f, "Bad distribution parameters"),
             StatsError::ArgMustBePositive(s) => write!(f, "Argument {} must be positive", s),
             StatsError::ArgNotNegative(s) => write!(f, "Argument {} must be non-negative", s),
-            StatsError::ArgIntervalIncl(s, min, max) => {
-                write!(f, "Argument {} not within interval [{}, {}]", s, min, max)
-            }
-            StatsError::ArgIntervalExcl(s, min, max) => {
-                write!(f, "Argument {} not within interval ({}, {})", s, min, max)
-            }
-            StatsError::ArgIntervalExclMin(s, min, max) => {
-                write!(f, "Argument {} not within interval ({}, {}]", s, min, max)
-            }
-            StatsError::ArgIntervalExclMax(s, min, max) => {
-                write!(f, "Argument {} not within interval [{}, {})", s, min, max)
-            }
+            StatsError::ArgIntervalIncl(s, min, max) => write!(f, "Argument {} not within interval [{}, {}]", s, min, max),
+            StatsError::ArgIntervalExcl(s, min, max) => write!(f, "Argument {} not within interval ({}, {})", s, min, max),
+            StatsError::ArgIntervalExclMin(s, min, max) => write!(f, "Argument {} not within interval ({}, {}]", s, min, max),
+            StatsError::ArgIntervalExclMax(s, min, max) => write!(f, "Argument {} not within interval [{}, {})", s, min, max),
             StatsError::ArgGt(s, val) => write!(f, "Argument {} must be greater than {}", s, val),
-            StatsError::ArgGtArg(s, val) => {
-                write!(f, "Argument {} must be greater than {}", s, val)
-            }
-            StatsError::ArgGte(s, val) => {
-                write!(f, "Argument {} must be greater than or equal to {}", s, val)
-            }
-            StatsError::ArgGteArg(s, val) => {
-                write!(f, "Argument {} must be greater than or equal to {}", s, val)
-            }
+            StatsError::ArgGtArg(s, val) => write!(f, "Argument {} must be greater than {}", s, val),
+            StatsError::ArgGte(s, val) => write!(f, "Argument {} must be greater than or equal to {}", s, val),
+            StatsError::ArgGteArg(s, val) => write!(f, "Argument {} must be greater than or equal to {}", s, val),
             StatsError::ArgLt(s, val) => write!(f, "Argument {} must be less than {}", s, val),
             StatsError::ArgLtArg(s, val) => write!(f, "Argument {} must be less than {}", s, val),
-            StatsError::ArgLte(s, val) => {
-                write!(f, "Argument {} must be less than or equal to {}", s, val)
-            }
-            StatsError::ArgLteArg(s, val) => {
-                write!(f, "Argument {} must be less than or equal to {}", s, val)
-            }
-            StatsError::ContainersMustBeSameLength => {
-                write!(f, "Expected containers of same length")
-            }
+            StatsError::ArgLte(s, val) => write!(f, "Argument {} must be less than or equal to {}", s, val),
+            StatsError::ArgLteArg(s, val) => write!(f, "Argument {} must be less than or equal to {}", s, val),
+            StatsError::ContainersMustBeSameLength => write!(f, "Expected containers of same length"),
             StatsError::ComputationFailedToConverge => write!(f, "Computation failed to converge"),
-            StatsError::ContainerExpectedSum(s, sum) => {
-                write!(f, "Elements in container {} expected to sum to {}", s, sum)
-            }
-            StatsError::ContainerExpectedSumVar(s, sum) => {
-                write!(f, "Elements in container {} expected to sum to {}", s, sum)
-            }
+            StatsError::ContainerExpectedSum(s, sum) => write!(f, "Elements in container {} expected to sum to {}", s, sum),
+            StatsError::ContainerExpectedSumVar(s, sum) => write!(f, "Elements in container {} expected to sum to {}", s, sum),
         }
     }
 }

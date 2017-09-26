@@ -1,5 +1,5 @@
-//! Defines mathematical expressions commonly used when computing
-//! distribution values as constants
+//! Defines mathematical expressions commonly used when computing distribution
+//! values as constants
 
 /// Constant value for `sqrt(2 * pi)`
 pub const SQRT_2PI: f64 = 2.5066282746310005024157652848110452530069867406099;
@@ -19,6 +19,6 @@ pub const LN_2_SQRT_E_OVER_PI: f64 = 0.62078223763524522234551844578164721225185
 /// Constant value for `2 * sqrt(e / pi)`
 pub const TWO_SQRT_E_OVER_PI: f64 = 1.8603827342052657173362492472666631120594218414085755;
 
-/// Constant value for Euler-Masheroni constant `lim(n -> inf) { sum(k=1 -> n) { 1/k - ln(n) } }`
-pub const EULER_MASCHERONI: f64 =
-    0.5772156649015328606065120900824024310421593359399235988057672348849;
+/// Constant value for Euler-Masheroni constant `lim(n -> inf) { sum(k=1 -> n)
+/// { 1/k - ln(n) } }`
+pub const EULER_MASCHERONI: f64 = 0.5772156649015328606065120900824024310421593359399235988057672348849;

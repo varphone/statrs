@@ -1,11 +1,11 @@
+use {Result, StatsError};
+use distribution::{Discrete, Distribution, Univariate};
+use function::factorial;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
 use std::cmp;
 use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::factorial;
-use statistics::*;
-use distribution::{Univariate, Discrete, Distribution};
-use {Result, StatsError};
 
 /// Implements the [Hypergeometric](http://en.wikipedia.org/wiki/Hypergeometric_distribution)
 /// distribution
@@ -102,7 +102,11 @@ impl Hypergeometric {
     /// Returns population, successes, and draws in that order
     /// as a tuple of doubles
     fn values_f64(&self) -> (f64, f64, f64) {
-        (self.population as f64, self.successes as f64, self.draws as f64)
+        (
+            self.population as f64,
+            self.successes as f64,
+            self.draws as f64,
+        )
     }
 }
 
@@ -171,11 +175,14 @@ impl Univariate<u64, f64> for Hypergeometric {
     /// # Formula
     ///
     /// ```ignore
-    /// 1 - ((n choose k+1) * (N-n choose K-k-1)) / (N choose K) * 3_F_2(1, k+1-K, k+1-n; k+2, N+k+2-K-n; 1)
+    /// 1 - ((n choose k+1) * (N-n choose K-k-1)) / (N choose K) * 3_F_2(1,
+    /// k+1-K, k+1-n; k+2, N+k+2-K-n; 1)
     /// ```
     ///
     // where `N` is population, `K` is successes, `n` is draws,
-    /// and `p_F_q` is the [generalized hypergeometric function](https://en.wikipedia.org/wiki/Generalized_hypergeometric_function)
+    /// and `p_F_q` is the [generalized hypergeometric
+    /// function](https://en.wikipedia.
+    /// org/wiki/Generalized_hypergeometric_function)
     fn cdf(&self, x: f64) -> f64 {
         if x < self.min() as f64 {
             0.0
@@ -185,11 +192,7 @@ impl Univariate<u64, f64> for Hypergeometric {
             let k = x.floor() as u64;
             let ln_denom = factorial::ln_binomial(self.population, self.draws);
             (0..k + 1).fold(0.0, |acc, i| {
-                acc +
-                (factorial::ln_binomial(self.successes, i) +
-                 factorial::ln_binomial(self.population - self.successes, self.draws - i) -
-                 ln_denom)
-                        .exp()
+                acc + (factorial::ln_binomial(self.successes, i) + factorial::ln_binomial(self.population - self.successes, self.draws - i) - ln_denom).exp()
             })
         }
     }
@@ -244,8 +247,10 @@ impl Mean<f64> for Hypergeometric {
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
     fn mean(&self) -> f64 {
-        assert!(self.population > 0,
-                format!("{}", StatsError::ArgGt("population", 0.0)));
+        assert!(
+            self.population > 0,
+            format!("{}", StatsError::ArgGt("population", 0.0))
+        );
 
         self.successes as f64 * self.draws as f64 / self.population as f64
     }
@@ -266,12 +271,13 @@ impl Variance<f64> for Hypergeometric {
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
     fn variance(&self) -> f64 {
-        assert!(self.population > 1,
-                format!("{}", StatsError::ArgGt("population", 1.0)));
+        assert!(
+            self.population > 1,
+            format!("{}", StatsError::ArgGt("population", 1.0))
+        );
 
         let (population, successes, draws) = self.values_f64();
-        draws * successes * (population - draws) * (population - successes) /
-        (population * population * (population - 1.0))
+        draws * successes * (population - draws) * (population - successes) / (population * population * (population - 1.0))
     }
 
     /// Returns the standard deviation of the hypergeometric distribution
@@ -302,18 +308,20 @@ impl Skewness<f64> for Hypergeometric {
     /// # Formula
     ///
     /// ```ignore
-    /// ((N - 2K) * (N - 1)^(1 / 2) * (N - 2n)) / ([n * K * (N - K) * (N - n)]^(1 / 2) * (N - 2))
+    /// ((N - 2K) * (N - 1)^(1 / 2) * (N - 2n)) / ([n * K * (N - K) * (N -
+    /// n)]^(1 / 2) * (N - 2))
     /// ```
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
     fn skewness(&self) -> f64 {
-        assert!(self.population > 2,
-                format!("{}", StatsError::ArgGt("population", 2.0)));
+        assert!(
+            self.population > 2,
+            format!("{}", StatsError::ArgGt("population", 2.0))
+        );
 
         let (population, successes, draws) = self.values_f64();
         (population - 1.0).sqrt() * (population - 2.0 * draws) * (population - 2.0 * successes) /
-        ((draws * successes * (population - successes) * (population - draws)).sqrt() *
-         (population - 2.0))
+            ((draws * successes * (population - successes) * (population - draws)).sqrt() * (population - 2.0))
     }
 }
 
@@ -347,9 +355,8 @@ impl Discrete<u64, f64> for Hypergeometric {
         if x > self.draws {
             0.0
         } else {
-            factorial::binomial(self.successes, x) *
-            factorial::binomial(self.population - self.successes, self.draws - x) /
-            factorial::binomial(self.population, self.draws)
+            factorial::binomial(self.successes, x) * factorial::binomial(self.population - self.successes, self.draws - x) /
+                factorial::binomial(self.population, self.draws)
         }
     }
 
@@ -364,9 +371,8 @@ impl Discrete<u64, f64> for Hypergeometric {
     ///
     /// where `N` is population, `K` is successes, and `n` is draws
     fn ln_pmf(&self, x: u64) -> f64 {
-        factorial::ln_binomial(self.successes, x) +
-        factorial::ln_binomial(self.population - self.successes, self.draws - x) -
-        factorial::ln_binomial(self.population, self.draws)
+        factorial::ln_binomial(self.successes, x) + factorial::ln_binomial(self.population - self.successes, self.draws - x) -
+            factorial::ln_binomial(self.population, self.draws)
     }
 }
 

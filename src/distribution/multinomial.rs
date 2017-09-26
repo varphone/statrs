@@ -1,12 +1,14 @@
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::factorial;
-use statistics::*;
-use distribution::{Discrete, Distribution};
 use {Result, StatsError};
+use distribution::{Discrete, Distribution};
+use function::factorial;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
 
-/// Implements the [Multinomial](https://en.wikipedia.org/wiki/Multinomial_distribution)
-/// distribution which is a generalization of the [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
+/// Implements the
+/// [Multinomial](https://en.wikipedia.org/wiki/Multinomial_distribution)
+/// distribution which is a generalization of the
+/// [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution)
 /// distribution
 ///
 /// # Examples
@@ -150,7 +152,10 @@ impl Mean<Vec<f64>> for Multinomial {
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
     /// and `k` is the total number of probabilities
     fn mean(&self) -> Vec<f64> {
-        self.p.iter().map(|x| x * self.n as f64).collect()
+        self.p
+            .iter()
+            .map(|x| x * self.n as f64)
+            .collect()
     }
 }
 
@@ -183,7 +188,10 @@ impl Variance<Vec<f64>> for Multinomial {
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
     /// and `k` is the total number of probabilities
     fn std_dev(&self) -> Vec<f64> {
-        self.variance().iter().map(|x| x.sqrt()).collect()
+        self.variance()
+            .iter()
+            .map(|x| x.sqrt())
+            .collect()
     }
 }
 
@@ -207,8 +215,10 @@ impl Skewness<Vec<f64>> for Multinomial {
 }
 
 impl<'a> Discrete<&'a [u64], f64> for Multinomial {
-    /// Calculates the probability mass function for the multinomial distribution
-    /// with the given `x`'s corresponding to the probabilities for this distribution
+    /// Calculates the probability mass function for the multinomial
+    /// distribution
+    /// with the given `x`'s corresponding to the probabilities for this
+    /// distribution
     ///
     /// # Panics
     ///
@@ -222,23 +232,33 @@ impl<'a> Discrete<&'a [u64], f64> for Multinomial {
     /// ```
     ///
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
-    /// `x_i` is the `i`th `x` value, and `k` is the total number of probabilities
+    /// `x_i` is the `i`th `x` value, and `k` is the total number of
+    /// probabilities
     fn pmf(&self, x: &[u64]) -> f64 {
-        assert!(self.p.len() == x.len(),
-                format!("{}", StatsError::ContainersMustBeSameLength));
-        assert!(x.iter().fold(0, |acc, x| acc + x) == self.n,
-                format!("{}", StatsError::ContainerExpectedSumVar("x", "n")));
+        assert!(
+            self.p.len() == x.len(),
+            format!("{}", StatsError::ContainersMustBeSameLength)
+        );
+        assert!(
+            x.iter().fold(0, |acc, x| acc + x) == self.n,
+            format!("{}", StatsError::ContainerExpectedSumVar("x", "n"))
+        );
 
         let coeff = factorial::multinomial(self.n, x);
         coeff *
-        self.p
-            .iter()
-            .zip(x.iter())
-            .fold(1.0, |acc, (pi, xi)| acc * pi.powf(*xi as f64))
+            self.p.iter().zip(x.iter()).fold(
+                1.0,
+                |acc,
+                 (pi, xi)| {
+                    acc * pi.powf(*xi as f64)
+                },
+            )
     }
 
-    /// Calculates the log probability mass function for the multinomial distribution
-    /// with the given `x`'s corresponding to the probabilities for this distribution
+    /// Calculates the log probability mass function for the multinomial
+    /// distribution
+    /// with the given `x`'s corresponding to the probabilities for this
+    /// distribution
     ///
     /// # Panics
     ///
@@ -252,20 +272,25 @@ impl<'a> Discrete<&'a [u64], f64> for Multinomial {
     /// ```
     ///
     /// where `n` is the number of trials, `p_i` is the `i`th probability,
-    /// `x_i` is the `i`th `x` value, and `k` is the total number of probabilities
+    /// `x_i` is the `i`th `x` value, and `k` is the total number of
+    /// probabilities
     fn ln_pmf(&self, x: &[u64]) -> f64 {
-        assert!(self.p.len() == x.len(),
-                format!("{}", StatsError::ContainersMustBeSameLength));
-        assert!(x.iter().fold(0, |acc, x| acc + x) == self.n,
-                format!("{}", StatsError::ContainerExpectedSumVar("x", "n")));
+        assert!(
+            self.p.len() == x.len(),
+            format!("{}", StatsError::ContainersMustBeSameLength)
+        );
+        assert!(
+            x.iter().fold(0, |acc, x| acc + x) == self.n,
+            format!("{}", StatsError::ContainerExpectedSumVar("x", "n"))
+        );
 
         let coeff = factorial::multinomial(self.n, x).ln();
         coeff +
-        self.p
-            .iter()
-            .zip(x.iter())
-            .map(|(pi, xi)| *xi as f64 * pi.ln())
-            .fold(0.0, |acc, x| acc + x)
+            self.p
+                .iter()
+                .zip(x.iter())
+                .map(|(pi, xi)| *xi as f64 * pi.ln())
+                .fold(0.0, |acc, x| acc + x)
     }
 }
 

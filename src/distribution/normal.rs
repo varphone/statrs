@@ -1,10 +1,10 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use function::erf;
-use statistics::*;
-use distribution::{Univariate, Continuous, Distribution, ziggurat};
 use {Result, StatsError, consts};
+use distribution::{Continuous, Distribution, Univariate, ziggurat};
+use function::erf;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
 /// Implements the [Normal](https://en.wikipedia.org/wiki/Normal_distribution)
 /// distribution
@@ -253,7 +253,8 @@ impl Continuous<f64, f64> for Normal {
         pdf_unchecked(x, self.mean, self.std_dev)
     }
 
-    /// Calculates the log probability density function for the normal distribution
+    /// Calculates the log probability density function for the normal
+    /// distribution
     /// at `x`
     ///
     /// # Formula

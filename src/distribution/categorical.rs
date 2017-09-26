@@ -1,12 +1,14 @@
-use std::f64;
-use rand::Rng;
-use rand::distributions::{Sample, IndependentSample};
-use statistics::*;
-use distribution::{Univariate, Discrete, Distribution, InverseCDF};
 use {Result, StatsError};
+use distribution::{Discrete, Distribution, InverseCDF, Univariate};
+use rand::Rng;
+use rand::distributions::{IndependentSample, Sample};
+use statistics::*;
+use std::f64;
 
-/// Implements the [Categorical](https://en.wikipedia.org/wiki/Categorical_distribution)
-/// distribution, also known as the generalized Bernoulli or discrete distribution
+/// Implements the
+/// [Categorical](https://en.wikipedia.org/wiki/Categorical_distribution)
+/// distribution, also known as the generalized Bernoulli or discrete
+/// distribution
 ///
 /// # Examples
 ///
@@ -74,7 +76,11 @@ impl Categorical {
     }
 
     fn cdf_max(&self) -> f64 {
-        *unsafe { self.cdf.get_unchecked(self.cdf.len() - 1) }
+        *unsafe {
+            self.cdf.get_unchecked(
+                self.cdf.len() - 1,
+            )
+        }
     }
 }
 
@@ -142,7 +148,8 @@ impl Univariate<u64, f64> for Categorical {
 }
 
 impl InverseCDF<f64> for Categorical {
-    /// Calculates the inverse cumulative distribution function for the categorical
+    /// Calculates the inverse cumulative distribution function for the
+    /// categorical
     /// distribution at `x`
     ///
     /// # Panics
@@ -159,8 +166,10 @@ impl InverseCDF<f64> for Categorical {
     /// and `f(x)` is defined as `p_x + f(x - 1)` and `f(0) = p_0` where
     /// `p_x` is the `x`th probability mass
     fn inverse_cdf(&self, x: f64) -> f64 {
-        assert!(x > 0.0 && x < 1.0,
-                format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0)));
+        assert!(
+            x > 0.0 && x < 1.0,
+            format!("{}", StatsError::ArgIntervalExcl("x", 0.0, 1.0))
+        );
         let denorm_prob = x * self.cdf_max();
         binary_index(&self.cdf, denorm_prob) as f64
     }
@@ -208,10 +217,10 @@ impl Mean<f64> for Categorical {
     /// where `p_j` is the `j`th probability mass and `k` is the number
     /// of categories
     fn mean(&self) -> f64 {
-        self.norm_pmf
-            .iter()
-            .enumerate()
-            .fold(0.0, |acc, (idx, &val)| acc + idx as f64 * val)
+        self.norm_pmf.iter().enumerate().fold(
+            0.0,
+            |acc, (idx, &val)| acc + idx as f64 * val,
+        )
     }
 }
 
@@ -228,13 +237,13 @@ impl Variance<f64> for Categorical {
     /// of categories, and `μ` is the mean
     fn variance(&self) -> f64 {
         let mu = self.mean();
-        self.norm_pmf
-            .iter()
-            .enumerate()
-            .fold(0.0, |acc, (idx, &val)| {
+        self.norm_pmf.iter().enumerate().fold(
+            0.0,
+            |acc, (idx, &val)| {
                 let r = idx as f64 - mu;
                 acc + r * r * val
-            })
+            },
+        )
     }
 
     /// Returns the standard deviation of the categorical distribution

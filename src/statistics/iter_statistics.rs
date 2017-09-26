@@ -1,20 +1,24 @@
-use std::f64;
-use std::borrow::Borrow;
 use error::StatsError;
 use statistics::*;
+use std::borrow::Borrow;
+use std::f64;
 
 impl<T> Statistics<f64> for T
-    where T: IntoIterator,
-          T::Item: Borrow<f64>
+where
+    T: IntoIterator,
+    T::Item: Borrow<f64>,
 {
     fn min(self) -> f64 {
         let mut iter = self.into_iter();
         match iter.next() {
             None => f64::NAN,
             Some(x) => {
-                iter.map(|x| *x.borrow())
-                    .fold(*x.borrow(),
-                          |acc, x| if x < acc || x.is_nan() { x } else { acc })
+                iter.map(|x| *x.borrow()).fold(
+                    *x.borrow(),
+                    |acc, x| {
+                        if x < acc || x.is_nan() { x } else { acc }
+                    },
+                )
             }
         }
     }
@@ -24,9 +28,12 @@ impl<T> Statistics<f64> for T
         match iter.next() {
             None => f64::NAN,
             Some(x) => {
-                iter.map(|x| *x.borrow())
-                    .fold(*x.borrow(),
-                          |acc, x| if x > acc || x.is_nan() { x } else { acc })
+                iter.map(|x| *x.borrow()).fold(
+                    *x.borrow(),
+                    |acc, x| {
+                        if x > acc || x.is_nan() { x } else { acc }
+                    },
+                )
             }
         }
     }
@@ -36,9 +43,10 @@ impl<T> Statistics<f64> for T
         match iter.next() {
             None => f64::NAN,
             Some(init) => {
-                iter.map(|x| x.borrow().abs())
-                    .fold(init.borrow().abs(),
-                          |acc, x| if x < acc || x.is_nan() { x } else { acc })
+                iter.map(|x| x.borrow().abs()).fold(
+                    init.borrow().abs(),
+                    |acc, x| if x < acc || x.is_nan() { x } else { acc },
+                )
             }
         }
     }
@@ -48,9 +56,10 @@ impl<T> Statistics<f64> for T
         match iter.next() {
             None => f64::NAN,
             Some(init) => {
-                iter.map(|x| x.borrow().abs())
-                    .fold(init.borrow().abs(),
-                          |acc, x| if x > acc || x.is_nan() { x } else { acc })
+                iter.map(|x| x.borrow().abs()).fold(
+                    init.borrow().abs(),
+                    |acc, x| if x > acc || x.is_nan() { x } else { acc },
+                )
             }
         }
     }
