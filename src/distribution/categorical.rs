@@ -261,6 +261,24 @@ impl Variance<f64> for Categorical {
     }
 }
 
+impl Entropy<f64> for Categorical {
+    /// Returns the entropy of the categorical distribution
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// - Σ_j ( p_j * ln(p_j) )
+    /// ```
+    /// where `p_j` the `j`th probability mass
+    fn entropy(&self) -> f64 {
+        -self.norm_pmf
+             .iter()
+             .filter(|&&p| p > 0.0)
+             .map(|p| p * p.ln())
+             .sum::<f64>()
+    }
+}
+
 impl Median<f64> for Categorical {
     /// Returns the median of the categorical distribution
     ///
@@ -417,6 +435,13 @@ mod test {
         assert_eq!(expected, x);
     }
 
+    fn test_almost<F>(prob_mass: &[f64], expected: f64, acc: f64, eval: F)
+        where F: Fn(Categorical) -> f64
+    {
+        let x = get_value(prob_mass, eval);
+        assert_almost_eq!(expected, x, acc);
+    }
+
     #[test]
     fn test_create() {
         create_case(&[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]);
@@ -453,6 +478,15 @@ mod test {
         test_case(&[0.0, 0.5, 0.5], 0.5, |x| x.std_dev());
         test_case(&[0.75, 0.25], 0.43301270189221932338186158537647, |x| x.std_dev());
         test_case(&[1.0, 0.0, 1.0], 1.0, |x| x.std_dev());
+    }
+
+    #[test]
+    fn test_entropy() {
+        test_case(&[0.0, 1.0], 0.0, |x| x.entropy());
+        test_almost(&[0.0, 1.0, 1.0], 2f64.ln(), 1e-15, |x| x.entropy());
+        test_almost(&[1.0, 1.0, 1.0], 3f64.ln(), 1e-15, |x| x.entropy());
+        test_almost(&vec![1.0; 100], 100f64.ln(), 1e-14, |x| x.entropy());
+        test_almost(&[0.0, 0.25, 0.5, 0.25], 1.0397207708399179, 1e-15, |x| x.entropy());
     }
 
     #[test]
