@@ -82,10 +82,7 @@ pub fn multinomial(n: u64, ni: &[u64]) -> f64 {
             (acc.0 + x, acc.1 - ln_factorial(x))
         },
     );
-    assert!(
-        sum == n,
-        format!("{}", StatsError::ContainerExpectedSumVar("ni", "n"))
-    );
+    assert_eq!(sum, n, "{}", StatsError::ContainerExpectedSumVar("ni", "n"));
     (0.5 + ret.exp()).floor()
 }
 

@@ -235,14 +235,8 @@ impl<'a> Discrete<&'a [u64], f64> for Multinomial {
     /// `x_i` is the `i`th `x` value, and `k` is the total number of
     /// probabilities
     fn pmf(&self, x: &[u64]) -> f64 {
-        assert!(
-            self.p.len() == x.len(),
-            format!("{}", StatsError::ContainersMustBeSameLength)
-        );
-        assert!(
-            x.iter().fold(0, |acc, x| acc + x) == self.n,
-            format!("{}", StatsError::ContainerExpectedSumVar("x", "n"))
-        );
+        assert_eq!(self.p.len(), x.len(), "{}", StatsError::ContainersMustBeSameLength);
+        assert_eq!(x.iter().sum::<u64>(), self.n, "{}", StatsError::ContainerExpectedSumVar("x", "n"));
 
         let coeff = factorial::multinomial(self.n, x);
         coeff *
@@ -275,14 +269,8 @@ impl<'a> Discrete<&'a [u64], f64> for Multinomial {
     /// `x_i` is the `i`th `x` value, and `k` is the total number of
     /// probabilities
     fn ln_pmf(&self, x: &[u64]) -> f64 {
-        assert!(
-            self.p.len() == x.len(),
-            format!("{}", StatsError::ContainersMustBeSameLength)
-        );
-        assert!(
-            x.iter().fold(0, |acc, x| acc + x) == self.n,
-            format!("{}", StatsError::ContainerExpectedSumVar("x", "n"))
-        );
+        assert_eq!(self.p.len(), x.len(), "{}", StatsError::ContainersMustBeSameLength);
+        assert_eq!(x.iter().sum::<u64>(), self.n, "{}", StatsError::ContainerExpectedSumVar("x", "n"));
 
         let coeff = factorial::multinomial(self.n, x).ln();
         coeff +
