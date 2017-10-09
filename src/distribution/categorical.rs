@@ -319,7 +319,7 @@ pub fn sample_unchecked<R: Rng>(r: &mut R, cdf: &[f64]) -> f64 {
         idx += 1;
         el = unsafe { cdf.get_unchecked(idx) };
     }
-    return idx as f64;
+    idx as f64
 }
 
 /// Computes the cdf from the given probability masses. Performs
