@@ -14,7 +14,7 @@ pub fn is_valid_multinomial(arr: &[f64], incl_zero: bool) -> bool {
         }
         sum += el;
     }
-    if sum == 0.0 { false } else { true }
+    sum != 0.0
 }
 
 #[cfg(test)]
