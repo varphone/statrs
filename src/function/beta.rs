@@ -94,7 +94,7 @@ pub fn beta_reg(a: f64, b: f64, x: f64) -> f64 {
     let mut h = d;
 
     for m in 1..141 {
-        let m = m as f64;
+        let m = f64::from(m);
         let m2 = m * 2.0;
         let mut aa = m * (b - m) * x / ((qam + m2) * (a + m2));
         d = 1.0 + aa * d;

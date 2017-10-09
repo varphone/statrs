@@ -248,7 +248,7 @@ pub fn gamma_lr(a: f64, x: f64) -> f64 {
         y += 1.0;
         z += 2.0;
         c += 1;
-        let yc = y * c as f64;
+        let yc = y * f64::from(c);
 
         let p = p2 * z - p3 * yc;
         let q = q2 * z - q3 * yc;
