@@ -211,11 +211,12 @@ impl Mean<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// sum(j * p_j) for j in {0, 1, ..., k - 1}
+    /// Σ(j * p_j)
     /// ```
     ///
-    /// where `p_j` is the `j`th probability mass and `k` is the number
-    /// of categories
+    /// where `p_j` is the `j`th probability mass,
+    /// `Σ` is the sum from `0` to `k - 1`,
+    /// and `k` is the number of categories
     fn mean(&self) -> f64 {
         self.norm_pmf.iter().enumerate().fold(
             0.0,
@@ -230,11 +231,12 @@ impl Variance<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// sum(p_j * (j - μ)^2) for j in {0, 1, ..., k - 1}
+    /// Σ(p_j * (j - μ)^2)
     /// ```
     ///
-    /// where `p_j` is the `j`th probability mass, `k` is the number
-    /// of categories, and `μ` is the mean
+    /// where `p_j` is the `j`th probability mass, `μ` is the mean,
+    /// `Σ` is the sum from `0` to `k - 1`,
+    /// and `k` is the number of categories
     fn variance(&self) -> f64 {
         let mu = self.mean();
         self.norm_pmf.iter().enumerate().fold(
@@ -251,11 +253,12 @@ impl Variance<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// sqrt(sum(p_j * (j - μ)^2)) for j in {0, 1, ..., k - 1}
+    /// sqrt(Σ(p_j * (j - μ)^2))
     /// ```
     ///
-    /// where `p_j` is the `j`th probability mass, `k` is the number
-    /// of categories, and `μ` is the mean
+    /// where `p_j` is the `j`th probability mass, `μ` is the mean,
+    /// `Σ` is the sum from `0` to `k - 1`,
+    /// and `k` is the number of categories
     fn std_dev(&self) -> f64 {
         self.variance().sqrt()
     }
@@ -267,10 +270,12 @@ impl Entropy<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// -sum(p_j * ln(p_j)) for j in {0, 1, ..., k - 1}
+    /// -Σ(p_j * ln(p_j))
     /// ```
-    /// where `p_j` the `j`th probability mass and `k` is the number
-    /// of categories
+    ///
+    /// where `p_j` is the `j`th probability mass,
+    /// `Σ` is the sum from `0` to `k - 1`,
+    /// and `k` is the number of categories
     fn entropy(&self) -> f64 {
         -self.norm_pmf
              .iter()
