@@ -267,9 +267,10 @@ impl Entropy<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// - Σ_j ( p_j * ln(p_j) )
+    /// - sum(p_j * ln(p_j)) for j in 0..k-1
     /// ```
-    /// where `p_j` the `j`th probability mass
+    /// where `p_j` the `j`th probability mass and `k` is the number
+    /// of categories
     fn entropy(&self) -> f64 {
         -self.norm_pmf
              .iter()
