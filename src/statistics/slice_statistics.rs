@@ -23,7 +23,7 @@ impl OrderStatistics<f64> for [f64] {
     }
 
     fn quantile(&mut self, tau: f64) -> f64 {
-        if tau < 0.0 || tau > 1.0 || self.len() == 0 {
+        if tau < 0.0 || tau > 1.0 || self.is_empty() {
             return f64::NAN;
         }
 
@@ -368,10 +368,7 @@ fn select_inplace(arr: &mut [f64], rank: usize) -> f64 {
 // insertion sort on small
 // containers and quick sorts for larger ones
 fn sort(primary: &mut [f64], secondary: &mut [usize]) {
-    assert!(
-        primary.len() == secondary.len(),
-        format!("{}", StatsError::ContainersMustBeSameLength)
-    );
+    assert_eq!(primary.len(), secondary.len(), "{}", StatsError::ContainersMustBeSameLength);
 
     let n = primary.len();
     if n <= 1 {
@@ -411,10 +408,7 @@ fn sort(primary: &mut [f64], secondary: &mut [usize]) {
 
 // quick sorts a primary slice and re-orders the secondary slice automatically
 fn quick_sort(primary: &mut [f64], secondary: &mut [usize], left: usize, right: usize) {
-    assert!(
-        primary.len() == secondary.len(),
-        format!("{}", StatsError::ContainersMustBeSameLength)
-    );
+    assert_eq!(primary.len(), secondary.len(), "{}", StatsError::ContainersMustBeSameLength);
 
     // shadow left and right for mutability in loop
     let mut left = left;
@@ -493,10 +487,7 @@ fn quick_sort(primary: &mut [f64], secondary: &mut [usize], left: usize, right: 
 // quick sorts a primary slice and re-orders the secondary slice automatically.
 // Sorts secondarily by the secondary slice on primary key duplicates
 fn quick_sort_all(primary: &mut [f64], secondary: &mut [usize], left: usize, right: usize) {
-    assert!(
-        primary.len() == secondary.len(),
-        format!("{}", StatsError::ContainersMustBeSameLength)
-    );
+    assert_eq!(primary.len(), secondary.len(), "{}", StatsError::ContainersMustBeSameLength);
 
     // shadow left and right for mutability in loop
     let mut left = left;

@@ -304,10 +304,7 @@ impl<'a> Continuous<&'a [f64], f64> for Dirichlet {
     /// `Π` is the product from `1` to `K`, `Σ` is the sum from `1` to `K`,
     /// and `K` is the number of concentration parameters
     fn ln_pdf(&self, x: &[f64]) -> f64 {
-        assert!(
-            self.alpha.len() == x.len(),
-            format!("{}", StatsError::ContainersMustBeSameLength)
-        );
+        assert_eq!(self.alpha.len(), x.len(), "{}", StatsError::ContainersMustBeSameLength);
 
         let (term, sum_xi, sum_alpha) = x.iter()
                                          .enumerate()

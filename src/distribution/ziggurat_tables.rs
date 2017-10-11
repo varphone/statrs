@@ -1,7 +1,7 @@
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
 //! Generated ziggurat tables borrowed from
-//! https://github.com/rust-lang-nursery/rand/blob/master/src/distributions/ziggurat_tables.rs
+//! `https://github.com/rust-lang-nursery/rand/blob/master/src/distributions/ziggurat_tables.rs`
 
 pub type ZigTable = &'static [f64; 257];
 pub const ZIG_NORM_R: f64 = 3.654152885361008796;
