@@ -211,7 +211,7 @@ impl Mean<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// sum(j * p_j) for j in 0..k-1
+    /// sum(j * p_j) for j in {0, 1, ..., k - 1}
     /// ```
     ///
     /// where `p_j` is the `j`th probability mass and `k` is the number
@@ -230,7 +230,7 @@ impl Variance<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// sum(p_j * (j - μ)^2) for j in 0..k-1
+    /// sum(p_j * (j - μ)^2) for j in {0, 1, ..., k - 1}
     /// ```
     ///
     /// where `p_j` is the `j`th probability mass, `k` is the number
@@ -251,7 +251,7 @@ impl Variance<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// sqrt(sum(p_j * (j - μ)^2)) for j in 0..k-1
+    /// sqrt(sum(p_j * (j - μ)^2)) for j in {0, 1, ..., k - 1}
     /// ```
     ///
     /// where `p_j` is the `j`th probability mass, `k` is the number
@@ -267,7 +267,7 @@ impl Entropy<f64> for Categorical {
     /// # Formula
     ///
     /// ```ignore
-    /// - sum(p_j * ln(p_j)) for j in 0..k-1
+    /// -sum(p_j * ln(p_j)) for j in {0, 1, ..., k - 1}
     /// ```
     /// where `p_j` the `j`th probability mass and `k` is the number
     /// of categories
