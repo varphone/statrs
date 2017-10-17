@@ -107,9 +107,8 @@ impl Distribution<f64> for Chi {
     /// ```
     fn sample<R: Rng>(&self, r: &mut R) -> f64 {
         (0..self.freedom as i64)
-            .fold(0.0, |acc, _| {
-                acc + super::normal::sample_unchecked(r, 0.0, 1.0).powf(2.0)
-            })
+            .fold(0.0,
+                  |acc, _| acc + super::normal::sample_unchecked(r, 0.0, 1.0).powf(2.0))
             .sqrt()
     }
 }
@@ -267,7 +266,7 @@ impl Mode<f64> for Chi {
     ///
     /// # Panics
     ///
-    /// If `freedom < 0.0`
+    /// If `freedom < 1.0`
     ///
     /// # Formula
     ///
@@ -277,11 +276,30 @@ impl Mode<f64> for Chi {
     ///
     /// where `k` is the degrees of freedom
     fn mode(&self) -> f64 {
-        assert!(
-            self.freedom >= 1.0,
-            format!("{}", StatsError::ArgGte("freedom", 1.0))
-        );
-        (self.freedom - 1.0).sqrt()
+        self.checked_mode().unwrap()
+    }
+}
+
+impl CheckedMode<f64> for Chi {
+    /// Returns the mode for the chi distribution
+    ///
+    /// # Errors
+    ///
+    /// If `freedom < 1.0`
+    ///
+    /// # Formula
+    ///
+    /// ```ignore
+    /// sqrt(k - 1)
+    /// ```
+    ///
+    /// where `k` is the degrees of freedom
+    fn checked_mode(&self) -> Result<f64> {
+        if self.freedom < 1.0 {
+            Err(StatsError::ArgGte("freedom", 1.0))
+        } else {
+            Ok((self.freedom - 1.0).sqrt())
+        }
     }
 }
 
@@ -443,6 +461,18 @@ mod test {
         test_case(2.5, 1.224744871391589049099, |x| x.mode());
         test_case(3.0, f64::consts::SQRT_2, |x| x.mode());
         test_case(f64::INFINITY, f64::INFINITY, |x| x.mode());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_mode_lt_one() {
+        get_value(0.5, |x| x.mode());
+    }
+
+    #[test]
+    fn test_checked_mode_lt_one() {
+        let n = try_create(0.5);
+        assert!(n.checked_mode().is_err());
     }
 
     #[test]
