@@ -162,5 +162,15 @@ pub trait Mode<T> {
 /// for its mode(s) with a possible failure mode
 pub trait CheckedMode<T> {
     /// Returns the mode.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::CheckedMode;
+    /// use statrs::distribution::Beta;
+    ///
+    /// let n = Beta::new(1.0, 1.0).unwrap();
+    /// assert!(n.checked_mode().is_err());
+    /// ```
     fn checked_mode(&self) -> Result<T>;
 }

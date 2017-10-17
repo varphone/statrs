@@ -3,7 +3,6 @@
 //! concrete implementations for a variety of distributions.
 
 use rand::Rng;
-use statistics::{Max, Min};
 
 pub use self::bernoulli::Bernoulli;
 pub use self::beta::Beta;
@@ -30,6 +29,7 @@ pub use self::students_t::StudentsT;
 pub use self::triangular::Triangular;
 pub use self::uniform::Uniform;
 pub use self::weibull::Weibull;
+use statistics::{Max, Min};
 
 mod bernoulli;
 mod beta;
@@ -59,6 +59,8 @@ mod uniform;
 mod weibull;
 mod ziggurat;
 mod ziggurat_tables;
+
+use Result;
 
 /// The `Distribution` trait is used to specify an interface
 /// for sampling statistical distributions
@@ -109,7 +111,7 @@ pub trait Univariate<T, K>: Distribution<K> + Min<T> + Max<T> {
     fn cdf(&self, x: K) -> K;
 }
 
-/// The `InverseCDF` trait used to specify an interface for distributions
+/// The `InverseCDF` trait is used to specify an interface for distributions
 /// with a closed form solution to the inverse cumulative distribution function.
 /// This trait will probably be merged into `Univariate` in a future release
 /// when already implemented distributions have `InverseCDF` back ported
@@ -121,8 +123,35 @@ pub trait InverseCDF<T> {
     /// # Examples
     ///
     /// ```
+    /// use statrs::distribution::InverseCDF;
+    /// use statrs::distribution::Categorical;
+    ///
+    /// let n = Categorical::new(&[0.0, 1.0, 2.0]).unwrap();
+    /// assert_eq!(n.inverse_cdf(0.5), 2.0);
     /// ```
     fn inverse_cdf(&self, x: T) -> T;
+}
+
+/// The `CheckedInverseCDF` trait is used to specify an interface
+/// for  distributions with a closed form solution to the inverse
+/// cumulative distribution function with possible failure modes.
+/// This trait should be merged into a `CheckedUnivarite` trait
+/// alongside `InverseCDF` in a future release.
+pub trait CheckedInverseCDF<T> {
+    /// Returns the inverse cumulative distribution function
+    /// calculated at `x` for a given distribution. May panic
+    /// depending on the implementor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::CheckedInverseCDF;
+    /// use statrs::distribution::Categorical;
+    ///
+    /// let n = Categorical::new(&[0.0, 1.0, 2.0]).unwrap();
+    /// assert!(n.checked_inverse_cdf(-1.0).is_err());
+    /// ```
+    fn checked_inverse_cdf(&self, x: T) -> Result<T>;
 }
 
 /// The `Continuous` trait extends the `Distribution`
