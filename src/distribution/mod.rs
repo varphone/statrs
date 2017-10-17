@@ -154,9 +154,8 @@ pub trait CheckedInverseCDF<T> {
     fn checked_inverse_cdf(&self, x: T) -> Result<T>;
 }
 
-/// The `Continuous` trait extends the `Distribution`
-/// trait and provides an interface for interacting with continuous
-/// statistical distributions
+/// The `Continuous` trait  provides an interface for interacting with
+/// continuous statistical distributions
 ///
 /// # Remarks
 ///
@@ -193,8 +192,35 @@ pub trait Continuous<T, K> {
     fn ln_pdf(&self, x: T) -> K;
 }
 
-/// The `Discrete` trait extends the `Distribution`
-/// trait and provides an interface for interacting with discrete
+pub trait CheckedContinuous<T, K> {
+    /// Returns the probability density function calculated at `x` for a given
+    /// distribution.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedContinuous, Dirichlet};
+    ///
+    /// let n = Dirichlet::new(&[1.0, 2.0, 3.0]).unwrap();
+    /// assert!(n.checked_pdf(&[0.0]).is_err());
+    /// ```
+    fn checked_pdf(&self, x: T) -> Result<K>;
+
+    /// Returns the log of the probability density function calculated at `x`
+    /// for a given distribution.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedContinuous, Dirichlet};
+    ///
+    /// let n = Dirichlet::new(&[1.0, 2.0, 3.0]).unwrap();
+    /// assert!(n.checked_ln_pdf(&[0.0]).is_err());
+    /// ```
+    fn checked_ln_pdf(&self, x: T) -> Result<K>;
+}
+
+/// The `Discrete` trait provides an interface for interacting with discrete
 /// statistical distributions
 ///
 /// # Remarks
