@@ -447,7 +447,7 @@ mod test {
 
     #[test]
     #[should_panic]
-    fn test_mode_panic() {
+    fn test_mode_freedom_lt_one() {
         test_case(0.1, 0.0, |x| x.mode());
     }
 
