@@ -267,7 +267,7 @@ impl Mode<f64> for Chi {
     ///
     /// # Panics
     ///
-    /// If `freedom < 0.0`
+    /// If `freedom < 1.0`
     ///
     /// # Formula
     ///
@@ -443,6 +443,12 @@ mod test {
         test_case(2.5, 1.224744871391589049099, |x| x.mode());
         test_case(3.0, f64::consts::SQRT_2, |x| x.mode());
         test_case(f64::INFINITY, f64::INFINITY, |x| x.mode());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_mode_freedom_lt_one() {
+        test_case(0.1, 0.0, |x| x.mode());
     }
 
     #[test]
