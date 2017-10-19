@@ -36,7 +36,7 @@ pub trait Max<T> {
     fn max(&self) -> T;
 }
 
-/// The `Mean` trait specifies than an object has a closed form
+/// The `Mean` trait specifies that an object has a closed form
 /// solution for its mean(s)
 pub trait Mean<T> {
     /// Returns the mean. May panic depending
@@ -52,6 +52,23 @@ pub trait Mean<T> {
     /// assert_eq!(0.5, n.mean());
     /// ```
     fn mean(&self) -> T;
+}
+
+/// The `CheckedMean` trait specifies that an object has a closed form
+/// solution for its mean(s) with possible failure modes
+pub trait CheckedMean<T> {
+    /// Returns the mean.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::CheckedMean;
+    /// use statrs::distribution::FisherSnedecor;
+    ///
+    /// let n = FisherSnedecor::new(1.0, 1.0).unwrap();
+    /// assert!(n.checked_mean().is_err());
+    /// ```
+    fn checked_mean(&self) -> Result<T>;
 }
 
 /// The `Variance` trait specifies that an object has a closed form solution for
@@ -87,6 +104,33 @@ pub trait Variance<T>: Mean<T> {
     fn std_dev(&self) -> T;
 }
 
+pub trait CheckedVariance<T>: CheckedMean<T> {
+    /// Returns the variance.
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::CheckedVariance;
+    /// use statrs::distribution::FisherSnedecor;
+    ///
+    /// let n = FisherSnedecor::new(1.0, 1.0).unwrap();
+    /// assert!(n.checked_variance().is_err());
+    /// ```
+    fn checked_variance(&self) -> Result<T>;
+
+    /// Returns the standard deviation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::CheckedVariance;
+    /// use statrs::distribution::FisherSnedecor;
+    ///
+    /// let n = FisherSnedecor::new(1.0, 1.0).unwrap();
+    /// assert!(n.checked_std_dev().is_err());
+    /// ```
+    fn checked_std_dev(&self) -> Result<T>;
+}
+
 /// The `Entropy` trait specifies an object that has a closed form solution
 /// for its entropy
 pub trait Entropy<T> {
@@ -104,7 +148,7 @@ pub trait Entropy<T> {
     /// ```
     fn entropy(&self) -> T;
 }
-/// The `Skewness` trait specifies ab object that has a closed form solution
+/// The `Skewness` trait specifies an object that has a closed form solution
 /// for its skewness(s)
 pub trait Skewness<T> {
     /// Returns the skewness. May panic depending
@@ -120,6 +164,24 @@ pub trait Skewness<T> {
     /// assert_eq!(0.0, n.skewness());
     /// ```
     fn skewness(&self) -> T;
+}
+
+/// The `CheckedSkewness` trait specifies an object that has a closed form
+/// solution
+/// for its skewness(s) with possible failure modes
+pub trait CheckedSkewness<T> {
+    /// Returns the skewness.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::CheckedSkewness;
+    /// use statrs::distribution::FisherSnedecor;
+    ///
+    /// let n = FisherSnedecor::new(1.0, 1.0).unwrap();
+    /// assert!(n.checked_skewness().is_err());
+    /// ```
+    fn checked_skewness(&self) -> Result<T>;
 }
 
 /// The `Median` trait specifies than an object has a closed form solution
