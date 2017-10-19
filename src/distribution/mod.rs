@@ -192,6 +192,9 @@ pub trait Continuous<T, K> {
     fn ln_pdf(&self, x: T) -> K;
 }
 
+/// The `CheckedContinuous` trait provides an interface for
+/// interacting with continuous statistical distributions with possible
+/// failure modes
 pub trait CheckedContinuous<T, K> {
     /// Returns the probability density function calculated at `x` for a given
     /// distribution.
@@ -258,4 +261,36 @@ pub trait Discrete<T, K> {
     /// assert!(prec::almost_eq(n.ln_pmf(5), (0.24609375f64).ln(), 1e-15));
     /// ```
     fn ln_pmf(&self, x: T) -> K;
+}
+
+/// The `CheckedDiscrete` trait provides an interface for interacting
+/// with discrete statistical distributions with possible failure modes
+pub trait CheckedDiscrete<T, K> {
+    /// Returns the probability mass function calculated at `x` for a given
+    /// distribution.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedDiscrete, Multinomial};
+    /// use statrs::prec;
+    ///
+    /// let n = Multinomial::new(&[0.3, 0.7], 5).unwrap();
+    /// assert!(n.checked_pmf(&[1]).is_err());
+    /// ```
+    fn checked_pmf(&self, x: T) -> Result<K>;
+
+    /// Returns the log of the probability mass function calculated at `x` for
+    /// a given distribution.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::distribution::{CheckedDiscrete, Multinomial};
+    /// use statrs::prec;
+    ///
+    /// let n = Multinomial::new(&[0.3, 0.7], 5).unwrap();
+    /// assert!(n.checked_ln_pmf(&[1]).is_err());
+    /// ```
+    fn checked_ln_pmf(&self, x: T) -> Result<K>;
 }
