@@ -465,12 +465,12 @@ mod test {
 
     #[test]
     #[should_panic]
-    fn test_mode_freedom_lt_one() {
+    fn test_mode_freedom_lt_1() {
         get_value(0.5, |x| x.mode());
     }
 
     #[test]
-    fn test_checked_mode_freedom_lt_one() {
+    fn test_checked_mode_freedom_lt_1() {
         let n = try_create(0.5);
         assert!(n.checked_mode().is_err());
     }

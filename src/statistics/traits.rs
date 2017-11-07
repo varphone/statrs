@@ -148,6 +148,24 @@ pub trait Entropy<T> {
     /// ```
     fn entropy(&self) -> T;
 }
+
+/// The `CheckedEntropy` trait specifies an object that has a closed form
+/// solutions for its entropy wih possible failure modes
+pub trait CheckedEntropy<T> {
+    /// Returns the entropy.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use statrs::statistics::CheckedEntropy;
+    /// use statrs::distribution::StudentsT;
+    ///
+    /// let n = StudentsT::new(0.0, 2.0, 1.0).unwrap();
+    /// assert!(n.checked_entropy().is_err());
+    /// ```
+    fn checked_entropy(&self) -> Result<T>;
+}
+
 /// The `Skewness` trait specifies an object that has a closed form solution
 /// for its skewness(s)
 pub trait Skewness<T> {
@@ -167,8 +185,7 @@ pub trait Skewness<T> {
 }
 
 /// The `CheckedSkewness` trait specifies an object that has a closed form
-/// solution
-/// for its skewness(s) with possible failure modes
+/// solution for its skewness(s) with possible failure modes
 pub trait CheckedSkewness<T> {
     /// Returns the skewness.
     ///
