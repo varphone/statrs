@@ -590,24 +590,24 @@ mod test {
 
     #[test]
     #[should_panic]
-    fn test_mode_shape_a_lte_one() {
+    fn test_mode_shape_a_lte_1() {
         get_value(1.0, 5.0, |x| x.mode());
     }
 
     #[test]
     #[should_panic]
-    fn test_mode_shape_b_lte_one() {
+    fn test_mode_shape_b_lte_1() {
         get_value(5.0, 1.0, |x| x.mode());
     }
 
     #[test]
-    fn test_checked_mode_shape_a_lte_one() {
+    fn test_checked_mode_shape_a_lte_1() {
         let n = try_create(1.0, 5.0);
         assert!(n.checked_mode().is_err());
     }
 
     #[test]
-    fn test_checked_mode_shape_b_lte_one() {
+    fn test_checked_mode_shape_b_lte_1() {
         let n = try_create(5.0, 1.0);
         assert!(n.checked_mode().is_err());
     }
@@ -642,12 +642,12 @@ mod test {
     }
 
     #[test]
-    fn test_pdf_input_lt_zero() {
+    fn test_pdf_input_lt_0() {
         test_case(1.0, 1.0, 0.0, |x| x.pdf(-1.0));
     }
 
     #[test]
-    fn test_pdf_input_gt_one() {
+    fn test_pdf_input_gt_0() {
         test_case(1.0, 1.0, 0.0, |x| x.pdf(2.0));
     }
 
@@ -674,12 +674,12 @@ mod test {
     }
 
     #[test]
-    fn test_ln_pdf_input_lt_zero() {
+    fn test_ln_pdf_input_lt_0() {
         test_case(1.0, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(-1.0));
     }
 
     #[test]
-    fn test_ln_pdf_input_gt_one() {
+    fn test_ln_pdf_input_gt_1() {
         test_case(1.0, 1.0, f64::NEG_INFINITY, |x| x.ln_pdf(2.0));
     }
 
@@ -706,12 +706,12 @@ mod test {
     }
 
     #[test]
-    fn test_cdf_input_lt_zero() {
+    fn test_cdf_input_lt_0() {
         test_case(1.0, 1.0, 0.0, |x| x.cdf(-1.0));
     }
 
     #[test]
-    fn test_cdf_input_gt_zero() {
+    fn test_cdf_input_gt_1() {
         test_case(1.0, 1.0, 1.0, |x| x.cdf(2.0));
     }
 
