@@ -198,7 +198,7 @@ where
 
 #[cfg(feature = "rand")]
 #[cfg_attr(docsrs, doc(cfg(feature = "rand")))]
-impl<D> ::rand::distributions::Distribution<OVector<f64, D>> for MultivariateStudent<D>
+impl<D> ::rand::distr::Distribution<OVector<f64, D>> for MultivariateStudent<D>
 where
     D: Dim,
     nalgebra::DefaultAllocator:
